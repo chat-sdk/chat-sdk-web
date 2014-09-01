@@ -1,0 +1,7 @@
+<table class="uk-table uk-table-hover">
+    <tr ng-repeat="(id, room) in getRooms()">
+        <td class="cc-pointer" ng-click="roomClicked(room)">
+            {{ room.getName() }}  <div class="uk-float-right cc-right-margin-5">{{ room.userCount() }}</div>
+        </td>
+    </tr>
+</table>

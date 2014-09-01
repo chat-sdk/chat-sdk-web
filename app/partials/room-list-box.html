@@ -1,0 +1,20 @@
+<div ng-show="showRoomListBox()" ng-style="{'width' : bRoomsListBoxWidth}" ng-controller="RoomListBoxController">
+    <div class="cc-room-list-bar" >
+        <div class="cc-base-text">
+            <div class="inner">
+                <div class="uk-float-left">More Chats</div>
+                <a >
+                    <img class="uk-float-right cc-image-30" src="img/cc-30-cross.png"/>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="cc-box cc-room-list-box cc-shadow" ng-hide="hideChat">
+        <div class="cc-box-header">More Chats
+            <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
+                <img src="img/cc-30-minimize.png" />
+            </a>
+        </div>
+        <div ng-include="'partials/room-list.html'"></div>
+    </div>
+</div>

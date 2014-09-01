@@ -1,0 +1,46 @@
+<div id="cc-login-box" class="cc-box cc-root-box" ng-controller="LoginController">
+
+    <div class="uk-vertical-align uk-text-center uk-height-1-1">
+        <div class="uk-vertical-align-middle uk-width-1-1" >
+            <div class="cc-box-header">Login or Register</div>
+
+            <form id="cc-login-form" class="uk-panel uk-panel-box uk-form">
+                <div class="uk-form-row">
+                    <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" required />
+                </div>
+                <div class="uk-form-row">
+                    <input class="uk-width-1-1" type="password" placeholder="Password" ng-model="password" enter-submit="login('password',{email:email, password:password});" required />
+                </div>
+                <div ng-show="showError" class="uk-form-row uk-alert uk-alert-danger">
+                    {{ errorMessage }}
+                </div>
+
+                <div class="uk-form-row">
+                    <div class="uk-grid uk-grid-small">
+                        <div class="uk-width-1-2">
+                            <a class="uk-button uk-button-primary uk-width-1-1" ng-click="login('password',{email:email, password:password});">Login</a>
+                        </div>
+                        <div class="uk-width-1-2">
+                            <a class="uk-button uk-button-success uk-width-1-1"  ng-click="signUp(email, password)">Sign up</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-form-row uk-text-small">
+                    <label class="uk-float-left"><input type="checkbox"> Remember Me</label>
+                    <a class="uk-float-right uk-link uk-link-muted" ng-click="auth.$sendPasswordResetEmail(email)">Forgot Password?</a>
+                </div>
+                <div class="uk-form-row">
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="auth.$login('facebook')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter" ng-click="auth.$login('twitter')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-github" ng-click="auth.$login('github')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus" ng-click="auth.$login('google')"></a>
+                </div>
+                <div class="uk-form-row">
+                    <a class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="auth.$login('anonymous')">Anonymous Login</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div ng-include="'partials/overlay.html'"></div>
+</div>

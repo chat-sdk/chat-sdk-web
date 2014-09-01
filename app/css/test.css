@@ -1,0 +1,97 @@
+html, body {
+    overflow: hidden;
+    height: 100%;
+    -webkit-overflow-scrolling: touch
+}
+
+body {
+    margin: 0
+}
+
+#result-iframe-wrap {
+    height: 100%;
+    height: -webkit-calc(100% -28px);
+    height: calc(100% -28px);
+    overflow: auto;
+    position: relative
+}
+
+#result {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    display: block
+}
+
+#codepen-footer, #codepen-footer * {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+#codepen-footer {
+    position: fixed;
+    bottom: -50px;
+    left: 0;
+    width: 100%;
+    padding: 0 10px;
+    height: 30px;
+    color: #eeeeee;
+    background-color: #505050;
+    background: -webkit-linear-gradient(#505050, #383838);
+    background: -o-linear-gradient(#505050, #383838);
+    background: linear-gradient(#505050, #383838);
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    box-shadow: inset 0 1px 0 #6e6e6e, 0 2px 2px rgba(0, 0, 0, 0.4);
+    font: 12px/30px "Lucida Grande", "Lucida Sans Unicode", Tahoma, sans-serif
+
+
+
+}
+
+#codepen-footer a {
+    color: #a7a7a7;
+    text-decoration: none;
+    margin-right: 6px
+}
+
+#codepen-footer a:hover {
+    color: white
+}
+
+#footer-mini-logo {
+    position: relative;
+    top: 4px
+}
+
+#footer-right {
+    position: absolute;
+    right: 5px;
+    top: 0
+}
+
+@media (max-width: 600px) {
+    #footer-right {
+        display: none
+    }
+}
+
+#bs-button {
+    padding: 1px 6px 2px 19px;
+    background: url(/images/browserstack.png), -webkit-linear-gradient(#fff4d1, #c9b67b);
+    background: url(/images/browserstack.png), -o-linear-gradient(#fff4d1, #c9b67b);
+    background: url(/images/browserstack.png), linear-gradient(#fff4d1, #c9b67b);
+    background-position: 4px center, center center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px, cover;
+    border: 0;
+    font: 11px "Lucida Grande", "Lucida Sans Unicode", Tahoma, sans-serif;
+    border-radius: 5px
+}
+
+#bs-button:hover {
+    background: url(/images/browserstack.png), #fff4d1;
+    background-position: 4px center, center center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px, cover
+}

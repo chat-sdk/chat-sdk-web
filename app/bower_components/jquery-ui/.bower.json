@@ -1,0 +1,20 @@
+{
+  "name": "jquery-ui",
+  "version": "1.11.0",
+  "main": [
+    "./jquery-ui.js"
+  ],
+  "dependencies": {
+    "jquery": ">=1.6"
+  },
+  "homepage": "https://github.com/components/jqueryui",
+  "_release": "1.11.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.11.0",
+    "commit": "7a86f9dc80da906fd07ef0700fe4acc4ab4ad67a"
+  },
+  "_source": "git://github.com/components/jqueryui.git",
+  "_target": "*",
+  "_originalSource": "jquery-ui"
+}
