@@ -25,7 +25,7 @@
         return ('draggable' in div) || ('ondragstart' in div && 'ondrop' in div);
     })(),
 
-    draggingPlaceholder, moving, clickedlink;
+    draggingPlaceholder, moving, dragging, clickedlink, delayIdle;
 
     // disable native dragndrop support for now
     supportsDragAndDrop = false;
@@ -36,6 +36,7 @@
 
             warp             : false,
             animation        : 150,
+            threshold        : 10,
 
             childClass       : 'uk-sortable-item',
             placeholderClass : 'uk-sortable-placeholder',
@@ -43,7 +44,6 @@
             draggingClass    : 'uk-sortable-dragged',
             dragMovingClass  : 'uk-sortable-moving',
             dragCustomClass  : '',
-
             handleClass      : false,
 
             stop             : function() {},
@@ -77,6 +77,7 @@
             var handleDragStart = delegate(function(e) {
 
                 moving = false;
+                dragging = false;
 
                 var target = $(e.target), children = $this.element.children();
 
@@ -89,7 +90,7 @@
                     var handle = target.hasClass($this.options.handleClass) ? target : target.closest('.'+$this.options.handleClass, element);
 
                     if (!handle.length) {
-                        e.preventDefault();
+                        //e.preventDefault();
                         return;
                     }
                 }
@@ -107,25 +108,35 @@
 
                 var $current = $(currentlyDraggingElement), offset = $current.offset();
 
-                draggingPlaceholder = $('<div class="'+([$this.options.draggingClass, $this.options.dragCustomClass].join(' '))+'"></div>').css({
-                    display : 'none',
-                    top     : offset.top,
-                    left    : offset.left,
-                    width   : $current.width(),
-                    height  : $current.height(),
-                    padding : $current.css('padding')
-                }).data('mouse-offset', {
-                    'left': offset.left - parseInt(e.pageX, 10),
-                    'top' : offset.top  - parseInt(e.pageY, 10)
-                }).append($current.html()).appendTo('body');
+                delayIdle = {
 
-                draggingPlaceholder.$current  = $current;
-                draggingPlaceholder.$sortable = $this;
+                    pos       : { x:e.pageX, y:e.pageY },
+                    threshold : $this.options.threshold,
+                    'apply'   : function() {
 
-                addFakeDragHandlers();
+                        draggingPlaceholder = $('<div class="'+([$this.options.draggingClass, $this.options.dragCustomClass].join(' '))+'"></div>').css({
+                            display : 'none',
+                            top     : offset.top,
+                            left    : offset.left,
+                            width   : $current.width(),
+                            height  : $current.height(),
+                            padding : $current.css('padding')
+                        }).data('mouse-offset', {
+                            'left': offset.left - parseInt(e.pageX, 10),
+                            'top' : offset.top  - parseInt(e.pageY, 10)
+                        }).append($current.html()).appendTo('body');
 
-                $this.options.start(this, currentlyDraggingElement);
-                $this.trigger('sortable-start', [$this, currentlyDraggingElement]);
+                        draggingPlaceholder.$current  = $current;
+                        draggingPlaceholder.$sortable = $this;
+
+                        addFakeDragHandlers();
+
+                        $this.options.start(this, currentlyDraggingElement);
+                        $this.trigger('sortable-start', [$this, currentlyDraggingElement]);
+
+                        delayIdle = false;
+                    }
+                }
 
                 if (!supportsDragAndDrop) {
                     e.preventDefault();
@@ -183,6 +194,7 @@
 
             var handleDrop = delegate(function(e) {
 
+
                 if (e.type === 'drop') {
 
                     if (e.stopPropagation) {
@@ -194,7 +206,7 @@
                     }
                 }
 
-                if (this === currentlyDraggingElement) {
+                if (!dragging) {
                     return;
                 }
 
@@ -337,6 +349,8 @@
 
         moveElementNextTo: function(element, elementToMoveNextTo) {
 
+            dragging = true;
+
             var $this    = this,
                 list     = $(element).parent().css('min-height', ''),
                 next     = isBelow(element, elementToMoveNextTo) ? elementToMoveNextTo : elementToMoveNextTo.nextSibling,
@@ -345,7 +359,7 @@
 
             if($this.options.warp || !$this.options.animation) {
                 elementToMoveNextTo.parentNode.insertBefore(element, next);
-                $(document).trigger("uk-check-display");
+                UI.Utils.checkDisplay($this.element);
                 return;
             }
 
@@ -385,7 +399,7 @@
                             count--
                             if (!count) {
                                 list.css('min-height', '');
-                                $(document).trigger("uk-check-display");
+                                UI.Utils.checkDisplay(ele);
                             }
                         });
                     }, 0);
@@ -445,9 +459,9 @@
     }
 
     // auto init
-    $(document).on("uk-domready", function(e) {
+    UI.ready(function(context) {
 
-        $("[data-uk-sortable]").each(function(){
+        $("[data-uk-sortable]", context).each(function(){
 
           var ele = $(this);
 
@@ -457,7 +471,13 @@
         });
     });
 
-    $(document).on('mousemove touchmove', function(e) {
+    UI.$doc.on('mousemove touchmove', function(e) {
+
+        if (delayIdle) {
+            if (Math.abs(e.pageX - delayIdle.pos.x) > delayIdle.threshold || Math.abs(e.pageY - delayIdle.pos.y) > delayIdle.threshold) {
+                delayIdle.apply();
+            }
+        }
 
         if (draggingPlaceholder) {
 
@@ -479,13 +499,13 @@
         }
     });
 
-    $(document).on('mouseup touchend', function() {
+    UI.$doc.on('mouseup touchend', function() {
 
         if(!moving && clickedlink) {
             location.href = clickedlink.attr('href');
         }
 
-        clickedlink = false;
+        delayIdle = clickedlink = false;
     });
 
     return UI.sortable;

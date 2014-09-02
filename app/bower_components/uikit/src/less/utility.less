@@ -7,7 +7,7 @@
 //                  `uk-float-*`
 //                  `uk-align-*`
 //                  `uk-vertical-align-*`
-//                  `uk-height-1-1`
+//                  `uk-height-*`
 //                  `uk-responsive-*`
 //                  `uk-margin-*`
 //                  `uk-border-*`
@@ -15,6 +15,7 @@
 //                  `uk-link-*`
 //                  `uk-scrollable-*`
 //                  `uk-overflow-container`
+//                  `uk-position-*`
 //                  `uk-display-*`
 //                  `uk-visible-*`
 //                  `uk-hidden-*`
@@ -34,6 +35,8 @@
 
 @utility-align-horizontal:                      15px;
 @utility-align-vertical:                        15px;
+
+@utility-height-viewport-min-height:            600px;
 
 @utility-margin:                                15px;
 @utility-margin-small:                          5px;
@@ -225,11 +228,33 @@
 .uk-vertical-align-middle { vertical-align: middle; }
 .uk-vertical-align-bottom { vertical-align: bottom; }
 
+
+/* Height
+ ========================================================================== */
+
 /*
- *  This helper class is very useful to extend the `html` and `body` element to the full height of the page.
+ * More robust if padding and border are used
+ */
+
+[class*='uk-height'] {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/*
+ * Useful to extend the `html` and `body` element to the full height of the page.
  */
 
 .uk-height-1-1 { height: 100%; }
+
+/*
+ * Useful to create image teasers
+ */
+
+.uk-height-viewport {
+    height: 100vh;
+    min-height: @utility-height-viewport-min-height;
+}
 
 
 /* Responsive objects
@@ -237,7 +262,7 @@
  ========================================================================== */
 
 /*
- * 1. Corrects max-width/max-height behavior if padding and border are used
+ * 1. Corrects `max-width` and `max-height` behavior if padding and border are used
  */
 
 .uk-responsive-width,
@@ -408,6 +433,21 @@
 }
 
 .uk-overflow-container > :last-child { margin-bottom: 0; }
+
+
+/* Position
+ ========================================================================== */
+
+.uk-position-absolute { position: absolute !important; }
+.uk-position-relative { position: relative !important; }
+
+.uk-position-cover {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
 
 
 /* Display

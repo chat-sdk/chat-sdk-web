@@ -65,18 +65,18 @@
             this.element.wrap('<div class="uk-autocomplete"></div>');
 
             this.autocomplete = UI.autocomplete(this.element.parent(), this.options);
-            this.autocomplete.dropdown.addClass('uk-dropdown-scrollable');
+            this.autocomplete.dropdown.addClass('uk-dropdown-small uk-dropdown-scrollable');
 
             this.autocomplete.on('autocomplete-show', function() {
 
-                var selected = $this.autocomplete.dropdown.find('[data-value="'+$this.element.val()+'"]');
+                var selected = $this.autocomplete.dropdown.find('[data-value="'+$this.autocomplete.input.val()+'"]');
 
                 setTimeout(function(){
                     $this.autocomplete.pick(selected, true);
                 }, 10);
             });
 
-            this.element.on('focus', function(){
+            this.autocomplete.input.on('focus', function(){
 
                 $this.autocomplete.value = Math.random();
                 $this.autocomplete.triggercomplete();
@@ -90,7 +90,7 @@
 
         checkTime: function() {
 
-            var arr, timeArray, meridian = 'AM', hour, minute, time = this.element.val();
+            var arr, timeArray, meridian = 'AM', hour, minute, time = this.autocomplete.input.val();
 
             if (this.options.format == '12h') {
                 arr = time.split(' ');
@@ -138,7 +138,7 @@
                 minute = 0;
             }
 
-            this.element.val(this.formatTime(hour, minute, meridian));
+            this.autocomplete.input.val(this.formatTime(hour, minute, meridian));
         },
 
         formatTime: function(hour, minute, meridian) {
@@ -149,13 +149,15 @@
     });
 
     // init code
-    $(document).on("focus.timepicker.uikit", "[data-uk-timepicker]", function(e) {
+    UI.$doc.on("focus.timepicker.uikit", "[data-uk-timepicker]", function(e) {
         var ele = $(this);
 
         if (!ele.data("timepicker")) {
             var obj = UI.timepicker(ele, UI.Utils.options(ele.attr("data-uk-timepicker")));
 
-            ele.focus();
+            setTimeout(function(){
+                obj.autocomplete.input.focus();
+            }, 20);
         }
     });
 });

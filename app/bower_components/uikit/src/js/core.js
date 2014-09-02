@@ -10,7 +10,7 @@
                 var resources = res.split(','), load = [], i, base = (config.config && config.config.uikit && config.config.uikit.base ? config.config.uikit.base : "").replace(/\/+$/g, "");
 
                 if (!base) {
-                    throw new Error( "Please define base path to uikit in the requirejs config." );
+                    throw new Error( "Please define base path to UIkit in the requirejs config." );
                 }
 
                 for (i = 0; i < resources.length; i += 1) {
@@ -46,7 +46,7 @@
         return UI;
     }
 
-    UI.version = '2.8.0';
+    UI.version = '2.9.0';
     UI.$doc    = $doc;
     UI.$win    = $win;
 
@@ -116,7 +116,7 @@
         (global.navigator['pointerEnabled'] && global.navigator['maxTouchPoints'] > 0) || //IE >=11
         false
     );
-    UI.support.mutationobserver      = (global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver || null);
+    UI.support.mutationobserver = (global.MutationObserver || global.WebKitMutationObserver || null);
 
     UI.Utils = {};
 
@@ -178,6 +178,10 @@
         } else {
           return false;
         }
+    };
+
+    UI.Utils.checkDisplay = function(context) {
+        $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document).trigger('uk-check-display');
     };
 
     UI.Utils.options = function(string) {
@@ -265,19 +269,56 @@
 
     $.UIkit.langdirection = $html.attr("dir") == "rtl" ? "right" : "left";
 
-    $(function(){
 
-        $doc.trigger("uk-domready");
+    // DOM mutation save ready helper function
+
+    UI.domObservers = [];
+
+    UI.domObserve = function(selector, fn) {
+
+        if(!UI.support.mutationobserver) return;
+
+        $(selector).each(function() {
+
+            var element = this;
+
+            try {
+
+                var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
+                    fn.apply(element, []);
+                    $(element).trigger('uk.dom.changed');
+                }, 50));
+
+                // pass in the target node, as well as the observer options
+                observer.observe(element, { childList: true, subtree: true });
+
+            } catch(e) {}
+        });
+    };
+
+    UI.ready = function(fn) {
+        $(function() { fn(document); });
+        UI.domObservers.push(fn);
+    };
+
+    $doc.on('uk.domready', function(){
+        UI.domObservers.forEach(function(fn){
+            fn(document);
+        });
+        $doc.trigger('uk.dom.changed');
+    });
+
+    $(function(){
 
         // custom scroll observer
         setInterval((function(){
 
-            var memory = {x: window.scrollX, y:window.scrollY};
+            var memory = {x: window.pageXOffset, y:window.pageYOffset};
 
             var fn = function(){
 
-                if (memory.x != window.scrollX || memory.y != window.scrollY) {
-                    memory = {x: window.scrollX, y:window.scrollY};
+                if (memory.x != window.pageXOffset || memory.y != window.pageYOffset) {
+                    memory = {x: window.pageXOffset, y:window.pageYOffset};
                     $doc.trigger('uk-scroll', [memory]);
                 }
             };
@@ -292,24 +333,36 @@
 
         })(), 15);
 
-
         // Check for dom modifications
-        if(!UI.support.mutationobserver) return;
+        UI.domObserve('[data-uk-observe]', function() {
 
-        try{
+            var ele = this;
 
-            var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
-                $doc.trigger("uk-domready");
-            }, 150));
+            UI.domObservers.forEach(function(fn){
+                fn(ele);
+            });
+        });
 
-            // pass in the target node, as well as the observer options
-            observer.observe(document.body, { childList: true, subtree: true });
 
-        } catch(e) {}
-
-        // remove css hover rules for touch devices
         if (UI.support.touch) {
-            UI.Utils.removeCssRules(/\.uk-(?!navbar).*:hover/);
+
+            // remove css hover rules for touch devices
+            // UI.Utils.removeCssRules(/\.uk-(?!navbar).*:hover/);
+
+            // viewport unit fix for uk-height-viewport - should be fixed in iOS 8
+            if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+
+                UI.$win.on('load orientationchange resize', UI.Utils.debounce((function(){
+
+                    var fn = function() {
+                        $('.uk-height-viewport').css('height', window.innerHeight);
+                        return fn;
+                    };
+
+                    return fn();
+
+                })(), 100));
+            }
         }
     });
 
@@ -337,146 +390,3 @@
 
     return UI;
 });
-
-/**
- * Promises/A+ spec. polyfill
- * promiscuous - https://github.com/RubenVerborgh/promiscuous
- * @license MIT
- * Ruben Verborgh
- */
-
-(function(global){
-
-    global.Promise = global.Promise || (function (func, obj) {
-
-        // Type checking utility function
-        function is(type, item) { return (typeof item)[0] == type; }
-
-        // Creates a promise, calling callback(resolve, reject), ignoring other parameters.
-        function Promise(callback, handler) {
-            // The `handler` variable points to the function that will
-            // 1) handle a .then(resolved, rejected) call
-            // 2) handle a resolve or reject call (if the first argument === `is`)
-            // Before 2), `handler` holds a queue of callbacks.
-            // After 2), `handler` is a finalized .then handler.
-            handler = function pendingHandler(resolved, rejected, value, queue, then, i) {
-                queue = pendingHandler.q;
-
-                // Case 1) handle a .then(resolved, rejected) call
-                if (resolved != is) {
-                    return Promise(function (resolve, reject) {
-                        queue.push({ p: this, r: resolve, j: reject, 1: resolved, 0: rejected });
-                    });
-                }
-
-                // Case 2) handle a resolve or reject call
-                // (`resolved` === `is` acts as a sentinel)
-                // The actual function signature is
-                // .re[ject|solve](<is>, success, value)
-
-                // Check if the value is a promise and try to obtain its `then` method
-                if (value && (is(func, value) | is(obj, value))) {
-                    try { then = value.then; }
-                    catch (reason) { rejected = 0; value = reason; }
-                }
-                // If the value is a promise, take over its state
-                if (is(func, then)) {
-                    var valueHandler = function (resolved) {
-                        return function (value) { return then && (then = 0, pendingHandler(is, resolved, value)); };
-                    };
-                    try { then.call(value, valueHandler(1), rejected = valueHandler(0)); }
-                    catch (reason) { rejected(reason); }
-                }
-                // The value is not a promise; handle resolve/reject
-                else {
-                    // Replace this handler with a finalized resolved/rejected handler
-                    handler = function (Resolved, Rejected) {
-                        // If the Resolved or Rejected parameter is not a function,
-                        // return the original promise (now stored in the `callback` variable)
-                        if (!is(func, (Resolved = rejected ? Resolved : Rejected))) return callback;
-                        // Otherwise, return a finalized promise, transforming the value with the function
-                        return Promise(function (resolve, reject) { finalize(this, resolve, reject, value, Resolved); });
-                    };
-                    // Resolve/reject pending callbacks
-                    i = 0;
-                    while (i < queue.length) {
-                        then = queue[i++];
-                        // If no callback, just resolve/reject the promise
-                        if (!is(func, resolved = then[rejected])) {
-                            (rejected ? then.r : then.j)(value);
-                        // Otherwise, resolve/reject the promise with the result of the callback
-                        } else {
-                            finalize(then.p, then.r, then.j, value, resolved);
-                        }
-                    }
-                }
-            };
-
-            // The queue of pending callbacks; garbage-collected when handler is resolved/rejected
-            handler.q = [];
-
-            // Create and return the promise (reusing the callback variable)
-            callback.call(callback = {
-                    then:  function (resolved, rejected) { return handler(resolved, rejected); },
-                    catch: function (rejected)           { return handler(0,        rejected); }
-                },
-                function (value)  { handler(is, 1,  value); },
-                function (reason) { handler(is, 0, reason); }
-            );
-
-            return callback;
-        }
-
-        // Finalizes the promise by resolving/rejecting it with the transformed value
-        function finalize(promise, resolve, reject, value, transform) {
-            setTimeout(function () {
-                try {
-                    // Transform the value through and check whether it's a promise
-                    value = transform(value);
-                    transform = value && (is(obj, value) | is(func, value)) && value.then;
-                    // Return the result if it's not a promise
-                    if (!is(func, transform))
-                        resolve(value);
-                    // If it's a promise, make sure it's not circular
-                    else if (value == promise)
-                        reject(TypeError());
-                    // Take over the promise's state
-                    else
-                        transform.call(value, resolve, reject);
-                }
-                catch (error) { reject(error); }
-            }, 0);
-        }
-
-        // Creates a resolved promise
-        Promise.resolve = ResolvedPromise;
-        function ResolvedPromise(value) { return Promise(function (resolve) { resolve(value); }); }
-
-        // Creates a rejected promise
-        Promise.reject = function (reason) { return Promise(function (resolve, reject) { reject(reason); }); };
-
-        // Transforms an array of promises into a promise for an array
-        Promise.all = function (promises) {
-            return Promise(function (resolve, reject, count, values) {
-                // Array of collected values
-                values = [];
-                // Resolve immediately if there are no promises
-                count = promises.length || resolve(values);
-                // Transform all elements (`map` is shorter than `forEach`)
-                promises.map(function (promise, index) {
-                    ResolvedPromise(promise).then(
-                    // Store the value and resolve if it was the last
-                    function (value) {
-                        values[index] = value;
-                        count = count -1;
-                        if(!count) resolve(values);
-                    },
-                    // Reject if one element fails
-                    reject);
-                });
-            });
-        };
-
-        return Promise;
-    })('f', 'o');
-})(this);

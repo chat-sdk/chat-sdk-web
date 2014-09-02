@@ -362,7 +362,7 @@ module.exports = function(grunt) {
         var extractSnippets = function(lessfile) {
             var less = grunt.file.read(lessfile);
 
-            var regex = /\/\/\s*<!--\s*(.+)\s*-->\s*\n((\s*\/\/.+\n)+)/g,
+            var regex = /\/\/\s*<!--\s*(.+)\s*-->\s*\n((\/\/.+\n)+)/g,
                 match = null;
 
             while (match = regex.exec(less)) {
@@ -376,12 +376,12 @@ module.exports = function(grunt) {
 
                 // place tab indices
                 var i = 1; // tab index, start with 1
-                content = content.replace(/class="(.+)"/g, 'class="${{index}:$1}"') // inside class attributes
-                                .replace(/(<[^>]+>)(<\/div>)/g, '$1${index}$2') // inside empty elements
+                content = content.replace(/class="([^"]+)"/g, 'class="${{index}:$1}"') // inside class attributes
+                                .replace(/(<[^>]+>)(<\/[^>]+>)/g, '$1${index}$2') // inside empty elements
                                 .replace(/\{index\}/g, function() { return i++; });
 
                 var snippet = template.replace("{content}", content)
-                                    .replace("{trigger}", name)
+                                    .replace("{trigger}", "uikit")
                                     .replace("{description}", description);
 
                 grunt.file.write('dist/snippets/'+name+'.sublime-snippet', snippet);

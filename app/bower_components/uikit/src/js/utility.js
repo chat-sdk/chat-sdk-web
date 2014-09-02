@@ -2,7 +2,7 @@
 
     "use strict";
 
-    var win = $(window), event = 'resize orientationchange', stacks = [];
+    var stacks = [];
 
     UI.component('stackMargin', {
 
@@ -18,23 +18,28 @@
 
             if (!this.columns.length) return;
 
-            win.on(event, (function() {
+            UI.$win.on('resize orientationchange', (function() {
+
                 var fn = function() {
                     $this.process();
                 };
 
                 $(function() {
                     fn();
-                    win.on("load", fn);
+                    UI.$win.on("load", fn);
                 });
 
-                return UI.Utils.debounce(fn, 150);
+                return UI.Utils.debounce(fn, 50);
             })());
 
-            $(document).on("uk-domready", function(e) {
+            UI.$doc.on("uk.dom.changed", function(e) {
                 $this.columns  = $this.element.children();
                 $this.process();
             });
+
+            this.on("uk-check-display", function(e) {
+                if(this.element.is(":visible")) this.process();
+            }.bind(this));
 
             stacks.push(this);
         },
@@ -78,20 +83,14 @@
     });
 
     // init code
-    $(document).on("uk-domready", function(e) {
-        $("[data-uk-margin]").each(function() {
+    UI.ready(function(context) {
+
+        $("[data-uk-margin]", context).each(function() {
             var ele = $(this), obj;
 
             if (!ele.data("stackMargin")) {
                 obj = UI.stackMargin(ele, UI.Utils.options(ele.attr("data-uk-margin")));
             }
-        });
-    });
-
-
-    $(document).on("uk-check-display", function(e) {
-        stacks.forEach(function(item) {
-            if(item.element.is(":visible")) item.process();
         });
     });
 

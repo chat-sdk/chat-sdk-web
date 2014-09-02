@@ -3,7 +3,7 @@
     "use strict";
 
     var $tooltip,   // tooltip container
-        tooltipdelay;
+        tooltipdelay, checkdelay;
 
     UI.component('tooltip', {
 
@@ -12,6 +12,7 @@
             "pos": "top",
             "animation": false,
             "delay": 0, // in miliseconds
+            "cls": "",
             "src": function() { return this.attr("title"); }
         },
 
@@ -41,13 +42,13 @@
         show: function() {
 
             if (tooltipdelay)     clearTimeout(tooltipdelay);
+            if (checkdelay)       clearTimeout(checkdelay);
             if (!this.tip.length) return;
 
             $tooltip.stop().css({"top": -2000, "visibility": "hidden"}).show();
             $tooltip.html('<div class="uk-tooltip-inner">' + this.tip + '</div>');
 
             var $this      = this,
-                bodyoffset = $('body').offset(),
                 pos        = $.extend({}, this.element.offset(), {width: this.element[0].offsetWidth, height: this.element[0].offsetHeight}),
                 width      = $tooltip[0].offsetWidth,
                 height     = $tooltip[0].offsetHeight,
@@ -55,16 +56,24 @@
                 position   = typeof(this.options.pos) === "function" ? this.options.pos.call(this.element) : this.options.pos,
                 tmppos     = position.split("-"),
                 tcss       = {
-                    "display": "none",
-                    "visibility": "visible",
-                    "top": (pos.top + pos.height + height),
-                    "left": pos.left
+                    "display"    : "none",
+                    "visibility" : "visible",
+                    "top"        : (pos.top + pos.height + height),
+                    "left"       : pos.left
                 };
+
 
             // prevent strange position
             // when tooltip is in offcanvas etc.
-            pos.left -= bodyoffset.left;
-            pos.top  -= bodyoffset.top;
+            if ($('html').css('position')=='fixed' || $('body').css('position')=='fixed'){
+                var bodyoffset = $('body').offset(),
+                    htmloffset = $('html').offset(),
+                    docoffset  = {'top': (htmloffset.top + bodyoffset.top), 'left': (htmloffset.left + bodyoffset.left)};
+
+                pos.left -= docoffset.left;
+                pos.top  -= docoffset.top;
+            }
+
 
             if ((tmppos[0] == "left" || tmppos[0] == "right") && $.UIkit.langdirection == 'right') {
                 tmppos[0] = tmppos[0] == "left" ? "right" : "left";
@@ -128,7 +137,7 @@
 
             tooltipdelay = setTimeout(function(){
 
-                $tooltip.css(tcss).attr("class", "uk-tooltip uk-tooltip-" + position);
+                $tooltip.css(tcss).attr("class", ["uk-tooltip", "uk-tooltip-"+position, $this.options.cls].join(' '));
 
                 if ($this.options.animation) {
                     $tooltip.css({opacity: 0, display: 'block'}).animate({opacity: 1}, parseInt($this.options.animation, 10) || 400);
@@ -137,6 +146,12 @@
                 }
 
                 tooltipdelay = false;
+
+                // close tooltip if element was removed or hidden
+                checkdelay = setInterval(function(){
+                    if(!$this.element.is(':visible')) $this.hide();
+                }, 150);
+
             }, parseInt(this.options.delay, 10) || 0);
         },
 
@@ -144,6 +159,7 @@
             if(this.element.is("input") && this.element[0]===document.activeElement) return;
 
             if(tooltipdelay) clearTimeout(tooltipdelay);
+            if (checkdelay)  clearTimeout(checkdelay);
 
             $tooltip.stop();
 
@@ -176,7 +192,7 @@
 
 
     // init code
-    $(document).on("mouseenter.tooltip.uikit focus.tooltip.uikit", "[data-uk-tooltip]", function(e) {
+    UI.$doc.on("mouseenter.tooltip.uikit focus.tooltip.uikit", "[data-uk-tooltip]", function(e) {
         var ele = $(this);
 
         if (!ele.data("tooltip")) {

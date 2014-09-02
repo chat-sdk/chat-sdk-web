@@ -10,12 +10,26 @@
 //                  `uk-animation-slide-bottom`
 //                  `uk-animation-slide-left`
 //                  `uk-animation-slide-right`
+//                  `uk-animation-scale`
+//                  `uk-animation-shake`
 //                  `uk-animation-reverse`
+//                  `uk-animation-10`
+//                  `uk-animation-top-left`
+//                  `uk-animation-top-center`
+//                  `uk-animation-top-right`
+//                  `uk-animation-middle-left`
+//                  `uk-animation-middle-right`
+//                  `uk-animation-bottom-left`
+//                  `uk-animation-bottom-center`
+//                  `uk-animation-bottom-right`
 //
 // Uses:            Scrollspy
 //
 // Used by:         Dropdown
 //                  Icon
+//                  Search
+//                  Datepicker
+//                  Slideshow
 //
 // ========================================================================
 
@@ -42,6 +56,7 @@
 
 /*
  * Fade
+ * Higher specificity (!important) needed because of reverse modifier
  */
 
 .uk-animation-fade {
@@ -49,46 +64,55 @@
     animation-name: uk-fade;
     -webkit-animation-duration: 0.8s;
     animation-duration: 0.8s;
-    -webkit-animation-timing-function: linear;
-    animation-timing-function: linear;
+    -webkit-animation-timing-function: linear !important;
+    animation-timing-function: linear !important;
+}
+
+/*
+ * Fade with scale
+ */
+
+.uk-animation-scale-up {
+    -webkit-animation-name: uk-fade-scale-02;
+    animation-name: uk-fade-scale-02;
+}
+
+.uk-animation-scale-down {
+    -webkit-animation-name: uk-fade-scale-18;
+    animation-name: uk-fade-scale-18;
+}
+
+/*
+ * Fade with slide
+ */
+
+.uk-animation-slide-top {
+    -webkit-animation-name: uk-fade-top;
+    animation-name: uk-fade-top;
+}
+
+.uk-animation-slide-bottom {
+    -webkit-animation-name: uk-fade-bottom;
+    animation-name: uk-fade-bottom;
+}
+
+.uk-animation-slide-left {
+    -webkit-animation-name: uk-fade-left;
+    animation-name: uk-fade-left;
+}
+
+.uk-animation-slide-right {
+    -webkit-animation-name: uk-fade-right;
+    animation-name: uk-fade-right;
 }
 
 /*
  * Scale
  */
 
-.uk-animation-scale-up {
-    -webkit-animation-name: uk-scale-up;
-    animation-name: uk-scale-up;
-}
-
-.uk-animation-scale-down {
-    -webkit-animation-name: uk-scale-down;
-    animation-name: uk-scale-down;
-}
-
-/*
- * Slide
- */
-
-.uk-animation-slide-top {
-    -webkit-animation-name: uk-slide-top;
-    animation-name: uk-slide-top;
-}
-
-.uk-animation-slide-bottom {
-    -webkit-animation-name: uk-slide-bottom;
-    animation-name: uk-slide-bottom;
-}
-
-.uk-animation-slide-left {
-    -webkit-animation-name: uk-slide-left;
-    animation-name: uk-slide-left;
-}
-
-.uk-animation-slide-right {
-    -webkit-animation-name: uk-slide-right;
-    animation-name: uk-slide-right;
+.uk-animation-scale {
+    -webkit-animation-name: uk-scale-12;
+    animation-name: uk-scale-12;
 }
 
 /*
@@ -101,21 +125,73 @@
 }
 
 
-/* Modifiers
+/* Direction modifiers
  ========================================================================== */
 
 .uk-animation-reverse {
     -webkit-animation-direction: reverse;
     animation-direction: reverse;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
 }
 
 
-/* Keyframes
- ========================================================================== */
+/* Duration modifiers
+========================================================================== */
 
-/*
- * Fade
- */
+.uk-animation-10 {
+    -webkit-animation-duration: 10s;
+    animation-duration: 10s;
+}
+
+
+/* Origin modifiers
+========================================================================== */
+
+.uk-animation-top-left {
+     -webkit-transform-origin: 0 0;
+     transform-origin: 0 0;
+}
+
+.uk-animation-top-center {
+     -webkit-transform-origin: 50% 0;
+     transform-origin: 50% 0;
+}
+
+.uk-animation-top-right {
+     -webkit-transform-origin: 100% 0;
+     transform-origin: 100% 0;
+}
+
+.uk-animation-middle-left {
+     -webkit-transform-origin: 0 50%;
+     transform-origin: 0 50%;
+}
+
+.uk-animation-middle-right {
+     -webkit-transform-origin: 100% 50%;
+     transform-origin: 100% 50%;
+}
+
+.uk-animation-bottom-left {
+     -webkit-transform-origin: 0 100%;
+     transform-origin: 0 100%;
+}
+
+.uk-animation-bottom-center {
+     -webkit-transform-origin: 50% 100%;
+     transform-origin: 50% 100%;
+}
+
+.uk-animation-bottom-right {
+     -webkit-transform-origin: 100% 100%;
+     transform-origin: 100% 100%;
+}
+
+
+/* Keyframes: Fade
+ * Used by dropdown, datepicker and slideshow component
+ ========================================================================== */
 
 @-webkit-keyframes uk-fade {
     0% { opacity: 0; }
@@ -127,84 +203,30 @@
     100% { opacity: 1; }
 }
 
-/*
- * Scale up
- */
 
-@-webkit-keyframes uk-scale-up {
-    0% {
-        opacity: 0;
-        -webkit-transform: scale(0.2);
-    }
-
-    100% {
-        opacity: 1;
-        -webkit-transform: scale(1);
-    }
-}
-
-@keyframes uk-scale-up {
-    0% {
-        opacity: 0;
-        transform: scale(0.2);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
+/* Keyframes: Fade with slide
+ ========================================================================== */
 
 /*
- * Scale down
+ * Top
  */
 
-@-webkit-keyframes uk-scale-down {
-    0% {
-        opacity: 0;
-        -webkit-transform: scale(1.8);
-    }
-
-    100% {
-        opacity: 1;
-        -webkit-transform: scale(1);
-    }
-}
-
-@keyframes uk-scale-down {
-    0% {
-        opacity: 0;
-        transform: scale(1.8);
-    }
-
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/*
- * Slide top
- */
-
-@-webkit-keyframes uk-slide-top {
+@-webkit-keyframes uk-fade-top {
     0% {
         opacity: 0;
         -webkit-transform: translateY(-100%);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateY(0);
     }
 }
 
-@keyframes uk-slide-top {
+@keyframes uk-fade-top {
     0% {
         opacity: 0;
         transform: translateY(-100%);
     }
-
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -212,27 +234,25 @@
 }
 
 /*
- * Slide bottom
+ * Bottom
  */
 
-@-webkit-keyframes uk-slide-bottom {
+@-webkit-keyframes uk-fade-bottom {
     0% {
         opacity: 0;
         -webkit-transform: translateY(100%);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateY(0);
     }
 }
 
-@keyframes uk-slide-bottom {
+@keyframes uk-fade-bottom {
     0% {
         opacity: 0;
         transform: translateY(100%);
     }
-
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -240,27 +260,25 @@
 }
 
 /*
- * Slide left
+ * Left
  */
 
-@-webkit-keyframes uk-slide-left {
+@-webkit-keyframes uk-fade-left {
     0% {
         opacity: 0;
         -webkit-transform: translateX(-100%);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateX(0);
     }
 }
 
-@keyframes uk-slide-left {
+@keyframes uk-fade-left {
     0% {
         opacity: 0;
         transform: translateX(-100%);
     }
-
     100% {
         opacity: 1;
         transform: translateX(0);
@@ -268,36 +286,207 @@
 }
 
 /*
- * Slide right
+ * Right
  */
 
-@-webkit-keyframes uk-slide-right {
+@-webkit-keyframes uk-fade-right {
     0% {
         opacity: 0;
         -webkit-transform: translateX(100%);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateX(0);
     }
 }
 
-@keyframes uk-slide-right {
+@keyframes uk-fade-right {
     0% {
         opacity: 0;
         transform: translateX(100%);
     }
-
     100% {
         opacity: 1;
         transform: translateX(0);
     }
 }
 
+
+/* Keyframes: Fade with scale
+ ========================================================================== */
+
 /*
- * Shake
+ * Scale by 0.2
  */
+
+@-webkit-keyframes uk-fade-scale-02 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(0.2);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+
+@keyframes uk-fade-scale-02 {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/*
+ * Scale by 1.5
+ * Used by slideshow component
+ */
+
+@-webkit-keyframes uk-fade-scale-15 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(1.5);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+
+@keyframes uk-fade-scale-15 {
+    0% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/*
+ * Scale by 1.8
+ */
+
+@-webkit-keyframes uk-fade-scale-18 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(1.8);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+
+@keyframes uk-fade-scale-18 {
+    0% {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* Keyframes: Slide
+ * Used by slideshow component
+ ========================================================================== */
+
+/*
+ * Left
+ */
+
+@-webkit-keyframes uk-slide-left {
+    0% { -webkit-transform: translateX(-100%); }
+    100% { -webkit-transform: translateX(0); }
+}
+
+@keyframes uk-slide-left {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+}
+
+/*
+ * Right
+ */
+
+@-webkit-keyframes uk-slide-right {
+    0% { -webkit-transform: translateX(100%); }
+    100% { -webkit-transform: translateX(0); }
+}
+
+@keyframes uk-slide-right {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+}
+
+/*
+ * Left third
+ */
+
+@-webkit-keyframes uk-slide-left-33 {
+    0% { -webkit-transform: translateX(33%); }
+    100% { -webkit-transform: translateX(0); }
+}
+
+@keyframes uk-slide-left-33 {
+    0% { transform: translateX(33%); }
+    100% { transform: translateX(0); }
+}
+
+/*
+ * Right third
+ */
+
+@-webkit-keyframes uk-slide-right-33 {
+    0% { -webkit-transform: translateX(-33%); }
+    100% { -webkit-transform: translateX(0); }
+}
+
+@keyframes uk-slide-right-33 {
+    0% { transform: translateX(-33%); }
+    100% { transform: translateX(0); }
+}
+
+
+/* Keyframes: Scale
+ ========================================================================== */
+
+@-webkit-keyframes uk-scale-12 {
+    0% { -webkit-transform: scale(1.2); }
+    100% { -webkit-transform: scale(1); }
+}
+
+@keyframes uk-scale-12 {
+    0% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+/* Keyframes: Rotate
+ * Used by icon and search component
+ ========================================================================== */
+
+@-webkit-keyframes uk-rotate {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(359deg); }
+}
+
+@keyframes uk-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(359deg); }
+}
+
+
+/* Keyframes: Shake
+ ========================================================================== */
 
 @-webkit-keyframes uk-shake {
     0%, 100% { -webkit-transform: translateX(0); }
@@ -325,8 +514,13 @@
     90% { transform: translateX(-1px); }
 }
 
+
+/* Keyframes: Fade with slide fixed
+ * Used by dropdown and search component
+ ========================================================================== */
+
 /*
- * Slide top fixed
+ * Top fixed
  */
 
 @-webkit-keyframes uk-slide-top-fixed {
@@ -334,7 +528,6 @@
         opacity: 0;
         -webkit-transform: translateY(-10px);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateY(0);
@@ -346,7 +539,6 @@
         opacity: 0;
         transform: translateY(-10px);
     }
-
     100% {
         opacity: 1;
         transform: translateY(0);
@@ -354,7 +546,7 @@
 }
 
 /*
- * Slide bottom fixed
+ * Bottom fixed
  */
 
 @-webkit-keyframes uk-slide-bottom-fixed {
@@ -362,7 +554,6 @@
         opacity: 0;
         -webkit-transform: translateY(10px);
     }
-
     100% {
         opacity: 1;
         -webkit-transform: translateY(0);
@@ -374,25 +565,10 @@
         opacity: 0;
         transform: translateY(10px);
     }
-
     100% {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/*
- * Spin
- */
-
-@-webkit-keyframes uk-spin {
-    0% { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(359deg); }
-}
-
-@keyframes uk-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(359deg); }
 }
 
 

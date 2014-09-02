@@ -1,5 +1,43 @@
 # Changelog
 
+### 2.9.0 (August 18, 2014)
+
+ - IMPORTANT: Renamed keyframe animation uk-spin to uk-rotate
+ - IMPORTANT: Removed uk-sticky class, use [data-uk-sticky] instead
+ - Added flex add-on
+ - Added cover add-on
+ - Added new keyframes and classes to animation component
+ - Added height viewport to utility component
+ - Added position classes to utility component
+ - Added treshold parameter to sortable add-on
+ - Added reload toggle elements on dom update
+ - Added hover color for badges
+ - Added animation and negative offset support for sticky add-on
+ - Added datepicker animation
+ - Added additional class parameter for the tooltip add-on
+ - Added iframe option + load custom css in iframe to htmleditor add-on
+ - Added more settings options for upload add-on
+ - Added trigger uk.dropped event when files were dropped to upload add-on
+ - Added trigger uk.offcanvas.hide when offcanvas hides
+ - Added allow multiple connect container to switcher component
+ - Added switch accross multiple connected switcher containers
+ - Added switch active content from within connected switcher containers via `data-uk-switcher-item` attribute
+ - Updated active datepicker closes on window resize
+ - Refactored sticky add-on and fixed z-index and box sizing
+ - Refactored responsive tab behavior
+ - Hide tooltip if source element is hidden or removed via JavaScript
+ - Fixed using data-uk-margin in dropdowns
+ - Fixed target option in tab js component
+ - Fixed autocomplete return type on ajax request
+ - Fixed autocomplete from overflowing its container
+ - Fixed tooltip position calculation when body or html element is fixed
+ - Fixed sortable add-on prevents default behaviour of child elements on click
+ - Fixed off-canvas in IE 9
+ - Fixed animation reverse timing function
+ - Removed Google maps automatic URL detection
+ - Removed search close button and loading spinner
+ - Removed Promise polyfill
+
 ### 2.8.0 (June 19, 2014)
 
  - IMPORTANT: Timepicker add-on is now based on autocomplete

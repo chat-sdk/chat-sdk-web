@@ -1,4 +1,4 @@
-var COMPILED = false;
+/* Firebase v1.0.21 */ var CLOSURE_NO_DEPS = true; var COMPILED = false;
 var goog = goog || {};
 goog.global = this;
 goog.global.CLOSURE_UNCOMPILED_DEFINES;
@@ -810,8 +810,8 @@ goog.provide("fb.core.util.validation");
 goog.require("fb.util.obj");
 goog.require("fb.util.utf8");
 goog.require("fb.util.validation");
-fb.core.util.validation.INVALID_KEY_REGEX_ = /[\[\].#$\/]/;
-fb.core.util.validation.INVALID_PATH_REGEX_ = /[\[\].#$]/;
+fb.core.util.validation.INVALID_KEY_REGEX_ = /[\[\].#$\/\u0000-\u001F\u007F]/;
+fb.core.util.validation.INVALID_PATH_REGEX_ = /[\[\].#$\u0000-\u001F\u007F]/;
 fb.core.util.validation.MAX_LEAF_SIZE_ = 10 * 1024 * 1024;
 fb.core.util.validation.MAX_DEPTH_SIZE_ = 1E3;
 fb.core.util.validation.isValidKey = function(key) {
@@ -877,8 +877,8 @@ fb.core.util.validation.validateFirebaseObjectDataArg = function(fnName, argumen
   if (optional && !goog.isDef(data)) {
     return;
   }
-  if (!goog.isObject(data)) {
-    throw new Error(fb.util.validation.errorPrefix(fnName, argumentNumber, optional) + " must be an object containing " + "the children to replace.");
+  if (!goog.isObject(data) || goog.isArray(data)) {
+    throw new Error(fb.util.validation.errorPrefix(fnName, argumentNumber, optional) + " must be an Object containing " + "the children to replace.");
   }
   fb.core.util.validation.validateFirebaseDataArg(fnName, argumentNumber, data, optional);
 };
@@ -1042,6 +1042,13 @@ fb.api.Query.prototype.endAt = function(priority, name) {
   return new fb.api.Query(this.repo, this.path, this.itemLimit, this.startPriority, this.startName, priority, name);
 };
 goog.exportProperty(fb.api.Query.prototype, "endAt", fb.api.Query.prototype.endAt);
+fb.api.Query.prototype.equalTo = function(priority, name) {
+  fb.util.validation.validateArgCount("Query.equalTo", 1, 2, arguments.length);
+  fb.core.util.validation.validatePriority("Query.equalTo", 1, priority, false);
+  fb.core.util.validation.validateKey("Query.equalTo", 2, name, true);
+  return this.startAt(priority, name).endAt(priority, name);
+};
+goog.exportProperty(fb.api.Query.prototype, "equalTo", fb.api.Query.prototype.equalTo);
 fb.api.Query.prototype.queryObject = function() {
   var obj = {};
   if (goog.isDef(this.startPriority)) {
@@ -1169,6 +1176,9 @@ fb.core.util.Path.prototype.child = function(childPathObj) {
 fb.core.util.Path.prototype.isEmpty = function() {
   return this.pieceNum_ >= this.pieces_.length;
 };
+fb.core.util.Path.prototype.length = function() {
+  return this.pieces_.length - this.pieceNum_;
+};
 fb.core.util.Path.RelativePath = function(outerPath, innerPath) {
   var outer = outerPath.getFront(), inner = innerPath.getFront();
   if (outer === null) {
@@ -1182,15 +1192,17 @@ fb.core.util.Path.RelativePath = function(outerPath, innerPath) {
   }
 };
 fb.core.util.Path.prototype.contains = function(other) {
-  var i = 0;
-  if (this.pieces_.length > other.pieces_.length) {
+  var i = this.pieceNum_;
+  var j = other.pieceNum_;
+  if (this.length() > other.length()) {
     return false;
   }
   while (i < this.pieces_.length) {
-    if (this.pieces_[i] !== other.pieces_[i]) {
+    if (this.pieces_[i] !== other.pieces_[j]) {
       return false;
     }
     ++i;
+    ++j;
   }
   return true;
 };
@@ -1730,162 +1742,185 @@ fb.core.RepoInfo.prototype.toString = function() {
 };
 goog.provide("fb.constants");
 var NODE_CLIENT = false;
-goog.provide("goog.crypt.Hash");
-goog.crypt.Hash = function() {
-  this.blockSize = -1;
-};
-goog.crypt.Hash.prototype.reset = goog.abstractMethod;
-goog.crypt.Hash.prototype.update = goog.abstractMethod;
-goog.crypt.Hash.prototype.digest = goog.abstractMethod;
-goog.provide("goog.crypt.Sha1");
-goog.require("goog.crypt.Hash");
-goog.crypt.Sha1 = function() {
-  goog.crypt.Sha1.base(this, "constructor");
-  this.blockSize = 512 / 8;
-  this.chain_ = [];
-  this.buf_ = [];
-  this.W_ = [];
-  this.pad_ = [];
-  this.pad_[0] = 128;
-  for (var i = 1;i < this.blockSize;++i) {
-    this.pad_[i] = 0;
+var CLIENT_VERSION = "0.0.0";
+goog.provide("sjcl");
+"use strict";
+sjcl = {cipher:{}, hash:{}, keyexchange:{}, mode:{}, misc:{}, codec:{}, exception:{corrupt:function(a) {
+  this.toString = function() {
+    return "CORRUPT: " + this.message;
+  };
+  this.message = a;
+}, invalid:function(a) {
+  this.toString = function() {
+    return "INVALID: " + this.message;
+  };
+  this.message = a;
+}, bug:function(a) {
+  this.toString = function() {
+    return "BUG: " + this.message;
+  };
+  this.message = a;
+}, notReady:function(a) {
+  this.toString = function() {
+    return "NOT READY: " + this.message;
+  };
+  this.message = a;
+}}};
+sjcl.bitArray = {bitSlice:function(a, b, c) {
+  a = sjcl.bitArray.e(a.slice(b / 32), 32 - (b & 31)).slice(1);
+  return void 0 === c ? a : sjcl.bitArray.clamp(a, c - b);
+}, extract:function(a, b, c) {
+  var d = Math.floor(-b - c & 31);
+  return((b + c - 1 ^ b) & -32 ? a[b / 32 | 0] << 32 - d ^ a[b / 32 + 1 | 0] >>> d : a[b / 32 | 0] >>> d) & (1 << c) - 1;
+}, concat:function(a, b) {
+  if (0 === a.length || 0 === b.length) {
+    return a.concat(b);
   }
-  this.inbuf_ = 0;
-  this.total_ = 0;
+  var c = a[a.length - 1], d = sjcl.bitArray.getPartial(c);
+  return 32 === d ? a.concat(b) : sjcl.bitArray.e(b, d, c | 0, a.slice(0, a.length - 1));
+}, bitLength:function(a) {
+  var b = a.length;
+  return 0 === b ? 0 : 32 * (b - 1) + sjcl.bitArray.getPartial(a[b - 1]);
+}, clamp:function(a, b) {
+  if (32 * a.length < b) {
+    return a;
+  }
+  a = a.slice(0, Math.ceil(b / 32));
+  var c = a.length;
+  b &= 31;
+  0 < c && b && (a[c - 1] = sjcl.bitArray.partial(b, a[c - 1] & 2147483648 >> b - 1, 1));
+  return a;
+}, partial:function(a, b, c) {
+  return 32 === a ? b : (c ? b | 0 : b << 32 - a) + 1099511627776 * a;
+}, getPartial:function(a) {
+  return Math.round(a / 1099511627776) || 32;
+}, equal:function(a, b) {
+  if (sjcl.bitArray.bitLength(a) !== sjcl.bitArray.bitLength(b)) {
+    return!1;
+  }
+  var c = 0, d;
+  for (d = 0;d < a.length;d++) {
+    c |= a[d] ^ b[d];
+  }
+  return 0 === c;
+}, e:function(a, b, c, d) {
+  var e;
+  e = 0;
+  for (void 0 === d && (d = []);32 <= b;b -= 32) {
+    d.push(c), c = 0;
+  }
+  if (0 === b) {
+    return d.concat(a);
+  }
+  for (e = 0;e < a.length;e++) {
+    d.push(c | a[e] >>> b), c = a[e] << 32 - b;
+  }
+  e = a.length ? a[a.length - 1] : 0;
+  a = sjcl.bitArray.getPartial(e);
+  d.push(sjcl.bitArray.partial(b + a & 31, 32 < b + a ? c : d.pop(), 1));
+  return d;
+}, h:function(a, b) {
+  return[a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]];
+}, byteswapM:function(a) {
+  var b, c;
+  for (b = 0;b < a.length;++b) {
+    c = a[b], a[b] = c >>> 24 | c >>> 8 & 65280 | (c & 65280) << 8 | c << 24;
+  }
+  return a;
+}};
+sjcl.codec.utf8String = {fromBits:function(a) {
+  var b = "", c = sjcl.bitArray.bitLength(a), d, e;
+  for (d = 0;d < c / 8;d++) {
+    0 === (d & 3) && (e = a[d / 4]), b += String.fromCharCode(e >>> 24), e <<= 8;
+  }
+  return decodeURIComponent(escape(b));
+}, toBits:function(a) {
+  a = unescape(encodeURIComponent(a));
+  var b = [], c, d = 0;
+  for (c = 0;c < a.length;c++) {
+    d = d << 8 | a.charCodeAt(c), 3 === (c & 3) && (b.push(d), d = 0);
+  }
+  c & 3 && b.push(sjcl.bitArray.partial(8 * (c & 3), d));
+  return b;
+}};
+sjcl.codec.base64 = {d:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", fromBits:function(a, b, c) {
+  var d = "", e = 0, g = sjcl.codec.base64.d, f = 0, h = sjcl.bitArray.bitLength(a);
+  c && (g = g.substr(0, 62) + "-_");
+  for (c = 0;6 * d.length < h;) {
+    d += g.charAt((f ^ a[c] >>> e) >>> 26), 6 > e ? (f = a[c] << 6 - e, e += 26, c++) : (f <<= 6, e -= 6);
+  }
+  for (;d.length & 3 && !b;) {
+    d += "=";
+  }
+  return d;
+}, toBits:function(a, b) {
+  a = a.replace(/\s|=/g, "");
+  var c = [], d, e = 0, g = sjcl.codec.base64.d, f = 0, h;
+  b && (g = g.substr(0, 62) + "-_");
+  for (d = 0;d < a.length;d++) {
+    h = g.indexOf(a.charAt(d));
+    if (0 > h) {
+      throw new sjcl.exception.invalid("this isn't base64!");
+    }
+    26 < e ? (e -= 26, c.push(f ^ h >>> e), f = h << 32 - e) : (e += 6, f ^= h << 32 - e);
+  }
+  e & 56 && c.push(sjcl.bitArray.partial(e & 56, f, 1));
+  return c;
+}};
+sjcl.codec.base64url = {fromBits:function(a) {
+  return sjcl.codec.base64.fromBits(a, 1, 1);
+}, toBits:function(a) {
+  return sjcl.codec.base64.toBits(a, 1);
+}};
+sjcl.hash.sha1 = function(a) {
+  a ? (this.c = a.c.slice(0), this.b = a.b.slice(0), this.a = a.a) : this.reset();
+};
+sjcl.hash.sha1.hash = function(a) {
+  return(new sjcl.hash.sha1).update(a).finalize();
+};
+sjcl.hash.sha1.prototype = {blockSize:512, reset:function() {
+  this.c = this.f.slice(0);
+  this.b = [];
+  this.a = 0;
+  return this;
+}, update:function(a) {
+  "string" === typeof a && (a = sjcl.codec.utf8String.toBits(a));
+  var b, c = this.b = sjcl.bitArray.concat(this.b, a);
+  b = this.a;
+  a = this.a = b + sjcl.bitArray.bitLength(a);
+  for (b = this.blockSize + b & -this.blockSize;b <= a;b += this.blockSize) {
+    n(this, c.splice(0, 16));
+  }
+  return this;
+}, finalize:function() {
+  var a, b = this.b, c = this.c, b = sjcl.bitArray.concat(b, [sjcl.bitArray.partial(1, 1)]);
+  for (a = b.length + 2;a & 15;a++) {
+    b.push(0);
+  }
+  b.push(Math.floor(this.a / 4294967296));
+  for (b.push(this.a | 0);b.length;) {
+    n(this, b.splice(0, 16));
+  }
   this.reset();
-};
-goog.inherits(goog.crypt.Sha1, goog.crypt.Hash);
-goog.crypt.Sha1.prototype.reset = function() {
-  this.chain_[0] = 1732584193;
-  this.chain_[1] = 4023233417;
-  this.chain_[2] = 2562383102;
-  this.chain_[3] = 271733878;
-  this.chain_[4] = 3285377520;
-  this.inbuf_ = 0;
-  this.total_ = 0;
-};
-goog.crypt.Sha1.prototype.compress_ = function(buf, opt_offset) {
-  if (!opt_offset) {
-    opt_offset = 0;
+  return c;
+}, f:[1732584193, 4023233417, 2562383102, 271733878, 3285377520], g:[1518500249, 1859775393, 2400959708, 3395469782]};
+function n(a, b) {
+  var c, d, e, g, f, h, m, l = b.slice(0), k = a.c;
+  e = k[0];
+  g = k[1];
+  f = k[2];
+  h = k[3];
+  m = k[4];
+  for (c = 0;79 >= c;c++) {
+    16 <= c && (l[c] = (l[c - 3] ^ l[c - 8] ^ l[c - 14] ^ l[c - 16]) << 1 | (l[c - 3] ^ l[c - 8] ^ l[c - 14] ^ l[c - 16]) >>> 31), d = 19 >= c ? g & f | ~g & h : 39 >= c ? g ^ f ^ h : 59 >= c ? g & f | g & h | f & h : 79 >= c ? g ^ f ^ h : void 0, d = (e << 5 | e >>> 27) + d + m + l[c] + a.g[Math.floor(c / 20)] | 0, m = h, h = f, f = g << 30 | g >>> 2, g = e, e = d;
   }
-  var W = this.W_;
-  if (goog.isString(buf)) {
-    for (var i = 0;i < 16;i++) {
-      W[i] = buf.charCodeAt(opt_offset) << 24 | buf.charCodeAt(opt_offset + 1) << 16 | buf.charCodeAt(opt_offset + 2) << 8 | buf.charCodeAt(opt_offset + 3);
-      opt_offset += 4;
-    }
-  } else {
-    for (var i = 0;i < 16;i++) {
-      W[i] = buf[opt_offset] << 24 | buf[opt_offset + 1] << 16 | buf[opt_offset + 2] << 8 | buf[opt_offset + 3];
-      opt_offset += 4;
-    }
-  }
-  for (var i = 16;i < 80;i++) {
-    var t = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
-    W[i] = (t << 1 | t >>> 31) & 4294967295;
-  }
-  var a = this.chain_[0];
-  var b = this.chain_[1];
-  var c = this.chain_[2];
-  var d = this.chain_[3];
-  var e = this.chain_[4];
-  var f, k;
-  for (var i = 0;i < 80;i++) {
-    if (i < 40) {
-      if (i < 20) {
-        f = d ^ b & (c ^ d);
-        k = 1518500249;
-      } else {
-        f = b ^ c ^ d;
-        k = 1859775393;
-      }
-    } else {
-      if (i < 60) {
-        f = b & c | d & (b | c);
-        k = 2400959708;
-      } else {
-        f = b ^ c ^ d;
-        k = 3395469782;
-      }
-    }
-    var t = (a << 5 | a >>> 27) + f + e + k + W[i] & 4294967295;
-    e = d;
-    d = c;
-    c = (b << 30 | b >>> 2) & 4294967295;
-    b = a;
-    a = t;
-  }
-  this.chain_[0] = this.chain_[0] + a & 4294967295;
-  this.chain_[1] = this.chain_[1] + b & 4294967295;
-  this.chain_[2] = this.chain_[2] + c & 4294967295;
-  this.chain_[3] = this.chain_[3] + d & 4294967295;
-  this.chain_[4] = this.chain_[4] + e & 4294967295;
-};
-goog.crypt.Sha1.prototype.update = function(bytes, opt_length) {
-  if (!goog.isDef(opt_length)) {
-    opt_length = bytes.length;
-  }
-  var lengthMinusBlock = opt_length - this.blockSize;
-  var n = 0;
-  var buf = this.buf_;
-  var inbuf = this.inbuf_;
-  while (n < opt_length) {
-    if (inbuf == 0) {
-      while (n <= lengthMinusBlock) {
-        this.compress_(bytes, n);
-        n += this.blockSize;
-      }
-    }
-    if (goog.isString(bytes)) {
-      while (n < opt_length) {
-        buf[inbuf] = bytes.charCodeAt(n);
-        ++inbuf;
-        ++n;
-        if (inbuf == this.blockSize) {
-          this.compress_(buf);
-          inbuf = 0;
-          break;
-        }
-      }
-    } else {
-      while (n < opt_length) {
-        buf[inbuf] = bytes[n];
-        ++inbuf;
-        ++n;
-        if (inbuf == this.blockSize) {
-          this.compress_(buf);
-          inbuf = 0;
-          break;
-        }
-      }
-    }
-  }
-  this.inbuf_ = inbuf;
-  this.total_ += opt_length;
-};
-goog.crypt.Sha1.prototype.digest = function() {
-  var digest = [];
-  var totalBits = this.total_ * 8;
-  if (this.inbuf_ < 56) {
-    this.update(this.pad_, 56 - this.inbuf_);
-  } else {
-    this.update(this.pad_, this.blockSize - (this.inbuf_ - 56));
-  }
-  for (var i = this.blockSize - 1;i >= 56;i--) {
-    this.buf_[i] = totalBits & 255;
-    totalBits /= 256;
-  }
-  this.compress_(this.buf_);
-  var n = 0;
-  for (var i = 0;i < 5;i++) {
-    for (var j = 24;j >= 0;j -= 8) {
-      digest[n] = this.chain_[i] >> j & 255;
-      ++n;
-    }
-  }
-  return digest;
-};
-goog.provide("goog.dom.NodeType");
+  k[0] = k[0] + e | 0;
+  k[1] = k[1] + g | 0;
+  k[2] = k[2] + f | 0;
+  k[3] = k[3] + h | 0;
+  k[4] = k[4] + m | 0;
+}
+;goog.provide("goog.dom.NodeType");
 goog.dom.NodeType = {ELEMENT:1, ATTRIBUTE:2, TEXT:3, CDATA_SECTION:4, ENTITY_REFERENCE:5, ENTITY:6, PROCESSING_INSTRUCTION:7, COMMENT:8, DOCUMENT:9, DOCUMENT_TYPE:10, DOCUMENT_FRAGMENT:11, NOTATION:12};
 goog.provide("goog.debug.Error");
 goog.debug.Error = function(opt_msg) {
@@ -3491,9 +3526,8 @@ goog.require("fb.constants");
 goog.require("fb.core.RepoInfo");
 goog.require("fb.core.storage");
 goog.require("fb.util.json");
-goog.require("goog.crypt");
-goog.require("goog.crypt.Sha1");
 goog.require("goog.crypt.base64");
+goog.require("sjcl");
 fb.core.util.LUIDGenerator = function() {
   var id = 1;
   return function() {
@@ -3529,11 +3563,7 @@ fb.core.util.base64DecodeIfNativeSupport = function(str) {
   return null;
 };
 fb.core.util.sha1 = function(str) {
-  var utf8Bytes = fb.util.utf8.stringToByteArray(str);
-  var sha1 = new goog.crypt.Sha1;
-  sha1.update(utf8Bytes);
-  var sha1Bytes = sha1.digest();
-  return goog.crypt.base64.encodeByteArray(sha1Bytes);
+  return sjcl.codec.base64.fromBits(sjcl.hash.sha1.hash(str));
 };
 fb.core.util.buildLogMessage_ = function(var_args) {
   var message = "";
@@ -3630,7 +3660,7 @@ fb.core.util.parseURL = function(dataURL) {
       }
       namespace = namespace.toLowerCase();
     } else {
-      fb.core.util.fatal("Cannot parse Firebase url. Please use https:<YOUR FIREBASE>.firebaseio.com");
+      fb.core.util.fatal("Cannot parse Firebase url. Please use https://<YOUR FIREBASE>.firebaseio.com");
     }
   }
   if (!secure) {
@@ -3664,7 +3694,7 @@ fb.core.util.executeWhenDOMReady = function(fn) {
     var called = false;
     var wrappedFn = function() {
       if (!document.body) {
-        setTimeout(wrappedFn, 10);
+        setTimeout(wrappedFn, Math.floor(10));
         return;
       }
       if (!called) {
@@ -3859,7 +3889,7 @@ fb.core.util.exceptionGuard = function(fn) {
   } catch (e) {
     setTimeout(function() {
       throw e;
-    }, 0);
+    }, Math.floor(0));
   }
 };
 goog.provide("fb.core.snap.LeafNode");
@@ -4493,6 +4523,8 @@ fb.realtime.Transport.prototype.close = function() {
 };
 fb.realtime.Transport.prototype.send = function(data) {
 };
+fb.realtime.Transport.prototype.bytesReceived;
+fb.realtime.Transport.prototype.bytesSent;
 goog.provide("fb.core.util.NodePatches");
 (function() {
   if (NODE_CLIENT) {
@@ -4847,13 +4879,15 @@ fb.core.stats.StatsListener.prototype.get = function() {
   return delta;
 };
 goog.provide("fb.core.stats.StatsReporter");
-var FIRST_STATS_TIME = 30 * 1E3;
+var FIRST_STATS_MIN_TIME = 10 * 1E3;
+var FIRST_STATS_MAX_TIME = 30 * 1E3;
 var REPORT_STATS_INTERVAL = 5 * 60 * 1E3;
 fb.core.stats.StatsReporter = function(collection, connection) {
   this.statsToReport_ = {};
   this.statsListener_ = new fb.core.stats.StatsListener(collection);
   this.connection_ = connection;
-  setTimeout(goog.bind(this.reportStats_, this), 10 + Math.random() * 2 * FIRST_STATS_TIME);
+  var timeout = FIRST_STATS_MIN_TIME + (FIRST_STATS_MAX_TIME - FIRST_STATS_MIN_TIME) * Math.random();
+  setTimeout(goog.bind(this.reportStats_, this), Math.floor(timeout));
 };
 fb.core.stats.StatsReporter.prototype.includeStat = function(stat) {
   this.statsToReport_[stat] = true;
@@ -4871,7 +4905,7 @@ fb.core.stats.StatsReporter.prototype.reportStats_ = function() {
   if (haveStatsToReport) {
     this.connection_.reportStats(reportedStats);
   }
-  setTimeout(goog.bind(this.reportStats_, this), Math.random() * 2 * REPORT_STATS_INTERVAL);
+  setTimeout(goog.bind(this.reportStats_, this), Math.floor(Math.random() * 2 * REPORT_STATS_INTERVAL));
 };
 goog.provide("fb.core.stats.StatsManager");
 goog.require("fb.core.stats.StatsCollection");
@@ -4923,6 +4957,8 @@ fb.realtime.WebSocketConnection = function(connId, repoInfo, sessionId) {
   this.keepaliveTimer = null;
   this.frames = null;
   this.totalFrames = 0;
+  this.bytesSent = 0;
+  this.bytesReceived = 0;
   this.stats_ = fb.core.stats.StatsManager.getCollection(repoInfo);
   this.connURL = (repoInfo.secure ? "wss://" : "ws://") + repoInfo.internalHost + "/.ws?" + fb.realtime.Constants.VERSION_PARAM + "=" + fb.realtime.Constants.PROTOCOL_VERSION;
   if (repoInfo.needsQueryParam()) {
@@ -5017,6 +5053,7 @@ fb.realtime.WebSocketConnection.prototype.handleIncomingFrame = function(mess) {
     return;
   }
   var data = mess["data"];
+  this.bytesReceived += data.length;
   this.stats_.incrementCounter("bytes_received", data.length);
   this.resetKeepAlive();
   if (this.frames !== null) {
@@ -5031,6 +5068,7 @@ fb.realtime.WebSocketConnection.prototype.handleIncomingFrame = function(mess) {
 fb.realtime.WebSocketConnection.prototype.send = function(data) {
   this.resetKeepAlive();
   var dataStr = fb.util.json.stringify(data);
+  this.bytesSent += dataStr.length;
   this.stats_.incrementCounter("bytes_sent", dataStr.length);
   var dataSegs = fb.core.util.splitStringBySize(dataStr, WEBSOCKET_MAX_FRAME_SIZE);
   if (dataSegs.length > 1) {
@@ -5075,7 +5113,7 @@ fb.realtime.WebSocketConnection.prototype.resetKeepAlive = function() {
       self.mySock.send("0");
     }
     self.resetKeepAlive();
-  }, WEBSOCKET_KEEPALIVE_INTERVAL);
+  }, Math.floor(WEBSOCKET_KEEPALIVE_INTERVAL));
 };
 goog.provide("fb.realtime.polling.PacketReceiver");
 fb.realtime.polling.PacketReceiver = function(onMessage) {
@@ -5187,6 +5225,8 @@ fb.realtime.BrowserPollConnection = function(connId, repoInfo, sessionId) {
   this.connId = connId;
   this.log_ = fb.core.util.logWrapper(connId);
   this.repoInfo = repoInfo;
+  this.bytesSent = 0;
+  this.bytesReceived = 0;
   this.stats_ = fb.core.stats.StatsManager.getCollection(repoInfo);
   this.sessionId = sessionId;
   this.everConnected_ = false;
@@ -5213,7 +5253,7 @@ fb.realtime.BrowserPollConnection.prototype.open = function(onMessage, onDisconn
     self.log_("Timed out trying to connect.");
     self.onClosed_();
     self.connectTimeoutTimer_ = null;
-  }, LP_CONNECT_TIMEOUT);
+  }, Math.floor(LP_CONNECT_TIMEOUT));
   fb.core.util.executeWhenDOMReady(function() {
     if (self.isClosed_) {
       return;
@@ -5315,6 +5355,7 @@ fb.realtime.BrowserPollConnection.prototype.close = function() {
 };
 fb.realtime.BrowserPollConnection.prototype.send = function(data) {
   var dataStr = fb.util.json.stringify(data);
+  this.bytesSent += dataStr.length;
   this.stats_.incrementCounter("bytes_sent", dataStr.length);
   var base64data = fb.core.util.base64Encode(dataStr);
   var dataSegs = fb.core.util.splitStringBySize(base64data, MAX_PAYLOAD_SIZE);
@@ -5337,7 +5378,9 @@ fb.realtime.BrowserPollConnection.prototype.addDisconnectPingFrame = function(id
   document.body.appendChild(this.myDisconnFrame);
 };
 fb.realtime.BrowserPollConnection.prototype.incrementIncomingBytes_ = function(args) {
-  this.stats_.incrementCounter("bytes_received", fb.util.json.stringify(args).length);
+  var bytesReceived = fb.util.json.stringify(args).length;
+  this.bytesReceived += bytesReceived;
+  this.stats_.incrementCounter("bytes_received", bytesReceived);
 };
 function FirebaseIFrameScriptHolder(commandCB, onMessageCB, onDisconnectCB, urlFn) {
   this.urlFn = urlFn;
@@ -5413,7 +5456,7 @@ FirebaseIFrameScriptHolder.prototype.close = function() {
         document.body.removeChild(self.myIFrame);
         self.myIFrame = null;
       }
-    }, 0);
+    }, Math.floor(0));
   }
   if (NODE_CLIENT && this.myID) {
     var urlParams = {};
@@ -5476,7 +5519,7 @@ FirebaseIFrameScriptHolder.prototype.addLongPollTag_ = function(url, serial) {
     self.outstandingRequests.remove(serial);
     self.newRequest_();
   };
-  var keepaliveTimeout = setTimeout(doNewRequest, KEEPALIVE_REQUEST_INTERVAL);
+  var keepaliveTimeout = setTimeout(doNewRequest, Math.floor(KEEPALIVE_REQUEST_INTERVAL));
   var readyStateCB = function() {
     clearTimeout(keepaliveTimeout);
     doNewRequest();
@@ -5515,7 +5558,7 @@ FirebaseIFrameScriptHolder.prototype.addTag = function(url, loadCB) {
         self.myIFrame.doc.body.appendChild(newScript);
       } catch (e) {
       }
-    }, 1);
+    }, Math.floor(1));
   }
 };
 if (typeof NODE_CLIENT !== "undefined" && NODE_CLIENT) {
@@ -5595,6 +5638,8 @@ goog.require("fb.realtime.Constants");
 goog.require("fb.realtime.TransportManager");
 var UPGRADE_TIMEOUT = 6E4;
 var DELAY_BEFORE_SENDING_EXTRA_REQUESTS = 5E3;
+var BYTES_SENT_HEALTHY_OVERRIDE = 10 * 1024;
+var BYTES_RECEIVED_HEALTHY_OVERRIDE = 100 * 1024;
 var REALTIME_STATE_CONNECTING = 0;
 var REALTIME_STATE_CONNECTED = 1;
 var REALTIME_STATE_DISCONNECTED = 2;
@@ -5636,16 +5681,26 @@ fb.realtime.Connection.prototype.start_ = function() {
   var self = this;
   setTimeout(function() {
     self.conn_ && self.conn_.open(onMessageReceived, onConnectionLost);
-  }, 0);
+  }, Math.floor(0));
   var healthyTimeout_ms = conn["healthyTimeout"] || 0;
   if (healthyTimeout_ms > 0) {
     this.healthyTimeout_ = setTimeout(function() {
       self.healthyTimeout_ = null;
       if (!self.isHealthy_) {
-        self.log_("Closing unhealthy connection after timeout.");
-        self.close();
+        if (self.conn_ && self.conn_.bytesReceived > BYTES_RECEIVED_HEALTHY_OVERRIDE) {
+          self.log_("Connection exceeded healthy timeout but has received " + self.conn_.bytesReceived + " bytes.  Marking connection healthy.");
+          self.isHealthy_ = true;
+          self.conn_.markConnectionHealthy();
+        } else {
+          if (self.conn_ && self.conn_.bytesSent > BYTES_SENT_HEALTHY_OVERRIDE) {
+            self.log_("Connection exceeded healthy timeout but has sent " + self.conn_.bytesSent + " bytes.  Leaving connection alive.");
+          } else {
+            self.log_("Closing unhealthy connection after timeout.");
+            self.close();
+          }
+        }
       }
-    }, healthyTimeout_ms);
+    }, Math.floor(healthyTimeout_ms));
   }
 };
 fb.realtime.Connection.prototype.nextTransportId_ = function() {
@@ -5845,7 +5900,7 @@ fb.realtime.Connection.prototype.startUpgrade_ = function(conn) {
       self.log_("Timed out trying to upgrade.");
       self.secondaryConn_.close();
     }
-  }, UPGRADE_TIMEOUT);
+  }, Math.floor(UPGRADE_TIMEOUT));
 };
 fb.realtime.Connection.prototype.onReset_ = function(host) {
   this.log_("Reset packet received.  New host: " + host);
@@ -5872,7 +5927,7 @@ fb.realtime.Connection.prototype.onConnectionEstablished_ = function(conn, times
   } else {
     setTimeout(function() {
       self.sendPingOnPrimaryIfNecessary_();
-    }, DELAY_BEFORE_SENDING_EXTRA_REQUESTS);
+    }, Math.floor(DELAY_BEFORE_SENDING_EXTRA_REQUESTS));
   }
 };
 fb.realtime.Connection.prototype.sendPingOnPrimaryIfNecessary_ = function() {
@@ -6140,7 +6195,7 @@ fb.core.PersistentConnection.prototype.sendOnDisconnect_ = function(action, path
     if (opt_onComplete) {
       setTimeout(function() {
         opt_onComplete(response["s"], response["d"]);
-      }, 0);
+      }, Math.floor(0));
     }
   });
 };
@@ -6247,7 +6302,7 @@ fb.core.PersistentConnection.prototype.scheduleConnect_ = function(timeout) {
   this.establishConnectionTimer_ = setTimeout(function() {
     self.establishConnectionTimer_ = null;
     self.establishConnection_();
-  }, timeout);
+  }, Math.floor(timeout));
 };
 fb.core.PersistentConnection.prototype.onVisible_ = function(visible) {
   if (visible && !this.visible_ && this.reconnectDelay_ === this.maxReconnectDelay_) {
@@ -7939,7 +7994,6 @@ fb.core.Repo.prototype.update = function(path, childrenToMerge, onComplete) {
   }
   var self = this;
   this.connection_.merge(path.toString(), childrenToMerge, function(status, errorReason) {
-    fb.core.util.assert(status === "ok" || status === "permission_denied", "merge at " + path + " failed.");
     var success = status === "ok";
     if (!success) {
       fb.core.util.warn("update at " + path + " failed: " + status);
@@ -8323,7 +8377,7 @@ fb.core.Repo.prototype.rerunTransactionQueue_ = function(queue, path) {
     if (abortTransaction) {
       queue[i].status = fb.core.TransactionStatus.COMPLETED;
       (function(unwatcher) {
-        setTimeout(unwatcher, 0);
+        setTimeout(unwatcher, Math.floor(0));
       })(queue[i].unwatcher);
       if (queue[i].onComplete) {
         var ref = new Firebase(this, queue[i].path);
@@ -8553,6 +8607,7 @@ goog.exportProperty(fb.api.INTERNAL, "statsIncrementCounter", fb.api.INTERNAL.st
 fb.api.INTERNAL.dataUpdateCount = function(ref) {
   return ref.repo.dataUpdateCount;
 };
+goog.exportProperty(fb.api.INTERNAL, "dataUpdateCount", fb.api.INTERNAL.dataUpdateCount);
 fb.api.INTERNAL.interceptServerData = function(ref, callback) {
   return ref.repo.interceptServerData_(callback);
 };
@@ -8603,6 +8658,14 @@ goog.exportProperty(fb.api.OnDisconnect.prototype, "setWithPriority", fb.api.OnD
 fb.api.OnDisconnect.prototype.update = function(objectToMerge, opt_onComplete) {
   fb.util.validation.validateArgCount("Firebase.onDisconnect().update", 1, 2, arguments.length);
   fb.core.util.validation.validateWritablePath("Firebase.onDisconnect().update", this.path_);
+  if (goog.isArray(objectToMerge)) {
+    var newObjectToMerge = {};
+    for (var i = 0;i < objectToMerge.length;++i) {
+      newObjectToMerge["" + i] = objectToMerge[i];
+    }
+    objectToMerge = newObjectToMerge;
+    fb.core.util.warn("Passing an Array to Firebase.onDisconnect().update() is deprecated. Use set() if you want to overwrite the " + "existing data, or an Object with integer keys if you really do want to only update some of the children.");
+  }
   fb.core.util.validation.validateFirebaseObjectDataArg("Firebase.onDisconnect().update", 1, objectToMerge, false);
   fb.util.validation.validateCallback("Firebase.onDisconnect().update", 2, opt_onComplete, true);
   this.repo_.onDisconnectUpdate(this.path_, objectToMerge, opt_onComplete);
@@ -8734,6 +8797,14 @@ Firebase.prototype.set = function(newVal, onComplete) {
 Firebase.prototype.update = function(objectToMerge, onComplete) {
   fb.util.validation.validateArgCount("Firebase.update", 1, 2, arguments.length);
   fb.core.util.validation.validateWritablePath("Firebase.update", this.path);
+  if (goog.isArray(objectToMerge)) {
+    var newObjectToMerge = {};
+    for (var i = 0;i < objectToMerge.length;++i) {
+      newObjectToMerge["" + i] = objectToMerge[i];
+    }
+    objectToMerge = newObjectToMerge;
+    fb.core.util.warn("Passing an Array to Firebase.update() is deprecated. Use set() if you want to overwrite the existing data, or " + "an Object with integer keys if you really do want to only update some of the children.");
+  }
   fb.core.util.validation.validateFirebaseObjectDataArg("Firebase.update", 1, objectToMerge, false);
   fb.util.validation.validateCallback("Firebase.update", 2, onComplete, true);
   if (fb.util.obj.contains(objectToMerge, ".priority")) {
@@ -8852,6 +8923,7 @@ Firebase.enableLogging = function(logger, persistent) {
   }
 };
 Firebase.ServerValue = {"TIMESTAMP":{".sv":"timestamp"}};
+Firebase.SDK_VERSION = CLIENT_VERSION;
 Firebase.INTERNAL = fb.api.INTERNAL;
 Firebase.Context = fb.core.RepoManager;
-
+; Firebase.SDK_VERSION='1.0.21';

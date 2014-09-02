@@ -2,8 +2,8 @@
 
     "use strict";
 
-    var $win           = $(window),
-        $doc           = $(document),
+    var $win           = UI.$win,
+        $doc           = UI.$doc,
         scrollspies    = [],
         checkScrollSpy = function() {
             for(var i=0; i < scrollspies.length; i++) {
@@ -149,8 +149,9 @@
     $win.on("resize orientationchange", UI.Utils.debounce(fnCheck, 50));
 
     // init code
-    $doc.on("uk-domready", function(e) {
-        $("[data-uk-scrollspy]").each(function() {
+    UI.ready(function(context) {
+
+        $("[data-uk-scrollspy]", context).each(function() {
 
             var element = $(this);
 
@@ -159,7 +160,7 @@
             }
         });
 
-        $("[data-uk-scrollspy-nav]").each(function() {
+        $("[data-uk-scrollspy-nav]", context).each(function() {
 
             var element = $(this);
 

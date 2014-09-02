@@ -2,7 +2,7 @@
 
     "use strict";
 
-    var win = $(window), event = 'resize orientationchange', grids = [];
+    var grids = [];
 
     UI.component('gridMatchHeight', {
 
@@ -20,24 +20,29 @@
 
             if (!this.columns.length) return;
 
-            win.on(event, (function() {
+            UI.$win.on('resize orientationchange', (function() {
+
                 var fn = function() {
                     $this.match();
                 };
 
                 $(function() {
                     fn();
-                    win.on("load", fn);
+                    UI.$win.on("load", fn);
                 });
 
-                return UI.Utils.debounce(fn, 150);
+                return UI.Utils.debounce(fn, 50);
             })());
 
-            $(document).on("uk-domready", function(e) {
+            UI.$doc.on("uk.dom.changed", function(e) {
                 $this.columns  = $this.element.children();
                 $this.elements = $this.options.target ? $this.find($this.options.target) : $this.columns;
                 $this.match();
             });
+
+            this.on("uk-check-display", function(e) {
+                if(this.element.is(":visible")) this.match();
+            }.bind(this));
 
             grids.push(this);
         },
@@ -131,8 +136,9 @@
 
 
     // init code
-    $(document).on("uk-domready", function(e) {
-        $("[data-uk-grid-match],[data-uk-grid-margin]").each(function() {
+    UI.ready(function(context) {
+
+        $("[data-uk-grid-match],[data-uk-grid-margin]", context).each(function() {
             var grid = $(this), obj;
 
             if (grid.is("[data-uk-grid-match]") && !grid.data("gridMatchHeight")) {
@@ -142,12 +148,6 @@
             if (grid.is("[data-uk-grid-margin]") && !grid.data("gridMargin")) {
                 obj = UI.gridMargin(grid, UI.Utils.options(grid.attr("data-uk-grid-margin")));
             }
-        });
-    });
-
-    $(document).on("uk-check-display", function(e) {
-        grids.forEach(function(item) {
-            if(item.element.is(":visible")) item.match();
         });
     });
 
