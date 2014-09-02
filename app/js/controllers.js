@@ -2,12 +2,11 @@
 
 /* Controllers */
 
-var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload','ngDragDrop']);
+var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
 
 myApp.controller('AppController', [
     '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'WebService', 'Cache','$document','Layout',
     function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, WebService, Cache, $document, Layout) {
-
 
     $scope.init = function () {
 
@@ -364,18 +363,75 @@ myApp.controller('MainBoxController', ['$scope', 'WebService', 'Cache', function
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$scope','WebService', function($scope, WebService) {
+myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache', '$firebaseSimpleLogin', function($rootScope, $scope, WebService, Cache, $firebaseSimpleLogin) {
 
+
+    /**
+     * Initialize the login controller
+     * Add listeners to AngularFire login, logout and error broadcasts
+     * Setup teh auth variable and try to authenticate
+     */
     $scope.init = function () {
-        WebService.authenticateUser(function(success) {
-            if(success) {
-                $scope.handleUserLogin($scope.auth.user);
-            }
-            else {
-                $scope.showLoginBox();
-            }
+
+        // Add observers for AngularFire login events
+        // When the user logs in
+        $scope.$on('$firebaseSimpleLogin:login', function (e) {
+            console.log("firebase simple login")
+
+            // Login was successful so log the user in given their ID
+            $scope.handleUserLogin($scope.auth.user);
+
+            // Hide the waiting overlay
             $scope.setOverlayHidden(true);
         });
+
+        // When the user logs out
+        $scope.$on('$firebaseSimpleLogin:logout', (function (e) {
+            console.log("firebase simple logout")
+            $scope.logout();
+        }).bind(this));
+
+        // When there's a login error
+        $scope.$on('$firebaseSimpleLogin:error', (function (e) {
+            console.log("firebase simple error")
+            $scope.logout();
+        }).bind(this));
+
+
+        // Setup an AngularFire auth reference
+        $rootScope.auth = $firebaseSimpleLogin(Paths.firebase());
+    }
+
+    /**
+     *
+     */
+    $scope.logout = function () {
+
+        // Try to unbind the user - we should have setup
+        // this function when the user was created
+        try {
+            $scope.unbindUser();
+        }
+        catch (err) {
+        }
+
+        // Now we need to
+        WebService.goOffline();
+
+        // Clear the cache down
+        Cache.clear();
+
+        // Allow the user to log back in
+        $scope.showLoginBox();
+
+        $scope.setOverlayHidden(true);
+    }
+
+    $scope.loginWithPassword = function () {
+        $scope.login('password',{
+            email:$scope.email,
+            password:$scope.password}
+        );
     }
 
     /**
@@ -390,6 +446,8 @@ myApp.controller('LoginController', ['$scope','WebService', function($scope, Web
 
         // Reset any error messages
         $scope.showError = false;
+
+        // Hide the overlay
         $scope.setOverlayHidden(false);
 
         $scope.auth.$login(method, options).then(function(user) {
@@ -462,7 +520,7 @@ myApp.controller('LoginController', ['$scope','WebService', function($scope, Web
                     this.logout();
                 }
                 else {
-                    WebService.bindUser(user.id, function () {
+                    WebService.bindUser(user.uid, function () {
 
                         // We have the user's ID so we can get the user's object
                         $scope.showProfileSettingsBox();

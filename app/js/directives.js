@@ -151,6 +151,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
             // If the user clicked in the text box
             // then don't drag
+
             if($rootScope.disableDrag) {
                 return true;
             }
@@ -172,12 +173,13 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
             emptySlot = scope.slotForRoom(scope.room);
             startingSlotOffset = Layout.offsetForSlot(emptySlot);
 
-            //return false;
+            // #55 Stop background from being highlighted on drag
+            return false;
         }).bind(this));
 
         $document.mousemove((function (e) {
 
-            if(scope.dragging) {
+            if(scope.dragging && !$rootScope.disableDrag) {
 
                 stopDefault(e);
 
@@ -419,6 +421,27 @@ myApp.directive('consumeEvent', function ($document, $rootScope) {
             return false;
         }).bind(this));
 
+    }
+});
+
+/**
+ * #54
+ * This directive is used for scrollbars when the component can
+ * also be dragged horizontally. If the user has shaky hands then
+ * the chat will shake while they're scrolling. To prevent this
+ * we add a listener to hear when they're scrolling.
+ */
+myApp.directive('stopShake', function ($rootScope, $document, $timeout) {
+    return function (scope, elm, attrs) {
+
+        elm.scroll(function () {
+            $rootScope.disableDrag = true;
+        });
+
+        // Allow dragging again on mouse up
+        $document.mouseup((function(e) {
+            $rootScope.disableDrag = false;
+        }).bind(this));
     }
 });
 

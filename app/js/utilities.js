@@ -48,7 +48,7 @@ var Paths = {
     },
 
     firebase: function () {
-        return new Firebase("https://messg.firebaseio.com/" + this.cid);
+        return new Firebase("https://chatcatio.firebaseio.com/" + this.cid);
     },
 
     usersRef: function () {
@@ -144,6 +144,18 @@ var Utilities = {
             }
             return result;
         }
+    },
+
+    saveImageFromURL: function (context, url, callback) {
+        context.post('server/pull.php', {'url': url}).success(function(data, status) {
+            if(callback) {
+                callback(data.fileName);
+            }
+        }).error(function(data, status) {
+            if(callback) {
+                callback(null);
+            }
+        });
     }
 
 };

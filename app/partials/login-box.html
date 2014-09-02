@@ -6,10 +6,11 @@
 
             <form id="cc-login-form" class="uk-panel uk-panel-box uk-form">
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" required />
+                    <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" enter-submit="loginWithPassword()" required />
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="password" placeholder="Password" ng-model="password" enter-submit="login('password',{email:email, password:password});" required />
+                    <input class="uk-width-1-1" type="password" placeholder="Password" ng-model="password" enter-submit="loginWithPassword()" required />
+                    {{ passwordFocus }}
                 </div>
                 <div ng-show="showError" class="uk-form-row uk-alert uk-alert-danger">
                     {{ errorMessage }}
@@ -18,7 +19,7 @@
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
                         <div class="uk-width-1-2">
-                            <a class="uk-button uk-button-primary uk-width-1-1" ng-click="login('password',{email:email, password:password});">Login</a>
+                            <a class="uk-button uk-button-primary uk-width-1-1" ng-click="loginWithPassword()">Login</a>
                         </div>
                         <div class="uk-width-1-2">
                             <a class="uk-button uk-button-success uk-width-1-1"  ng-click="signUp(email, password)">Sign up</a>
@@ -30,13 +31,13 @@
                     <a class="uk-float-right uk-link uk-link-muted" ng-click="auth.$sendPasswordResetEmail(email)">Forgot Password?</a>
                 </div>
                 <div class="uk-form-row">
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="auth.$login('facebook')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter" ng-click="auth.$login('twitter')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-github" ng-click="auth.$login('github')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus" ng-click="auth.$login('google')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="login('facebook')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter" ng-click="login('twitter')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-github" ng-click="login('github')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus" ng-click="login('google')"></a>
                 </div>
                 <div class="uk-form-row">
-                    <a class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="auth.$login('anonymous')">Anonymous Login</a>
+                    <a class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</a>
                 </div>
             </form>
 

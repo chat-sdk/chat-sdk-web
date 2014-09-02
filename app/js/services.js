@@ -4,8 +4,14 @@
 
 // Demonstrate how to register services
 // In this case it is a simple value service.
-var myApp = angular.module('myApp.services', ['firebase']).
+var myApp = angular.module('myApp.services', ['firebase', 'facebook']).
   value('version', '0.1');
+
+myApp.config(function(FacebookProvider) {
+    // Set your appId through the setAppId method or
+    // use the shortcut in the initialize method directly.
+    FacebookProvider.init('735373466519297');
+});
 
 myApp.factory('Config', function () {
     return {
@@ -927,7 +933,7 @@ myApp.factory('Message', function (Cache, User) {
     return message;
 });
 
-myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, Cache, User, Room, Message, Layout) {
+myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, Cache, User, Room, Message, Layout, Facebook) {
 
     var WebService = {
 
@@ -984,51 +990,6 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
             }).bind(this));
         },
 
-        /**
-         * USER LOGIN
-         */
-
-        /**
-         * Create a new AngularFire simple login object
-         * this object will try to authenticate the user if
-         * a session exists
-         * @param callback - notify if the authentication was successful
-         */
-        authenticateUser: function (callback) {
-
-            // Setup an Angular Fire auth reference
-            this._model.auth = $firebaseSimpleLogin(Paths.firebase());
-
-            // If a session already exists, Firebase will login
-            // automatically
-            this._model.$on('$firebaseSimpleLogin:login', function (e) {
-                console.log("firebase simple login")
-                callback(true);
-            });
-
-            this._model.$on('$firebaseSimpleLogin:logout', (function (e) {
-                console.log("firebase simple logout")
-                callback(false);
-
-                try {
-                    this._model.unbindUser();
-                }
-                catch (err) {
-                }
-
-                // Now we need to
-                this.goOffline();
-
-                Cache.clear();
-
-            }).bind(this));
-
-            this._model.$on('$firebaseSimpleLogin:error', (function (e) {
-                console.log("firebase simple error")
-                callback(false);
-            }).bind(this));
-        },
-
         goOffline: function () {
             Firebase.goOffline();
         },
@@ -1057,26 +1018,85 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                 this.bindUserWithFID(fid, (function () {
                     callback();
 
-                    // Get the user's location from their IP
-                    $.get("http://ipinfo.io", (function(response) {
+                    // Here's the place to update the user's details
+                    var user = this._model.user;
+                    var auth = this._model.auth;
 
-                        // The first time the user logs on
-                        // try to guess which city and country they're from
-                        if(!this._model.user.meta.city) {
-                            this._model.user.meta.city = response.city;
+                    if(!user.meta.name || user.meta.name.length == 0) {
+                        user.meta.name = auth.user.displayName;
+                    }
+                    if(!user.meta.name || user.meta.name.length == 0) {
+                        user.meta.name = auth.user.username;
+                    }
+
+                    var imageURL = null;
+                    var thirdPartyData = auth.user.thirdPartyUserData;
+
+                    /** SOCIAL INFORMATION **/
+                    if(auth.user.provider == "facebook") {
+                        // Make an API request to Facebook to get an appropriately sized
+                        // photo
+                        if(!user.meta.imageURL && imageURL) {
+                            Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
+                                Utilities.saveImageFromURL($http, response.data.url, function(fileName) {
+                                    user.meta.imageURL = fileName;
+                                });
+                            });
                         }
-                        if(!this._model.user.meta.country) {
-                            this._model.user.meta.country = response.country;
+                    }
+                    if(auth.user.provider == "twitter") {
+
+                        // We need to transform the twiter url to replace 'normal' with 'bigger'
+                        // to get the 75px image instad of the 50px
+                        imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
+
+                        if(!user.meta.description) {
+                            user.meta.description = thirdPartyData.description;
                         }
+                    }
+                    if(auth.user.provider == "github") {
+                        imageURL = thirdPartyData.avatar_url;
+                    }
+                    if(auth.user.provider == "google") {
+                        imageURL = thirdPartyData.picture;
+                    }
+                    if(auth.user.provider == "anonymous") {
 
-                        console.log(response.city, response.country);
+                    }
 
-                        // Digest to update the interface
-                        $timeout(function() {
-                            $rootScope.$digest();
+                    // If they don't have a profile picture load it from the social network
+                    if(!user.meta.imageURL && imageURL) {
+                        Utilities.saveImageFromURL($http, imageURL, function(fileName) {
+                            user.meta.imageURL = fileName;
                         });
+                    }
 
-                    }).bind(this), "jsonp");
+                    /** LOCATION **/
+                    // Get the user's city and country from their IP
+                    if(!user.meta.country || !user.meta.city) {
+                        $.get("http://ipinfo.io", (function(response) {
+
+                            // The first time the user logs on
+                            // try to guess which city and country they're from
+                            if(!user.meta.city) {
+                                user.meta.city = response.city;
+                            }
+                            if(!user.meta.country) {
+                                user.meta.country = response.country;
+                            }
+
+                            console.log(response.city, response.country);
+
+                            // Digest to update the interface
+                            $timeout(function() {
+                                $rootScope.$digest();
+                            });
+
+                        }).bind(this), "jsonp");
+                    }
+
+                    /** GRAVATAR **/
+
 
                     // Track which users are online
                     this.addOnlineUsersListener();
@@ -1252,8 +1272,10 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
             // TODO: if we do this we'll also be listening for meta updates...
             this._model.user = User.buildUserWithID(fid);
 
+            $userMetaRef.$asObject().$bindTo(this._model, "user.meta").then((function (unbind) {
+
             // Bind the user to the user variable
-            $userMetaRef.$bind(this._model, "user.meta").then((function (unbind) {
+            //$userMetaRef.$bind(this._model, "user.meta").then((function (unbind) {
 
                 // If the user hasn't got a name yet don't throw an error
                 if (!this._model.user.meta.name) {

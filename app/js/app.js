@@ -15,13 +15,3 @@ myApp.config(['$routeProvider', function($routeProvider) {
   //$routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2'});
   //$routeProvider.otherwise({redirectTo: '/view1'});
 }]);
-
-//myApp.run(function () {
-//    App.init({
-//        apiKey: '3cbfd37002',
-//        fbURL: 'messg',
-//        title: 'Ben'
-//    });
-//});
-
-

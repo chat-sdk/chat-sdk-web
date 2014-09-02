@@ -1,5 +1,5 @@
 <!--The 30 in the height is to take account for the bottom bar-->
-<div class="cc-chat-box-outer" ng-show="room.active" ng-style="{'right': room.offset, 'height': (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location>
+<div class="cc-chat-box-outer" ng-show="room.active" ng-style="{'right': room.offset, 'height': (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location >
 
     <div class="cf-chat-box cc-shadow" ng-style="{'height': room.height, 'width': room.width}" ng-hide="room.minimized"  >
         <div class="cc-box-header">{{ room.getName() }}
@@ -26,7 +26,7 @@
         <div ng-show="activeTab == 'users'" ng-include="'partials/user-list.html'"></div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - 27}">
+        <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - 27}" stop-shake>
             <div  ng-repeat="message in room.getMessages()">
 
                 <div ng-show="messageIsMine(message)">
