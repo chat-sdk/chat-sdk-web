@@ -91,7 +91,8 @@
 <br>
 <br>
 
-<div ng-app="myApp" ng-controller="AppController" >
+<!-- #45 Added ng-cloak  -->
+<div ng-app="myApp" ng-controller="AppController" ng-cloak >
 
     <!--<div style="position: absolute; top: 0; left: 0">-->
         <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.dragging" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
