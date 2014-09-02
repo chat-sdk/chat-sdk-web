@@ -100,7 +100,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
         insertRoom: function(room, index) {
 
-            if(room && room.meta.fid) {
+            if(room && room.meta.rid) {
 
                 console.log("Add room" + room.meta.name);
 
@@ -158,14 +158,14 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
         },
 
         removeRoom: function (room) {
-            if(room && room.meta.fid) {
-                this.removeRoomWithID(room.meta.fid);
+            if(room && room.meta.rid) {
+                this.removeRoomWithID(room.meta.rid);
             }
         },
 
-        removeRoomWithID: function (fid) {
+        removeRoomWithID: function (rid) {
             for(var i in this.rooms) {
-                if(this.rooms[i].meta.fid == fid) {
+                if(this.rooms[i].meta.rid == rid) {
                     this.rooms.splice(i, 1);
                     break;
                 }
@@ -327,99 +327,99 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
 
         // A cache of all users
         addUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.users[user.meta.fid] = user;
+            if(user && user.meta && user.meta.uid) {
+                this.users[user.meta.uid] = user;
             }
         },
 
         removeUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.removeUserWithID(user.meta.fid);
+            if(user && user.meta && user.meta.uid) {
+                this.removeUserWithID(user.meta.uid);
             }
         },
 
-        removeUserWithID: function (fid) {
-            if(fid) {
-                delete this.users[fid];
+        removeUserWithID: function (uid) {
+            if(uid) {
+                delete this.users[uid];
                 this.digest();
             }
         },
 
         addFriend: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.friends[user.meta.fid] = user;
+            if(user && user.meta && user.meta.uid) {
+                this.friends[user.meta.uid] = user;
             }
         },
 
         removeFriend: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.removeFriendWithID(user.meta.fid);
+            if(user && user.meta && user.meta.uid) {
+                this.removeFriendWithID(user.meta.uid);
             }
         },
 
-        removeFriendWithID: function (fid) {
-            if(fid) {
-                delete this.friends[fid];
+        removeFriendWithID: function (uid) {
+            if(uid) {
+                delete this.friends[uid];
                 this.digest();
             }
         },
 
         addBlockedUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.blockedUsers[user.meta.fid] = user;
+            if(user && user.meta && user.meta.uid) {
+                this.blockedUsers[user.meta.uid] = user;
             }
         },
 
         removeBlockedUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.removeBlockedUserWithID(user.meta.fid);
+            if(user && user.meta && user.meta.uid) {
+                this.removeBlockedUserWithID(user.meta.uid);
             }
         },
 
-        removeBlockedUserWithID: function (fid) {
-            if(fid) {
-                delete this.blockedUsers[fid];
+        removeBlockedUserWithID: function (uid) {
+            if(uid) {
+                delete this.blockedUsers[uid];
                 this.digest();
             }
         },
 
         addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.onlineUsers[user.meta.fid] = user;
+            if(user && user.meta && user.meta.uid) {
+                this.onlineUsers[user.meta.uid] = user;
                 this.digest();
             }
         },
 
-        getUserWithID: function (fid) {
-           var user = this.users[fid];
+        getUserWithID: function (uid) {
+           var user = this.users[uid];
            if(!user) {
-               user = this.onlineUsers[fid];
+               user = this.onlineUsers[uid];
            }
             if(!user) {
-                user = this.friends[fid];
+                user = this.friends[uid];
             }
             if(!user) {
-                user = this.blockedUsers[fid];
+                user = this.blockedUsers[uid];
             }
            return user;
         },
 
         removeOnlineUser: function (user) {
-            if(user && user.meta && user.meta.fid) {
-                this.removeOnlineUserWithID(user.meta.fid);
+            if(user && user.meta && user.meta.uid) {
+                this.removeOnlineUserWithID(user.meta.uid);
             }
         },
 
-        removeOnlineUserWithID: function (fid) {
-            if(fid) {
-                delete this.onlineUsers[fid];
+        removeOnlineUserWithID: function (uid) {
+            if(uid) {
+                delete this.onlineUsers[uid];
                 this.digest();
             }
         },
 
         addPublicRoom: function (room) {
-            if(room && room.meta.fid) {
-                this.publicRooms[room.meta.fid] = room;
+            if(room && room.meta.rid) {
+                this.publicRooms[room.meta.rid] = room;
 
                 // TODO: do we need this?
                 //this.sortRooms();
@@ -428,15 +428,15 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
         },
 
         removePublicRoom: function (room) {
-            if(room && room.meta.fid) {
-                this.removePublicRoomWithID(room.meta.fid);
+            if(room && room.meta.rid) {
+                this.removePublicRoomWithID(room.meta.rid);
                 this.digest();
             }
         },
 
-        removePublicRoomWithID: function (fid) {
-            if(fid) {
-                delete this.publicRooms[fid];
+        removePublicRoomWithID: function (rid) {
+            if(rid) {
+                delete this.publicRooms[rid];
                 this.digest();
             }
         },
@@ -473,12 +473,12 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
 myApp.factory('User', function ($rootScope, $timeout) {
     return {
 
-        buildUserWithID: function (fid) {
-            var user = this.newUserWithID(fid);
+        buildUserWithID: function (uid) {
+            var user = this.newUserWithID(uid);
 
             // Start listening to the Firebase location
             user.on = (function () {
-                var ref = Paths.userMetaRef(fid);
+                var ref = Paths.userMetaRef(uid);
 
                 // Add a method to listen for updates to this user
                 ref.on('value',(function(snapshot) {
@@ -495,24 +495,24 @@ myApp.factory('User', function ($rootScope, $timeout) {
 
             // Stop listening to the Firebase location
             user.off = (function () {
-                var ref = Paths.userMetaRef(fid);
+                var ref = Paths.userMetaRef(uid);
                 ref.off();
             }).bind(this);
 
             user.addRoom = function (room) {
-                var ref = Paths.userRoomsRef(user.meta.fid).child(room.meta.fid);
-                ref.set({fid: room.meta.fid});
+                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
+                ref.set({uid: room.meta.rid});
             }
 
             user.removeRoom = function (room) {
-                var ref = Paths.userRoomsRef(user.meta.fid).child(room.meta.fid);
+                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
                 ref.remove();
             }
 
             user.addFriend = function (friend) {
-                var ref = Paths.userFriendsRef(user.meta.fid);
+                var ref = Paths.userFriendsRef(user.meta.uid);
                 ref = ref.push();
-                ref.set({fid: friend.meta.fid});
+                ref.set({uid: friend.meta.uid});
             }
 
             user.removeFriend = function (friend) {
@@ -521,9 +521,9 @@ myApp.factory('User', function ($rootScope, $timeout) {
             }
 
             user.blockUser = function (block) {
-                var ref = Paths.userBlockedRef(user.meta.fid);
+                var ref = Paths.userBlockedRef(user.meta.uid);
                 ref = ref.push();
-                ref.set({fid: block.meta.fid});
+                ref.set({uid: block.meta.uid});
             }
 
             user.unblockUser = function (block) {
@@ -532,7 +532,7 @@ myApp.factory('User', function ($rootScope, $timeout) {
             }
 
             user.updateRoomSlot = function (room, slot) {
-                var ref = Paths.userRoomsRef(user.meta.fid).child(room.meta.fid);
+                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
                 ref.update({slot: slot});
             }
 
@@ -547,7 +547,7 @@ myApp.factory('User', function ($rootScope, $timeout) {
         newUser: function () {
             var user = {
                 meta: {
-                    fid: null
+                    uid: null
                     //aid: null,
                     //imageURL: null,
                     //gender: null,
@@ -559,15 +559,15 @@ myApp.factory('User', function ($rootScope, $timeout) {
             return user;
         },
 
-        newUserWithID: function (fid) {
+        newUserWithID: function (uid) {
             var user = this.newUser();
-            user.meta.fid = fid;
+            user.meta.uid = uid;
 
             user.goOnline = function () {
-                var ref = Paths.onlineUserRef(fid);
+                var ref = Paths.onlineUserRef(uid);
 
                 ref.setWithPriority({
-                        fid: fid
+                        uid: uid
                     }, user.meta.name
                 );
                 ref.onDisconnect().remove();
@@ -591,15 +591,15 @@ myApp.factory('User', function ($rootScope, $timeout) {
 myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, User, Layout) {
     return {
 
-        buildRoomWithID: function (fid) {
+        buildRoomWithID: function (rid) {
 
             var room = this.newRoom();
-            room.meta.fid = fid;
+            room.meta.rid = rid;
 
             room.on = function () {
 
                 // Get the room meta data
-                var ref = Paths.roomMetaRef(fid);
+                var ref = Paths.roomMetaRef(rid);
 
                 ref.on('value', (function(snapshot) {
                     room.meta = snapshot.val();
@@ -612,7 +612,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 }).bind(this));
 
                 // Also get the messages from the room
-                ref = Paths.roomMessagesRef(fid);
+                ref = Paths.roomMessagesRef(rid);
 
                 ref.endAt().limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
 
@@ -645,19 +645,19 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 });
 
                 // Listen to users being added to the thread
-                ref = Paths.roomUsersRef(fid);
+                ref = Paths.roomUsersRef(rid);
                 ref.on('child_added', function (snapshot) {
                     // Get the user
                     if(snapshot.val()) {
 
-                        var userID = snapshot.val().fid;
+                        var uid = snapshot.val().uid;
 
-                        var user = Cache.getUserWithID(userID);
+                        var user = Cache.getUserWithID(uid);
                         if(!user) {
-                            user = User.buildUserWithID(userID);
+                            user = User.buildUserWithID(uid);
                             Cache.addUser(user);
                         }
-                        room.users[user.meta.fid] = user;
+                        room.users[user.meta.uid] = user;
 
                         // TODO: Should digest here
                         $timeout(function(){
@@ -668,9 +668,9 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 ref.on('child_removed', function (snapshot) {
                     if(snapshot.val()) {
-                        var userID = snapshot.val().fid;
+                        var uid = snapshot.val().uid;
 
-                        delete room.users[userID];
+                        delete room.users[uid];
                         // TODO: Should digest here
                         $timeout(function(){
                             $rootScope.$digest();
@@ -680,7 +680,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 });
 
                 // Handle typing
-                ref = Paths.roomTypingRef(fid);
+                ref = Paths.roomTypingRef(rid);
 
                 ref.on('child_added', function (snapshot) {
                     room.typing[snapshot.name()] = snapshot.val().name;
@@ -704,7 +704,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
             room.startTyping = function (user) {
                 // The user is typing...
-                var ref = Paths.roomTypingRef(room.meta.fid).child(user.meta.fid);
+                var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
                 ref.set({name: user.meta.name});
 
                 // If the user disconnects, tidy up by removing the typing
@@ -713,16 +713,16 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.finishTyping = function (user) {
-                var ref = Paths.roomTypingRef(room.meta.fid).child(user.meta.fid);
+                var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
                 ref.remove();
             }
 
             room.off = function () {
                 // Get the room meta data
-                Paths.roomMetaRef(fid).off();
-                Paths.roomMessagesRef(fid).off();
-                Paths.roomUsersRef(fid).off();
-                Paths.roomTypingRef(fid).off();
+                Paths.roomMetaRef(rid).off();
+                Paths.roomMessagesRef(rid).off();
+                Paths.roomUsersRef(rid).off();
+                Paths.roomTypingRef(rid).off();
             }
 
             room.on();
@@ -732,7 +732,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
         newRoom: function () {
             var room = {
-                fid: null,
                 meta: {
                     name: null,
                     public: null,
@@ -753,9 +752,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             room.userCount = function () {
                 var i = 0;
                 for(var key in room.users) {
-                    //if(Cache.onlineUsers[room.users[key].meta.fid]) {
-                        i++;
-                    //}
+                    i++;
                 }
                 return i;
             }
@@ -764,7 +761,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 // If the user is already a member of the
                 // room
-                if(room.users[user.meta.fid]) {
+                if(room.users[user.meta.uid]) {
                     return;
                 }
                 else {
@@ -774,15 +771,15 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.setStatusForUser = function(user, status) {
-                var ref = Paths.roomUsersRef(room.meta.fid);
-                ref.child(user.meta.fid).set({
+                var ref = Paths.roomUsersRef(room.meta.rid);
+                ref.child(user.meta.uid).set({
                     status: status,
-                    fid: user.meta.fid
+                    uid: user.meta.uid
                 });
             }
 
             room.removeUser = function (user) {
-                var ref = Paths.roomUsersRef(room.meta.fid).child(user.meta.fid);
+                var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
                 ref.remove(function(e) {
                     console.log(e);
                 });
@@ -791,7 +788,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             room.sendMessage = function (message) {
 
                 // Get a ref to the room
-                var ref = Paths.roomMessagesRef(room.meta.fid);
+                var ref = Paths.roomMessagesRef(room.meta.rid);
 
                 ref.push(message, function () {
                     // Get the message now to find it's time stamp
@@ -808,9 +805,9 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
                 }
                 if(data) {
-                    var user = Cache.getUserWithID(data.fid);
+                    var user = Cache.getUserWithID(data.uid);
                     if(!user) {
-                        user = User.buildUserWithID(data.fid);
+                        user = User.buildUserWithID(data.uid);
                         Cache.addUser(user);
                     }
                     return user;
@@ -837,7 +834,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                         // We only want to use the name of a user
                         // who isn't the current user
-                        if(Cache.onlineUsers[user.meta.fid]) {
+                        if(Cache.onlineUsers[user.meta.uid]) {
                             if(user.meta.name) {
                                 return user.meta.name;
                             }
@@ -856,7 +853,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.getUserStatus = function (user) {
-                var data = room.meta.users[user.meta.fid];
+                var data = room.meta.users[user.meta.uid];
                 if(data) {
                     return data.status;
                 }
@@ -886,30 +883,30 @@ myApp.factory('Message', function (Cache, User) {
         buildMessageFromSnapshot: function (snapshot) {
             var val = snapshot.val();
             if(val) {
-                return this.buildMessage(val.user_fid, val.text, val.time);
+                return this.buildMessage(val.uid, val.text, val.time);
             }
             else {
                 return null;
             }
         },
 
-        buildMessage: function (fid, text, timestamp) {
+        buildMessage: function (uid, text, timestamp) {
 
             var message = this.newMessage();
 
-            message.user_fid = fid;
+            message.uid = uid;
             message.text = text;
             message.time = timestamp ? timestamp : Firebase.ServerValue.TIMESTAMP;
 
             message.user = (function () {
 
-                if(message.user_fid) {
+                if(message.uid) {
 
                     // We need to set the user here
-                    var user = Cache.getUserWithID(message.user_fid);
+                    var user = Cache.getUserWithID(message.uid);
 
                     if(!user) {
-                        user = User.buildUserWithID(message.user_fid);
+                        user = User.buildUserWithID(message.uid);
                         Cache.addUser(user);
                     }
                     return user;
@@ -924,7 +921,7 @@ myApp.factory('Message', function (Cache, User) {
 
         newMessage: function () {
             return {
-                user_fid: null,
+                uid: null,
                 text: null,
                 time: null
             }
@@ -961,20 +958,20 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
             // A user has come online
             ref.on("child_added", (function (snapshot) {
 
-                // Get the FID of the added user
-                var fid = null;
+                // Get the UID of the added user
+                var uid = null;
                 if (snapshot && snapshot.val()) {
-                    fid = snapshot.val().fid;
+                    uid = snapshot.val().uid;
                 }
 
                 // We don't want to process the current user
-                if (fid && fid != this._model.user.meta.fid) {
+                if (uid && uid != this._model.user.meta.uid) {
 
-                    console.log("Added: " + fid);
+                    console.log("Added: " + uid);
 
-                    var user = Cache.getUserWithID(fid);
+                    var user = Cache.getUserWithID(uid);
                     if (!user) {
-                        user = User.buildUserWithID(fid);
+                        user = User.buildUserWithID(uid);
                     }
                     Cache.addOnlineUser(user);
                 }
@@ -982,7 +979,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
 
             ref.on("child_removed", (function (snapshot) {
 
-                var user = Cache.getUserWithID(snapshot.val().fid);
+                var user = Cache.getUserWithID(snapshot.val().uid);
                 if (user) {
                     Cache.removeOnlineUser(user)
                 }
@@ -1007,104 +1004,102 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
          * a session exists
          * @param callback - notify if the authentication was successful
          */
-        bindUser: function (aid, callback) {
+        bindUser: function (uid, callback) {
 
-            // Get the user using our authentication ID
-            this.getUserFID(aid, (function (fid) {
+            // Set the user's ID
+            Paths.userMetaRef(uid).set({uid: uid});
 
-                // TODO: Handle errors here
+            // Bind the user's meta data
+            this.bindUserWithUID(uid, (function () {
 
-                // Bind the user's meta data
-                this.bindUserWithFID(fid, (function () {
-                    callback();
+                callback();
 
-                    // Here's the place to update the user's details
-                    var user = this._model.user;
-                    var auth = this._model.auth;
+                // Here's the place to update the user's details
+                var user = this._model.user;
+                var auth = this._model.auth;
 
-                    if(!user.meta.name || user.meta.name.length == 0) {
-                        user.meta.name = auth.user.displayName;
-                    }
-                    if(!user.meta.name || user.meta.name.length == 0) {
-                        user.meta.name = auth.user.username;
-                    }
+                if(!user.meta.name || user.meta.name.length == 0) {
+                    user.meta.name = auth.user.displayName;
+                }
+                if(!user.meta.name || user.meta.name.length == 0) {
+                    user.meta.name = auth.user.username;
+                }
 
-                    var imageURL = null;
-                    var thirdPartyData = auth.user.thirdPartyUserData;
+                var imageURL = null;
+                var thirdPartyData = auth.user.thirdPartyUserData;
 
-                    /** SOCIAL INFORMATION **/
-                    if(auth.user.provider == "facebook") {
-                        // Make an API request to Facebook to get an appropriately sized
-                        // photo
-                        if(!user.meta.imageURL && imageURL) {
-                            Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
-                                Utilities.saveImageFromURL($http, response.data.url, function(fileName) {
-                                    user.meta.imageURL = fileName;
-                                });
-                            });
-                        }
-                    }
-                    if(auth.user.provider == "twitter") {
-
-                        // We need to transform the twiter url to replace 'normal' with 'bigger'
-                        // to get the 75px image instad of the 50px
-                        imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
-
-                        if(!user.meta.description) {
-                            user.meta.description = thirdPartyData.description;
-                        }
-                    }
-                    if(auth.user.provider == "github") {
-                        imageURL = thirdPartyData.avatar_url;
-                    }
-                    if(auth.user.provider == "google") {
-                        imageURL = thirdPartyData.picture;
-                    }
-                    if(auth.user.provider == "anonymous") {
-
-                    }
-
-                    // If they don't have a profile picture load it from the social network
+                /** SOCIAL INFORMATION **/
+                if(auth.user.provider == "facebook") {
+                    // Make an API request to Facebook to get an appropriately sized
+                    // photo
                     if(!user.meta.imageURL && imageURL) {
-                        Utilities.saveImageFromURL($http, imageURL, function(fileName) {
-                            user.meta.imageURL = fileName;
+                        Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
+                            Utilities.saveImageFromURL($http, response.data.url, function(fileName) {
+                                user.meta.imageURL = fileName;
+                            });
                         });
                     }
+                }
+                if(auth.user.provider == "twitter") {
 
-                    /** LOCATION **/
-                    // Get the user's city and country from their IP
-                    if(!user.meta.country || !user.meta.city) {
-                        $.get("http://ipinfo.io", (function(response) {
+                    // We need to transform the twiter url to replace 'normal' with 'bigger'
+                    // to get the 75px image instad of the 50px
+                    imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
 
-                            // The first time the user logs on
-                            // try to guess which city and country they're from
-                            if(!user.meta.city) {
-                                user.meta.city = response.city;
-                            }
-                            if(!user.meta.country) {
-                                user.meta.country = response.country;
-                            }
-
-                            console.log(response.city, response.country);
-
-                            // Digest to update the interface
-                            $timeout(function() {
-                                $rootScope.$digest();
-                            });
-
-                        }).bind(this), "jsonp");
+                    if(!user.meta.description) {
+                        user.meta.description = thirdPartyData.description;
                     }
+                }
+                if(auth.user.provider == "github") {
+                    imageURL = thirdPartyData.avatar_url;
+                }
+                if(auth.user.provider == "google") {
+                    imageURL = thirdPartyData.picture;
+                }
+                if(auth.user.provider == "anonymous") {
 
-                    /** GRAVATAR **/
+                }
+
+                // If they don't have a profile picture load it from the social network
+                if(!user.meta.imageURL && imageURL) {
+                    Utilities.saveImageFromURL($http, imageURL, function(fileName) {
+                        user.meta.imageURL = fileName;
+                    });
+                }
+
+                /** LOCATION **/
+                // Get the user's city and country from their IP
+                if(!user.meta.country || !user.meta.city) {
+                    $.get("http://ipinfo.io", (function(response) {
+
+                        // The first time the user logs on
+                        // try to guess which city and country they're from
+                        if(!user.meta.city) {
+                            user.meta.city = response.city;
+                        }
+                        if(!user.meta.country) {
+                            user.meta.country = response.country;
+                        }
+
+                        console.log(response.city, response.country);
+
+                        // Digest to update the interface
+                        $timeout(function() {
+                            $rootScope.$digest();
+                        });
+
+                    }).bind(this), "jsonp");
+                }
+
+                /** GRAVATAR **/
 
 
-                    // Track which users are online
-                    this.addOnlineUsersListener();
+                // Track which users are online
+                this.addOnlineUsersListener();
 
-                    // Add listeners to the user
-                    this.addListenersToUser(fid, (function () {
+                // Add listeners to the user
+                this.addListenersToUser(uid, (function () {
 
-                    }).bind(this));
                 }).bind(this));
             }).bind(this));
         },
@@ -1112,23 +1107,23 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
         /**
          * This adds a listener to the user's chat rooms
          * and then adds a message listener to each room
-         * @param fid - the user's Firebase ID
+         * @param uid - the user's Firebase ID
          * @param callback - notify when we finish
          */
-        addListenersToUser: function (fid, callback) {
+        addListenersToUser: function (uid, callback) {
 
             // Listen to the user's rooms
-            var roomsRef = Paths.userRoomsRef(fid);
+            var roomsRef = Paths.userRoomsRef(uid);
 
             // A new room was added so we should start listening to it
             roomsRef.on('child_added', (function (snapshot) {
 
                 // Get the room id
-                var fid = snapshot.name();
+                var rid = snapshot.name();
 
-                if (fid) {
+                if (rid) {
 
-                    var room = Room.buildRoomWithID(fid);
+                    var room = Room.buildRoomWithID(rid);
                     if (room) {
                         var slot = snapshot.val().slot;
 
@@ -1150,9 +1145,9 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
 
             publicRoomsRef.on('child_added', (function (snapshot) {
 
-                var fid = snapshot.name();
-                if(fid) {
-                    var room = Room.buildRoomWithID(fid);
+                var rid = snapshot.name();
+                if(rid) {
+                    var room = Room.buildRoomWithID(rid);
                     if(room) {
                         Cache.addPublicRoom(room);
                     }
@@ -1167,14 +1162,14 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
             }).bind(this));
 
             // Listen to friends
-            var friendsRef = Paths.userFriendsRef(fid);
+            var friendsRef = Paths.userFriendsRef(uid);
             friendsRef.on('child_added', (function (snapshot) {
 
-                var fid = snapshot.val().fid;
-                if(fid) {
-                    var user = Cache.getUserWithID(fid);
+                var uid = snapshot.val().uid;
+                if(uid) {
+                    var user = Cache.getUserWithID(uid);
                     if(!user) {
-                        user = User.buildUserWithID(fid);
+                        user = User.buildUserWithID(uid);
                     }
                     user.removeFriend = function () {
                         snapshot.ref().remove();
@@ -1186,19 +1181,19 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
 
             friendsRef.on('child_removed', (function (snapshot) {
 
-                Cache.removeFriendWithID(snapshot.val().fid);
+                Cache.removeFriendWithID(snapshot.val().uid);
 
             }).bind(this));
 
             // Listen to blocked
-            var blockedUsersRef = Paths.userBlockedRef(fid);
+            var blockedUsersRef = Paths.userBlockedRef(uid);
             blockedUsersRef.on('child_added', (function (snapshot) {
 
-                var fid = snapshot.val().fid;
-                if(fid) {
-                    var user = Cache.getUserWithID(fid);
+                var uid = snapshot.val().uid;
+                if(uid) {
+                    var user = Cache.getUserWithID(uid);
                     if(!user) {
-                        user = User.buildUserWithID(fid);
+                        user = User.buildUserWithID(uid);
                     }
                     user.unblock = function () {
                         snapshot.ref().remove();
@@ -1210,72 +1205,25 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
 
             blockedUsersRef.on('child_removed', (function (snapshot) {
 
-                Cache.removeBlockedUserWithID(snapshot.val().fid);
+                Cache.removeBlockedUserWithID(snapshot.val().uid);
 
             }).bind(this));
         },
 
-        /**
-         * Given an authentication ID search on Firebase to find
-         * the user's account. If it exists return the user's
-         * Firebase ID otherwise create a new user profile
-         * @param aid - user's authentication ID
-         */
-        getUserFID: function (aid, callback) {
-            console.log("USER ID " + aid);
-
-            // Get a link to the user
-            var ref = Paths.usersRef();
-
-            // Select the data for the current user
-            ref.startAt(aid).endAt(aid).once('value', function (snapshot) {
-
-                // If the user exists then we provide the user's id for the callback
-                if (snapshot.val() && snapshot.hasChildren()) {
-
-                    snapshot.forEach(function (childData) {
-
-                        console.log("Child: " + childData.val().meta.name + " Name: " + childData.name() + " priority " + childData.getPriority());
-
-                        // Return the user's value
-                        callback(childData.val().meta.fid);
-                    });
-                }
-                else {
-
-                    // Otherwise we create a new user
-                    var newRef = ref.push();
-                    var fid = newRef.name();
-
-                    // Now set a value at the location
-                    newRef.setWithPriority({meta: {aid: aid, fid: fid}}, aid, function () {
-                        console.log('Created new user: ' + fid + " ref: " + newRef.toString());
-                        callback(fid);
-                    });
-                }
-
-            }, function () {
-                // TODO: Handle this
-            }, this);
-        },
-
-        bindUserWithFID: function (fid, callback) {
+        bindUserWithUID: function (uid, callback) {
 
             // Get a ref to the user
-            var userMetaRef = Paths.userMetaRef(fid);
+            var userMetaRef = Paths.userMetaRef(uid);
 
             // Create an angular binding ref
             var $userMetaRef = $firebase(userMetaRef);
 
             // Create the user
-            //this._model.user = User.newUserWithID(fid);
             // TODO: if we do this we'll also be listening for meta updates...
-            this._model.user = User.buildUserWithID(fid);
-
-            $userMetaRef.$asObject().$bindTo(this._model, "user.meta").then((function (unbind) {
+            this._model.user = User.buildUserWithID(uid);
 
             // Bind the user to the user variable
-            //$userMetaRef.$bind(this._model, "user.meta").then((function (unbind) {
+            $userMetaRef.$asObject().$bindTo(this._model, "user.meta").then((function (unbind) {
 
                 // If the user hasn't got a name yet don't throw an error
                 if (!this._model.user.meta.name) {
@@ -1294,19 +1242,12 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                 }).bind(this);
 
                 // Mark the user as online
-                console.log("Did bind user to scope " + fid);
+                console.log("Did bind user to scope " + uid);
 
                 if (callback) {
                     callback();
                 }
             }).bind(this));
-
-            // TODO: Check this!
-            // I think this is handled elsewhere
-//            this._model.$on('$firebaseSimpleLogin:logout', (function () {
-//                console.log("Angular Fire logout");
-//                this._model.unbindUser();
-//            }).bind(this));
         },
 
         /**
@@ -1356,7 +1297,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                 // Once the room's created we need to
                 // add it to the list of public rooms
                 var ref = Paths.publicRoomsRef();
-                ref.child(room.meta.fid).set({fid: room.meta.fid});
+                ref.child(room.meta.rid).set({rid: room.meta.rid});
 
                 this.joinRoom(room, bUserStatusOwner);
 
@@ -1372,7 +1313,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
             var roomMetaRef = Paths.roomMetaRef(roomRef.name());
 
             // Add the room then set it's firebase ID
-            room.meta.fid = roomRef.name();
+            room.meta.rid = roomRef.name();
 
             // Add the room to Firebase
             roomMetaRef.set(room.meta, (function () {
@@ -1411,15 +1352,15 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
 
         sendMessage: function (room, text) {
 
-            var message = Message.buildMessage(this._model.user.meta.fid, text);
+            var message = Message.buildMessage(this._model.user.meta.uid, text);
             message.user = null;
 
             room.sendMessage(message);
 
         },
 
-        fidIsMine: function (fid) {
-            return fid == this._model.user.meta.fid;
+        uidIsMine: function (uid) {
+            return uid == this._model.user.meta.uid;
         },
 
         numberOfChatters: function (callback) {

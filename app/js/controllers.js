@@ -107,7 +107,7 @@ myApp.controller('AppController', [
      * time to go from the list to inside the
      * box before the box disappears
      */
-    $scope.showProfileBox = function (fid, duration) {
+    $scope.showProfileBox = function (uid, duration) {
 
         $scope.profileBoxStyle = {
             right: 250,
@@ -118,7 +118,7 @@ myApp.controller('AppController', [
             'border-bottom-right-radius': 0
         };
 
-        if(!fid) {
+        if(!uid) {
             if(duration == 0) {
                 $scope.currentUser = null;
             }
@@ -130,7 +130,7 @@ myApp.controller('AppController', [
         }
         else {
             $scope.cancelTimer();
-            $scope.currentUser = Cache.getUserWithID(fid);//Cache.onlineUsers[fid];
+            $scope.currentUser = Cache.getUserWithID(uid);
         }
     }
 
@@ -150,7 +150,7 @@ myApp.controller('AppController', [
 
     $scope.isFriend = function (user) {
         if(user) {
-            return Cache.friends[user.meta.fid] != null;
+            return Cache.friends[user.meta.uid] != null;
         }
         return false;
     }
@@ -166,7 +166,7 @@ myApp.controller('AppController', [
 
     $scope.isBlocked = function (user) {
         if(user) {
-            return Cache.blockedUsers[user.meta.fid] != null;
+            return Cache.blockedUsers[user.meta.uid] != null;
         }
         return false;
     }
@@ -202,7 +202,7 @@ myApp.controller('AppController', [
 
     $scope.isOnline = function (user) {
         if(user) {
-            return Cache.onlineUsers[user.meta.fid] != null;
+            return Cache.onlineUsers[user.meta.uid] != null;
         }
         return false;
     }
@@ -610,7 +610,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
     }
 
     $scope.messageIsMine = function (message) {
-        return WebService.fidIsMine(message.user_fid);
+        return WebService.uidIsMine(message.uid);
     }
 
     $scope.userForMessage = function (message) {
@@ -627,9 +627,9 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
 
     // Save the super class
     $scope.superShowProfileBox = $scope.showProfileBox;
-    $scope.showProfileBox = function (fid) {
+    $scope.showProfileBox = function (uid) {
 
-        $scope.superShowProfileBox(fid);
+        $scope.superShowProfileBox(uid);
 
         // Work out the x position
         var x = $scope.room.offset + $scope.room.width;
@@ -722,8 +722,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
         var users = {};
         for(var key in $scope.room.users) {
             var user = $scope.room.users[key];
-            if(user.meta.fid != $scope.user.meta.fid) {
-                users[user.meta.fid] = user;
+            if(user.meta.uid != $scope.user.meta.uid) {
+                users[user.meta.uid] = user;
             }
         }
         return users;
@@ -748,7 +748,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
         var i = 0;
         var name = null;
         for(var key in $scope.room.typing) {
-            if(key == $scope.user.meta.fid) {
+            if(key == $scope.user.meta.uid) {
                 continue;
             }
             name = $scope.room.typing[key];
@@ -867,8 +867,8 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', function($scope, C
         // then alphabetically
         array.sort(function (a, b) {
             // Sort by who's online first then alphabetcially
-            var aOnline = Cache.onlineUsers[a.meta.fid];
-            var bOnline = Cache.onlineUsers[b.meta.fid];
+            var aOnline = Cache.onlineUsers[a.meta.uid];
+            var bOnline = Cache.onlineUsers[b.meta.uid];
 
             if(aOnline != bOnline) {
                 return aOnline ? -1 : 1;

@@ -1,6 +1,6 @@
 <table class="uk-table">
     <span class="cc-section-header">{{ sectionHeader }}</span>
-    <tr ng-repeat="(id, user) in getUsers()" ng-mouseover="showProfileBox(user.meta.fid)" ng-mouseleave="showProfileBox(null)">
+    <tr ng-repeat="(id, user) in getUsers()" ng-mouseover="showProfileBox(user.meta.uid)" ng-mouseleave="showProfileBox(null)">
         <td class="cc-row" ng-class="isOnline(user) ? 'cc-pointer' : null" draggable-user="user">
             <img class="cc-thumbnail-20 cc-right-margin-5 uk-float-left" ng-src="{{ user.thumbnailURL(20) }}"/>
             <span class="uk-float-left">{{ user.meta.name }}</span>
