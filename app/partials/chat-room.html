@@ -2,7 +2,7 @@
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{'right': room.offset, 'height': (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location >
 
     <div class="cf-chat-box cc-shadow" ng-style="{'height': room.height, 'width': room.width}" ng-hide="room.minimized"  >
-        <div class="cc-box-header">{{ room.getName() }}
+        <div class="cc-box-header cc-pointer">{{ room.getName() }}
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
                 <img src="img/cc-30-minimize.png" />
             </a>

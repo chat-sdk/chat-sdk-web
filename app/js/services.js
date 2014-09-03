@@ -1032,7 +1032,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                 if(auth.user.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
-                    if(!user.meta.imageURL && imageURL) {
+                    if(!user.meta.imageURL) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
                             Utilities.saveImageFromURL($http, response.data.url, function(fileName) {
                                 user.meta.imageURL = fileName;
