@@ -610,7 +610,7 @@ a {
     bottom:0;
     right: 0;
     background: black;
-    opacity: 0.8;
+    opacity: 0.1;
     z-index:100;
 
     border-top-left-radius: 5px;
@@ -632,8 +632,8 @@ a {
     right: 0;
     margin:auto;
     z-index:101;
-    max-width: 64px;
-    max-height: 64px;
+    max-width: 150px;
+    max-height: 150px;
     color: #BBBBBB;
     text-align: center;
 }
@@ -643,11 +643,59 @@ a {
     font-size: 0.8em;
 }
 
+.cc-notification {
+    position: absolute;
+    margin: auto;
+
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    width: 80%;
+    height: 100px;
+    background: white;
+
+    text-align: center;
+
+    z-index:101;
+
+    line-height: 0.9;
+}
+.cc-notification div {
+    margin: 7px;
+}
+
+.cc-notification div img {
+    margin: 8px;
+}
+
+.cc-notification div span.title {
+    font-weight: bold;
+    color: #666;
+}
+
+.cc-notification div span.message {
+    font-size: 0.8em;
+    color: #777;
+}
+
+.cc-notification div.button-outer {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    left: -5px;
+}
+
+
 body {
     background: url(../img/128-191.jpg) repeat; !important
 }
 
-
+a.disabled {
+    pointer-events: none,
+    cursor: default;
+}
 
 
 

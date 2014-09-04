@@ -1,0 +1,21 @@
+<div ng-controller="NotificationController" ng-show="notification.show" >
+    <div class="cf-overlay" ></div>
+    <div class="cc-notification cc-shadow">
+        <div>
+            <span class="title">{{ notification.title }}</span>
+            <br/>
+            <!-- Waiting indicator -->
+            <img ng-show="notification.type == 'waiting'" src="img/loader.gif" width="26" height="26" />
+            <br/>
+
+
+            <!-- Payload -->
+            <span class="message" >{{ notification.message }}</span>
+
+        </div>
+        <!-- Buttons -->
+        <div class="button-outer">
+            <button class="uk-button uk-button-small" ng-show="notification.type == 'alert'" ng-click="submit()">{{ notification.button }}</button>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-<div id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" >
+<div ng-controller="ProfileSettingsController" id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" >
 
     <div class="uk-vertical-align uk-text-center uk-height-1-1 cc-inner-margin">
         <div class="uk-vertical-align-middle">
@@ -14,7 +14,7 @@
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="Display name" ng-model="user.meta.name" maxlength="15" required />
+                    <input class="uk-width-1-1 " type="text" placeholder="Display name *" ng-model="user.meta.name" limit-width="150" min-chars="3" />
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1" rows="3" placeholder="Profile description" ng-model="user.meta.description"></textarea>
@@ -31,7 +31,7 @@
                     <div ng-include="'partials/year-of-birth-select.html'"></div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="City" ng-model="user.meta.city" required />
+                    <input class="uk-width-1-1" type="text" placeholder="City *" ng-model="user.meta.city" limit-width="200" min-chars="3" />
                 </div>
                 <div class="uk-form-row">
                     <div ng-include="'partials/countries-select.html'"></div>
@@ -49,5 +49,5 @@
             </form>
         </div>
     </div>
-    <div ng-include="'partials/overlay.html'"></div>
+    <div ng-include="'partials/notification.html'"></div>
 </div>

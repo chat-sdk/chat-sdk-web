@@ -486,3 +486,76 @@ myApp.directive('autoGrow', function() {
         update();
     }
 });
+
+myApp.directive('limitWidth', function () {
+
+    $.fn.textWidth = function(text, font) {
+        if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+        $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+        return $.fn.textWidth.fakeEl.width();
+    };
+
+    return function (scope, element, attr) {
+        var maxWidth = element.attr('limit-width');
+        var minChars = element.attr('min-chars');
+
+//        element.keydown(function (e) {
+//
+//            var char = String.fromCharCode(e.which);
+//
+//            console.log(""+scope);
+//
+//            // Is the character alphanumeric?
+//            if(/[a-zA-Z0-9 ]/.test(char)) {
+//                // New character - if it's a space replace it with
+//                // a character for the length calculation
+//                if(char == " ") {
+//                    char = "_";
+//                }
+//
+//                // Work out the new string
+//                var val = element.val() + char;
+//
+//                var newWidth = $.fn.textWidth(val, element.css("font"));
+//
+//                return newWidth <= maxWidth;
+//            }
+//            return true;
+//
+//        });
+
+        element.keyup(function (e) {
+
+            var char = String.fromCharCode(e.which);
+            var val = element.val();
+
+            // Is the character alphanumeric?
+            if(/[a-zA-Z0-9 ]/.test(char)) {
+                // New character - if it's a space replace it with
+                // a character for the length calculation
+                if(char == " ") {
+                    char = "_";
+                }
+
+                // Work out the new string
+                val = element.val() + char;
+
+            }
+
+            var newWidth = $.fn.textWidth(val, element.css("font"));
+
+            // Depending on the width work out if the field is valid
+            var valid = newWidth < maxWidth && val.length > minChars;
+
+
+            if (valid) {
+                element.removeClass('uk-form-danger');
+            }
+            else {
+                element.addClass('uk-form-danger');
+            }
+
+        });
+
+    }
+});

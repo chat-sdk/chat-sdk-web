@@ -13,13 +13,17 @@ myApp.controller('AppController', [
         WebService.setModel($scope);
 
         // Show the waiting overlay
-        $scope.setOverlayHidden(false);
+        $scope.notification = {
+            show: false
+        };
+        //$scope.setOverlayHidden(false);
 
         // Setup the search variable - if we don't do this
         // Angular can't set search.text
         $scope.search = {};
 
         $scope.on = true;
+
 
     }
 
@@ -64,9 +68,9 @@ myApp.controller('AppController', [
         $scope.minimize = true;
     }
 
-    $scope.setOverlayHidden = function (isHidden) {
-        $scope.hideOverlay = isHidden;
-    }
+//    $scope.setOverlayHidden = function (isHidden) {
+//        $scope.notification.show = !isHidden;
+//    }
 
     /**
      * Return a list of all the user's current
@@ -209,7 +213,7 @@ myApp.controller('AppController', [
 
 
 
-        /**
+    /**
      * @return number of online users
      */
     $scope.numberOfUsersOnline = function () {
@@ -319,6 +323,18 @@ myApp.controller('AppController', [
         // $scope.upload = $upload.http({...})  see 88#issuecomment-31366487 for sample code.
     };
 
+    $scope.hideNotification = function () {
+        $scope.notification.show = false;
+    }
+
+    $scope.showNotification = function (type, title, message, button) {
+        $scope.notification.title = title;
+        $scope.notification.message = message;
+        $scope.notification.type = type;
+        $scope.notification.button = button;
+        $scope.notification.show = true;
+    }
+
     $scope.init();
 
 }]);
@@ -331,7 +347,9 @@ myApp.controller('MainBoxController', ['$scope', 'WebService', 'Cache', function
     }
 
     $scope.showOverlay = function (message) {
-        $scope.overlayMessage = message;
+        $scope.notification.show = true;
+        $scope.type = bNotificationTypeWaiting;
+        $scope.notification.message = message;
     }
 
     $scope.tabClicked = function (tab) {
@@ -373,6 +391,9 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
      */
     $scope.init = function () {
 
+        // Show the notification to say we're authenticating
+        $scope.showNotification(bNotificationTypeWaiting, "Authenticating");
+
         // Add observers for AngularFire login events
         // When the user logs in
         $scope.$on('$firebaseSimpleLogin:login', function (e) {
@@ -382,7 +403,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
             $scope.handleUserLogin($scope.auth.user);
 
             // Hide the waiting overlay
-            $scope.setOverlayHidden(true);
+            //$scope.setOverlayHidden(true);
+            $scope.hideNotification();
         });
 
         // When the user logs out
@@ -400,6 +422,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
 
         // Setup an AngularFire auth reference
         $rootScope.auth = $firebaseSimpleLogin(Paths.firebase());
+    }
+
+    $scope.setError = function (message) {
+        $scope.showError = message != null;
+        $scope.errorMessage = message;
     }
 
     /**
@@ -424,7 +451,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
         // Allow the user to log back in
         $scope.showLoginBox();
 
-        $scope.setOverlayHidden(true);
+        //
+        $scope.hideNotification();
     }
 
     $scope.loginWithPassword = function () {
@@ -448,7 +476,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
         $scope.showError = false;
 
         // Hide the overlay
-        $scope.setOverlayHidden(false);
+//        $scope.setOverlayHidden(false);
+        $scope.showNotification(bNotificationTypeWaiting, "Logging in");
 
         $scope.auth.$login(method, options).then(function(user) {
 
@@ -459,6 +488,20 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
 
             $scope.handleLoginError(error);
 
+        });
+    }
+
+    $scope.forgotPassword  = function (email) {
+
+        $scope.auth.$sendPasswordResetEmail(email).then(function() {
+
+            $scope.showNotification(bNotificationTypeAlert, "Email sent",
+                "Instructions have been sent. Please check your Junk folder!", "ok");
+
+            $scope.setError(null);
+
+        }, function(error) {
+            $scope.handleLoginError(error);
         });
     }
 
@@ -473,11 +516,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
         WebService.goOnline();
 
         $scope.showError = false;
-        $scope.setOverlayHidden(false);
+        //$scope.setOverlayHidden(false);
 
         console.log("will sign up: "+email + ", "+password);
 
-        // First create the suer
+        $scope.showNotification(bNotificationTypeWaiting, "Registering...");
+
+        // First create the super
         $scope.auth.$createUser(email, password).then((function(user) {
 
             // Now log in using the newly made account
@@ -485,6 +530,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
 //                email: email,
 //                password: password
 //            });
+
+            //$scope.auth.user = user;
 
             //$scope.handleUserLogin(user);
             console.log("Success!");
@@ -505,7 +552,9 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
     $scope.handleUserLogin = function (user) {
 
         // We logged in successfully, hide the overlay
-        $scope.setOverlayHidden(true);
+        //$scope.setOverlayHidden(true);
+
+        $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         // Now we need to get the API information
         API.getAPIDetails((function(api) {
@@ -515,12 +564,17 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
             // Get the number of chatters
             WebService.numberOfChatters((function (number) {
 
+                $scope.hideNotification();
+
                 if(number >= api.max) {
                     alert("Sorry the chat server is full! Try again later");
                     this.logout();
                 }
                 else {
-                    WebService.bindUser(user.uid, function () {
+
+
+                    WebService.bindUser(user, function () {
+
 
                         // We have the user's ID so we can get the user's object
                         $scope.showProfileSettingsBox();
@@ -539,7 +593,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
      */
     $scope.handleLoginError = function (error) {
         // The login failed - display a message to the user
-        $scope.setOverlayHidden(true);
+        //$scope.setOverlayHidden(true);
+        $scope.hideNotification();
 
         var message = "An unknown error occurred";
 
@@ -567,8 +622,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
             message = "Invalid email or password.";
         }
 
-        $scope.showError = true;
-        $scope.errorMessage = message;
+        $scope.setError(message);
+
     }
 
     $scope.init();
@@ -885,3 +940,33 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', function($scope, C
     }
 
 }]);
+
+myApp.controller('ProfileSettingsController', ['$scope', function($scope) {
+
+    $scope.done = function () {
+
+        // Is the name valid?
+        var name = $scope.user.meta.name;
+
+
+
+
+        var name = $scope.user.meta.city;
+
+    }
+
+}]);
+
+var bNotificationTypeWaiting = 'waiting';
+var bNotificationTypeAlert = 'alert';
+
+myApp.controller('NotificationController', ['$scope', function($scope) {
+
+    $scope.submit = function () {
+        $scope.notification.show = false;
+    }
+
+
+}]);
+
+

@@ -547,13 +547,11 @@ myApp.factory('User', function ($rootScope, $timeout) {
         newUser: function () {
             var user = {
                 meta: {
-                    uid: null
-                    //aid: null,
-                    //imageURL: null,
-                    //gender: null,
-                    //city: null,
-                    //country: null,
-                    //yearOfBirth: null
+                    uid: null,
+                    name: null,
+                    description: null,
+                    city: null,
+                    country: null
                 }
             }
             return user;
@@ -1004,32 +1002,36 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
          * a session exists
          * @param callback - notify if the authentication was successful
          */
-        bindUser: function (uid, callback) {
+        // TODO: Use promise
+        bindUser: function (authUser, callback) {
 
             // Set the user's ID
-            Paths.userMetaRef(uid).set({uid: uid});
+            Paths.userMetaRef(authUser.uid).set({uid: authUser.uid});
 
             // Bind the user's meta data
-            this.bindUserWithUID(uid, (function () {
+            this.bindUserWithUID(authUser.uid, (function () {
 
                 callback();
 
-                // Here's the place to update the user's details
                 var user = this._model.user;
-                var auth = this._model.auth;
 
-                if(!user.meta.name || user.meta.name.length == 0) {
-                    user.meta.name = auth.user.displayName;
+                var name = user.meta.name;
+                if(!name || name.length == 0) {
+                    name = user.displayName;
                 }
-                if(!user.meta.name || user.meta.name.length == 0) {
-                    user.meta.name = auth.user.username;
+                if(!name || name.length == 0) {
+                    name = user.username;
                 }
+                if(!name || name.length == 0) {
+                    name = "";
+                }
+                user.meta.name = name;
 
                 var imageURL = null;
-                var thirdPartyData = auth.user.thirdPartyUserData;
+                var thirdPartyData = user.thirdPartyUserData;
 
                 /** SOCIAL INFORMATION **/
-                if(auth.user.provider == "facebook") {
+                if(user.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
                     if(!user.meta.imageURL) {
@@ -1040,7 +1042,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                         });
                     }
                 }
-                if(auth.user.provider == "twitter") {
+                if(user.provider == "twitter") {
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
@@ -1050,13 +1052,13 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                         user.meta.description = thirdPartyData.description;
                     }
                 }
-                if(auth.user.provider == "github") {
+                if(user.provider == "github") {
                     imageURL = thirdPartyData.avatar_url;
                 }
-                if(auth.user.provider == "google") {
+                if(user.provider == "google") {
                     imageURL = thirdPartyData.picture;
                 }
-                if(auth.user.provider == "anonymous") {
+                if(user.provider == "anonymous") {
 
                 }
 
@@ -1098,7 +1100,7 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
                 this.addOnlineUsersListener();
 
                 // Add listeners to the user
-                this.addListenersToUser(uid, (function () {
+                this.addListenersToUser(authUser.uid, (function () {
 
                 }).bind(this));
             }).bind(this));

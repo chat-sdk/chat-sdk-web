@@ -28,7 +28,7 @@
                 </div>
                 <div class="uk-form-row uk-text-small">
                     <label class="uk-float-left"><input type="checkbox"> Remember Me</label>
-                    <a class="uk-float-right uk-link uk-link-muted" ng-click="auth.$sendPasswordResetEmail(email)">Forgot Password?</a>
+                    <a class="uk-float-right uk-link uk-link-muted" ng-click="forgotPassword(email)" ng-class="email.length == 0 ? 'disabled' : ''">Forgot Password?</a>
                 </div>
                 <div class="uk-form-row">
                     <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="login('facebook')"></a>
@@ -43,5 +43,6 @@
 
         </div>
     </div>
-    <div ng-include="'partials/overlay.html'"></div>
+
+    <div ng-include="'partials/notification.html'" ></div>
 </div>

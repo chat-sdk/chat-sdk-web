@@ -156,6 +156,14 @@ var Utilities = {
                 callback(null);
             }
         });
+    },
+
+    textWidth: function (text, font) {
+
+        if (!Utilities.textWidth.fakeEl) Utilities.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+        Utilities.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+        return Utilities.textWidth.fakeEl.width();
+
     }
 
 };
