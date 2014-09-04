@@ -945,12 +945,16 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
          * by updaing the model and via callbacks
          * @param model - AngularJS $scope variable
          */
-        setModel: function (model) {
-            this._model = model;
-        },
+        //setModel: function (model) {
+        //    this._model = $rootScope;
+        //},
+
+        //setUser: function (user) {
+        //    $rootScope.user = user;
+        //},
 
         getUser: function () {
-            return this._model.user;
+            return $rootScope.user;
         },
 
         addOnlineUsersListener: function () {
@@ -967,7 +971,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                 }
 
                 // We don't want to process the current user
-                if (uid && uid != this._model.user.meta.uid) {
+                if (uid && uid != this.getUser().meta.uid) {
 
                     console.log("Added: " + uid);
 
@@ -995,8 +999,8 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
 
         goOnline: function () {
             Firebase.goOnline();
-            if(this._model.user) {
-                this._model.user.goOnline();
+            if(this.getUser()) {
+                this.getUser().goOnline();
             }
         },
 
@@ -1017,7 +1021,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
 
                 callback();
 
-                var user = this._model.user;
+                var user = this.getUser();
 
                 var name = user.meta.name;
                 if(!name || name.length == 0) {
@@ -1226,25 +1230,25 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
 
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            this._model.user = User.buildUserWithID(uid);
+            $rootScope.user = User.buildUserWithID(uid);
 
             // Bind the user to the user variable
-            $userMetaRef.$asObject().$bindTo(this._model, "user.meta").then((function (unbind) {
+            $userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
 
                 // If the user hasn't got a name yet don't throw an error
-                if (!this._model.user.meta.name) {
-                    this._model.user.meta.name = "";
+                if (!this.getUser().meta.name) {
+                    this.getUser().meta.name = "";
                 }
 
                 // TODO: Check this
 
-                this._model.user.goOnline();
+                this.getUser().goOnline();
 
-                this._model.unbindUser = (function () {
+                $rootScope.unbindUser = (function () {
                     unbind();
 
                     // Clear the data
-                    this._model.user = null;
+                    $rootScope.user = null;
                 }).bind(this);
 
                 // Mark the user as online
@@ -1339,26 +1343,26 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
         joinRoom: function (room, status) {
             if(room) {
                 // Add the user to the room
-                room.addUser(this._model.user, status);
+                room.addUser(this.getUser(), status);
 
                 // Add the room to the user
-                this._model.user.addRoom(room);
+                this.getUser().addRoom(room);
             }
         },
 
         leaveRoom: function (room) {
             if(room) {
                 // Remove the user from the room
-                room.removeUser(this._model.user);
+                room.removeUser(this.getUser());
 
                 // Remove the room from the user's list
-                this._model.user.removeRoom(room);
+                this.getUser().removeRoom(room);
             }
         },
 
         sendMessage: function (room, text) {
 
-            var message = Message.buildMessage(this._model.user.meta.uid, text);
+            var message = Message.buildMessage(this.getUser().meta.uid, text);
             message.user = null;
 
             room.sendMessage(message);
@@ -1366,7 +1370,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
         },
 
         uidIsMine: function (uid) {
-            return uid == this._model.user.meta.uid;
+            return uid == this.getUser().meta.uid;
         },
 
         numberOfChatters: function (callback) {

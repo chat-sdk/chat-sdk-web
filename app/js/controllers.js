@@ -10,20 +10,16 @@ myApp.controller('AppController', [
 
     $scope.init = function () {
 
-        Auth.setModel($scope);
-
         // Show the waiting overlay
         $scope.notification = {
             show: false
         };
-        //$scope.setOverlayHidden(false);
 
         // Setup the search variable - if we don't do this
         // Angular can't set search.text
         $scope.search = {};
 
         $scope.on = true;
-
 
     }
 
@@ -71,10 +67,6 @@ myApp.controller('AppController', [
     $scope.minimizeMainBox = function () {
         $scope.minimize = true;
     }
-
-//    $scope.setOverlayHidden = function (isHidden) {
-//        $scope.notification.show = !isHidden;
-//    }
 
     /**
      * Return a list of all the user's current
@@ -207,15 +199,12 @@ myApp.controller('AppController', [
         }
     }
 
-
     $scope.isOnline = function (user) {
         if(user) {
             return Cache.onlineUsers[user.meta.uid] != null;
         }
         return false;
     }
-
-
 
     /**
      * @return number of online users
@@ -244,11 +233,8 @@ myApp.controller('AppController', [
      */
     $scope.logout = function () {
 
-        // This will be handeled by the logout listener anyway
+        // This will be handled by the logout listener anyway
         $scope.auth.$logout();
-
-        // We need to unbind the scope from the user
-        //user.unbindUserFromScope($scope);
 
         $scope.showLoginBox();
     }
@@ -520,7 +506,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         Auth.goOnline();
 
         $scope.showError = false;
-        //$scope.setOverlayHidden(false);
 
         console.log("will sign up: "+email + ", "+password);
 
@@ -529,15 +514,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // First create the super
         $scope.auth.$createUser(email, password).then((function(user) {
 
-            // Now log in using the newly made account
-//            $scope.login('password', {
-//                email: email,
-//                password: password
-//            });
-
-            //$scope.auth.user = user;
-
-            //$scope.handleUserLogin(user);
             console.log("Success!");
 
             $scope.handleUserLogin(user);
@@ -554,9 +530,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
      * @param {Obj} the User object from Firebase authentication
      */
     $scope.handleUserLogin = function (user) {
-
-        // We logged in successfully, hide the overlay
-        //$scope.setOverlayHidden(true);
 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
@@ -576,10 +549,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                 }
                 else {
 
-
                     Auth.bindUser(user, function () {
-
-
                         // We have the user's ID so we can get the user's object
                         $scope.showProfileSettingsBox();
 
@@ -596,8 +566,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
      * @param {Obj} the error returned from Firebase
      */
     $scope.handleLoginError = function (error) {
+
         // The login failed - display a message to the user
-        //$scope.setOverlayHidden(true);
         $scope.hideNotification();
 
         var message = "An unknown error occurred";
