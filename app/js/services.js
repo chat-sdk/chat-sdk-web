@@ -928,9 +928,9 @@ myApp.factory('Message', function (Cache, User) {
     return message;
 });
 
-myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, Cache, User, Room, Message, Layout, Facebook) {
+myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, Cache, User, Room, Message, Layout, Facebook) {
 
-    var WebService = {
+    var Auth = {
 
         _model: null,
 
@@ -1380,8 +1380,8 @@ myApp.factory('WebService', function ($rootScope, $firebase, $firebaseSimpleLogi
         }
     }
 
-    WebService.init();
+    Auth.init();
 
-    return WebService;
+    return Auth;
 
 });

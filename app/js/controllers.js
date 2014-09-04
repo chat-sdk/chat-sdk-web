@@ -5,12 +5,12 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'WebService', 'Cache','$document','Layout',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, WebService, Cache, $document, Layout) {
+    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout',
+    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout) {
 
     $scope.init = function () {
 
-        WebService.setModel($scope);
+        Auth.setModel($scope);
 
         // Show the waiting overlay
         $scope.notification = {
@@ -231,7 +231,7 @@ myApp.controller('AppController', [
             $scope.user.unblockUser(user);
         }
         else {
-            WebService.createPrivateRoom([user]);
+            Auth.createPrivateRoom([user]);
         }
     }
 
@@ -252,10 +252,10 @@ myApp.controller('AppController', [
     $scope.shutdown = function () {
         $scope.on = !$scope.on;
         if($scope.on) {
-            WebService.goOnline();
+            Auth.goOnline();
         }
         else {
-            WebService.goOffline();
+            Auth.goOffline();
         }
     }
 
@@ -339,7 +339,7 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', 'WebService', 'Cache', function($scope, WebService, Cache) {
+myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', function($scope, Auth, Cache) {
 
     $scope.init = function () {
         // Make the users tab start clicked
@@ -375,13 +375,13 @@ myApp.controller('MainBoxController', ['$scope', 'WebService', 'Cache', function
     }
 
     $scope.roomClicked = function (room) {
-        WebService.joinRoom(room, bUserStatusMember);
+        Auth.joinRoom(room, bUserStatusMember);
     }
 
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache', '$firebaseSimpleLogin', function($rootScope, $scope, WebService, Cache, $firebaseSimpleLogin) {
+myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin) {
 
 
     /**
@@ -443,7 +443,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
         }
 
         // Now we need to
-        WebService.goOffline();
+        Auth.goOffline();
 
         // Clear the cache down
         Cache.clear();
@@ -470,7 +470,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
     $scope.login = function (method, options) {
 
         // Re-establish a connection with Firebase
-        WebService.goOnline();
+        Auth.goOnline();
 
         // Reset any error messages
         $scope.showError = false;
@@ -513,7 +513,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
     $scope.signUp = function (email, password) {
 
         // Re-establish connection with Firebase
-        WebService.goOnline();
+        Auth.goOnline();
 
         $scope.showError = false;
         //$scope.setOverlayHidden(false);
@@ -562,7 +562,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
             Paths.setCID(api.cid);
 
             // Get the number of chatters
-            WebService.numberOfChatters((function (number) {
+            Auth.numberOfChatters((function (number) {
 
                 $scope.hideNotification();
 
@@ -573,7 +573,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
                 else {
 
 
-                    WebService.bindUser(user, function () {
+                    Auth.bindUser(user, function () {
 
 
                         // We have the user's ID so we can get the user's object
@@ -630,7 +630,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','WebService', 'Cache
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout', function($scope, $timeout, WebService, Layout) {
+myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', function($scope, $timeout, Auth, Layout) {
 
     $scope.init = function (room) {
         $scope.input = {};
@@ -648,7 +648,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
     }
 
     $scope.sendMessage = function () {
-        WebService.sendMessage($scope.room, $scope.input.text);
+        Auth.sendMessage($scope.room, $scope.input.text);
         $scope.input.text = "";
     }
 
@@ -657,7 +657,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
     }
 
     $scope.removeRoom = function(room) {
-        WebService.deleteRoom(room);
+        Auth.deleteRoom(room);
     }
 
     $scope.chatBoxStyle = function () {
@@ -665,7 +665,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
     }
 
     $scope.messageIsMine = function (message) {
-        return WebService.uidIsMine(message.uid);
+        return Auth.uidIsMine(message.uid);
     }
 
     $scope.userForMessage = function (message) {
@@ -822,7 +822,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'WebService', 'Layout',
     }
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', 'WebService', 'Layout', function($scope, WebService, Layout) {
+myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function($scope, Auth, Layout) {
 
     $scope.superGetRooms = $scope.getRooms;
     $scope.getRooms = function() {
@@ -862,14 +862,14 @@ myApp.controller('RoomListBoxController', ['$scope', 'WebService', 'Layout', fun
 
 }]);
 
-myApp.controller('CreateRoomController', ['$scope', 'WebService', function($scope, WebService) {
+myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Auth) {
 
     $scope.init = function () {
         $scope.clearForm();
     }
 
     $scope.createRoom  = function () {
-        WebService.createPublicRoom($scope.room, function () {
+        Auth.createPublicRoom($scope.room, function () {
 
         });
         $scope.back();
