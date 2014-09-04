@@ -27,6 +27,10 @@ myApp.controller('AppController', [
 
     }
 
+    $scope.getUser = function () {
+        return Auth.getUser();
+    }
+
     /**
      * Resize the main box in proportion to the window height
      * - this is called whenever the window size changes
@@ -90,7 +94,7 @@ myApp.controller('AppController', [
 
     $scope.saveRoomSlotToUser = function (room) {
         //TODO: finish this
-        $scope.user.updateRoomSlot(room, room.slot());
+        $scope.getUser().updateRoomSlot(room, room.slot());
     }
 
     /**
@@ -145,10 +149,10 @@ myApp.controller('AppController', [
 
     $scope.addRemoveFriend = function(user) {
         if($scope.isFriend(user)) {
-            $scope.user.removeFriend(user);
+            $scope.getUser().removeFriend(user);
         }
         else {
-            $scope.user.addFriend(user);
+            $scope.getUser().addFriend(user);
         }
     }
 
@@ -161,10 +165,10 @@ myApp.controller('AppController', [
 
     $scope.blockUnblockUser = function(user) {
         if($scope.isBlocked(user)) {
-            $scope.user.unblockUser(user);
+            $scope.getUser().unblockUser(user);
         }
         else {
-            $scope.user.blockUser(user);
+            $scope.getUser().blockUser(user);
         }
     }
 
@@ -228,7 +232,7 @@ myApp.controller('AppController', [
 
         // Is the user blocked?
         if($scope.isBlocked(user)) {
-            $scope.user.unblockUser(user);
+            $scope.getUser().unblockUser(user);
         }
         else {
             Auth.createPrivateRoom([user]);
@@ -307,7 +311,7 @@ myApp.controller('AppController', [
                 //$scope.imageName = data.fileName;
 
                 if(data.fileName) {
-                    $scope.user.meta.imageURL = data.fileName;
+                    $scope.getUser().meta.imageURL = data.fileName;
                 }
 
             }).error(function (e) {
@@ -703,7 +707,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     }
 
     $scope.acceptInvitation = function () {
-        $scope.room.setStatusForUser($scope.user, bUserStatusMember)
+        $scope.room.setStatusForUser($scope.getUser(), bUserStatusMember)
     }
 
     $scope.minimize = function () {
@@ -777,7 +781,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         var users = {};
         for(var key in $scope.room.users) {
             var user = $scope.room.users[key];
-            if(user.meta.uid != $scope.user.meta.uid) {
+            if(user.meta.uid != $scope.getUser().meta.uid) {
                 users[user.meta.uid] = user;
             }
         }
@@ -792,10 +796,10 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
     $scope.setTyping = function (typing) {
         if(typing) {
-            $scope.room.startTyping($scope.user);
+            $scope.room.startTyping($scope.getUser());
         }
         else {
-            $scope.room.finishTyping($scope.user);
+            $scope.room.finishTyping($scope.getUser());
         }
     }
 
@@ -803,7 +807,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         var i = 0;
         var name = null;
         for(var key in $scope.room.typing) {
-            if(key == $scope.user.meta.uid) {
+            if(key == $scope.getUser().meta.uid) {
                 continue;
             }
             name = $scope.room.typing[key];
@@ -946,12 +950,12 @@ myApp.controller('ProfileSettingsController', ['$scope', function($scope) {
     $scope.done = function () {
 
         // Is the name valid?
-        var name = $scope.user.meta.name;
+        var name = $scope.getUser().meta.name;
 
 
 
 
-        var name = $scope.user.meta.city;
+        var name = $scope.getUser().meta.city;
 
     }
 

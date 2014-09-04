@@ -330,7 +330,7 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
         elm.mousedown((function(e) {
             // Set the current user
             $rootScope.userDrag = {
-                user: scope.user,
+                user: scope.aUser,
                 x:0,
                 y:0,
                 dragging: true,

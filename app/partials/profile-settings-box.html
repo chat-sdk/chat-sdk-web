@@ -5,7 +5,7 @@
 
             <form class="uk-panel uk-form">
                 <div class="uk-form-row">
-                        <div class="uk-container-center cc-thumbnail-100" ng-style="{'background':'url('+user.thumbnailURL(100)+')'}">
+                        <div class="uk-container-center cc-thumbnail-100" ng-style="{'background':'url('+getUser().thumbnailURL(100)+')'}">
 
                         <input class="cc-hidden-input" type="file" ng-file-select="onFileSelect($files)">
                     </div>
@@ -14,14 +14,14 @@
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1 " type="text" placeholder="Display name *" ng-model="user.meta.name" limit-width="150" min-chars="3" />
+                    <input class="uk-width-1-1 " type="text" placeholder="Display name *" ng-model="getUser().meta.name" limit-width="150" min-chars="3" />
                 </div>
                 <div class="uk-form-row">
-                    <textarea class="uk-width-1-1" rows="3" placeholder="Profile description" ng-model="user.meta.description"></textarea>
+                    <textarea class="uk-width-1-1" rows="3" placeholder="Profile description" ng-model="getUser().meta.description"></textarea>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Gender</div>
-                    <select class="uk-width-1-2 uk-float-right" ng-model="user.meta.gender" required>
+                    <select class="uk-width-1-2 uk-float-right" ng-model="getUser().meta.gender" required>
                         <option value="M">Male</option>
                         <option value="F">Female</option>
                     </select>
@@ -31,7 +31,7 @@
                     <div ng-include="'partials/year-of-birth-select.html'"></div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="City *" ng-model="user.meta.city" limit-width="200" min-chars="3" />
+                    <input class="uk-width-1-1" type="text" placeholder="City *" ng-model="getUser().meta.city" limit-width="200" min-chars="3" />
                 </div>
                 <div class="uk-form-row">
                     <div ng-include="'partials/countries-select.html'"></div>

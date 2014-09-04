@@ -935,7 +935,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
         _model: null,
 
         init: function () {
-
+            //this._model = {user: null};
         },
 
         /**
@@ -947,6 +947,10 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
          */
         setModel: function (model) {
             this._model = model;
+        },
+
+        getUser: function () {
+            return this._model.user;
         },
 
         addOnlineUsersListener: function () {
@@ -1006,7 +1010,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
         bindUser: function (authUser, callback) {
 
             // Set the user's ID
-            Paths.userMetaRef(authUser.uid).set({uid: authUser.uid});
+            Paths.userMetaRef(authUser.uid).update({uid: authUser.uid});
 
             // Bind the user's meta data
             this.bindUserWithUID(authUser.uid, (function () {
