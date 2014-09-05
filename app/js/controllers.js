@@ -15,13 +15,11 @@ myApp.controller('AppController', [
             show: false
         };
 
-        // Setup the search variable - if we don't do this
-        // Angular can't set search.text
-        $scope.search = {};
-
         $scope.on = true;
 
     }
+
+
 
     $scope.getUser = function () {
         return Auth.getUser();
@@ -337,8 +335,16 @@ myApp.controller('AppController', [
 myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', function($scope, Auth, Cache, Utilities) {
 
     $scope.init = function () {
+
+        // Setup the search variable - if we don't do this
+        // Angular can't set search.text
+        $scope.search = {};
+        $scope.search[bUsersTab] = "";
+        $scope.search[bRoomsTab] = "";
+        $scope.search[bFriendsTab] = "";
+
         // Make the users tab start clicked
-        $scope.tabClicked('users');
+        $scope.tabClicked(bUsersTab);
     }
 
     $scope.showOverlay = function (message) {
@@ -347,16 +353,29 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
         $scope.notification.message = message;
     }
 
+    $scope.searchText = function () {
+        if(!$scope.search) {
+            $scope.search = {};
+        }
+        if($scope.search[$scope.activeTab]) {
+            $scope.search[$scope.activeTab] = "";
+        }
+        return $scope.search[$scope.activeTab];
+    }
+
     $scope.tabClicked = function (tab) {
         $scope.activeTab = tab;
 
-        if(tab == 'users') {
+        // Save current search text
+        //$scope.search
+
+        if(tab == bUsersTab) {
             $scope.title = "Who's online";
         }
-        if(tab == 'rooms') {
+        if(tab == bRoomsTab) {
             $scope.title = "Chat rooms";
         }
-        if(tab == 'friends') {
+        if(tab == bFriendsTab) {
             $scope.title = "My friends";
         }
     }

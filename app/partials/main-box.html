@@ -1,4 +1,4 @@
-<div id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': mainBoxWidth, 'height': mainBoxHeight}" ng-controller="MainBoxController">
+<div ng-controller="MainBoxController" id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': mainBoxWidth, 'height': mainBoxHeight}" >
     <div class="cc-box-header">
         {{ title }}
         <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimizeMainBox()">
@@ -21,7 +21,7 @@
     <!--Add the search box-->
     <div class="uk-overflow-container">
         <form class="uk-panel uk-form uk-float-left cc-padded" ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' ? 40 : 10))}">
-            <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search.text" placeholder="Search" />
+            <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search[activeTab]" placeholder="Search" />
         </form>
         <a class="uk-float-right" ng-show="activeTab == 'rooms'" ng-click="showCreateRoomBox()">
             <img class="cc-image-30" src="img/cc-30-plus.png" />

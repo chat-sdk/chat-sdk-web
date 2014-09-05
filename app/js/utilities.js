@@ -24,6 +24,11 @@ var bUserStatusMember = 'member';
 var bUserStatusInvited = 'invited';
 var bUserStatusBlocked = 'blocked';
 
+// Tabs
+var bUsersTab = 'users';
+var bRoomsTab = 'rooms';
+var bFriendsTab = 'friends';
+
 var bProfileSettingsBox = 'profileSettingsBox';
 
 var bShowProfileSettingsBox = 'showProfileSettingsBox';
