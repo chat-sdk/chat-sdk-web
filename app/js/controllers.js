@@ -353,15 +353,15 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
         $scope.notification.message = message;
     }
 
-    $scope.searchText = function () {
-        if(!$scope.search) {
-            $scope.search = {};
-        }
-        if($scope.search[$scope.activeTab]) {
-            $scope.search[$scope.activeTab] = "";
-        }
-        return $scope.search[$scope.activeTab];
-    }
+//    $scope.searchText = function () {
+//        if(!$scope.search) {
+//            $scope.search = {};
+//        }
+//        if($scope.search[$scope.activeTab]) {
+//            $scope.search[$scope.activeTab] = "";
+//        }
+//        return $scope.search[$scope.activeTab];
+//    }
 
     $scope.tabClicked = function (tab) {
         $scope.activeTab = tab;
