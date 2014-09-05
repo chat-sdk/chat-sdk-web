@@ -385,7 +385,7 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
      * @return A list of users who's names meet the search text
      */
     $scope.getUsers = function () {
-        return Utilities.filterByName(Cache.onlineUsers, $scope.search.text);
+        return Utilities.filterByName(Cache.onlineUsers, $scope.search[$scope.activeTab]);
     }
 
     $scope.roomClicked = function (room) {
@@ -897,7 +897,7 @@ myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', f
 
     $scope.getRooms = function() {
         // Filter rooms by search text
-        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search.text);
+        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
     }
 
 }]);
@@ -935,6 +935,9 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
                 return 0;
             }
         });
+
+        // Filter by search term
+        array = Utilities.filterByName(array, $scope.search[$scope.activeTab]);
 
         return array;
     }
