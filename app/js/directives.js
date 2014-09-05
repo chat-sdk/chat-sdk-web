@@ -487,120 +487,86 @@ myApp.directive('autoGrow', function() {
     }
 });
 
-myApp.directive('fitText', function ($rootScope, $document, $timeout) {
-    return function (scope, element, attrs) {
-
-
-        // Get the height of the text
-        var val = element.val();
-
-        var minHeight = element[0].offsetHeight,
-            paddingLeft = element.css('paddingLeft'),
-            paddingRight = element.css('paddingRight');
-
-        var div = angular.element('<div></div>').css({
-            position: 'absolute',
-            top: -10000,
-            left: -10000,
-            width: element[0].offsetWidth - parseInt(paddingLeft || 0) - parseInt(paddingRight || 0),
-            fontSize: element.css('fontSize'),
-            fontFamily: element.css('fontFamily'),
-            lineHeight: element.css('lineHeight'),
-            resize:     'none'
-        });
-        angular.element(document.body).append(div);
-
-        var update = function() {
-            var times = function(string, number) {
-                for (var i = 0, r = ''; i < number; i++) {
-                    r += string;
-                }
-                return r;
-            }
-
-            var val = element.val().replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/&/g, '&amp;')
-                .replace(/\n$/, '<br/>&nbsp;')
-                .replace(/\n/g, '<br/>')
-                .replace(/\s{2,}/g, function(space) { return times('&nbsp;', space.length - 1) + ' ' });
-            div.html(val);
-
-            scope.inputHeight = Math.max(div[0].offsetHeight + 10 /* the "threshold" */, minHeight);
-
-            //element.css('height', height + 'px');
-
-            console.log("Height: " + scope.inputHeight);
-        }
-
-        element.bind('keyup keydown keypress change', update);
-        update();
-
-
-    }
-});
-
-//myApp.directive('ccValidate', function () {
+//myApp.directive('fitText', function ($rootScope, $document, $timeout) {
+//    return function (scope, element, attrs) {
 //
-//    $.fn.textWidth = function(text, font) {
-//        if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
-//        $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
-//        return $.fn.textWidth.fakeEl.width();
-//    };
 //
-//    return function (scope, element, attr) {
+//        // Get the height of the text
+//        var val = element.val();
 //
-//        var options = eval(attr.ccValidate);
+//        var minHeight = element[0].offsetHeight,
+//            paddingLeft = element.css('paddingLeft'),
+//            paddingRight = element.css('paddingRight');
 //
-//        //var maxWidth = options.maxWidth;
-//        var maxChars = scope.validation[options.name].maxChars;
-//        var minChars = scope.validation[options.name].minChars;
+//        var div = angular.element('<div></div>').css({
+//            position: 'absolute',
+//            top: -10000,
+//            left: -10000,
+//            width: element[0].offsetWidth - parseInt(paddingLeft || 0) - parseInt(paddingRight || 0),
+//            fontSize: element.css('fontSize'),
+//            fontFamily: element.css('fontFamily'),
+//            lineHeight: element.css('lineHeight'),
+//            resize:     'none'
+//        });
+//        angular.element(document.body).append(div);
 //
-//        var validate = function (val) {
-//
-//            //var newWidth = $.fn.textWidth(val, element.css("font"));
-//
-//            // Depending on the width work out if the field is valid
-//            var valid = val.length <= maxChars && val.length >= minChars;
-//
-//            if (valid) {
-//                element.removeClass('uk-form-danger');
-//            }
-//            else {
-//                element.addClass('uk-form-danger');
+//        var update = function() {
+//            var times = function(string, number) {
+//                for (var i = 0, r = ''; i < number; i++) {
+//                    r += string;
+//                }
+//                return r;
 //            }
 //
-//            if(!scope.validation) {
-//                scope.validation = {};
-//            }
+//            var val = element.val().replace(/</g, '&lt;')
+//                .replace(/>/g, '&gt;')
+//                .replace(/&/g, '&amp;')
+//                .replace(/\n$/, '<br/>&nbsp;')
+//                .replace(/\n/g, '<br/>')
+//                .replace(/\s{2,}/g, function(space) { return times('&nbsp;', space.length - 1) + ' ' });
+//            div.html(val);
 //
-//            // Pass the data back to the scope so we can
-//            // validate the variables
-//            scope.validation[options.name] = valid;
+//            scope.inputHeight = Math.max(div[0].offsetHeight + 10 /* the "threshold" */, minHeight);
+//
+//            //element.css('height', height + 'px');
+//
+//            console.log("Height: " + scope.inputHeight);
 //        }
 //
-//        element.keyup(function (e) {
-//
-//            var char = String.fromCharCode(e.which);
-//            var val = element.val();
-//
-//            // Is the character alphanumeric?
-//            if(/[a-zA-Z0-9 ]/.test(char)) {
-//                // New character - if it's a space replace it with
-//                // a character for the length calculation
-//                if(char == " ") {
-//                    char = "_";
-//                }
-//
-//                // Work out the new string
-//                val = element.val() + char;
-//
-//            }
-//
-//            validate (val);
-//        });
-//
+//        element.bind('keyup keydown keypress change', update);
+//        update();
 //
 //
 //    }
 //});
+
+myApp.directive('fitText', function () {
+
+    return function(scope, element, attr) {
+
+        element.bind('keyup', function(e) {
+            $(element).height(0);
+            var height = $(element)[0].scrollHeight;
+
+            // 8 is for the padding
+            if (height < 20) {
+                height = 28;
+            }
+
+            // If we go over the max height
+            var maxHeight = eval(attr.fitText);
+            if(height > maxHeight) {
+                height = maxHeight;
+                element.css({overflow: 'auto'});
+            }
+            else {
+                element.css({overflow: 'hidden'});
+            }
+
+            scope.inputHeight = height;
+
+            $(element).height(height);
+        });
+    }
+
+});

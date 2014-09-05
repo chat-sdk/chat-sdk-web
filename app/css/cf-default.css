@@ -286,7 +286,7 @@ div#cc-base div.cf-chat-box div.cf-chat-box-msg textarea.cf-chat-box-msg-txt {
     line-height: 20px;
 
     /*transition: all 0.2s linear 0s;*/
-    overflow: none;
+    overflow: hidden;
 
     box-sizing: border-box;
 }
