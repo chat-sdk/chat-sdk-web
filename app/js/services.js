@@ -697,6 +697,10 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     // Get the snapshot value
                     var val = snapshot.val();
 
+                    if(val.text.length == 0) {
+                        return;
+                    }
+
                     // Create the message object
                     var message = Message.buildMessageFromSnapshot(snapshot);
 
@@ -1454,6 +1458,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
         },
 
         sendMessage: function (room, text) {
+
+            if(!text || text.length == 0)
+                return;
 
             var message = Message.buildMessage(this.getUser().meta.uid, text);
             message.user = null;
