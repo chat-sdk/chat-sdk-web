@@ -641,6 +641,9 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         $scope.hideChat = false;
 
         $scope.tabClicked('messages');
+
+        // The height of the bottom message input bar
+        $scope.inputHeight = 26;
     }
 
     $scope.getZIndex = function () {

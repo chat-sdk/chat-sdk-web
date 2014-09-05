@@ -26,7 +26,7 @@
         <div ng-show="activeTab == 'users'" ng-include="'partials/user-list.html'"></div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - 27}" stop-shake>
+        <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
             <div  ng-repeat="message in room.getMessages()">
 
                 <div ng-show="messageIsMine(message)">
@@ -65,7 +65,7 @@
             <div class="cc-typing-indicator">
                 {{ getTyping() }}
             </div>
-            <textarea class="cf-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)"></textarea>
+            <textarea class="cf-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" fit-text="3" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)" ng-style="{'max-height': inputHeight}"></textarea>
         </div>
 
         <!--The overlay that appears if the user hasn't accepted the invitation-->
@@ -77,11 +77,8 @@
             <a ng-click="removeRoom(room)" ><img src="img/cc-40-cross.png"/></a>
             <a ng-click="acceptInvitation()" ><img src="img/cc-40-tick.png"/></a>
 
-            <!--<button class="uk-button uk-button-danger">Reject</button>-->
-            <!--<button class="uk-button uk-button-success">Accept</button>-->
         </div>
     </div>
-
 
     <div ng-show="room.badge" class="cc-badge cc-shadow">
         {{ room.badge }}
