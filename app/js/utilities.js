@@ -24,6 +24,11 @@ var bUserStatusMember = 'member';
 var bUserStatusInvited = 'invited';
 var bUserStatusBlocked = 'blocked';
 
+var bProfileSettingsBox = 'profileSettingsBox';
+
+var bShowProfileSettingsBox = 'showProfileSettingsBox';
+
+
 // Chat width
 var bChatRoomWidth = 230;
 var bChatRoomHeight = 300;

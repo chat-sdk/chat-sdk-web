@@ -9,12 +9,12 @@
 
                         <input class="cc-hidden-input" type="file" ng-file-select="onFileSelect($files)">
                     </div>
-                    <div class="uk-progress uk-progress-mini uk-width-4-5 uk-container-center" ng-show="uploadingFile">
+                    <div class="uk-progress uk-progress-mini uk-width-4-5 uk-container-center cc-animated-200" ng-style="uploadingFile ? {} : {'height': '0', 'margin-top':'-6px'}" >
                         <div class="uk-progress-bar" ng-style="{'width': uploadProgress + '%', 'opacity': uploadingFile ? 1 : 0}"></div>
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1 " type="text" placeholder="Display name *" ng-model="getUser().meta.name" limit-width="150" min-chars="3" />
+                    <input class="uk-width-1-1 " type="text" placeholder="Display name *" ng-model="getUser().meta.name"  ng-class="validation.name.valid ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1" rows="3" placeholder="Profile description" ng-model="getUser().meta.description"></textarea>
@@ -31,7 +31,7 @@
                     <div ng-include="'partials/year-of-birth-select.html'"></div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="City *" ng-model="getUser().meta.city" limit-width="200" min-chars="3" />
+                    <input class="uk-width-1-1" type="text" placeholder="City *" ng-model="getUser().meta.city" ng-class="validation.city.valid ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
                     <div ng-include="'partials/countries-select.html'"></div>
@@ -42,7 +42,7 @@
                             <a class="uk-width-1-1 uk-button uk-button-danger" ng-click="logout()">Logout</a>
                         </div>
                         <div class="uk-width-1-2">
-                            <a class="uk-width-1-1 uk-button uk-button-primary" ng-click="showMainBox()">Done</a>
+                            <a class="uk-width-1-1 uk-button uk-button-primary" ng-click="done()">Done</a>
                         </div>
                     </div>
                 </div>

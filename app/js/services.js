@@ -1091,7 +1091,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     name = authUser.username;
                 }
                 if(!name || name.length == 0) {
-                    name = "";
+                    name = "Anonymous" + Math.floor(Math.random() * 100 + 1);
                 }
                 user.meta.name = name;
 

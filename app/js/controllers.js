@@ -43,7 +43,11 @@ myApp.controller('AppController', [
      * Show the profile settings
      */
     $scope.showProfileSettingsBox = function () {
-        $scope.activeBox = 'profileSettingsBox';
+        $scope.activeBox = bProfileSettingsBox;
+
+        // This will allow us to setup validation after the user
+        // has been loaded
+        $scope.$broadcast(bShowProfileSettingsBox);
     }
 
     /**
@@ -918,19 +922,85 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
 
 }]);
 
-myApp.controller('ProfileSettingsController', ['$scope', function($scope) {
+myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope, Auth) {
 
+    $scope.ref = null,
+
+    $scope.init = function () {
+
+        // Listen for validation errors
+
+        $scope.validation = {
+            name: {
+                minChars: 3,
+                maxChars: 18,
+                valid: true
+            },
+            city: {
+                minChars: 3,
+                maxChars: 18,
+                valid: true
+            }
+        };
+
+        // When the box will be opened we need to add a listener to the
+        // user
+        $scope.$on(bShowProfileSettingsBox, (function (event, args) {
+
+            // Remove the previous listener
+            if($scope.ref) {
+                $scope.ref.off();
+            }
+
+            if(Auth.getUser() && Auth.getUser().meta && Auth.getUser().meta.uid) {
+
+                // Create a firebase ref to the user
+                $scope.ref = Paths.userMetaRef(Auth.getUser().meta.uid);
+
+                $scope.ref.on('value', function (snapshot) {
+
+                    $scope.validate();
+
+                }, function (error) {
+                    console.log("Error");
+                });
+
+            }
+
+        }).bind(this));
+    }
+
+    $scope.validate = function () {
+
+        var meta = Auth.getUser().meta;
+
+        // Validate the user
+        var nameValid = meta.name && meta.name.length >= $scope.validation.name.minChars && meta.name.length <= $scope.validation.name.maxChars;
+        $scope.validation.name.valid = nameValid;
+
+        var cityValid = meta.city && meta.city.length >= $scope.validation.city.minChars && meta.city.length <= $scope.validation.city.maxChars;
+        $scope.validation.city.valid = cityValid;
+
+        return nameValid && cityValid;
+
+    }
+
+    /**
+     * This is called when the user confirms changes to their user
+     * profile
+     */
     $scope.done = function () {
 
         // Is the name valid?
-        var name = $scope.getUser().meta.name;
-
-
-
-
-        var name = $scope.getUser().meta.city;
-
+        if($scope.validate()) {
+            $scope.showMainBox()
+        }
+        else {
+            $scope.showNotification(bNotificationTypeAlert, "Validation failed", "Please check that all fields are valid", "Ok");
+        }
     }
+
+    $scope.init();
 
 }]);
 

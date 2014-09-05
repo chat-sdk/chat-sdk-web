@@ -409,6 +409,8 @@ div#cc-create-room-box {
     z-index: 200;
 }
 
+
+
 /**
  * GENERAL
  */
@@ -697,6 +699,7 @@ a.disabled {
     cursor: default;
 }
 
-
-
+.cc-animated-200 {
+    transition: all 0.2s linear 0s;
+}
 

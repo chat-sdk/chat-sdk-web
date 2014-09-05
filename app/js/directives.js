@@ -487,23 +487,49 @@ myApp.directive('autoGrow', function() {
     }
 });
 
-myApp.directive('limitWidth', function () {
-
-    $.fn.textWidth = function(text, font) {
-        if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
-        $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
-        return $.fn.textWidth.fakeEl.width();
-    };
-
-    return function (scope, element, attr) {
-        var maxWidth = element.attr('limit-width');
-        var minChars = element.attr('min-chars');
-
-//        element.keydown(function (e) {
+//myApp.directive('ccValidate', function () {
+//
+//    $.fn.textWidth = function(text, font) {
+//        if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+//        $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+//        return $.fn.textWidth.fakeEl.width();
+//    };
+//
+//    return function (scope, element, attr) {
+//
+//        var options = eval(attr.ccValidate);
+//
+//        //var maxWidth = options.maxWidth;
+//        var maxChars = scope.validation[options.name].maxChars;
+//        var minChars = scope.validation[options.name].minChars;
+//
+//        var validate = function (val) {
+//
+//            //var newWidth = $.fn.textWidth(val, element.css("font"));
+//
+//            // Depending on the width work out if the field is valid
+//            var valid = val.length <= maxChars && val.length >= minChars;
+//
+//            if (valid) {
+//                element.removeClass('uk-form-danger');
+//            }
+//            else {
+//                element.addClass('uk-form-danger');
+//            }
+//
+//            if(!scope.validation) {
+//                scope.validation = {};
+//            }
+//
+//            // Pass the data back to the scope so we can
+//            // validate the variables
+//            scope.validation[options.name] = valid;
+//        }
+//
+//        element.keyup(function (e) {
 //
 //            var char = String.fromCharCode(e.which);
-//
-//            console.log(""+scope);
+//            var val = element.val();
 //
 //            // Is the character alphanumeric?
 //            if(/[a-zA-Z0-9 ]/.test(char)) {
@@ -514,48 +540,14 @@ myApp.directive('limitWidth', function () {
 //                }
 //
 //                // Work out the new string
-//                var val = element.val() + char;
+//                val = element.val() + char;
 //
-//                var newWidth = $.fn.textWidth(val, element.css("font"));
-//
-//                return newWidth <= maxWidth;
 //            }
-//            return true;
 //
+//            validate (val);
 //        });
-
-        element.keyup(function (e) {
-
-            var char = String.fromCharCode(e.which);
-            var val = element.val();
-
-            // Is the character alphanumeric?
-            if(/[a-zA-Z0-9 ]/.test(char)) {
-                // New character - if it's a space replace it with
-                // a character for the length calculation
-                if(char == " ") {
-                    char = "_";
-                }
-
-                // Work out the new string
-                val = element.val() + char;
-
-            }
-
-            var newWidth = $.fn.textWidth(val, element.css("font"));
-
-            // Depending on the width work out if the field is valid
-            var valid = newWidth < maxWidth && val.length > minChars;
-
-
-            if (valid) {
-                element.removeClass('uk-form-danger');
-            }
-            else {
-                element.addClass('uk-form-danger');
-            }
-
-        });
-
-    }
-});
+//
+//
+//
+//    }
+//});
