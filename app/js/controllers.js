@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout) {
+    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Utilities',
+    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Utilities) {
 
     $scope.init = function () {
 
@@ -224,7 +224,9 @@ myApp.controller('AppController', [
             $scope.getUser().unblockUser(user);
         }
         else {
-            Auth.createPrivateRoom([user]);
+            Auth.createPrivateRoom([user]).then(function() {
+                console.log("Complete");
+            });
         }
     }
 
@@ -329,7 +331,7 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', function($scope, Auth, Cache) {
+myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', function($scope, Auth, Cache, Utilities) {
 
     $scope.init = function () {
         // Make the users tab start clicked
@@ -371,8 +373,7 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', function($scop
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin) {
-
+myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API) {
 
     /**
      * Initialize the login controller
@@ -533,13 +534,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
-        // Now we need to get the API information
-        API.getAPIDetails((function(api) {
+        API.getAPIDetails().then((function(api) {
 
             Paths.setCID(api.cid);
 
-            // Get the number of chatters
-            Auth.numberOfChatters((function (number) {
+            Auth.numberOfChatters().then((function(number) {
 
                 $scope.hideNotification();
 
@@ -549,14 +548,21 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                 }
                 else {
 
-                    Auth.bindUser(user, function () {
+                    Auth.bindUser(user).then(function() {
                         // We have the user's ID so we can get the user's object
                         $scope.showProfileSettingsBox();
-
+                    }, function(error) {
+                        // TODO: Handle this
                     });
                 }
-            }).bind(this));
-        }).bind(this));
+
+            }).bind(this), function (error) {
+                // TODO: Handle error
+            });
+
+        }).bind(this), function (error) {
+            // TODO: Handle error
+        });
     }
 
     /**
@@ -843,9 +849,7 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
     }
 
     $scope.createRoom  = function () {
-        Auth.createPublicRoom($scope.room, function () {
-
-        });
+        Auth.createPublicRoom($scope.room);
         $scope.back();
     }
 
@@ -867,7 +871,7 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
 
 }]);
 
-myApp.controller('PublicRoomsListController', ['$scope', 'Cache', function($scope, Cache) {
+myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', function($scope, Cache, Utilities) {
 
     $scope.getRooms = function() {
         // Filter rooms by search text
@@ -876,7 +880,7 @@ myApp.controller('PublicRoomsListController', ['$scope', 'Cache', function($scop
 
 }]);
 
-myApp.controller('FriendsListController', ['$scope', 'Cache', function($scope, Cache) {
+myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', function($scope, Cache, Utilities) {
 
     $scope.init = function (header) {
         $scope.sectionHeader = header;

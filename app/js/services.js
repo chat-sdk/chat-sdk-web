@@ -19,6 +19,86 @@ myApp.factory('Config', function () {
     }
 });
 
+myApp.factory('API', ['$q', function ($q) {
+    return {
+        getAPIDetails: function () {
+
+            var deferred = $q.defer();
+
+            // Make up some API Details
+            var api = {
+                cid: "xxyyzz",
+                max: 30,
+                rooms: [
+                    {
+                        fid: "123123",
+                        name: "Fixed 1",
+                        desc: "This is fixed 1"
+                    }
+                ]
+            };
+
+            setTimeout(function () {
+                deferred.resolve(api);
+            },10);
+
+            return deferred.promise;
+        }
+    }
+}]);
+
+myApp.factory('Utilities', ['$q', function ($q) {
+    return {
+
+        filterByName: function (array, name) {
+            if(!name || name == "") {
+                return array;
+            }
+            else {
+                // Loop over all users
+                var result = {};
+                var u = null;
+                var t = null;
+                var n = null;
+                for(var id in array) {
+                    u = array[id];
+                    // Switch to lower case and remove spaces
+                    // to improve search results
+                    t = name.toLowerCase().replace(/ /g,'');
+                    n = u.meta.name.toLowerCase().replace(/ /g,'');
+                    if(n.substring(0, t.length) == t) {
+                        result[id] = u;
+                    }
+                }
+                return result;
+            }
+        },
+
+        saveImageFromURL: function (context, url) {
+
+            var deferred = $q.defer();
+
+            context.post('server/pull.php', {'url': url}).success(function(data, status) {
+
+                deferred.resolve(data.fileName);
+
+            }).error(function(data, status) {
+
+                deferred.reject();
+
+            });
+
+            return deferred.promise;
+        },
+
+        textWidth: function (text, font) {
+            if (!this.textWidth.fakeEl) this.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+            this.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+            return this.textWidth.fakeEl.width();
+        }
+    }
+}]);
+
 myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
     var layout = {
 
@@ -928,30 +1008,11 @@ myApp.factory('Message', function (Cache, User) {
     return message;
 });
 
-myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, Cache, User, Room, Message, Layout, Facebook) {
+myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, $q, Cache, User, Room, Message, Layout, Facebook) {
 
     var Auth = {
 
         _model: null,
-
-        init: function () {
-            //this._model = {user: null};
-        },
-
-        /**
-         * Give the service access to the scope
-         * the service will handle all interactions with
-         * Firebase and communicate with the controller
-         * by updaing the model and via callbacks
-         * @param model - AngularJS $scope variable
-         */
-        //setModel: function (model) {
-        //    this._model = $rootScope;
-        //},
-
-        //setUser: function (user) {
-        //    $rootScope.user = user;
-        //},
 
         getUser: function () {
             return $rootScope.user;
@@ -1008,27 +1069,25 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
          * Create a new AngularFire simple login object
          * this object will try to authenticate the user if
          * a session exists
-         * @param callback - notify if the authentication was successful
+         * @param authUser - the authentication user provided by Firebase
          */
-        // TODO: Use promise
-        bindUser: function (authUser, callback) {
+        bindUser: function (authUser) {
+
+            var deferred = $q.defer();
 
             // Set the user's ID
             Paths.userMetaRef(authUser.uid).update({uid: authUser.uid});
 
-            // Bind the user's meta data
-            this.bindUserWithUID(authUser.uid, (function () {
-
-                callback();
+            this.bindUserWithUID(authUser.uid).then((function () {
 
                 var user = this.getUser();
 
                 var name = user.meta.name;
                 if(!name || name.length == 0) {
-                    name = user.displayName;
+                    name = authUser.displayName;
                 }
                 if(!name || name.length == 0) {
-                    name = user.username;
+                    name = authUser.username;
                 }
                 if(!name || name.length == 0) {
                     name = "";
@@ -1036,21 +1095,24 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                 user.meta.name = name;
 
                 var imageURL = null;
-                var thirdPartyData = user.thirdPartyUserData;
+                var thirdPartyData = authUser.thirdPartyUserData;
 
                 /** SOCIAL INFORMATION **/
-                if(user.provider == "facebook") {
+                if(authUser.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
                     if(!user.meta.imageURL) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
-                            Utilities.saveImageFromURL($http, response.data.url, function(fileName) {
+
+                            Utilities.saveImageFromURL($http, response.data.url).then(function(fileName) {
                                 user.meta.imageURL = fileName;
+                            }, function(error) {
+
                             });
                         });
                     }
                 }
-                if(user.provider == "twitter") {
+                if(authUser.provider == "twitter") {
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
@@ -1060,20 +1122,22 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                         user.meta.description = thirdPartyData.description;
                     }
                 }
-                if(user.provider == "github") {
+                if(authUser.provider == "github") {
                     imageURL = thirdPartyData.avatar_url;
                 }
-                if(user.provider == "google") {
+                if(authUser.provider == "google") {
                     imageURL = thirdPartyData.picture;
                 }
-                if(user.provider == "anonymous") {
+                if(authUser.provider == "anonymous") {
 
                 }
 
                 // If they don't have a profile picture load it from the social network
                 if(!user.meta.imageURL && imageURL) {
-                    Utilities.saveImageFromURL($http, imageURL, function(fileName) {
+                    Utilities.saveImageFromURL($http, imageURL).then(function(fileName) {
                         user.meta.imageURL = fileName;
+                    }, function(error) {
+
                     });
                 }
 
@@ -1108,19 +1172,23 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                 this.addOnlineUsersListener();
 
                 // Add listeners to the user
-                this.addListenersToUser(authUser.uid, (function () {
+                this.addListenersToUser(authUser.uid);
 
-                }).bind(this));
-            }).bind(this));
+                deferred.resolve();
+
+            }).bind(this), function (error) {
+                deferred.reject(error);
+            });
+
+            return deferred.promise;
         },
 
         /**
          * This adds a listener to the user's chat rooms
          * and then adds a message listener to each room
          * @param uid - the user's Firebase ID
-         * @param callback - notify when we finish
          */
-        addListenersToUser: function (uid, callback) {
+        addListenersToUser: function (uid) {
 
             // Listen to the user's rooms
             var roomsRef = Paths.userRoomsRef(uid);
@@ -1220,7 +1288,9 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
             }).bind(this));
         },
 
-        bindUserWithUID: function (uid, callback) {
+        bindUserWithUID: function (uid) {
+
+            var deferred = $q.defer();
 
             // Get a ref to the user
             var userMetaRef = Paths.userMetaRef(uid);
@@ -1254,23 +1324,27 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                 // Mark the user as online
                 console.log("Did bind user to scope " + uid);
 
-                if (callback) {
-                    callback();
-                }
-            }).bind(this));
+                deferred.resolve();
+
+            }).bind(this), function (error) {
+                deferred.reject(error);
+            });
+
+            return deferred.promise;
         },
 
         /**
          * Create a new chat room
          * @param The owner of the room
          * @param A list of users to add
-         * @param A callback function
          */
-        createPrivateRoom: function (users, callback) {
+        createPrivateRoom: function (users) {
+
+            var deferred = $q.defer();
 
             var room = Room.newRoom();
 
-            this.createRoom(room, (function () {
+            this.createRoom(room).then((function() {
 
                 this.joinRoom(room, bUserStatusOwner);
 
@@ -1279,21 +1353,22 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                     users[i].addRoom(room);
                 }
 
-                try {
-                    callback();
-                } catch (e) {
+                deferred.resolve();
 
-                }
-            }).bind(this));
+            }).bind(this), function(error) {
+                deferred.reject(error);
+            });
+
+            return deferred.promise;
         },
 
         /**
          * Create a new chat room
-         * @param The owner of the room
-         * @param A list of users to add
-         * @param A callback function
+         * @param The room options
          */
-        createPublicRoom: function (options, callback) {
+        createPublicRoom: function (options) {
+
+            var deferred = $q.defer();
 
             var room = Room.newRoom();
 
@@ -1302,7 +1377,7 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
             room.meta.private = options.private;
             room.meta.invitesEnabled = options.invitesEnabled;
 
-            this.createRoom(room, (function () {
+            this.createRoom(room).then((function() {
 
                 // Once the room's created we need to
                 // add it to the list of public rooms
@@ -1311,10 +1386,18 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
 
                 this.joinRoom(room, bUserStatusOwner);
 
-            }).bind(this));
+                deferred.resolve();
+
+            }).bind(this), function(error) {
+                deferred.reject(error);
+            });
+
+            return deferred.promise;
         },
 
-        createRoom: function (room, callback) {
+        createRoom: function (room) {
+
+            var deferred = $q.defer();
 
             var ref = Paths.roomsRef();
 
@@ -1326,9 +1409,18 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
             room.meta.rid = roomRef.name();
 
             // Add the room to Firebase
-            roomMetaRef.set(room.meta, (function () {
-                callback();
+            roomMetaRef.set(room.meta, (function (error) {
+
+                if(error) {
+                    deferred.reject(error);
+                }
+                else {
+                    deferred.resolve();
+                }
+
             }).bind(this));
+
+            return deferred.promise;
         },
 
         deleteRoom: function (room) {
@@ -1373,7 +1465,9 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
             return uid == this.getUser().meta.uid;
         },
 
-        numberOfChatters: function (callback) {
+        numberOfChatters: function () {
+
+            var deferred = $q.defer();
 
             // Get the number of chatters
             var ref = Paths.onlineUsersRef();
@@ -1383,12 +1477,13 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
                 for(var key in snapshot.val()) {
                     i++;
                 }
-                callback(i);
+
+                deferred.resolve(i);
             });
+
+            return deferred.promise;
         }
     }
-
-    Auth.init();
 
     return Auth;
 
