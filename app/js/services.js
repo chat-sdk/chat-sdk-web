@@ -1008,7 +1008,8 @@ myApp.factory('Message', function (Cache, User) {
     return message;
 });
 
-myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $timeout, $http, $q, Cache, User, Room, Message, Layout, Facebook) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Message', 'Layout', 'Utilities',
+              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Message, Layout, Utilities) {
 
     var Auth = {
 
@@ -1487,4 +1488,4 @@ myApp.factory('Auth', function ($rootScope, $firebase, $firebaseSimpleLogin, $ti
 
     return Auth;
 
-});
+}]);
