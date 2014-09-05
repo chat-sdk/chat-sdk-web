@@ -9,7 +9,7 @@
 
                         <input class="cc-hidden-input" type="file" ng-file-select="onFileSelect($files)">
                     </div>
-                    <div class="uk-progress uk-progress-mini uk-width-4-5 uk-container-center">
+                    <div class="uk-progress uk-progress-mini uk-width-4-5 uk-container-center" ng-show="uploadingFile">
                         <div class="uk-progress-bar" ng-style="{'width': uploadProgress + '%', 'opacity': uploadingFile ? 1 : 0}"></div>
                     </div>
                 </div>

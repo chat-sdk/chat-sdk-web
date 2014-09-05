@@ -266,7 +266,6 @@ myApp.controller('AppController', [
         $scope.uploadingFile = true;
         $scope.uploadProgress = 0;
 
-
         //$files: an array of files selected, each file has name, size, and type.
         for (var i = 0; i < $files.length; i++) {
             var file = $files[i];
