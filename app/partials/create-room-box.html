@@ -7,7 +7,7 @@
 
             <form class=" uk-form">
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="Name" ng-model="room.name" required />
+                    <input class="uk-width-1-1" type="text" placeholder="Name" ng-model="room.name" cc-focus="focusName" ng-blur="focusName = false" required />
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1" rows="3" placeholder="Description" ng-model="room.description"></textarea>

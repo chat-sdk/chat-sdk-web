@@ -60,6 +60,7 @@ myApp.controller('AppController', [
      */
     $scope.showCreateRoomBox = function () {
         $scope.activeBox = 'createRoomBox';
+        $scope.$broadcast(bShowCreateChatBox);
     }
 
     $scope.toggleMainBoxVisibility = function() {
@@ -870,6 +871,10 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
 
     $scope.init = function () {
         $scope.clearForm();
+
+        $scope.$on(bShowCreateChatBox, function () {
+            $scope.focusName = true;
+        });
     }
 
     $scope.createRoom  = function () {

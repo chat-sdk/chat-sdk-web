@@ -32,7 +32,7 @@ var bFriendsTab = 'friends';
 var bProfileSettingsBox = 'profileSettingsBox';
 
 var bShowProfileSettingsBox = 'showProfileSettingsBox';
-
+var bShowCreateChatBox = 'showCreateChatBox';
 
 // Chat width
 var bChatRoomWidth = 230;
