@@ -471,7 +471,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
     $scope.loginWithPassword = function () {
         $scope.login('password',{
             email:$scope.email,
-            password:$scope.password}
+            password:$scope.password,
+            rememberMe: $scope.rememberMe}
         );
     }
 
@@ -498,9 +499,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
             //$scope.handleUserLogin(user);
 
         }, function(error) {
-
             $scope.handleLoginError(error);
-
         });
     }
 

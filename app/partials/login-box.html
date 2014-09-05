@@ -27,14 +27,14 @@
                     </div>
                 </div>
                 <div class="uk-form-row uk-text-small">
-                    <label class="uk-float-left"><input type="checkbox"> Remember Me</label>
+                    <label class="uk-float-left"><input type="checkbox" ng-model="rememberMe"> Remember Me</label>
                     <a class="uk-float-right uk-link uk-link-muted" ng-click="forgotPassword(email)" ng-class="email.length == 0 ? 'disabled' : ''">Forgot Password?</a>
                 </div>
                 <div class="uk-form-row">
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="login('facebook')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter" ng-click="login('twitter')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-github" ng-click="login('github')"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus" ng-click="login('google')"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook" ng-click="login('facebook', {'rememberMe': rememberMe})"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter" ng-click="login('twitter', {'rememberMe': rememberMe})"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-github" ng-click="login('github', {'rememberMe': rememberMe})"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus" ng-click="login('google', {'rememberMe': rememberMe})"></a>
                 </div>
                 <div class="uk-form-row">
                     <a class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</a>
