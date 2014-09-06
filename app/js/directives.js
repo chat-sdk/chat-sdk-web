@@ -514,13 +514,11 @@ myApp.directive('fitText', function () {
                 scope.inputHeight = height;
             });
 
-            //$(element).height(height);
             element.css({'max-height': height});
             element.css({'height': height});
 
         });
     }
-
 });
 
 myApp.directive('ccFocus', function () {

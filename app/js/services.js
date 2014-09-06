@@ -1024,6 +1024,16 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 return room.messages;
             }
 
+            room.lastMessage = function () {
+                var messages = this.getMessages();
+                if(messages.length > 0) {
+                    return messages[messages.length - 1];
+                }
+                else {
+                    return 0;
+                }
+            }
+
             return room;
         }
     }

@@ -1,7 +1,28 @@
-<table class="uk-table uk-table-hover">
+<table class="uk-table uk-table-hover room-list">
     <tr ng-repeat="(id, room) in getRooms()">
-        <td class="cc-pointer" ng-click="roomClicked(room)">
-            {{ room.getName() }}  <div class="uk-float-right cc-right-margin-5">{{ room.userCount() }}</div>
+        <td class="cc-pointer uk-position-relative" ng-click="roomClicked(room)">
+            <div class="uk-overflow-container">
+                <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 60 }">
+                    <a ng-show="canDeleteRoom" ng-click="deleteRoom(room)"><img src="../img/cc-20-cross.png" /></a>
+                    {{ room.getName() }}
+                </div>
+                <div class="uk-float-right cc-right-margin-5">
+                    {{ room.userCount() }}
+                    <img src="../img/cc-20-user.png" />
+                    <div ng-show="room.badge" class="cc-badge cc-shadow">
+                        {{ room.badge }}
+                    </div>
+                </div>
+            </div>
+            <!--We need to subtract 10 for the padding-->
+            <div class="last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
+                <div class="uk-float-left cc-ellipsis title" >
+                    {{ room.lastMessage().user().meta.name }}:
+                </div>
+                <div class="cc-ellipsis message">
+                    &nbsp; {{ room.lastMessage().text }}
+                </div>
+            </div>
         </td>
     </tr>
 </table>

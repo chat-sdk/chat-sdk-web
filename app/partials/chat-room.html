@@ -2,13 +2,14 @@
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{'right': room.offset, 'height': (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location >
 
     <div class="cf-chat-box cc-shadow" ng-style="{'height': room.height, 'width': room.width}" ng-hide="room.minimized"  >
-        <div class="cc-box-header cc-pointer">{{ room.getName() }}
+        <div class="cc-box-header cc-pointer">
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
                 <img src="img/cc-30-minimize.png" />
             </a>
             <a class="uk-float-left cc-image-30 cc-resize-cursor" title="Resize room" resize-room>
                 <img src="img/cc-30-resize.png" />
             </a>
+            <div class="cc-ellipsis uk-float-left" ng-style="{'width': room.width - 60}">{{ room.getName() }}</div>
         </div>
 
         <div class="cc-tab-container cc-bottom-shadow">
@@ -87,8 +88,8 @@
     <div class="cc-chat-bar" ng-click="toggleVisibility()" >
         <div class="cc-base-text">
             <div class="inner">
-                <div class="uk-float-left">{{ room.getName() }}</div>
-                <a ng-click="removeRoom(room)">
+                <div class="uk-float-left cc-ellipsis name">{{ room.getName() }}</div>
+                <a ng-click="deleteRoom(room)">
                     <img class="uk-float-right cc-image-30" src="img/cc-30-cross.png" disable-drag/>
                 </a>
                 <div class="uk-float-right">{{ room.userCount() }}</div>

@@ -67,6 +67,7 @@ div#cc-base div.cf-menu-bar {
     font-size: 14px;
     font-weight: bold;
     line-height: 30px;
+    height: 30px;
     color: #fff;
     text-align: center;
     background-color: #0d82b3;
@@ -75,6 +76,10 @@ div#cc-base div.cf-menu-bar {
     /*border-left: solid 1px #0d82b3;*/
     /*border-right: solid 1px #0d82b3;*/
     width: 100%;
+}
+
+.cc-box-header div {
+    overflow: hidden;
 }
 
 /**
@@ -198,6 +203,28 @@ div#cc-base div.cc-room-list-bar {
 }
 
 /**
+ * Room list
+ */
+
+.room-list div.last-message {
+    font-size: 0.8em;
+}
+
+.room-list div.last-message .title {
+    font-weight: bold;
+    max-width: 30%;
+}
+
+.room-list div.last-message .message {
+    font-style: italic;
+}
+
+.room-list div.cc-badge {
+    position: absolute;
+    top: 6px;
+    right: -10px;
+}
+/**
  * Chat box
  */
 
@@ -236,9 +263,8 @@ div#cc-base div.cf-chat-box .cf-overlay-content img {
     margin: 10px 5px;
 }
 
-
 /* The base of the chat box */
-div#cc-base div.cc-chat-bar {
+div.cc-chat-bar {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -248,6 +274,17 @@ div#cc-base div.cc-chat-bar {
     /*margin-left: 30px;*/
     /*float: right;*/
     z-index: -10;
+}
+
+div.cc-chat-bar div.name {
+    max-width: 150px;
+}
+
+/* Position the badge */
+div.cc-chat-box-outer div.cc-badge {
+    position: absolute;
+    bottom: 20px;
+    right: 190px;
 }
 
 /* The area that contains the messages */
@@ -565,9 +602,6 @@ a {
 }
 
 .cc-badge {
-    position: absolute;
-    bottom: 20px;
-    right: 190px;
 
     background: #ba1440;
     width: 20px;
@@ -704,3 +738,8 @@ a.disabled {
     transition: all 0.2s linear 0s;
 }
 
+.cc-ellipsis {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

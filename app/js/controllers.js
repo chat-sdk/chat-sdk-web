@@ -344,6 +344,13 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
 
         // Make the users tab start clicked
         $scope.tabClicked(bUsersTab);
+
+        // This is used by sub views for their layouts
+        $scope.boxWidth = bMainBoxWidth;
+
+        // We don't want people deleting rooms from this view
+        $scope.canDeleteRoom = false;
+
     }
 
     $scope.showOverlay = function (message) {
@@ -660,7 +667,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         $scope.activeTab = tab;
     }
 
-    $scope.removeRoom = function(room) {
+    $scope.deleteRoom = function(room) {
         Auth.deleteRoom(room);
     }
 
@@ -829,12 +836,27 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function($scope, Auth, Layout) {
 
     $scope.init = function () {
-        $scope.roomListBoxWidth = bRoomListBoxWidth;
+        $scope.boxWidth = bRoomListBoxWidth;
+        $scope.canDeleteRoom = true;
     }
 
     $scope.superGetRooms = $scope.getRooms;
     $scope.getRooms = function() {
-        return $scope.superGetRooms(false);
+        var rooms = $scope.superGetRooms(false);
+
+        // Sort rooms by the number of unread messages
+        rooms.sort(function (a, b) {
+            // First order by number of unread messages
+            if(a.badge != b.badge) {
+                return b.badge - a.badge;
+            }
+            // Otherwise sort them by number of users
+            else {
+                return b.userCount() - a.userCount();
+            }
+        });
+
+        return rooms;
     }
 
     $scope.roomClicked = function(room) {
@@ -863,9 +885,15 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
                 room.height = height;
                 room.active = true;
                 room.badge = null;
+                room.minimized = false;
+
                 break;
             }
         }
+    }
+
+    $scope.deleteRoom = function(room) {
+        Auth.deleteRoom(room);
     }
 
     $scope.init();
@@ -905,7 +933,7 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
 
 }]);
 
-myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', function($scope, Cache, Utilities) {
+myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', 'Auth', function($scope, Cache, Utilities, Auth) {
 
     $scope.getRooms = function() {
         // Filter rooms by search text
