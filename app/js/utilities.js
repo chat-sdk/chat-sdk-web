@@ -89,7 +89,7 @@ var Paths = {
     },
 
     onlineUsersRef: function () {
-        return this.usersRef().child(bOnlineKey);
+        return this.firebase().child(bOnlineKey);
     },
 
     onlineUserRef: function (fid) {
