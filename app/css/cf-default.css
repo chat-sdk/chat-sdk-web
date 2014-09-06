@@ -178,7 +178,7 @@ div#cc-base div#cc-profile-box {
  */
 
 div#cc-base div.cc-room-list-box {
-    width: 230px;
+    width: 100%;
     height: 300px;
     left: 0;
 
@@ -193,7 +193,7 @@ div#cc-base div.cc-room-list-box {
 /* The base of the room list box */
 div#cc-base div.cc-room-list-bar {
     position: fixed;
-    width: 200px;
+    width: 100px;
     left: 0;
 }
 

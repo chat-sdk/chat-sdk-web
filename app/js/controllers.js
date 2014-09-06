@@ -19,8 +19,6 @@ myApp.controller('AppController', [
 
     }
 
-
-
     $scope.getUser = function () {
         return Auth.getUser();
     }
@@ -742,7 +740,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         // Constrain the chat window
         $scope.room.width = Math.max(bChatRoomWidth, $scope.room.width);
 
-        var screenWidth = Layout.showRoomListBox() ? $scope.screenWidth - bRoomsListBoxWidth - bChatRoomSpacing : $scope.screenWidth;
+        var screenWidth = Layout.showRoomListBox() ? $scope.screenWidth - bRoomListBoxWidth - bChatRoomSpacing : $scope.screenWidth;
 
         if($scope.room.width + $scope.room.offset >= screenWidth) {
             $scope.room.width = screenWidth - $scope.room.offset;
@@ -830,6 +828,10 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
 myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function($scope, Auth, Layout) {
 
+    $scope.init = function () {
+        $scope.roomListBoxWidth = bRoomListBoxWidth;
+    }
+
     $scope.superGetRooms = $scope.getRooms;
     $scope.getRooms = function() {
         return $scope.superGetRooms(false);
@@ -865,6 +867,8 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
             }
         }
     }
+
+    $scope.init();
 
 }]);
 

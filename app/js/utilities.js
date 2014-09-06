@@ -44,11 +44,10 @@ var bChatRoomHeight = 300;
 var bChatRoomTopMargin = 60;
 var bChatRoomSpacing = 15;
 
-
 var bMainBoxWidth = 250;
 var bMainBoxHeight = 230;
 
-var bRoomsListBoxWidth = 230;
+var bRoomListBoxWidth = 200;
 
 var bProfileBoxWidth = 300;
 

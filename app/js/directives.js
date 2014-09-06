@@ -497,7 +497,7 @@ myApp.directive('fitText', function () {
 
             // 8 is for the padding
             if (height < 20) {
-                height = 28;
+                height = 26;
             }
 
             // If we go over the max height
@@ -510,9 +510,14 @@ myApp.directive('fitText', function () {
                 element.css({overflow: 'hidden'});
             }
 
-            scope.inputHeight = height;
+            scope.$apply(function () {
+                scope.inputHeight = height;
+            });
 
-            $(element).height(height);
+            //$(element).height(height);
+            element.css({'max-height': height});
+            element.css({'height': height});
+
         });
     }
 

@@ -214,7 +214,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             // the rooms list will be hidden which will
             // give us extra space
             if(lastRoom.width + lastRoom.offset > $rootScope.screenWidth) {
-                width -= bRoomsListBoxWidth;
+                width -= bRoomListBoxWidth;
             }
             else {
 
