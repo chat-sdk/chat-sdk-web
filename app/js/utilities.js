@@ -34,6 +34,9 @@ var bProfileSettingsBox = 'profileSettingsBox';
 var bShowProfileSettingsBox = 'showProfileSettingsBox';
 var bShowCreateChatBox = 'showCreateChatBox';
 
+var bVisibilityChangedNotification = 'bVisibilityChangedNotification';
+
+
 // Chat width
 var bChatRoomWidth = 230;
 var bChatRoomHeight = 300;

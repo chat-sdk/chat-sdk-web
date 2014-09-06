@@ -19,6 +19,75 @@ myApp.factory('Config', function () {
     }
 });
 
+myApp.service('Visibility', function Visibility($rootScope) {
+
+    document.addEventListener("visibilitychange",changed);
+    document.addEventListener("webkitvisibilitychange", changed);
+    document.addEventListener("mozvisibilitychange", changed);
+    document.addEventListener("msvisibilitychange", changed);
+
+    function changed() {
+        $rootScope.$broadcast(bVisibilityChangedNotification, document.hidden || document.webkitHidden || document.mozHidden || document.msHidden);
+    }
+});
+
+/**
+ * The presence service handles the user's online / offline
+ * status
+ */
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($rootScope, $timeout, Visibility) {
+    return {
+
+        user: null,
+        inactiveTimerPromise: null,
+
+        // Initialize the visibility service
+        start: function (user) {
+
+            this.user = user;
+
+            // Take the user online
+            this.goOnline();
+
+            $rootScope.$on(bVisibilityChangedNotification, (function (e, hidden) {
+                console.log('Hidden: ' + hidden);
+                if(!hidden) {
+
+                    // If the user's clicked the screen then cancel the
+                    // inactivity timer
+                    if(this.inactiveTimerPromise) {
+                        $timeout.cancel(this.inactiveTimerPromise);
+                    }
+                    this.goOnline();
+                }
+                else {
+                    // If the user switches tabs and doesn't enter for
+                    // 2 minutes take them offline
+                    this.inactiveTimerPromise = $timeout((function () {
+                        this.goOffline();
+                    }).bind(this), 1000 * 60 * 2);
+                }
+            }).bind(this));
+
+        },
+
+        stop: function () {
+            this.user = null;
+        },
+
+        goOffline: function () {
+            Firebase.goOffline();
+        },
+
+        goOnline: function () {
+            Firebase.goOnline();
+            if(this.user) {
+                this.user.goOnline();
+            }
+        }
+    }
+}]);
+
 myApp.factory('API', ['$q', function ($q) {
     return {
         getAPIDetails: function () {
@@ -642,6 +711,7 @@ myApp.factory('User', function ($rootScope, $timeout) {
             user.meta.uid = uid;
 
             user.goOnline = function () {
+
                 var ref = Paths.onlineUserRef(uid);
 
                 ref.setWithPriority({
@@ -1012,8 +1082,8 @@ myApp.factory('Message', function (Cache, User) {
     return message;
 });
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Message', 'Layout', 'Utilities',
-              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Message, Layout, Utilities) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Message', 'Layout', 'Utilities', 'Presence',
+              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Message, Layout, Utilities, Presence) {
 
     var Auth = {
 
@@ -1057,17 +1127,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
 
             }).bind(this));
-        },
-
-        goOffline: function () {
-            Firebase.goOffline();
-        },
-
-        goOnline: function () {
-            Firebase.goOnline();
-            if(this.getUser()) {
-                this.getUser().goOnline();
-            }
         },
 
         /**
@@ -1317,7 +1376,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 // TODO: Check this
 
-                this.getUser().goOnline();
+
+                //
+                Presence.start(this.getUser());
+
+
 
                 $rootScope.unbindUser = (function () {
                     unbind();

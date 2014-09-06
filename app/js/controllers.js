@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout) {
+    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence',
+    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence) {
 
     $scope.init = function () {
 
@@ -247,10 +247,10 @@ myApp.controller('AppController', [
     $scope.shutdown = function () {
         $scope.on = !$scope.on;
         if($scope.on) {
-            Auth.goOnline();
+            Presence.goOnline();
         }
         else {
-            Auth.goOffline();
+            Presence.goOffline();
         }
     }
 
@@ -396,7 +396,8 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API) {
+myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', 'Presence',
+    function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API, Presence) {
 
     /**
      * Initialize the login controller
@@ -457,7 +458,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         }
 
         // Now we need to
-        Auth.goOffline();
+        Presence.goOffline();
 
         // Clear the cache down
         Cache.clear();
@@ -485,7 +486,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
     $scope.login = function (method, options) {
 
         // Re-establish a connection with Firebase
-        Auth.goOnline();
+        Presence.goOnline();
 
         // Reset any error messages
         $scope.showError = false;
@@ -526,7 +527,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
     $scope.signUp = function (email, password) {
 
         // Re-establish connection with Firebase
-        Auth.goOnline();
+        Presence.goOnline();
 
         $scope.showError = false;
 
