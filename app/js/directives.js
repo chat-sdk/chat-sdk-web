@@ -533,3 +533,9 @@ myApp.directive('ccFocus', function () {
         }
     };
 });
+
+myApp.directive('ccUncloak', function () {
+    return function (scope, element, attr) {
+        element.removeAttr('style');
+    }
+});
