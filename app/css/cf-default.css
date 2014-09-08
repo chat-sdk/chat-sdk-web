@@ -253,26 +253,12 @@ div#cc-base div.cf-chat-box {
 
 }
 
-div#cc-base div.cf-chat-box .cf-overlay-content {
-    max-width: 150px;
-    max-height: 70px;
-    color: black;
-}
-
-div#cc-base div.cf-chat-box .cf-overlay-content img {
-    margin: 10px 5px;
-}
-
 /* The base of the chat box */
 div.cc-chat-bar {
     position: absolute;
     right: 0;
     bottom: 0;
-    /*position: fixed;*/
-    /* The offset is set dynamically */
     width: 200px;
-    /*margin-left: 30px;*/
-    /*float: right;*/
     z-index: -10;
 }
 
@@ -292,8 +278,6 @@ div#cc-base div.cf-chat-box div.cf-chat-box-msgs {
     height: 240px;
     overflow-y: auto;
     width: 100%;
-    /*border-left: 1px #DDD solid;*/
-    /*border-right: 1px #DDD solid;*/
 }
 
 /* The text area container */
@@ -422,6 +406,30 @@ div.cc-message-outer img {
     padding-left: 5px;
 }
 
+/* Chat invite */
+
+div.cf-chat-box .cf-overlay-content {
+    max-width: 100%;
+    max-height: 70px;
+    color: black;
+}
+
+div.cf-chat-box .cf-overlay-content .title {
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1.2em;
+    margin-bottom: 5px;
+}
+
+div.cf-chat-box .cf-overlay-content .subtitle {
+    font-size: 0.9em;
+    color: #777;
+    font-style: italic;
+}
+
+div.cf-chat-box .cf-overlay-content img {
+    margin: 10px 5px;
+}
 
 
 /**
@@ -630,11 +638,6 @@ a {
     font-style: italic;
 }
 
-.cc-invited-box {
-    position: absolute;
-    bottom: 30px;
-    left: 0;
-}
 
 /**
  * Overlay
@@ -742,4 +745,8 @@ a.disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.cc-center {
+    margin: 0px auto;
 }
