@@ -206,6 +206,10 @@ div#cc-base div.cc-room-list-bar {
  * Room list
  */
 
+/*div.room-list {*/
+    /*overflow-x: hidden;*/
+/*}*/
+
 .room-list div.last-message {
     font-size: 0.8em;
 }
@@ -754,4 +758,8 @@ a.disabled {
 
 .cc-center {
     margin: 0px auto;
+}
+
+.cc-hide-overflow-x {
+    overflow-x: hidden;
 }

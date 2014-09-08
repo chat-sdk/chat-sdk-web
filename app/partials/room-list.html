@@ -14,13 +14,15 @@
                     </div>
                 </div>
             </div>
-            <!--We need to subtract 10 for the padding-->
+            <!--We need to subtract 10 for the padding -->
             <div class="last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
-                <div class="uk-float-left cc-ellipsis title" >
-                    {{ room.lastMessage().user().meta.name }}:
-                </div>
-                <div class="cc-ellipsis message">
-                    &nbsp; {{ room.lastMessage().text }}
+                <div ng-show="room.lastMessage().user().meta.name && room.lastMessage().text">
+                    <div class="uk-float-left cc-ellipsis title" >
+                        {{ room.lastMessage().user().meta.name }}:
+                    </div>
+                    <div class="cc-ellipsis message">
+                        &nbsp; {{ room.lastMessage().text }}
+                    </div>
                 </div>
             </div>
         </td>
