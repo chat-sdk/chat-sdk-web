@@ -644,6 +644,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         $scope.input = {};
         $scope.room = room;
 
+        //room.badge = 0;
+
         $scope.hideChat = false;
 
         $scope.tabClicked('messages');
@@ -845,6 +847,7 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
 
     $scope.init = function () {
         $scope.boxWidth = bRoomListBoxWidth;
+        $scope.boxHeight = bRoomListBoxHeight;
         $scope.canDeleteRoom = true;
     }
 

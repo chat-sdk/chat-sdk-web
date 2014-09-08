@@ -48,6 +48,7 @@ var bMainBoxWidth = 250;
 var bMainBoxHeight = 230;
 
 var bRoomListBoxWidth = 200;
+var bRoomListBoxHeight = 300;
 
 var bProfileBoxWidth = 300;
 

@@ -224,9 +224,10 @@ div#cc-base div.cc-room-list-bar {
 }
 
 .room-list div.cc-badge {
-    position: absolute;
-    top: 6px;
-    right: -10px;
+    float: right;
+    /*position: absolute;*/
+    /*top: 6px;*/
+    /*right: -10px;*/
 }
 /**
  * Chat box

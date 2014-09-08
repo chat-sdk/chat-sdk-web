@@ -1,4 +1,4 @@
-<div ng-show="showRoomListBox()" ng-controller="RoomListBoxController">
+<div ng-show="showRoomListBox()" ng-style="{'height': boxHeight}"  ng-controller="RoomListBoxController">
     <div class="cc-room-list-bar" >
         <div class="cc-base-text">
             <div class="inner">
@@ -12,6 +12,7 @@
                 <img src="img/cc-30-minimize.png" />
             </a>
         </div>
-        <div ng-include="'partials/room-list.html'"></div>
+        <!-- This 30 relates to the header height -->
+        <div class="cc-hide-overflow-x" ng-style="{'height': boxHeight - 30}" ng-include="'partials/room-list.html'"></div>
     </div>
 </div>

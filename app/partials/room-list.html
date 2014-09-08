@@ -2,14 +2,16 @@
     <tr ng-repeat="(id, room) in getRooms()">
         <td class="cc-pointer uk-position-relative" ng-click="roomClicked(room)">
             <div class="uk-overflow-container">
-                <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 60 }">
+                <!-- Room name -->
+                <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 80 }">
                     <a ng-show="canDeleteRoom" ng-click="deleteRoom(room)"><img src="../img/cc-20-cross.png" /></a>
                     {{ room.getName() }}
                 </div>
+                <!-- Number of users -->
                 <div class="uk-float-right cc-right-margin-5">
                     {{ room.userCount() }}
                     <img src="../img/cc-20-user.png" />
-                    <div ng-show="room.badge" class="cc-badge cc-shadow">
+                    <div ng-show="room.badge" class="cc-badge">
                         {{ room.badge }}
                     </div>
                 </div>
