@@ -659,8 +659,12 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     }
 
     $scope.sendMessage = function () {
-        Auth.sendMessage($scope.room, $scope.input.text);
+        var user = Auth.getUser();
+
+        $scope.room.sendMessage($scope.input.text, user);
+
         $scope.input.text = "";
+
     }
 
     $scope.tabClicked = function (tab) {
@@ -675,8 +679,12 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         return $scope.hideChat ? 'style="0px"' : "";
     }
 
-    $scope.messageIsMine = function (message) {
-        return Auth.uidIsMine(message.uid);
+//    $scope.messageIsMine = function (message) {
+//        return Auth.uidIsMine(message.uid);
+//    }
+
+    $scope.messageSide = function (message) {
+        return Auth.uidIsMine(message.uid) ? 'right' : 'left';
     }
 
     $scope.userForMessage = function (message) {

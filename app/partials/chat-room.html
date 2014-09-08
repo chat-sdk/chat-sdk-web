@@ -30,34 +30,23 @@
         <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
             <div  ng-repeat="message in room.getMessages()">
 
-                <div ng-show="messageIsMine(message)">
+                <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30 cc-abs-right" ng-src="{{ message.user().thumbnailURL(30) }}" />
-                        <span class="bubble right-bubble" ng-style="{'max-width': room.width - 80}">
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + messageSide(message)" ng-src="{{ message.user().thumbnailURL(30) }}" />
+                        <span class="bubble" ng-class="messageSide(message) + '-bubble'" ng-style="{'max-width': room.width - 80}">
                             {{ message.text }}
                         </span>
                     </div>
-                    <div class="cc-message-outer">
-                        <span class="uk-text-small  uk-float-right cc-message-margin">
-                            <span class="uk-text-bold">{{ message.user().meta.name }}</span>
+                    <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && room.hideTime(message)">
+                        <div class="cc-message-margin" ng-class="'uk-float-' + messageSide(message)">
+                            <span ng-hide="message.hideName" class="uk-text-bold">{{ message.user().meta.name }}</span>
+                        </div>
+                        <div class="uk-float-left uk-width-1-1 time" ng-hide=" room.hideTime(message)">
                             {{ message.time | date: "hh:mm a" }}
-                        </span>
+                        </div>
                     </div>
                 </div>
-                <div ng-show="!messageIsMine(message)">
-                    <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30 cc-abs-left" ng-src="{{ message.user().thumbnailURL(30) }}" />
-                        <span class="bubble left-bubble" ng-style="{'max-width': room.width - 80}">
-                            {{ message.text }}
-                        </span>
-                    </div>
-                    <div  class="cc-message-outer">
-                        <span class="uk-text-small uk-float-left cc-message-margin">
-                            <span class="uk-text-bold">{{ message.user().meta.name }}</span>
-                            {{ message.time | date: "hh:mm a" }}
-                        </span>
-                    </div>
-                </div>
+
             </div>
             <div style="height: 20px"></div>
         </div>

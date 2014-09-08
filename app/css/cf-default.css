@@ -331,6 +331,11 @@ div.cc-message-outer img {
     bottom: 0;
 }
 
+div.cc-message-outer .time {
+    text-align: center;
+    color: #777;
+}
+
 .cc-abs-right {
     right: 2px;
 }

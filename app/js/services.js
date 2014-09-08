@@ -776,6 +776,37 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                     // Add the message to this room
                     if(message) {
+
+                        // Get the previous message if it exists
+                        if(room.messages.length > 0) {
+
+                            var lastMessage = room.messages[room.messages.length - 1];
+
+                            // We hide the name on the last message if it is sent by the
+                            // same message as this message i.e.
+                            // - User 1 (name hidden)
+                            // - User 1
+                            lastMessage.hideName = message.uid == lastMessage.uid
+
+                            // Last message date
+                            var lastDate = new Date(lastMessage.time);
+
+                            var newDate = new Date(message.time);
+
+                            // If messages have the same day, hour and minute
+                            // hide the time
+                            if(lastDate.getDay() == newDate.getDay() &&
+                                lastDate.getHours() == newDate.getHours() &&
+                                lastDate.getMinutes() == newDate.getMinutes()) {
+
+                                lastMessage.hideTime = true;
+                            }
+
+                            // Add a pointer to the lastMessage
+                            message.lastMessage = lastMessage;
+
+                        }
+
                         room.messages.push(message);
                         room.messagesDirty = true;
                     }
@@ -877,6 +908,10 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 Paths.roomTypingRef(rid).off();
             }
 
+            room.hideTime = function (message) {
+                return message.hideTime || message == room.lastMessage();
+            }
+
             room.on();
 
             return room;
@@ -934,16 +969,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
                 ref.remove(function(e) {
                     console.log(e);
-                });
-            }
-
-            room.sendMessage = function (message) {
-
-                // Get a ref to the room
-                var ref = Paths.roomMessagesRef(room.meta.rid);
-
-                ref.push(message, function () {
-                    // Get the message now to find it's time stamp
                 });
             }
 
@@ -1012,6 +1037,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.getMessages = function () {
+
                 if(!room.messagesDirty) {
                     return room.messages;
                 }
@@ -1023,6 +1049,22 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 return room.messages;
             }
+
+            room.sendMessage = function (text, user) {
+
+                if(!text || text.length == 0)
+                    return;
+
+                var message = Message.buildMessage(user.meta.uid, text);
+                message.user = null;
+
+                // Get a ref to the room
+                var ref = Paths.roomMessagesRef(room.meta.rid);
+
+                var newRef = ref.push();
+                newRef.setWithPriority(message, Firebase.ServerValue.TIMESTAMP);
+
+            },
 
             room.lastMessage = function () {
                 var messages = this.getMessages();
@@ -1039,7 +1081,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
     }
 });
 
-myApp.factory('Message', function (Cache, User) {
+myApp.factory('Message', ['Cache', 'User', function (Cache, User) {
     var message = {
 
         buildMessageFromSnapshot: function (snapshot) {
@@ -1090,10 +1132,10 @@ myApp.factory('Message', function (Cache, User) {
         }
     }
     return message;
-});
+}]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Message', 'Layout', 'Utilities', 'Presence',
-              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Message, Layout, Utilities, Presence) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence',
+              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence) {
 
     var Auth = {
 
@@ -1528,18 +1570,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 // Remove the room from the user's list
                 this.getUser().removeRoom(room);
             }
-        },
-
-        sendMessage: function (room, text) {
-
-            if(!text || text.length == 0)
-                return;
-
-            var message = Message.buildMessage(this.getUser().meta.uid, text);
-            message.user = null;
-
-            room.sendMessage(message);
-
         },
 
         uidIsMine: function (uid) {
