@@ -126,7 +126,7 @@ myApp.controller('AppController', [
             else {
                 $scope.profileHideTimeoutPromise = $timeout(function () {
                     $scope.currentUser = null;
-                }, duration ? duration : 1);
+                }, duration ? duration : 100);
             }
         }
         else {
@@ -221,10 +221,13 @@ myApp.controller('AppController', [
     $scope.userClicked = function (user) {
 
         // Is the user blocked?
-        if($scope.isBlocked(user)) {
+        if(user.blocked) {
             $scope.getUser().unblockUser(user);
         }
-        else {
+        else if(user.blockingMe) {
+            return;
+        }
+        else if (user.online) {
             Auth.createPrivateRoom([user]).then(function() {
                 console.log("Complete");
             });
@@ -391,6 +394,10 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
      * @return A list of users who's names meet the search text
      */
     $scope.getUsers = function () {
+
+        // Filter online users to remove users that are blocking us
+        var users = Cache.onlineUsers
+
         return Utilities.filterByName(Cache.onlineUsers, $scope.search[$scope.activeTab]);
     }
 

@@ -608,12 +608,30 @@ a {
 
 .cc-row, .uk-table td.cc-row {
     border: none;
-    border-right: 2px solid #FFF;
+    border-left: 5px solid #FFF;
+    cursor: pointer;
 }
 
-.cc-row:hover, .uk-table td.cc-row:hover {
-    border-right: 2px solid #0d82b3;
+.cc-row, .uk-table td.cc-row.online {
+    border: none;
+    border-left: 5px solid #70f067;
 }
+
+.cc-row, .uk-table td.cc-row.offline {
+    border: none;
+    border-left: 5px solid #999;
+    cursor: default;
+}
+
+.cc-row, .uk-table td.cc-row.blocked {
+    border: none;
+    border-left: 5px solid #b04848;
+    cursor: default;
+}
+
+/*.cc-row:hover, .uk-table td.cc-row:hover {*/
+    /*border-left: 5px solid #0d82b3;*/
+/*}*/
 
 .cc-flag {
     margin-left: 10px;

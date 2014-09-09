@@ -497,6 +497,7 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
         addFriend: function (user) {
             if(user && user.meta && user.meta.uid) {
                 this.friends[user.meta.uid] = user;
+                user.friend = true;
             }
         },
 
@@ -508,14 +509,19 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
 
         removeFriendWithID: function (uid) {
             if(uid) {
-                delete this.friends[uid];
-                this.digest();
+                var user = this.friends[uid];
+                if(user) {
+                    user.friends = false;
+                    delete this.friends[uid];
+                    this.digest();
+                }
             }
         },
 
         addBlockedUser: function (user) {
             if(user && user.meta && user.meta.uid) {
                 this.blockedUsers[user.meta.uid] = user;
+                user.blocked = true;
             }
         },
 
@@ -527,13 +533,18 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
 
         removeBlockedUserWithID: function (uid) {
             if(uid) {
-                delete this.blockedUsers[uid];
-                this.digest();
+                var user = this.blockedUsers[uid];
+                if(user) {
+                    user.blocked = false;
+                    delete this.blockedUsers[uid];
+                    this.digest();
+                }
             }
         },
 
         addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
+            if(user && user.meta && user.meta.uid && user.meta.uid != $rootScope.user.meta.uid) {
+                user.online = true;
                 this.onlineUsers[user.meta.uid] = user;
                 this.digest();
             }
@@ -561,8 +572,12 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
 
         removeOnlineUserWithID: function (uid) {
             if(uid) {
-                delete this.onlineUsers[uid];
-                this.digest();
+                var user = this.onlineUsers[uid];
+                if(user) {
+                    user.online = false;
+                    delete this.onlineUsers[uid];
+                    this.digest();
+                }
             }
         },
 
@@ -619,7 +634,7 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
     }
 });
 
-myApp.factory('User', function ($rootScope, $timeout) {
+myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, $timeout, Cache) {
     return {
 
         buildUserWithID: function (uid) {
@@ -627,12 +642,24 @@ myApp.factory('User', function ($rootScope, $timeout) {
 
             // Start listening to the Firebase location
             user.on = (function () {
+
                 var ref = Paths.userMetaRef(uid);
 
                 // Add a method to listen for updates to this user
                 ref.on('value',(function(snapshot) {
 
                     user.meta = snapshot.val();
+
+                    // Am I blocked?
+                    user.blockingMe = user.meta.blocked != null && user.meta.blocked[$rootScope.user.meta.uid] != null;
+
+                    // Remove from the online list if they're blocking us
+                    if(user.blockingMe) {
+                        Cache.removeOnlineUser(user);
+                    }
+                    else {
+                        Cache.addOnlineUser(user);
+                    }
 
                     user.setImageName(user.meta.imageName);
 
@@ -674,8 +701,13 @@ myApp.factory('User', function ($rootScope, $timeout) {
 
             user.blockUser = function (block) {
                 var ref = Paths.userBlockedRef(user.meta.uid);
-                ref = ref.push();
-                ref.set({uid: block.meta.uid});
+
+                var data = {};
+                data[block.meta.uid] = {uid: block.meta.uid};
+                ref.set(data);
+
+//                ref = ref.push();
+//                ref.set({block.meta.uid : {uid: block.meta.uid}});
             }
 
             user.unblockUser = function (block) {
@@ -745,7 +777,7 @@ myApp.factory('User', function ($rootScope, $timeout) {
             return user;
         }
     }
-});
+}]);
 
 myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, User, Layout) {
     return {
@@ -866,6 +898,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 ref.on('child_removed', function (snapshot) {
                     if(snapshot.val()) {
+
                         var uid = snapshot.val().uid;
 
                         delete room.users[uid];
@@ -877,7 +910,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         $timeout(function(){
                             $rootScope.$digest();
                         });
-
                     }
                 });
 
@@ -1185,17 +1217,33 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     uid = snapshot.val().uid;
                 }
 
-                // We don't want to process the current user
-                if (uid && uid != this.getUser().meta.uid) {
+                var user = Cache.getUserWithID(uid);
+                if (!user) {
+                    user = User.buildUserWithID(uid);
+                }
 
-                    console.log("Added: " + uid);
-
-                    var user = Cache.getUserWithID(uid);
-                    if (!user) {
-                        user = User.buildUserWithID(uid);
-                    }
+                // Is the user blocking us?
+                if(!user.blockingMe) {
                     Cache.addOnlineUser(user);
                 }
+
+
+                // We don't want to process the current user
+//                if (uid && uid != this.getUser().meta.uid) {
+//
+//                    console.log("Added: " + uid);
+//
+//                    var user = Cache.getUserWithID(uid);
+//                    if (!user) {
+//                        user = User.buildUserWithID(uid);
+//                    }
+//
+//                    // Is the user blocking us?
+//                    if(!user.blockingMe) {
+//                        Cache.addOnlineUser(user);
+//                    }
+//
+//                }
             }).bind(this));
 
             ref.on("child_removed", (function (snapshot) {
@@ -1423,6 +1471,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     user.unblock = function () {
                         snapshot.ref().remove();
                     }
+
                     Cache.addBlockedUser(user);
                 }
 

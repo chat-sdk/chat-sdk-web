@@ -334,7 +334,8 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
                 x:0,
                 y:0,
                 dragging: true,
-                dropLoc:false
+                dropLoc:false,
+                visible: false
             };
 
             stopDefault(e);
@@ -348,6 +349,7 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
             if($rootScope.userDrag.dragging) {
 
 //                stopDefault(e);
+                $rootScope.userDrag.visible = true;
 
                 $rootScope.userDrag.x = e.clientX - 10;
                 $rootScope.userDrag.y = e.clientY - 10;
@@ -369,6 +371,7 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
 
         $document.mouseup((function(e) {
             $rootScope.userDrag.dragging = false;
+            $rootScope.userDrag.visible = false;
             $rootScope.$apply();
         }).bind(this));
     }
