@@ -16,6 +16,7 @@
     "firebase": "1.0.x",
     "firebase-simple-login": "1.6.x",
     "angularfire": "latest",
-    "angular-facebook": "latest"
+    "angular-facebook": "latest",
+    "date.format": "https://github.com/jacwright/date.format.git#master"
   }
 }

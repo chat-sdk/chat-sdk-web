@@ -65,7 +65,7 @@
 
     <!--<div style="position: absolute; top: 0; left: 0">-->
         <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.dragging" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.thumbnailURL(20) }}"  />
+            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.imageURL20 }}"  />
             {{ userDrag.user.meta.name }}
         </div>
     <!--</div>-->
@@ -134,6 +134,7 @@
 <script src="bower_components/firebase-simple-login/firebase-simple-login.js"></script>
 
 <script src="bower_components/angular-facebook/lib/angular-facebook.js"></script>
+<script src="bower_components/date.format/date.format.js"></script>
 
 <script type="text/javascript">
 

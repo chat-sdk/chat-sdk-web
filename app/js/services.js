@@ -631,7 +631,10 @@ myApp.factory('User', function ($rootScope, $timeout) {
 
                 // Add a method to listen for updates to this user
                 ref.on('value',(function(snapshot) {
+
                     user.meta = snapshot.val();
+
+                    user.setImageName(user.meta.imageName);
 
                     $timeout(function(){
                         $rootScope.$digest();
@@ -721,14 +724,22 @@ myApp.factory('User', function ($rootScope, $timeout) {
                 ref.onDisconnect().remove();
             }
 
-            user.thumbnailURL = function (size) {
-                if(user.meta.imageURL) {
-                    return "server/tmp/resize.php?src=" + user.meta.imageURL + "&w="+size+"&h="+size;
-                }
-                // TODO: Make this better
-                else {
-                    return "img/cc-"+size+"-profile-pic.png";
-                }
+//            user.thumbnailURL = function (size) {
+//                if(user.meta.imageURL) {
+//                    return "server/tmp/resize.php?src=" + user.meta.imageURL + "&w="+size+"&h="+size;
+//                }
+//                // TODO: Make this better
+//                else {
+//                    return "img/cc-"+size+"-profile-pic.png";
+//                }
+//            }
+
+            user.setImageName = function (fileName) {
+                user.meta.imageName = fileName;
+
+                user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
+                user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
+                user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
             }
 
             return user;
@@ -762,6 +773,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 // Also get the messages from the room
                 ref = Paths.roomMessagesRef(rid);
 
+                // Add listen to messages added to this thread
                 ref.endAt().limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
 
                     // Get the snapshot value
@@ -778,36 +790,36 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     if(message) {
 
                         // Get the previous message if it exists
-                        if(room.messages.length > 0) {
+                        if(room.lastMessage) {
 
-                            var lastMessage = room.messages[room.messages.length - 1];
+                            var lastMessage = room.lastMessage;
 
                             // We hide the name on the last message if it is sent by the
                             // same message as this message i.e.
                             // - User 1 (name hidden)
                             // - User 1
-                            lastMessage.hideName = message.uid == lastMessage.uid
+                            lastMessage.hideName = message.meta.uid == lastMessage.meta.uid
 
                             // Last message date
-                            var lastDate = new Date(lastMessage.time);
+                            var lastDate = new Date(lastMessage.meta.time);
 
-                            var newDate = new Date(message.time);
+                            var newDate = new Date(message.meta.time);
 
                             // If messages have the same day, hour and minute
                             // hide the time
-                            if(lastDate.getDay() == newDate.getDay() &&
-                                lastDate.getHours() == newDate.getHours() &&
-                                lastDate.getMinutes() == newDate.getMinutes()) {
 
-                                lastMessage.hideTime = true;
-                            }
+                            lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
 
                             // Add a pointer to the lastMessage
                             message.lastMessage = lastMessage;
 
                         }
 
+                        // We always hide the time for the latest message
+                        message.hideTime = true;
+
                         room.messages.push(message);
+                        room.lastMessage = message;
                         room.messagesDirty = true;
                     }
 
@@ -842,6 +854,9 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         }
                         room.users[user.meta.uid] = user;
 
+                        // Update name
+                        room.updateName();
+
                         // TODO: Should digest here
                         $timeout(function(){
                             $rootScope.$digest();
@@ -854,6 +869,10 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         var uid = snapshot.val().uid;
 
                         delete room.users[uid];
+
+                        // Update name
+                        room.updateName();
+
                         // TODO: Should digest here
                         $timeout(function(){
                             $rootScope.$digest();
@@ -908,11 +927,10 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 Paths.roomTypingRef(rid).off();
             }
 
-            room.hideTime = function (message) {
-                return message.hideTime || message == room.lastMessage();
-            }
-
             room.on();
+
+            // We've just created the room so update the name
+            room.updateName();
 
             return room;
         },
@@ -992,10 +1010,11 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 return null;
             }
 
-            room.getName = function () {
+            room.updateName = function () {
 
                 if(room.meta.name) {
-                    return room.meta.name;
+                    room.name = room.meta.name;
+                    return;
                 }
 
                 // How many users are there?
@@ -1003,7 +1022,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 for(var key in room.users) {
                     i++;
                 }
-
                 // TODO: Do this better
                 if(i == 2) {
                     for(var key in room.users) {
@@ -1013,7 +1031,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         // who isn't the current user
                         if(Cache.onlineUsers[user.meta.uid]) {
                             if(user.meta.name) {
-                                return user.meta.name;
+                                room.name = user.meta.name;
                             }
                         }
                     }
@@ -1021,7 +1039,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 // Private chat x users
                 // Ben Smiley
-                return bPrivateChatDefaultName;
+                room.name = bGroupChatDefaultName;
 
             }
 
@@ -1030,10 +1048,15 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.getUserStatus = function (user) {
-                var data = room.meta.users[user.meta.uid];
-                if(data) {
-                    return data.status;
+                // This could be called from the UI so it's important
+                // to wait until users has been populated
+                if(room.meta.users) {
+                    var data = room.meta.users[user.meta.uid];
+                    if(data) {
+                        return data.status;
+                    }
                 }
+                return '';
             }
 
             room.getMessages = function () {
@@ -1062,26 +1085,26 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 var ref = Paths.roomMessagesRef(room.meta.rid);
 
                 var newRef = ref.push();
-                newRef.setWithPriority(message, Firebase.ServerValue.TIMESTAMP);
+                newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP);
 
-            },
-
-            room.lastMessage = function () {
-                var messages = this.getMessages();
-                if(messages.length > 0) {
-                    return messages[messages.length - 1];
-                }
-                else {
-                    return 0;
-                }
             }
+
+//            room.lastMessage = function () {
+//                var messages = this.getMessages();
+//                if(messages.length > 0) {
+//                    return messages[messages.length - 1];
+//                }
+//                else {
+//                    return 0;
+//                }
+//            }
 
             return room;
         }
     }
 });
 
-myApp.factory('Message', ['Cache', 'User', function (Cache, User) {
+myApp.factory('Message', ['$rootScope','Cache', 'User', function ($rootScope, Cache, User) {
     var message = {
 
         buildMessageFromSnapshot: function (snapshot) {
@@ -1098,27 +1121,31 @@ myApp.factory('Message', ['Cache', 'User', function (Cache, User) {
 
             var message = this.newMessage();
 
-            message.uid = uid;
-            message.text = text;
-            message.time = timestamp ? timestamp : Firebase.ServerValue.TIMESTAMP;
+            message.meta = {
+                uid: uid,
+                text: text,
+                time: timestamp ? timestamp : Firebase.ServerValue.TIMESTAMP
+            };
 
-            message.user = (function () {
+            message.timeString = new Date(timestamp).format('h:m a');
 
-                if(message.uid) {
+            // Set the user
+            if(message.meta.uid) {
 
-                    // We need to set the user here
-                    var user = Cache.getUserWithID(message.uid);
+                // We need to set the user here
+                var user = Cache.getUserWithID(message.meta.uid);
 
-                    if(!user) {
-                        user = User.buildUserWithID(message.uid);
-                        Cache.addUser(user);
-                    }
-                    return user;
+                if(!user) {
+                    user = User.buildUserWithID(message.meta.uid);
+                    Cache.addUser(user);
                 }
 
-                return null;
+                message.user = user;
+            }
 
-            }).bind(this);
+            // Our messages are on the right - other user's messages are
+            // on the left
+            message.side = message.meta.uid == $rootScope.user.meta.uid ? 'right' : 'left';
 
             return message;
         },
@@ -1210,18 +1237,20 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
                 user.meta.name = name;
 
-                var imageURL = null;
+                var imageName = null;
                 var thirdPartyData = authUser.thirdPartyUserData;
 
                 /** SOCIAL INFORMATION **/
                 if(authUser.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
-                    if(!user.meta.imageURL) {
+                    if(!user.meta.imageName) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
 
                             Utilities.saveImageFromURL($http, response.data.url).then(function(fileName) {
-                                user.meta.imageURL = fileName;
+
+                                user.setImageName(fileName);
+
                             }, function(error) {
 
                             });
@@ -1232,26 +1261,28 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
-                    imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
+                    imageName = thirdPartyData.profile_image_url.replace("normal", "bigger");
 
                     if(!user.meta.description) {
                         user.meta.description = thirdPartyData.description;
                     }
                 }
                 if(authUser.provider == "github") {
-                    imageURL = thirdPartyData.avatar_url;
+                    imageName = thirdPartyData.avatar_url;
                 }
                 if(authUser.provider == "google") {
-                    imageURL = thirdPartyData.picture;
+                    imageName = thirdPartyData.picture;
                 }
                 if(authUser.provider == "anonymous") {
 
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if(!user.meta.imageURL && imageURL) {
-                    Utilities.saveImageFromURL($http, imageURL).then(function(fileName) {
-                        user.meta.imageURL = fileName;
+                if(!user.meta.imageName && imageName) {
+                    Utilities.saveImageFromURL($http, imageName).then(function(fileName) {
+
+                        user.setImageName(fileName);
+
                     }, function(error) {
 
                     });

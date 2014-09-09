@@ -9,7 +9,7 @@
             <a class="uk-float-left cc-image-30 cc-resize-cursor" title="Resize room" resize-room>
                 <img src="img/cc-30-resize.png" />
             </a>
-            <div class="cc-ellipsis uk-float-left" ng-style="{'width': room.width - 60}">{{ room.getName() }}</div>
+            <div class="cc-ellipsis uk-float-left" ng-style="{'width': room.width - 60}">{{ room.name }}</div>
         </div>
 
         <div class="cc-tab-container cc-bottom-shadow">
@@ -32,17 +32,17 @@
 
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + messageSide(message)" ng-src="{{ message.user().thumbnailURL(30) }}" />
-                        <span class="bubble" ng-class="messageSide(message) + '-bubble'" ng-style="{'max-width': room.width - 80}">
-                            {{ message.text }}
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.imageURL30 }}" />
+                        <span class="bubble" ng-class="message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
+                            {{ message.meta.text }}
                         </span>
                     </div>
-                    <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && room.hideTime(message)">
-                        <div class="cc-message-margin" ng-class="'uk-float-' + messageSide(message)">
-                            <span ng-hide="message.hideName" class="uk-text-bold">{{ message.user().meta.name }}</span>
+                    <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
+                        <div class="cc-message-margin" ng-class="'uk-float-' + message.side">
+                            <span ng-hide="message.hideName" class="uk-text-bold">{{ message.user.meta.name }}</span>
                         </div>
-                        <div class="uk-float-left uk-width-1-1 time" ng-hide=" room.hideTime(message)">
-                            {{ message.time | date: "hh:mm a" }}
+                        <div class="uk-float-left uk-width-1-1 time" ng-hide="message.hideTime">
+                            {{ message.timeString }}
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
     <div class="cc-chat-bar" ng-click="toggleVisibility()" >
         <div class="cc-base-text">
             <div class="inner">
-                <div class="uk-float-left cc-ellipsis name">{{ room.getName() }}</div>
+                <div class="uk-float-left cc-ellipsis name">{{ room.name }}</div>
                 <a ng-click="deleteRoom(room)">
                     <img class="uk-float-right cc-image-30" src="img/cc-30-cross.png" disable-drag/>
                 </a>

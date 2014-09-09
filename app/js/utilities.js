@@ -3,6 +3,7 @@
 /* Services */
 
 var bPrivateChatDefaultName = "Private Chat";
+var bGroupChatDefaultName = "Private Chat";
 
 // Paths
 var bUsersPath = "users";
@@ -36,6 +37,7 @@ var bShowCreateChatBox = 'showCreateChatBox';
 
 var bVisibilityChangedNotification = 'bVisibilityChangedNotification';
 
+var bImageDirectory = 'server/tmp/resize.php';
 
 // Chat width
 var bChatRoomWidth = 230;

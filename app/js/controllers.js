@@ -299,7 +299,7 @@ myApp.controller('AppController', [
                 //$scope.imageName = data.fileName;
 
                 if(data.fileName) {
-                    $scope.getUser().meta.imageURL = data.fileName;
+                    $scope.getUser().setImageName(data.fileName);
                 }
 
             }).error(function (e) {
@@ -679,18 +679,6 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
     $scope.chatBoxStyle = function () {
         return $scope.hideChat ? 'style="0px"' : "";
-    }
-
-//    $scope.messageIsMine = function (message) {
-//        return Auth.uidIsMine(message.uid);
-//    }
-
-    $scope.messageSide = function (message) {
-        return Auth.uidIsMine(message.uid) ? 'right' : 'left';
-    }
-
-    $scope.userForMessage = function (message) {
-        return message.user();
     }
 
     $scope.toggleVisibility = function () {

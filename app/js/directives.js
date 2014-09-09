@@ -496,7 +496,7 @@ myApp.directive('fitText', function () {
             var height = $(element)[0].scrollHeight;
 
             // 8 is for the padding
-            if (height < 20) {
+            if (height < 26) {
                 height = 26;
             }
 
