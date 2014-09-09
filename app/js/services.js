@@ -561,6 +561,9 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
             if(!user) {
                 user = this.blockedUsers[uid];
             }
+            if(!user) {
+                //user =
+            }
            return user;
         },
 
@@ -680,7 +683,10 @@ myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, 
 
             user.addRoom = function (room) {
                 var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-                ref.set({uid: room.meta.rid});
+                ref.set({
+                    rid: room.meta.rid,
+                    invitedBy: $rootScope.user.meta.uid
+                });
             }
 
             user.removeRoom = function (room) {
@@ -794,6 +800,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 ref.on('value', (function(snapshot) {
                     room.meta = snapshot.val();
+
 
                     $timeout(function(){
                         $rootScope.$digest();
@@ -1082,7 +1089,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             room.getUserStatus = function (user) {
                 // This could be called from the UI so it's important
                 // to wait until users has been populated
-                if(room.meta.users) {
+                if(room.meta && room.meta.users) {
                     var data = room.meta.users[user.meta.uid];
                     if(data) {
                         return data.status;
@@ -1392,17 +1399,27 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             roomsRef.on('child_added', (function (snapshot) {
 
                 // Get the room id
-                var rid = snapshot.name();
+                var rid = snapshot.val().rid;
+                var invitedBy = snapshot.val().invitedBy;
+
+                // Is this person a friend?
 
                 if (rid) {
 
                     var room = Room.buildRoomWithID(rid);
                     if (room) {
+
+                        if(invitedBy) {
+                            var user = Cache.getUserWithID(invitedBy);
+
+                        }
+
                         var slot = snapshot.val().slot;
 
                         Layout.insertRoom(room, slot ? slot : 0);
 
                     }
+
                 }
 
             }).bind(this));
