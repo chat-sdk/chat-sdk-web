@@ -768,8 +768,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         }
     }
 
-    $scope.slotForRoom = function (room) {
-        return Layout.slotForRoom(room);
+    $scope.nearestSlotToRoom = function (room) {
+        return Layout.nearestSlotToRoom(room);
     }
 
     $scope.roomAtSlot = function (slot) {

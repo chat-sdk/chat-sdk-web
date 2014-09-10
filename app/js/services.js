@@ -257,6 +257,14 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             return this.rooms;
         },
 
+        roomAtSlot: function (slot) {
+            var rooms = this.roomsSortedByOffset();
+            if(rooms && rooms.length > 0) {
+                return rooms[slot];
+            }
+            return null;
+        },
+
         /**
          * Insert a room at a particular slot
          * @param room
@@ -361,7 +369,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
         },
 
         //
-        slotForRoom: function (room) {
+        nearestSlotToRoom: function (room) {
             return this.nearestSlotToOffset(room.offset);
         },
 

@@ -146,12 +146,12 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
         var lastClientX = 0;
         var emptySlot = 0;
         var startingSlotOffset = 0;
+        var pastHalfWay = false;
 
         elm.mousedown((function (e) {
 
             // If the user clicked in the text box
             // then don't drag
-
             if($rootScope.disableDrag) {
                 return true;
             }
@@ -170,7 +170,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
             lastClientX = e.clientX;
 
             // Mark the slot we're leaving
-            emptySlot = scope.slotForRoom(scope.room);
+            emptySlot = scope.nearestSlotToRoom(scope.room);
             startingSlotOffset = Layout.offsetForSlot(emptySlot);
 
             // #55 Stop background from being highlighted on drag
@@ -189,13 +189,13 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 scope.room.offset += dx;
                 lastClientX = e.clientX;
 
-
                 // We must be moving in either a positive direction
                 if(dx == 0) {
-                    return;
+                    return false;
                 }
 
                 // Which side of our starting point are we?
+                // Left is +ve right is -ve
                 var displacement = scope.room.offset - startingSlotOffset;
 
                 // Identify the slot we're moving towards
@@ -214,12 +214,13 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                     }
                 }
 
+                // If we're moving towards a new slot
                 if(nextSlot != emptySlot) {
 
                     // Which slot are we closer to?
                     var nextSlotOffset = Layout.offsetForSlot(nextSlot);
 
-                    var pastHalfWay = false;
+                    pastHalfWay = false;
                     if(displacement > 0) {
                         pastHalfWay = scope.room.offset > (startingSlotOffset + nextSlotOffset)/2;
                     }
@@ -249,6 +250,8 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                     }
                 }
 
+                console.log("Empty slot: " + emptySlot);
+
                 // Notify the controller
                 scope.wasDragged();
 
@@ -266,13 +269,56 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
                 // Get the nearest slot to the chat room
                 var nearestSlot = scope.nearestSlotToOffset(scope.room.offset);
-                scope.room.targetSlot = nearestSlot;
 
                 // Check to see if the slot is already
+                var roomAtNearestSlot = Layout.roomAtSlot(nearestSlot);
+
+                console.log("This room - " + scope.room.meta.name + ", room at nearest slot: " + roomAtNearestSlot.meta.name);
+
+                // This logic stops rooms being placed on top of each other
+                if(roomAtNearestSlot && roomAtNearestSlot != scope.room && nearestSlot != emptySlot) {
+
+                    // Move the room to the nearest slot
+                    // If the room's stopped animating or it's heading towards our target
+                    // slot send it to the empty slot
+                    if(!roomAtNearestSlot.targetSlot || roomAtNearestSlot.targetSlot == nearestSlot) {
+                        roomAtNearestSlot.targetSlot = emptySlot;
+
+                        console.log("Nearest");
+
+                        $rootScope.$broadcast('animateRoom', {
+                            room: roomAtNearestSlot
+                        });
+                    }
+                }
+
+                if(nearestSlot == emptySlot) {
+                    console.log("Same");
+                }
+
+                scope.room.targetSlot = nearestSlot;
 
                 $rootScope.$broadcast('animateRoom', {
                     room: scope.room
                 });
+
+                // Update all other rooms too
+                // this fixes an issue where if you move the room backwards and forwards
+                // a lot the rooms get clumped together
+                // This function makes sure that on a mouse-up event all the rooms are
+                // layed out properly
+                var r = null;
+                var sortedRooms =  Layout.roomsSortedByOffset();
+                for(var i = 0; i < sortedRooms.length; i++) {
+                    r = sortedRooms[i];
+                    if(r != scope.room && r != roomAtNearestSlot) {
+                        r.targetSlot = i;
+                        $rootScope.$broadcast('animateRoom', {
+                            room: r
+                        });
+                    }
+                }
+
 
             }
         }).bind(this));
@@ -282,6 +328,8 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 console.log("Animate room to: " + args.room.targetSlot);
 
                 var offset = Layout.offsetForSlot(args.room.targetSlot);
+
+                console.log(args.room.meta.name + " -> " + args.room.targetSlot);
 
                 // Stop the previous animation
                 elm.stop(true, false);
