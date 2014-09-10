@@ -518,6 +518,10 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             }
         },
 
+        isFriend: function(uid) {
+            return this.friends[uid] != null;
+        },
+
         addBlockedUser: function (user) {
             if(user && user.meta && user.meta.uid) {
                 this.blockedUsers[user.meta.uid] = user;
@@ -529,6 +533,10 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             if(user && user.meta && user.meta.uid) {
                 this.removeBlockedUserWithID(user.meta.uid);
             }
+        },
+
+        isBlockedUser: function(uid) {
+            return this.blockedUsers[uid] != null;
         },
 
         removeBlockedUserWithID: function (uid) {
@@ -1418,6 +1426,16 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                         if(invitedBy) {
                             var user = User.getOrCreateUserWithID(invitedBy);
                             room.invitedBy = user;
+                        }
+
+                        if(Cache.isBlockedUser(invitedBy)) {
+                            return;
+                        }
+
+                        // If the user is a friend
+                        if(Cache.isFriend(invitedBy)) {
+                            // Set the user to member
+                            room.setStatusForUser($rootScope.user, bUserStatusMember);
                         }
 
                         var slot = snapshot.val().slot;
