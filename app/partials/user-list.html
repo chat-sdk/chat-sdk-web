@@ -9,6 +9,7 @@
                 <span class="flag {{ aUser.meta.country | lowercase }}"></span>
             </div>
             <button class="uk-button uk-button-mini uk-button-danger uk-float-right" ng-show="aUser.blocked" >Unblock</button>
+            <img class="uk-float-right cc-right-margin-5" src="../img/cc-20-friend.png" ng-show="aUser.friend && !aUser.blocked" />
         </td>
     </tr>
 </table>

@@ -511,7 +511,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             if(uid) {
                 var user = this.friends[uid];
                 if(user) {
-                    user.friends = false;
+                    user.friend = false;
                     delete this.friends[uid];
                     this.digest();
                 }
