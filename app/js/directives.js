@@ -283,10 +283,12 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
                 var offset = Layout.offsetForSlot(args.room.targetSlot);
 
+                // Stop the previous animation
                 elm.stop(true, false);
 
                 // Animate the chat room into position
                 elm.animate({right: offset}, args.duration ? args.duration : 300, function () {
+
                     scope.room.offset = offset;
                     scope.room.targetSlot = null;
 

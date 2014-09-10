@@ -182,10 +182,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
             // Monitor the window size
             angular.element($window).bind('resize', (function () {
-
                 this.updateScreenSize();
-
-
             }).bind(this));
 
         },
@@ -194,6 +191,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             $rootScope.screenWidth = $document.width();
             $rootScope.screenHeight = $window.innerHeight;
 
+            // Update the main box i.e. it's always 50% of the total screen height
             this.resizeMainBox();
             this.updateRoomSize();
         },
@@ -203,7 +201,13 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             $rootScope.mainBoxWidth = bMainBoxWidth;
         },
 
+        /**
+         * Returns the width of the screen -
+         * if the room list is showing then it subtracts it's width
+         * @returns {Usable screen width}
+         */
         effectiveScreenWidth: function () {
+
             var width = $rootScope.screenWidth;
 
             var rooms = this.roomsSortedByOffset();
@@ -218,13 +222,14 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             if(lastRoom.width + lastRoom.offset > $rootScope.screenWidth) {
                 width -= bRoomListBoxWidth;
             }
-            else {
-
-            }
 
             return width;
         },
 
+        /**
+         * Should we show the room list
+         * @returns {boolean}
+         */
         showRoomListBox: function () {
             var showListBox = (this.getRooms(false).length > 0);
             return showListBox;
@@ -245,6 +250,9 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             return rooms;
         },
 
+        /**
+         * @returns {all rooms}
+         */
         getAllRooms: function () {
             return this.rooms;
         },
@@ -261,6 +269,12 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
                 console.log("Add room" + room.meta.name);
 
+                // Set the room's target position
+                room.targetSlot = Math.min(index, this.rooms.length);
+
+                // Add the room
+                this.rooms.push(room);
+
                 // Get a list of rooms sorted by offset
                 var rooms = this.roomsSortedByOffset();
 
@@ -269,8 +283,8 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                     var r = null;
 
                     // Loop over the existing rooms and move each room one
-                    // along
-                    for(var i = index; i < rooms.length; i++) {
+                    // to the left of the new room to the left by one
+                    for(var i = index + 1; i < rooms.length; i++) {
 
                         r = rooms[i];
 
@@ -286,16 +300,12 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                     }
                 }
 
-                this.rooms.push(room);
-
-                // Update the position of the first room
-                //room.offset = this.offsetForSlot(index);
+                // Set the initial position of the first room
                 room.offset = this.offsetForSlot(index);
 
                 this.updateRoomSize();
 
                 this.digest();
-
             }
         },
 
