@@ -51,13 +51,15 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
 
             $rootScope.$on(bVisibilityChangedNotification, (function (e, hidden) {
                 console.log('Hidden: ' + hidden);
+
+                if(this.inactiveTimerPromise) {
+                    $timeout.cancel(this.inactiveTimerPromise);
+                }
+
                 if(!hidden) {
 
                     // If the user's clicked the screen then cancel the
                     // inactivity timer
-                    if(this.inactiveTimerPromise) {
-                        $timeout.cancel(this.inactiveTimerPromise);
-                    }
                     this.goOnline();
                 }
                 else {
@@ -247,19 +249,27 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             return this.rooms;
         },
 
+        /**
+         * Insert a room at a particular slot
+         * @param room
+         * @param slot
+         */
         insertRoom: function(room, index) {
 
+            // If the room is a valid variable
             if(room && room.meta.rid) {
 
                 console.log("Add room" + room.meta.name);
 
-                // Update the position of all the rooms
-
+                // Get a list of rooms sorted by offset
                 var rooms = this.roomsSortedByOffset();
 
-                var r = null;
-
                 if(rooms.length > 0) {
+
+                    var r = null;
+
+                    // Loop over the existing rooms and move each room one
+                    // along
                     for(var i = index; i < rooms.length; i++) {
 
                         r = rooms[i];
@@ -815,6 +825,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 ref.on('value', (function(snapshot) {
                     room.meta = snapshot.val();
 
+                    room.updateName();
 
                     $timeout(function(){
                         $rootScope.$digest();
@@ -981,9 +992,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.on();
-
-            // We've just created the room so update the name
-            room.updateName();
 
             return room;
         },
@@ -1613,10 +1621,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             var room = Room.newRoom();
 
-            room.meta.name = options.name;
-            room.meta.description = options.description;
-            room.meta.private = options.private;
-            room.meta.invitesEnabled = options.invitesEnabled;
+            room.meta = options;
 
             this.createRoom(room).then((function() {
 
