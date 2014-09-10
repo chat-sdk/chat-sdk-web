@@ -63,7 +63,7 @@
         <!--that results in the room data being modified that caues the room to be re-added-->
         <div class="cf-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
         <div class="cf-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
-            <div class="uk-width-4-5 cc-center cc-ellipsis title">{{ room.getOwner().meta.name }}</div>
+            <div class="uk-width-4-5 cc-center cc-ellipsis title">{{ room.invitedBy.meta.name }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
             <a ng-click="deleteRoom(room)" ><img src="img/cc-40-cross.png"/></a>
             <a ng-click="acceptInvitation()" ><img src="img/cc-40-tick.png"/></a>

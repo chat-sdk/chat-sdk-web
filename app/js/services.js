@@ -463,7 +463,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
     return layout;
 });
 
-myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
+myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope, $timeout, Layout) {
     return {
 
         // Dict
@@ -561,9 +561,6 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
             if(!user) {
                 user = this.blockedUsers[uid];
             }
-            if(!user) {
-                //user =
-            }
            return user;
         },
 
@@ -635,7 +632,7 @@ myApp.factory('Cache', function ($rootScope, $timeout, Layout) {
             Layout.rooms = [];
         }
     }
-});
+}]);
 
 myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, $timeout, Cache) {
     return {
@@ -781,6 +778,15 @@ myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, 
             }
 
             return user;
+        },
+
+        getOrCreateUserWithID: function(uid) {
+            var user = Cache.getUserWithID(uid)
+            if(!user) {
+                user = this.buildUserWithID(uid);
+                Cache.addUser(user);
+            }
+            return user;
         }
     }
 }]);
@@ -886,11 +892,11 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                         var uid = snapshot.val().uid;
 
-                        var user = Cache.getUserWithID(uid);
-                        if(!user) {
-                            user = User.buildUserWithID(uid);
-                            Cache.addUser(user);
-                        }
+                        var user = User.getOrCreateUserWithID(uid);
+//                        if(!user) {
+//                            user = User.buildUserWithID(uid);
+//                            Cache.addUser(user);
+//                        }
                         room.users[user.meta.uid] = user;
 
                         // Update name
@@ -1039,11 +1045,11 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
                 }
                 if(data) {
-                    var user = Cache.getUserWithID(data.uid);
-                    if(!user) {
-                        user = User.buildUserWithID(data.uid);
-                        Cache.addUser(user);
-                    }
+                    var user = User.getOrCreateUserWithID(data.uid);
+//                    if(!user) {
+//                        user = User.buildUserWithID(data.uid);
+//                        Cache.addUser(user);
+//                    }
                     return user;
                 }
                 return null;
@@ -1172,12 +1178,12 @@ myApp.factory('Message', ['$rootScope','Cache', 'User', function ($rootScope, Ca
             if(message.meta.uid) {
 
                 // We need to set the user here
-                var user = Cache.getUserWithID(message.meta.uid);
+                var user = User.getOrCreateUserWithID(message.meta.uid);
 
-                if(!user) {
-                    user = User.buildUserWithID(message.meta.uid);
-                    Cache.addUser(user);
-                }
+//                if(!user) {
+//                    user = User.buildUserWithID(message.meta.uid);
+//                    Cache.addUser(user);
+//                }
 
                 message.user = user;
             }
@@ -1224,10 +1230,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     uid = snapshot.val().uid;
                 }
 
-                var user = Cache.getUserWithID(uid);
-                if (!user) {
-                    user = User.buildUserWithID(uid);
-                }
+                var user = User.getOrCreateUserWithID(uid);
+//                if (!user) {
+//                    user = User.buildUserWithID(uid);
+//                }
 
                 // Is the user blocking us?
                 if(!user.blockingMe) {
@@ -1255,7 +1261,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             ref.on("child_removed", (function (snapshot) {
 
-                var user = Cache.getUserWithID(snapshot.val().uid);
+                var user = User.getOrCreateUserWithID(snapshot.val().uid);
                 if (user) {
                     Cache.removeOnlineUser(user)
                 }
@@ -1410,8 +1416,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if (room) {
 
                         if(invitedBy) {
-                            var user = Cache.getUserWithID(invitedBy);
-
+                            var user = User.getOrCreateUserWithID(invitedBy);
+                            room.invitedBy = user;
                         }
 
                         var slot = snapshot.val().slot;
@@ -1457,10 +1463,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var uid = snapshot.val().uid;
                 if(uid) {
-                    var user = Cache.getUserWithID(uid);
-                    if(!user) {
-                        user = User.buildUserWithID(uid);
-                    }
+                    var user = User.getOrCreateUserWithID(uid);
+//                    if(!user) {
+//                        user = User.buildUserWithID(uid);
+//                    }
                     user.removeFriend = function () {
                         snapshot.ref().remove();
                     }
@@ -1481,10 +1487,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var uid = snapshot.val().uid;
                 if(uid) {
-                    var user = Cache.getUserWithID(uid);
-                    if(!user) {
-                        user = User.buildUserWithID(uid);
-                    }
+                    var user = User.getOrCreateUserWithID(uid);
+//                    if(!user) {
+//                        user = User.buildUserWithID(uid);
+//                    }
                     user.unblock = function () {
                         snapshot.ref().remove();
                     }
