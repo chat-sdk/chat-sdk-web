@@ -782,3 +782,12 @@ a.disabled {
 .cc-hide-overflow-x {
     overflow-x: hidden;
 }
+
+.cc-disable-highlight {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
