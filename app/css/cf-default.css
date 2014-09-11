@@ -356,7 +356,7 @@ div.cc-message-outer .time {
 .bubble
 {
     position: relative;
-    max-width: 150px;
+    max-width: 158px;
 
     padding: 5px;
     margin: 2px 0px;
@@ -381,26 +381,26 @@ div.cc-message-outer .time {
     float: right;
     margin-right: 15px;
     background: #EEE;
-    right: 35px;
+    right: 27px;
 }
 
 .right-bubble:after {
-    border-width: 8px 0 8px 15px;
+    border-width: 5px 0 5px 9px;
     border-color: transparent #EEE;
-    right: -15px;
+    right: -9px;
 }
 
 .left-bubble {
     float: left;
     margin-left: 15px;
     background: #91dfff;
-    left: 35px;
+    left: 27px;
 }
 
 .left-bubble:after {
-    border-width: 8px 15px 8px 0;
+    border-width: 5px 9px 5px 0;
     border-color: transparent #91dfff;
-    left: -15px;
+    left: -9px;
 }
 
 .cc-user-drag {
