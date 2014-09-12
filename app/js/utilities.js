@@ -2,6 +2,8 @@
 
 /* Services */
 
+var DEBUG = false;
+
 var bPrivateChatDefaultName = "Private Chat";
 var bGroupChatDefaultName = "Private Chat";
 

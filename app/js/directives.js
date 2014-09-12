@@ -256,7 +256,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                     }
                 }
 
-                console.log("Empty slot: " + emptySlot);
+                if(DEBUG) console.log("Empty slot: " + emptySlot);
 
                 // Notify the controller
                 scope.wasDragged();
@@ -282,7 +282,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 // Check to see if the slot is already
                 var roomAtNearestSlot = Layout.roomAtSlot(nearestSlot);
 
-                console.log("This room - " + scope.room.meta.name + ", room at nearest slot: " + roomAtNearestSlot.meta.name);
+                if(DEBUG) console.log("This room - " + scope.room.meta.name + ", room at nearest slot: " + roomAtNearestSlot.meta.name);
 
                 // This logic stops rooms being placed on top of each other
                 if(roomAtNearestSlot && roomAtNearestSlot != scope.room && nearestSlot != emptySlot) {
@@ -328,11 +328,10 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
         scope.$on('animateRoom', (function (event, args) {
             if(args.room == scope.room) {
-                console.log("Animate room to: " + args.room.targetSlot);
 
                 var offset = Layout.offsetForSlot(args.room.targetSlot);
 
-                console.log(args.room.meta.name + " -> " + args.room.targetSlot);
+                if(DEBUG) console.log(args.room.meta.name + " -> " + args.room.targetSlot);
 
                 // Stop the previous animation
                 elm.stop(true, false);

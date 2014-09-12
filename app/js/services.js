@@ -50,7 +50,6 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
             this.goOnline();
 
             $rootScope.$on(bVisibilityChangedNotification, (function (e, hidden) {
-                console.log('Hidden: ' + hidden);
 
                 if(this.inactiveTimerPromise) {
                     $timeout.cancel(this.inactiveTimerPromise);
@@ -275,14 +274,8 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             // If the room is a valid variable
             if(room && room.meta.rid) {
 
-                console.log("Add room" + room.meta.name);
-
-                //index = Math.min(index, this.rooms.length);
-
-                console.log(">>>>> Index: " + index);
-
                 // Set the room's target position
-                room.targetSlot = index;// Math.min(index, this.rooms.length);
+                room.targetSlot = index;
 
                 // Add the room
                 this.rooms.push(room);
@@ -318,7 +311,6 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                 // Check every room against every other room to see if the
                 // target is valid
 
-
 //                var ri = null;
 //                var rj = null;
 //                for(var i = 0; i < rooms.length; i++) {
@@ -341,8 +333,6 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
                 // Update the room's slot
                 $rootScope.user.updateRoomSlot(room, room.targetSlot);
-
-                console.log("Room target: Room offset: " + room.offset);
 
                 this.updateRoomSize();
 
@@ -540,7 +530,6 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             $timeout(function() {
                 $rootScope.$digest();
             });
-            console.log("Layout digest");
         }
     }
     layout.init();
@@ -723,7 +712,6 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             $timeout(function() {
                 $rootScope.$digest();
             });
-            console.log("Cache digest");
         },
 
         clear: function () {
@@ -767,7 +755,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
 
                     $timeout(function(){
                         $rootScope.$digest();
-                        console.log("User updated digest");
                     });
 
                 }).bind(this));
@@ -941,8 +928,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
         buildRoomWithID: function (rid) {
 
-            console.log("RID:" + rid);
-
             var room = this.newRoom();
             room.meta.rid = rid;
 
@@ -959,7 +944,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     $timeout(function(){
                         $rootScope.$digest();
                     });
-                    console.log("Room value digest");
 
                 }).bind(this));
 
@@ -968,8 +952,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 // Add listen to messages added to this thread
                 ref.endAt().limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
-
-                    console.log("Message added: " + snapshot.val().text);
 
                     // Get the snapshot value
                     var val = snapshot.val();
@@ -1048,7 +1030,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     $timeout(function(){
                         $rootScope.$digest();
                     });
-                    console.log("New message digest");
                 });
 
                 // Listen to users being added to the thread
@@ -1099,7 +1080,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     $timeout(function(){
                         $rootScope.$digest();
                     });
-                    console.log("typing digest");
                 });
 
                 ref.on('child_removed', function (snapshot) {
@@ -1108,9 +1088,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     $timeout(function(){
                         $rootScope.$digest();
                     });
-                    console.log("typing digest");
                 });
-
             }
 
             room.startTyping = function (user) {
@@ -1213,10 +1191,20 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             }
 
             room.removeUser = function (user) {
+
+                var deferred = $q.defer();
+
                 var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
-                ref.remove(function(e) {
-                    console.log(e);
+                ref.remove(function(error) {
+                    if(error) {
+                        deferred.reject(error);
+                    }
+                    else {
+                        deferred.resolve();
+                    }
                 });
+
+                return deferred.promise;
             }
 
             room.getOwner = function () {
@@ -1229,12 +1217,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
                 }
                 if(data) {
-                    var user = User.getOrCreateUserWithID(data.uid);
-//                    if(!user) {
-//                        user = User.buildUserWithID(data.uid);
-//                        Cache.addUser(user);
-//                    }
-                    return user;
+                    return User.getOrCreateUserWithID(data.uid);
                 }
                 return null;
             }
@@ -1297,8 +1280,8 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 }
                 // Sort messages by time
                 room.messages.sort(function (a, b) {
-                    return a.time - b.time;
-                })
+                    return a.meta.time - b.meta.time;
+                });
                 room.messagesDirty = false;
 
                 return room.messages;
@@ -1318,6 +1301,23 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 var newRef = ref.push();
                 newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP);
 
+            }
+
+            room.transcript = function () {
+
+                var transcript = "";
+
+                // Loop over messages and format them
+                var messages = room.getMessages();
+
+                var m = null;
+                for(var i in messages) {
+                    m = messages[i];
+
+                    transcript += moment(m.meta.time).format('HH:mm:ss') + " " + m.user.meta.name + ": " + m.meta.text + "\n";
+                }
+
+                return transcript;
             }
 
             return room;
@@ -1344,7 +1344,7 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
             var message = {meta : meta};
             message.mid = mid;
 
-            message.timeString = new Date(meta.time).format('h:m a');
+            message.timeString = moment(meta.time).format('h:mm a');
 
             // Set the user
             if(message.meta.uid) {
@@ -1438,32 +1438,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
 
                 var user = User.getOrCreateUserWithID(uid);
-//                if (!user) {
-//                    user = User.buildUserWithID(uid);
-//                }
 
                 // Is the user blocking us?
                 if(!user.blockingMe) {
                     Cache.addOnlineUser(user);
                 }
 
-
-                // We don't want to process the current user
-//                if (uid && uid != this.getUser().meta.uid) {
-//
-//                    console.log("Added: " + uid);
-//
-//                    var user = Cache.getUserWithID(uid);
-//                    if (!user) {
-//                        user = User.buildUserWithID(uid);
-//                    }
-//
-//                    // Is the user blocking us?
-//                    if(!user.blockingMe) {
-//                        Cache.addOnlineUser(user);
-//                    }
-//
-//                }
             }).bind(this));
 
             ref.on("child_removed", (function (snapshot) {
@@ -1569,8 +1549,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                         if(!user.meta.country) {
                             user.meta.country = response.country;
                         }
-
-                        console.log(response.city, response.country);
 
                         // Digest to update the interface
                         $timeout(function() {
@@ -1752,13 +1730,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     this.getUser().meta.name = "";
                 }
 
-                // TODO: Check this
-
-
-                //
                 Presence.start(this.getUser());
-
-
 
                 $rootScope.unbindUser = (function () {
                     unbind();
@@ -1768,7 +1740,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }).bind(this);
 
                 // Mark the user as online
-                console.log("Did bind user to scope " + uid);
+                if(DEBUG) console.log("Did bind user to scope " + uid);
 
                 deferred.resolve();
 
@@ -1799,7 +1771,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     users[i].addRoom(room);
                 }
 
-                deferred.resolve();
+                deferred.resolve(room);
 
             }).bind(this), function(error) {
                 deferred.reject(error);

@@ -24,6 +24,8 @@
             </div>
         </div>
 
+        <div ng-show="activeTab == 'settings'" ng-include="'partials/chat-settings.html'"></div>
+
         <div ng-show="activeTab == 'users'" ng-include="'partials/user-list.html'"></div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
@@ -46,8 +48,9 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+            <!-- This stops the messages being rendered right to the bottom
+                 and being covered by the "User is typing ..." text-->
             <div style="height: 20px"></div>
         </div>
 

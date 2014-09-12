@@ -17,6 +17,7 @@
     "firebase-simple-login": "1.6.x",
     "angularfire": "latest",
     "angular-facebook": "latest",
-    "date.format": "https://github.com/jacwright/date.format.git#master"
+    "FileSaver": "latest",
+    "moment": "latest"
   }
 }

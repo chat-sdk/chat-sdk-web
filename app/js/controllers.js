@@ -228,8 +228,8 @@ myApp.controller('AppController', [
             return;
         }
         else if (user.online) {
-            Auth.createPrivateRoom([user]).then(function() {
-                console.log("Complete");
+            Auth.createPrivateRoom([user]).then(function(room) {
+                if (DEBUG) console.log("Room Created: " + room.meta.name);
             });
         }
     }
@@ -285,7 +285,10 @@ myApp.controller('AppController', [
                 /* customize how data is added to formData. See #40#issuecomment-28612000 for sample code */
                 //formDataAppender: function(formData, key, val){}
             }).progress(function(evt) {
-                console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+
+                if(DEBUG)
+                    console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+
                 $scope.uploadProgress = parseInt(100.0 * evt.loaded / evt.total);
 
                 if($scope.uploadProgress == 100) {
@@ -296,10 +299,6 @@ myApp.controller('AppController', [
                 }
 
             }).success(function(data, status, headers, config) {
-                console.log("Data!!!");
-                console.log(data);
-
-                //$scope.imageName = data.fileName;
 
                 if(data.fileName) {
                     $scope.getUser().setImageName(data.fileName);
@@ -424,7 +423,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // Add observers for AngularFire login events
         // When the user logs in
         $scope.$on('$firebaseSimpleLogin:login', function (e) {
-            console.log("firebase simple login")
+
+            if(DEBUG) console.log("firebase simple login")
 
             // Login was successful so log the user in given their ID
             $scope.handleUserLogin($scope.auth.user);
@@ -436,13 +436,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         // When the user logs out
         $scope.$on('$firebaseSimpleLogin:logout', (function (e) {
-            console.log("firebase simple logout")
+            if(DEBUG) console.log("firebase simple logout")
             $scope.logout();
         }).bind(this));
 
         // When there's a login error
         $scope.$on('$firebaseSimpleLogin:error', (function (e) {
-            console.log("firebase simple error")
+            if(DEBUG) console.log("firebase simple error")
             $scope.logout();
         }).bind(this));
 
@@ -615,8 +615,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         var message = "An unknown error occurred";
 
-        console.log("Handling error...");
-
         if (error.code == 'AUTHENTICATION_DISABLED') {
             message = "This authentication method is currently disabled.";
         }
@@ -757,9 +755,6 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         if($scope.room.width + $scope.room.offset >= screenWidth) {
             $scope.room.width = screenWidth - $scope.room.offset;
         }
-
-        console.log("width: " + $scope.room.width);
-        console.log("effective: " + Layout.effectiveScreenWidth());
 
         $scope.room.height = Math.max(bChatRoomHeight, $scope.room.height);
 
@@ -1042,7 +1037,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
                     $scope.validate();
 
                 }, function (error) {
-                    console.log("Error");
+                    if(DEBUG) console.log(error);
                 });
 
             }
@@ -1092,8 +1087,22 @@ myApp.controller('NotificationController', ['$scope', function($scope) {
     $scope.submit = function () {
         $scope.notification.show = false;
     }
-
-
 }]);
 
+myApp.controller('ChatSettingsController', ['$scope', function($scope) {
+
+    $scope.saveTranscript = function () {
+
+        var t = $scope.room.transcript();
+
+        if(DEBUG) console.log(t);
+
+        saveAs(new Blob([t], {type: "text/plain;charset=utf-8"}), $scope.room.name + "-transcript.txt");
+
+    }
+
+    $scope.copyTranscript = function () {
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", $scope.room.transcript());    }
+
+}]);
 
