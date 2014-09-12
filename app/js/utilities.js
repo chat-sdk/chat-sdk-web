@@ -14,6 +14,8 @@ var bTypingPath = 'typing'
 var bFriendsPath = 'friends'
 var bBlockedPath = 'blocked'
 
+var bReadKey = 'read';
+
 var bMetaKey = "meta";
 //var bFIDKey = "fid";
 //var bAIDKey = "aid";
@@ -132,5 +134,13 @@ var Paths = {
 
     userRoomsRef: function (fid) {
         return this.userRef(fid).child(bRoomsPath);
+    },
+
+    messageUsersRef: function (rid, mid) {
+        return this.messageRef(rid, mid).child(bUsersPath);
+    },
+
+    messageRef: function (rid, mid) {
+        return this.roomMessagesRef(rid).child(mid);
     }
 };

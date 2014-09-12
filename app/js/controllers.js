@@ -651,8 +651,6 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         $scope.input = {};
         $scope.room = room;
 
-        //room.badge = 0;
-
         $scope.hideChat = false;
 
         $scope.tabClicked('messages');
@@ -853,8 +851,12 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
         // Sort rooms by the number of unread messages
         rooms.sort(function (a, b) {
             // First order by number of unread messages
-            if(a.badge != b.badge) {
-                return b.badge - a.badge;
+            // Badge can be null
+            var ab = a.badge ? a.badge : 0;
+            var bb = b.badge ? b.badge : 0;
+
+            if(ab != bb) {
+                return bb - ab;
             }
             // Otherwise sort them by number of users
             else {
@@ -889,7 +891,7 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
                 room.offset = offset;
                 room.width = width;
                 room.height = height;
-                room.active = true;
+                room.activate();
                 room.badge = null;
                 room.minimized = false;
 

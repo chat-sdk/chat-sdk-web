@@ -277,8 +277,12 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
                 console.log("Add room" + room.meta.name);
 
+                //index = Math.min(index, this.rooms.length);
+
+                console.log(">>>>> Index: " + index);
+
                 // Set the room's target position
-                room.targetSlot = Math.min(index, this.rooms.length);
+                room.targetSlot = index;// Math.min(index, this.rooms.length);
 
                 // Add the room
                 this.rooms.push(room);
@@ -288,6 +292,7 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
                 if(rooms.length > 0) {
 
+                    // Loop over the rooms
                     var r = null;
 
                     // Loop over the existing rooms and move each room one
@@ -299,22 +304,67 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                         // Budge all the other rooms up
                         r.targetSlot = this.nearestSlotToOffset(r.offset) + 1;
 
-                        $rootScope.$broadcast('animateRoom', {
-                            room: r,
-                            finished: (function() {
-                                this.updateRoomSize();
-                            }).bind(this)
-                        });
+                        if(r.draggable) {
+                            $rootScope.$broadcast('animateRoom', {
+                                room: r,
+                                finished: (function() {
+                                    this.updateRoomSize();
+                                }).bind(this)
+                            });
+                        }
                     }
                 }
 
+                // Check every room against every other room to see if the
+                // target is valid
+
+
+//                var ri = null;
+//                var rj = null;
+//                for(var i = 0; i < rooms.length; i++) {
+//                    ri = rooms[i];
+//
+//                    // Now check it against all the rooms
+//                    for(var j = i; j < rooms.length; j++) {
+//                        rj = rooms[j];
+//
+//                        if(ri != rj && ri.targetSlot == rj.targetSlot && !rj.draggable) {
+//
+//                            moveToSlot(rj, rj.targetSlot + 1);
+//
+//                        }
+//                    }
+//                }
+
                 // Set the initial position of the first room
-                room.offset = this.offsetForSlot(index);
+                room.offset = this.offsetForSlot(room.targetSlot);
+
+                // Update the room's slot
+                $rootScope.user.updateRoomSlot(room, room.targetSlot);
+
+                console.log("Room target: Room offset: " + room.offset);
 
                 this.updateRoomSize();
 
                 this.digest();
             }
+        },
+
+        getRoomWithID: function (rid) {
+            for(var i in this.rooms) {
+                if(this.rooms[i].meta.rid == rid) {
+                    return this.rooms[i];
+                }
+            }
+            return null;
+        },
+
+        getActiveRooms: function () {
+            var ar = [];
+            for(var i in this.rooms) {
+                this.rooms[i].active ? ar.push(this.rooms[i]) : null ;
+            }
+            return ar;
         },
 
         updateRoomSize: function () {
@@ -328,7 +378,13 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             var effectiveScreenWidth = this.effectiveScreenWidth();
 
             for(var i in rooms) {
-                rooms[i].active = (rooms[i].offset + rooms[i].width) < effectiveScreenWidth;
+                if((rooms[i].offset + rooms[i].width) < effectiveScreenWidth) {
+                    rooms[i].activate();
+                    //rooms[i].active = true;
+                }
+                else {
+                    rooms[i].active = false;
+                }
             }
 
             this.digest();
@@ -653,6 +709,16 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             return rooms;
         },
 
+        getRoomWithID: function (rid) {
+            var room = this.publicRooms[rid];
+
+            if(!room) {
+                room = Layout.getRoomWithID(rid);
+            }
+
+            return room;
+        },
+
         digest: function () {
             $timeout(function() {
                 $rootScope.$digest();
@@ -830,7 +896,22 @@ myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, 
 myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, User, Layout) {
     return {
 
+        getOrCreateRoomWithID: function (rid) {
+
+            var room = Cache.getRoomWithID(rid);
+
+            if(!room) {
+                room = this.buildRoomWithID(rid);
+            }
+
+            // HERE
+
+            return room;
+        },
+
         buildRoomWithID: function (rid) {
+
+            console.log("RID:" + rid);
 
             var room = this.newRoom();
             room.meta.rid = rid;
@@ -858,18 +939,23 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 // Add listen to messages added to this thread
                 ref.endAt().limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
 
+                    console.log("Message added: " + snapshot.val().text);
+
                     // Get the snapshot value
                     var val = snapshot.val();
 
-                    if(val.text.length == 0) {
+                    if(!val || val.text.length == 0) {
                         return;
                     }
 
                     // Create the message object
-                    var message = Message.buildMessageFromSnapshot(snapshot);
+                    var message = Message.buildMessage(snapshot.name(), val);
 
                     // Add the message to this room
                     if(message) {
+
+                        // This logic handles whether the date and name should be
+                        // show
 
                         // Get the previous message if it exists
                         if(room.lastMessage) {
@@ -906,13 +992,27 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
 
                     // If the room is inactive or minimized increase the badge
-                    if(!room.active || room.minimized) {
+                    if((!room.active || room.minimized) && !message.readBy()) {
+
+                        if(!room.unreadMessages) {
+                            room.unreadMessages  = [];
+                        }
+
+                        room.unreadMessages.push(message);
+
+                        // If this is the first badge then room.badge will
+                        // undefined - so set it to one
                         if(!room.badge) {
                             room.badge = 1;
                         }
                         else {
                             room.badge = Math.min(room.badge + 1, 99);
                         }
+                    }
+                    else {
+                        // Is the room active? If it is then mark the message
+                        // as seen
+                        message.markRead();
                     }
 
                     $timeout(function(){
@@ -930,10 +1030,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         var uid = snapshot.val().uid;
 
                         var user = User.getOrCreateUserWithID(uid);
-//                        if(!user) {
-//                            user = User.buildUserWithID(uid);
-//                            Cache.addUser(user);
-//                        }
+
                         room.users[user.meta.uid] = user;
 
                         // Update name
@@ -1007,6 +1104,29 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 Paths.roomMessagesRef(rid).off();
                 Paths.roomUsersRef(rid).off();
                 Paths.roomTypingRef(rid).off();
+            }
+
+            room.markRead = function () {
+
+                var messages = room.unreadMessages;
+
+                if(messages && messages.length > 0) {
+
+                    for(var i in messages) {
+                        messages[i].markRead();
+                    }
+
+                    // Clear the messages array
+                    while(messages.length > 0) {
+                        messages.pop();
+                    }
+                }
+                room.badge = null;
+            }
+
+            room.activate = function () {
+                room.active = true;
+                room.markRead();
             }
 
             room.on();
@@ -1157,7 +1277,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 if(!text || text.length == 0)
                     return;
 
-                var message = Message.buildMessage(user.meta.uid, text);
+                var message = Message.newMessage(room.meta.rid, user.meta.uid, text);
                 message.user = null;
 
                 // Get a ref to the room
@@ -1168,45 +1288,31 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
             }
 
-//            room.lastMessage = function () {
-//                var messages = this.getMessages();
-//                if(messages.length > 0) {
-//                    return messages[messages.length - 1];
-//                }
-//                else {
-//                    return 0;
-//                }
-//            }
-
             return room;
         }
     }
 });
 
-myApp.factory('Message', ['$rootScope','Cache', 'User', function ($rootScope, Cache, User) {
+myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootScope, $q, Cache, User) {
     var message = {
 
-        buildMessageFromSnapshot: function (snapshot) {
-            var val = snapshot.val();
-            if(val) {
-                return this.buildMessage(val.uid, val.text, val.time);
-            }
-            else {
-                return null;
+        newMessage: function (rid, uid, text) {
+            return {
+                meta: {
+                    rid: rid,
+                    uid: uid,
+                    time: Firebase.ServerValue.TIMESTAMP,
+                    text: text
+                }
             }
         },
 
-        buildMessage: function (uid, text, timestamp) {
+        buildMessage: function (mid, meta) {
 
-            var message = this.newMessage();
+            var message = {meta : meta};
+            message.mid = mid;
 
-            message.meta = {
-                uid: uid,
-                text: text,
-                time: timestamp ? timestamp : Firebase.ServerValue.TIMESTAMP
-            };
-
-            message.timeString = new Date(timestamp).format('h:m a');
+            message.timeString = new Date(meta.time).format('h:m a');
 
             // Set the user
             if(message.meta.uid) {
@@ -1214,12 +1320,51 @@ myApp.factory('Message', ['$rootScope','Cache', 'User', function ($rootScope, Ca
                 // We need to set the user here
                 var user = User.getOrCreateUserWithID(message.meta.uid);
 
-//                if(!user) {
-//                    user = User.buildUserWithID(message.meta.uid);
-//                    Cache.addUser(user);
-//                }
-
                 message.user = user;
+            }
+
+            message.markRead = function (uid) {
+
+                if(!uid) {
+                    uid = $rootScope.user.meta.uid;
+                }
+
+                var deferred = $q.defer();
+
+                // Is this message already marked as read?
+                if(message.readBy()) {
+                    deferred.resolve();
+                }
+                else if(!uid) {
+                    deferred.reject();
+                }
+                else {
+                    var ref = Paths.messageUsersRef(message.meta.rid, message.mid).child(uid);
+
+                    var data = {};
+                    data[bReadKey] = true;
+
+                    ref.set(data, function (error) {
+                        if(error) {
+                            deferred.reject(error);
+                        }
+                        else {
+                            deferred.resolve();
+                        }
+                    });
+                }
+
+                return deferred.promise;
+            }
+
+            message.readBy = function (uid) {
+
+                if(!uid) {
+                    uid = $rootScope.user.meta.uid;
+                }
+
+                return message.meta.users != null && message.meta.users[uid] != null && message.meta.users[uid][bReadKey] != null;
+
             }
 
             // Our messages are on the right - other user's messages are
@@ -1227,14 +1372,6 @@ myApp.factory('Message', ['$rootScope','Cache', 'User', function ($rootScope, Ca
             message.side = message.meta.uid == $rootScope.user.meta.uid ? 'right' : 'left';
 
             return message;
-        },
-
-        newMessage: function () {
-            return {
-                uid: null,
-                text: null,
-                time: null
-            }
         }
     }
     return message;
@@ -1446,7 +1583,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 if (rid) {
 
-                    var room = Room.buildRoomWithID(rid);
+                    var room = Room.getOrCreateRoomWithID(rid);
+
                     if (room) {
 
                         if(invitedBy) {
@@ -1487,7 +1625,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var rid = snapshot.name();
                 if(rid) {
-                    var room = Room.buildRoomWithID(rid);
+
+
+                    var room = Room.getOrCreateRoomWithID(rid);
                     if(room) {
                         Cache.addPublicRoom(room);
                     }

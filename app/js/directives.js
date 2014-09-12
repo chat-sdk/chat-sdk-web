@@ -148,6 +148,12 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
         var startingSlotOffset = 0;
         var pastHalfWay = false;
 
+        // Set the room as draggable - this will interact
+        // with the layout manager i.e. draggable rooms
+        // will be animated to position whereas non-draggable
+        // rooms will be moved position manually
+        scope.room.draggable = true;
+
         elm.mousedown((function (e) {
 
             // If the user clicked in the text box
@@ -270,6 +276,11 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 // Get the nearest slot to the chat room
                 var nearestSlot = scope.nearestSlotToOffset(scope.room.offset);
 
+                nearestSlot = Math.min(nearestSlot, Layout.getActiveRooms().length - 1);
+
+                // TODO: #129 - Can place chat room in incorrect slot
+                // This nearest slot method
+
                 // Check to see if the slot is already
                 var roomAtNearestSlot = Layout.roomAtSlot(nearestSlot);
 
@@ -284,16 +295,10 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                     if(!roomAtNearestSlot.targetSlot || roomAtNearestSlot.targetSlot == nearestSlot) {
                         roomAtNearestSlot.targetSlot = emptySlot;
 
-                        console.log("Nearest");
-
                         $rootScope.$broadcast('animateRoom', {
                             room: roomAtNearestSlot
                         });
                     }
-                }
-
-                if(nearestSlot == emptySlot) {
-                    console.log("Same");
                 }
 
                 scope.room.targetSlot = nearestSlot;
