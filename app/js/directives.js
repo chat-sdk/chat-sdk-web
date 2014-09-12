@@ -276,10 +276,8 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 // Get the nearest slot to the chat room
                 var nearestSlot = scope.nearestSlotToOffset(scope.room.offset);
 
-                nearestSlot = Math.min(nearestSlot, Layout.getActiveRooms().length - 1);
-
                 // TODO: #129 - Can place chat room in incorrect slot
-                // This nearest slot method
+                nearestSlot = Math.min(nearestSlot, Layout.getActiveRooms().length - 1);
 
                 // Check to see if the slot is already
                 var roomAtNearestSlot = Layout.roomAtSlot(nearestSlot);

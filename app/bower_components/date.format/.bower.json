@@ -1,0 +1,13 @@
+{
+  "name": "date.format",
+  "homepage": "https://github.com/jacwright/date.format",
+  "_release": "a693a72022",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "a693a7202286a1797f64304acb914a8ccc7e281e"
+  },
+  "_source": "https://github.com/jacwright/date.format.git",
+  "_target": "master",
+  "_originalSource": "https://github.com/jacwright/date.format.git"
+}

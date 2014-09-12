@@ -736,7 +736,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
     }
 }]);
 
-myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, $timeout, Cache) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootScope, $timeout, $q, Cache) {
     return {
 
         buildUserWithID: function (uid) {
@@ -861,22 +861,52 @@ myApp.factory('User', ['$rootScope', '$timeout', 'Cache', function ($rootScope, 
                 ref.onDisconnect().remove();
             }
 
-//            user.thumbnailURL = function (size) {
-//                if(user.meta.imageURL) {
-//                    return "server/tmp/resize.php?src=" + user.meta.imageURL + "&w="+size+"&h="+size;
-//                }
-//                // TODO: Make this better
-//                else {
-//                    return "img/cc-"+size+"-profile-pic.png";
-//                }
-//            }
-
             user.setImageName = function (fileName) {
-                user.meta.imageName = fileName;
 
-                user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
-                user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
-                user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
+                var setName = function (fileName) {
+
+                    if(!fileName) {
+                        fileName = 'cf-100-profile-pic.png';
+                    }
+
+                    user.meta.imageName = fileName;
+
+                    user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
+                    user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
+                    user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
+
+                    $timeout(function(){
+                        $rootScope.$digest();
+                    });
+
+                }
+
+                if(!fileName) {
+                    setName();
+                }
+                else {
+                    user.isImage(bImageDirectory + '?src=' + fileName).then(function () {
+                        setName(fileName);
+                    }, function (error) {
+                        setName()
+                    });
+                }
+            }
+
+            user.isImage = function (src) {
+
+                var deferred = $q.defer();
+
+                var image = new Image();
+                image.onerror = function() {
+                    deferred.resolve(false);
+                };
+                image.onload = function() {
+                    deferred.resolve(true);
+                };
+                image.src = src;
+
+                return deferred.promise;
             }
 
             return user;
@@ -1568,6 +1598,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
          * @param uid - the user's Firebase ID
          */
         addListenersToUser: function (uid) {
+
+            // Add a listener to the image URL
+
 
             // Listen to the user's rooms
             var roomsRef = Paths.userRoomsRef(uid);
