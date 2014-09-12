@@ -1348,9 +1348,12 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
             if(message.meta.uid) {
 
                 // We need to set the user here
-                var user = User.getOrCreateUserWithID(message.meta.uid);
-
-                message.user = user;
+                if(message.meta.uid == $rootScope.user.meta.uid) {
+                    message.user = $rootScope.user;
+                }
+                else {
+                    message.user = User.getOrCreateUserWithID(message.meta.uid);
+                }
             }
 
             message.markRead = function (uid) {

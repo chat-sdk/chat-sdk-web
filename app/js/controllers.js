@@ -543,16 +543,12 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         $scope.showError = false;
 
-        console.log("will sign up: "+email + ", "+password);
-
         $scope.showNotification(bNotificationTypeWaiting, "Registering...");
 
         // First create the super
         $scope.auth.$createUser(email, password).then((function(user) {
 
-            console.log("Success!");
-
-            $scope.handleUserLogin(user);
+            $scope.handleUserLogin(user, true);
 
         }).bind(this), function(error) {
             $scope.handleLoginError(error);
@@ -565,7 +561,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
      * a three way binding to the user property
      * @param {Obj} the User object from Firebase authentication
      */
-    $scope.handleUserLogin = function (user) {
+    $scope.handleUserLogin = function (user, firstLogin) {
 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
@@ -585,7 +581,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
                     Auth.bindUser(user).then(function() {
                         // We have the user's ID so we can get the user's object
-                        $scope.showProfileSettingsBox();
+                        if(firstLogin) {
+                            $scope.showProfileSettingsBox();
+                        }
+                        else {
+                            $scope.showMainBox();
+                        }
+
                     }, function(error) {
                         // TODO: Handle this
                     });
