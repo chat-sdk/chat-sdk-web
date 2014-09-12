@@ -875,7 +875,7 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
         var rooms = Layout.roomsSortedByOffset();
 
         // Get the last box that's active
-        for(var i = rooms.length - 1; i > 0; i--) {
+        for(var i = rooms.length - 1; i >= 0; i--) {
             if(rooms[i].active) {
 
                 // Get the details of the final room
@@ -900,6 +900,14 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
                 break;
             }
         }
+    }
+
+    $scope.minimize = function () {
+        $scope.hideRoomList = true;
+    }
+
+    $scope.toggle = function () {
+        $scope.hideRoomList = !$scope.hideRoomList;
     }
 
     $scope.deleteRoom = function(room) {

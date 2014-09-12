@@ -1268,7 +1268,9 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 // Private chat x users
                 // Ben Smiley
-                room.name = bGroupChatDefaultName;
+                if(!room.name) {
+                    room.name = bGroupChatDefaultName;
+                }
 
             }
 
@@ -1416,6 +1418,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
     var Auth = {
 
         _model: null,
+        _createRoomTimeoutPromise: null,
 
         getUser: function () {
             return $rootScope.user;
@@ -1838,6 +1841,18 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
         createRoom: function (room) {
 
             var deferred = $q.defer();
+
+            // Only allow a room to be created every 0.5 seconds
+            // to stop spamming
+            if(this._createRoomTimeoutPromise) {
+                deferred.reject();
+               return deferred.promise;
+            }
+            else {
+                this._createRoomTimeoutPromise = $timeout((function () {
+                    this._createRoomTimeoutPromise = null;
+                }).bind(this), 500);
+            }
 
             var ref = Paths.roomsRef();
 
