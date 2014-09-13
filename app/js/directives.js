@@ -61,6 +61,7 @@ myApp.directive('scrollGlue', function(){
             });
         }
     };
+
     function fakeNgModel(initValue){
         return {
             $setViewValue: function(value){
@@ -110,7 +111,6 @@ myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($ro
                 }
 
                 // Apply the change
-                //$rootScope.$broadcast('updateRoomSize');
                 Layout.updateRoomSize();
 
                 scope.$apply();
@@ -276,7 +276,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 // Get the nearest slot to the chat room
                 var nearestSlot = scope.nearestSlotToOffset(scope.room.offset);
 
-                // TODO: #129 - Can place chat room in incorrect slot
+                // #129 - Can place chat room in incorrect slot
                 nearestSlot = Math.min(nearestSlot, Layout.getActiveRooms().length - 1);
 
                 // Check to see if the slot is already
@@ -361,20 +361,18 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
     };
 }]);
 
-myApp.directive('centerMouseY', function ($document) {
+myApp.directive('centerMouseY', ['$document', function ($document) {
     return function (scope, elm, attrs) {
         $document.mousemove((function (e) {
             if(scope.currentUser && !elm.is(":hover")) {
                 // Keep the center of this box level with the mouse y
                 elm.css({bottom: scope.screenHeight - e.clientY - elm.height()/2});
-                //scope.profileBoxStyle.bottom = scope.screenHeight - e.pageY - elm.height()/2;
-                //scope.$digest();
             }
         }).bind(this));
     }
-});
+}]);
 
-myApp.directive('draggableUser', function ($document, $rootScope) {
+myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
         $rootScope.userDrag = {};
@@ -400,7 +398,6 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
 
             if($rootScope.userDrag.dragging) {
 
-//                stopDefault(e);
                 $rootScope.userDrag.visible = true;
 
                 $rootScope.userDrag.x = e.clientX - 10;
@@ -427,9 +424,9 @@ myApp.directive('draggableUser', function ($document, $rootScope) {
             $rootScope.$apply();
         }).bind(this));
     }
-});
+}]);
 
-myApp.directive('userDropLocation', function ($document, $rootScope) {
+myApp.directive('userDropLocation', ['$rootScope','$document', function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
         elm.mouseenter(function(e) {
@@ -452,10 +449,10 @@ myApp.directive('userDropLocation', function ($document, $rootScope) {
             }
         }).bind(this));
     }
-});
+}]);
 
 
-myApp.directive('disableDrag', function ($document, $rootScope) {
+myApp.directive('disableDrag', ['$rootScope','$document', function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
         elm.mousedown((function(e) {
@@ -466,9 +463,9 @@ myApp.directive('disableDrag', function ($document, $rootScope) {
             $rootScope.disableDrag = false;
         }).bind(this));
     }
-});
+}]);
 
-myApp.directive('consumeEvent', function ($document, $rootScope) {
+myApp.directive('consumeEvent', ['$rootScope','$document', function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
         elm.mousedown((function(e) {
@@ -477,7 +474,7 @@ myApp.directive('consumeEvent', function ($document, $rootScope) {
         }).bind(this));
 
     }
-});
+}]);
 
 /**
  * #54
@@ -486,7 +483,7 @@ myApp.directive('consumeEvent', function ($document, $rootScope) {
  * the chat will shake while they're scrolling. To prevent this
  * we add a listener to hear when they're scrolling.
  */
-myApp.directive('stopShake', function ($rootScope, $document, $timeout) {
+myApp.directive('stopShake', ['$rootScope', '$document',function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
         elm.scroll(function () {
@@ -498,7 +495,7 @@ myApp.directive('stopShake', function ($rootScope, $document, $timeout) {
             $rootScope.disableDrag = false;
         }).bind(this));
     }
-});
+}]);
 
 myApp.directive('autoGrow', function() {
     return function(scope, element, attr){
@@ -519,12 +516,13 @@ myApp.directive('autoGrow', function() {
         angular.element(document.body).append($shadow);
 
         var update = function() {
+
             var times = function(string, number) {
                 for (var i = 0, r = ''; i < number; i++) {
                     r += string;
                 }
                 return r;
-            }
+            };
 
             var val = element.val().replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
@@ -535,7 +533,7 @@ myApp.directive('autoGrow', function() {
             $shadow.html(val);
 
             element.css('height', Math.max($shadow[0].offsetHeight + 10 /* the "threshold" */, minHeight) + 'px');
-        }
+        };
 
         element.bind('keyup keydown keypress change', update);
         update();

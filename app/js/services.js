@@ -7,11 +7,11 @@
 var myApp = angular.module('myApp.services', ['firebase', 'facebook']).
   value('version', '0.1');
 
-myApp.config(function(FacebookProvider) {
+myApp.config(['FacebookProvider', function(FacebookProvider) {
     // Set your appId through the setAppId method or
     // use the shortcut in the initialize method directly.
     FacebookProvider.init('735373466519297');
-});
+}]);
 
 myApp.factory('Config', function () {
     return {
@@ -19,7 +19,7 @@ myApp.factory('Config', function () {
     }
 });
 
-myApp.service('Visibility', function Visibility($rootScope) {
+myApp.service('Visibility', ['$rootScope', function Visibility($rootScope) {
 
     document.addEventListener("visibilitychange",changed);
     document.addEventListener("webkitvisibilitychange", changed);
@@ -29,7 +29,7 @@ myApp.service('Visibility', function Visibility($rootScope) {
     function changed() {
         $rootScope.$broadcast(bVisibilityChangedNotification, document.hidden || document.webkitHidden || document.mozHidden || document.msHidden);
     }
-});
+}]);
 
 /**
  * The presence service handles the user's online / offline
@@ -89,13 +89,37 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
     }
 }]);
 
-myApp.factory('API', ['$q', function ($q) {
+myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
     return {
         getAPIDetails: function () {
 
+
             var deferred = $q.defer();
 
-            // Make up some API Details
+            // Contact the API
+//            $http({
+//                method: 'post',
+//                url: 'http://chatcat.io/wp-admin/admin-ajax.php'//,
+////                params: {
+////                    action: 'get-api-key',
+////                    url: $window.location.origin
+////                }
+//            }).then(function (response) {
+//
+//                console.log(response);
+//
+//                deferred.resolve(response);
+//
+//
+//            }, function (error) {
+//
+//                console.log(error);
+//                deferred.reject(error);
+//
+//            });
+
+
+            //Make up some API Details
             var api = {
                 cid: "xxyyzz",
                 max: 30,
@@ -131,13 +155,15 @@ myApp.factory('Utilities', ['$q', function ($q) {
                 var t = null;
                 var n = null;
                 for(var id in array) {
-                    u = array[id];
-                    // Switch to lower case and remove spaces
-                    // to improve search results
-                    t = name.toLowerCase().replace(/ /g,'');
-                    n = u.meta.name.toLowerCase().replace(/ /g,'');
-                    if(n.substring(0, t.length) == t) {
-                        result[id] = u;
+                    if(array.hasOwnProperty(id)) {
+                        u = array[id];
+                        // Switch to lower case and remove spaces
+                        // to improve search results
+                        t = name.toLowerCase().replace(/ /g,'');
+                        n = u.meta.name.toLowerCase().replace(/ /g,'');
+                        if(n.substring(0, t.length) == t) {
+                            result[id] = u;
+                        }
                     }
                 }
                 return result;
@@ -169,7 +195,8 @@ myApp.factory('Utilities', ['$q', function ($q) {
     }
 }]);
 
-myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
+myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', function ($rootScope, $timeout, $document, $window) {
+
     var layout = {
 
         rooms: [],
@@ -240,10 +267,14 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
          */
         getRooms: function (active) {
             var rooms = [];
-            for(var i in this.getAllRooms()) {
-                var room = this.getAllRooms()[i];
-                if(room.active == active) {
-                    rooms.push(room);
+            var allRooms = this.getAllRooms();
+
+            for(var i in allRooms) {
+                if(allRooms.hasOwnProperty(i)) {
+                    var room = this.getAllRooms()[i];
+                    if(room.active == active) {
+                        rooms.push(room);
+                    }
                 }
             }
             return rooms;
@@ -342,8 +373,10 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
         getRoomWithID: function (rid) {
             for(var i in this.rooms) {
-                if(this.rooms[i].meta.rid == rid) {
-                    return this.rooms[i];
+                if(this.rooms.hasOwnProperty(i)) {
+                    if(this.rooms[i].meta.rid == rid) {
+                        return this.rooms[i];
+                    }
                 }
             }
             return null;
@@ -352,7 +385,9 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
         getActiveRooms: function () {
             var ar = [];
             for(var i in this.rooms) {
-                this.rooms[i].active ? ar.push(this.rooms[i]) : null ;
+                if(this.rooms.hasOwnProperty(i)) {
+                    this.rooms[i].active ? ar.push(this.rooms[i]) : null ;
+                }
             }
             return ar;
         },
@@ -368,12 +403,13 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             var effectiveScreenWidth = this.effectiveScreenWidth();
 
             for(var i in rooms) {
-                if((rooms[i].offset + rooms[i].width) < effectiveScreenWidth) {
-                    rooms[i].activate();
-                    //rooms[i].active = true;
-                }
-                else {
-                    rooms[i].active = false;
+                if(rooms.hasOwnProperty(i)) {
+                    if((rooms[i].offset + rooms[i].width) < effectiveScreenWidth) {
+                        rooms[i].activate();
+                    }
+                    else {
+                        rooms[i].active = false;
+                    }
                 }
             }
 
@@ -388,9 +424,11 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
 
         removeRoomWithID: function (rid) {
             for(var i in this.rooms) {
-                if(this.rooms[i].meta.rid == rid) {
-                    this.rooms.splice(i, 1);
-                    break;
+                if(this.rooms.hasOwnProperty(i)) {
+                    if(this.rooms[i].meta.rid == rid) {
+                        this.rooms.splice(i, 1);
+                        break;
+                    }
                 }
             }
             this.updateRoomPositions();
@@ -401,16 +439,18 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             var i = 0;
             var rooms = this.roomsSortedByOffset();
             for(var key in rooms) {
-                var room = rooms[key];
-                room.targetSlot = i++;
-                $rootScope.$broadcast('animateRoom', {
-                    room: room,
-                    duration: duration,
-                    finished: (function () {
-                        //$rootScope.$broadcast('updateRoomSize');
-                        this.updateRoomSize();
-                    }).bind(this)
-                });
+                if(rooms.hasOwnProperty(key)) {
+                    var room = rooms[key];
+                    room.targetSlot = i++;
+                    $rootScope.$broadcast('animateRoom', {
+                        room: room,
+                        duration: duration,
+                        finished: (function () {
+                            //$rootScope.$broadcast('updateRoomSize');
+                            this.updateRoomSize();
+                        }).bind(this)
+                    });
+                }
             }
         },
 
@@ -431,33 +471,38 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
             // The best slot we've found so far
             var slot = 0;
 
-            for(var key in this.getAllRooms()) {
-                var slotX = this.offsetForSlot(i);
-                d1 = Math.abs(x - slotX);
+            var allRooms = this.getAllRooms();
 
-                // If this slot is closer that the
-                // last one record the slot
-                if(d1 < d0) {
-                    slot = i;
+            for(var key in allRooms) {
+                if(allRooms.hasOwnProperty(key)) {
+                    var slotX = this.offsetForSlot(i);
+                    d1 = Math.abs(x - slotX);
+
+                    // If this slot is closer that the
+                    // last one record the slot
+                    if(d1 < d0) {
+                        slot = i;
+                    }
+                    // TODO: Could have an efficiency saving by checking
+                    // if the distance is getting bigger
+
+                    d0 = d1;
+                    i++;
                 }
-                // TODO: Could have an efficiency saving by checking
-                // if the distance is getting bigger
-
-                d0 = d1;
-                i++;
             }
             return slot;
         },
 
         sortRooms: function () {
-            var room = null;
 
             var i = 0;
             var room = null;
             for(var key in this.rooms) {
-                room = this.rooms[key];
-                room.offset = this.offsetForSlot(room.targetSlot);
-                room.targetSlot = null;
+                if(this.rooms.hasOwnProperty(key)) {
+                    room = this.rooms[key];
+                    room.offset = this.offsetForSlot(room.targetSlot);
+                    room.targetSlot = null;
+                }
             }
         },
 
@@ -484,20 +529,19 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
         roomsSortedByOffset: function () {
             var arr = [];
 
-            // There should only ever be one
-//            var roomWithTarget = null;
-
             var withTarget = [];
 
             for (var key in this.rooms) {
-                var room = this.rooms[key];
+                if(this.rooms.hasOwnProperty(key)) {
+                    var room = this.rooms[key];
 
-                if (room.targetSlot) {
-                    withTarget.push(room);
-                    //roomWithTarget = room;
-                }
-                else {
-                    arr.push(room);
+                    if (room.targetSlot) {
+                        withTarget.push(room);
+                        //roomWithTarget = room;
+                    }
+                    else {
+                        arr.push(room);
+                    }
                 }
             }
             arr.sort(function (a, b) {
@@ -519,10 +563,6 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                 arr.splice(withTarget[i].targetSlot,  0, withTarget[i]);
             }
 
-//            if(roomWithTarget) {
-//                arr.splice(roomWithTarget.targetSlot,  0, roomWithTarget);
-//            }
-
             return arr;
         },
 
@@ -531,10 +571,10 @@ myApp.factory('Layout', function ($rootScope, $timeout, $document, $window) {
                 $rootScope.$digest();
             });
         }
-    }
+    };
     layout.init();
     return layout;
-});
+}]);
 
 myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope, $timeout, Layout) {
     return {
@@ -602,11 +642,11 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             }
         },
 
-        removeBlockedUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeBlockedUserWithID(user.meta.uid);
-            }
-        },
+//        removeBlockedUser: function (user) {
+//            if(user && user.meta && user.meta.uid) {
+//                this.removeBlockedUserWithID(user.meta.uid);
+//            }
+//        },
 
         isBlockedUser: function(uid) {
             return this.blockedUsers[uid] != null;
@@ -672,12 +712,12 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             }
         },
 
-        removePublicRoom: function (room) {
-            if(room && room.meta.rid) {
-                this.removePublicRoomWithID(room.meta.rid);
-                this.digest();
-            }
-        },
+//        removePublicRoom: function (room) {
+//            if(room && room.meta.rid) {
+//                this.removePublicRoomWithID(room.meta.rid);
+//                this.digest();
+//            }
+//        },
 
         removePublicRoomWithID: function (rid) {
             if(rid) {
@@ -690,7 +730,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             // Add the public rooms to an array
             var rooms = [];
             for(var key in this.publicRooms) {
-                rooms.push(this.publicRooms[key]);
+                if(this.publicRooms.hasOwnProperty(key)) {
+                    rooms.push(this.publicRooms[key]);
+                }
             }
             rooms.sort(function(a, b) {
                 return b.userCount() - a.userCount();
@@ -773,23 +815,23 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     rid: room.meta.rid,
                     invitedBy: $rootScope.user.meta.uid
                 });
-            }
+            };
 
             user.removeRoom = function (room) {
                 var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
                 ref.remove();
-            }
+            };
 
             user.addFriend = function (friend) {
                 var ref = Paths.userFriendsRef(user.meta.uid);
                 ref = ref.push();
                 ref.set({uid: friend.meta.uid});
-            }
+            };
 
             user.removeFriend = function (friend) {
                 friend.removeFriend();
                 friend.removeFriend = null;
-            }
+            };
 
             user.blockUser = function (block) {
                 var ref = Paths.userBlockedRef(user.meta.uid);
@@ -800,17 +842,17 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
 
 //                ref = ref.push();
 //                ref.set({block.meta.uid : {uid: block.meta.uid}});
-            }
+            };
 
             user.unblockUser = function (block) {
                 block.unblock();
                 block.unblock = null;
-            }
+            };
 
             user.updateRoomSlot = function (room, slot) {
                 var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
                 ref.update({slot: slot});
-            }
+            };
 
             user.on();
 
@@ -829,7 +871,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     city: null,
                     country: null
                 }
-            }
+            };
             return user;
         },
 
@@ -846,7 +888,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     }, user.meta.name
                 );
                 ref.onDisconnect().remove();
-            }
+            };
 
             user.setImageName = function (fileName) {
 
@@ -866,7 +908,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                         $rootScope.$digest();
                     });
 
-                }
+                };
 
                 if(!fileName) {
                     setName();
@@ -878,7 +920,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                         setName()
                     });
                 }
-            }
+            };
 
             user.isImage = function (src) {
 
@@ -886,15 +928,15 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
 
                 var image = new Image();
                 image.onerror = function() {
-                    deferred.resolve(false);
+                    deferred.reject();
                 };
                 image.onload = function() {
-                    deferred.resolve(true);
+                    deferred.resolve();
                 };
                 image.src = src;
 
                 return deferred.promise;
-            }
+            };
 
             return user;
         },
@@ -910,7 +952,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
     }
 }]);
 
-myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, User, Layout) {
+myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout',function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout) {
     return {
 
         getOrCreateRoomWithID: function (rid) {
@@ -920,8 +962,6 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
             if(!room) {
                 room = this.buildRoomWithID(rid);
             }
-
-            // HERE
 
             return room;
         },
@@ -1089,7 +1129,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                         $rootScope.$digest();
                     });
                 });
-            }
+            };
 
             room.startTyping = function (user) {
                 // The user is typing...
@@ -1099,12 +1139,12 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 // If the user disconnects, tidy up by removing the typing
                 // inidcator
                 ref.onDisconnect().remove();
-            }
+            };
 
             room.finishTyping = function (user) {
                 var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
                 ref.remove();
-            }
+            };
 
             room.off = function () {
                 // Get the room meta data
@@ -1112,7 +1152,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 Paths.roomMessagesRef(rid).off();
                 Paths.roomUsersRef(rid).off();
                 Paths.roomTypingRef(rid).off();
-            }
+            };
 
             room.markRead = function () {
 
@@ -1121,7 +1161,9 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 if(messages && messages.length > 0) {
 
                     for(var i in messages) {
-                        messages[i].markRead();
+                        if(messages.hasOwnProperty(i)) {
+                            messages[i].markRead();
+                        }
                     }
 
                     // Clear the messages array
@@ -1130,12 +1172,12 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
                 }
                 room.badge = null;
-            }
+            };
 
             room.activate = function () {
                 room.active = true;
                 room.markRead();
-            }
+            };
 
             room.on();
 
@@ -1159,15 +1201,17 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 height: bChatRoomHeight,
                 zIndex: null,
                 active: true
-            }
+            };
 
             room.userCount = function () {
                 var i = 0;
                 for(var key in room.users) {
-                    i++;
+                    if(room.users.hasOwnProperty(key)) {
+                        i++;
+                    }
                 }
                 return i;
-            }
+            };
 
             room.addUser = function (user, status) {
 
@@ -1180,7 +1224,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     this.setStatusForUser(user, status);
                 }
 
-            }
+            };
 
             room.setStatusForUser = function(user, status) {
                 var ref = Paths.roomUsersRef(room.meta.rid);
@@ -1188,7 +1232,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     status: status,
                     uid: user.meta.uid
                 });
-            }
+            };
 
             room.removeUser = function (user) {
 
@@ -1205,22 +1249,24 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 });
 
                 return deferred.promise;
-            }
+            };
 
             room.getOwner = function () {
                 // get the owner's ID
                 var data = null;
                 for(var key in room.meta.users) {
-                    data = room.meta.users[key];
-                    if(data.status == bUserStatusOwner) {
-                        break;
+                    if(room.meta.users.hasOwnProperty(key)) {
+                        data = room.meta.users[key];
+                        if(data.status == bUserStatusOwner) {
+                            break;
+                        }
                     }
                 }
                 if(data) {
                     return User.getOrCreateUserWithID(data.uid);
                 }
                 return null;
-            }
+            };
 
             room.updateName = function () {
 
@@ -1232,18 +1278,22 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 // How many users are there?
                 var i = 0;
                 for(var key in room.users) {
-                    i++;
+                    if(room.users.hasOwnProperty(key)) {
+                        i++;
+                    }
                 }
                 // TODO: Do this better
                 if(i == 2) {
                     for(var key in room.users) {
-                        var user = room.users[key];
+                        if(room.users.hasOwnProperty(key)) {
+                            var user = room.users[key];
 
-                        // We only want to use the name of a user
-                        // who isn't the current user
-                        if(Cache.onlineUsers[user.meta.uid]) {
-                            if(user.meta.name) {
-                                room.name = user.meta.name;
+                            // We only want to use the name of a user
+                            // who isn't the current user
+                            if(Cache.onlineUsers[user.meta.uid]) {
+                                if(user.meta.name) {
+                                    room.name = user.meta.name;
+                                }
                             }
                         }
                     }
@@ -1255,11 +1305,11 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     room.name = bGroupChatDefaultName;
                 }
 
-            }
+            };
 
             room.slot = function () {
                 return Layout.nearestSlotToOffset(room.offset);
-            }
+            };
 
             room.getUserStatus = function (user) {
                 // This could be called from the UI so it's important
@@ -1271,7 +1321,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                     }
                 }
                 return '';
-            }
+            };
 
             room.getMessages = function () {
 
@@ -1285,7 +1335,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 room.messagesDirty = false;
 
                 return room.messages;
-            }
+            };
 
             room.sendMessage = function (text, user) {
 
@@ -1301,7 +1351,7 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
                 var newRef = ref.push();
                 newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP);
 
-            }
+            };
 
             room.transcript = function () {
 
@@ -1312,18 +1362,19 @@ myApp.factory('Room', function (Config, Message, $rootScope, $timeout, Cache, Us
 
                 var m = null;
                 for(var i in messages) {
-                    m = messages[i];
-
-                    transcript += moment(m.meta.time).format('HH:mm:ss') + " " + m.user.meta.name + ": " + m.meta.text + "\n";
+                    if(messages.hasOwnProperty(i)) {
+                        m = messages[i];
+                        transcript += moment(m.meta.time).format('HH:mm:ss') + " " + m.user.meta.name + ": " + m.meta.text + "\n";
+                    }
                 }
 
                 return transcript;
-            }
+            };
 
             return room;
         }
     }
-});
+}]);
 
 myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootScope, $q, Cache, User) {
     var message = {
@@ -1481,7 +1532,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     name = authUser.username;
                 }
                 if(!name || name.length == 0) {
-                    name = "Anonymous" + Math.floor(Math.random() * 100 + 1);
+                    name = "ChatCat" + Math.floor(Math.random() * 1000 + 1);
                 }
                 user.meta.name = name;
 
@@ -1767,8 +1818,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 this.joinRoom(room, bUserStatusOwner);
 
                 for (var i in users) {
-                    room.addUser(users[i], bUserStatusInvited);
-                    users[i].addRoom(room);
+                    if(users.hasOwnProperty(i)) {
+                        room.addUser(users[i], bUserStatusInvited);
+                        users[i].addRoom(room);
+                    }
                 }
 
                 deferred.resolve(room);
@@ -1782,7 +1835,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
         /**
          * Create a new chat room
-         * @param The room options
+         * @param options - room options
          */
         createPublicRoom: function (options) {
 
@@ -1879,9 +1932,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             }
         },
 
-        uidIsMine: function (uid) {
-            return uid == this.getUser().meta.uid;
-        },
+//        uidIsMine: function (uid) {
+//            return uid == this.getUser().meta.uid;
+//        },
 
         numberOfChatters: function () {
 
@@ -1891,9 +1944,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             var ref = Paths.onlineUsersRef();
             ref.once('value', function (snapshot) {
 
-                var i = 0
-                for(var key in snapshot.val()) {
-                    i++;
+                var i = 0;
+                var chatters = snapshot.val();
+                for(var key in chatters) {
+                    if(chatters.hasOwnProperty(key)) {
+                        i++;
+                    }
                 }
 
                 deferred.resolve(i);
@@ -1901,7 +1957,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             return deferred.promise;
         }
-    }
+    };
 
     return Auth;
 
