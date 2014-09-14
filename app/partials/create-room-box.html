@@ -14,13 +14,13 @@
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-float-left">
-                        Private chat room
+                        Make room public
                     </div>
                     <div class="uk-float-right">
-                        <input type="checkbox" ng-model="room.private">
+                        <input type="checkbox" ng-model="public">
                     </div>
                 </div>
-                <div class="uk-form-row">
+                <div class="uk-form-row" ng-hide="public">
                     <div class="uk-float-left">
                         Member can invite other users
                     </div>

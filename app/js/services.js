@@ -729,6 +729,10 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             }
         },
 
+        getPublicRoomWithID: function (rid) {
+            return this.publicRooms[rid];
+        },
+
         getPublicRooms: function () {
             // Add the public rooms to an array
             var rooms = [];
@@ -744,8 +748,8 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             rooms.sort(function(a, b) {
 
                 // Weight
-                var aw = a.meta.weight; aw = aw ? aw : -100;
-                var bw = b.meta.weight; bw = bw ? bw : -100;
+                var aw = a.meta.weight; aw = aw ? aw : 100;
+                var bw = b.meta.weight; bw = bw ? bw : 100;
 
                 if(aw != bw) {
                     return aw - bw;
@@ -838,7 +842,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
 
             user.addRoom = function (room) {
                 var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-                ref.set({
+                ref.update({
                     rid: room.meta.rid,
                     invitedBy: $rootScope.user.meta.uid
                 });
@@ -1215,7 +1219,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             var room = {
                 meta: {
                     name: null,
-                    public: null,
                     invitesEnabled: false,
                     users: []
                 },
@@ -1242,6 +1245,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
             room.addUser = function (user, status) {
 
+                // Are we able to invite the user?
+                if(!room.canInviteUser() && status != bUserStatusOwner) {
+                    $rootScope.showNotification(bNotificationTypeAlert, 'Invites disabled', 'The creator of this room has disabled invites', 'ok');
+                    return;
+                }
+
                 // If the user is already a member of the
                 // room
                 if(room.users[user.meta.uid]) {
@@ -1253,9 +1262,27 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
             };
 
+            room.canInviteUser = function () {
+
+                // Is this room an invite only room?
+                if(room.meta.invitesEnabled) {
+                    return true;
+                }
+                else {
+                    // Are we the owner?
+                    var owner = room.getOwner();
+                    if(owner && owner.meta) {
+                        return owner.meta.uid == $rootScope.user.meta.uid;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            };
+
             room.setStatusForUser = function(user, status) {
                 var ref = Paths.roomUsersRef(room.meta.rid);
-                ref.child(user.meta.uid).set({
+                ref.child(user.meta.uid).update({
                     status: status,
                     uid: user.meta.uid
                 });
@@ -1281,6 +1308,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             room.getOwner = function () {
                 // get the owner's ID
                 var data = null;
+
                 for(var key in room.meta.users) {
                     if(room.meta.users.hasOwnProperty(key)) {
                         data = room.meta.users[key];
@@ -1338,16 +1366,18 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 return Layout.nearestSlotToOffset(room.offset);
             };
 
-            room.getUserStatus = function (user) {
+            room.getUserInfo = function (user) {
                 // This could be called from the UI so it's important
                 // to wait until users has been populated
                 if(room.meta && room.meta.users) {
-                    var data = room.meta.users[user.meta.uid];
-                    if(data) {
-                        return data.status;
-                    }
+                    return room.meta.users[user.meta.uid];
                 }
-                return '';
+                return null;
+            }
+
+            room.getUserStatus = function (user) {
+                var info = room.getUserInfo(user);
+                return info ? info.status : null;
             };
 
             room.getMessages = function () {
@@ -1676,7 +1706,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     console.log("WARNING: Room description is undefined or of zero length");
                 }
                 if(room.weight == null) {
-                    room.weight = 0;
+                    room.weight = 100;
                 }
 
                 // Add the rooms
@@ -1716,6 +1746,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 if (rid) {
 
                     var room = Room.getOrCreateRoomWithID(rid);
+
+                    // Make sure we reset the offset
+                    // this can cause a bug with public rooms
+                    // because when they're removed they
+                    // aren't necessarily destroyed because
+                    // they stay in the cache
+                    room.offset = 0;
 
                     if (room) {
 
@@ -1757,8 +1794,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var rid = snapshot.name();
                 if(rid) {
-
-
                     var room = Room.getOrCreateRoomWithID(rid);
                     if(room) {
                         Cache.addPublicRoom(room);
@@ -1868,14 +1903,17 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
         /**
          * Create a new chat room
-         * @param The owner of the room
          * @param A list of users to add
+         * @param {Obj=} the room meta
          */
-        createPrivateRoom: function (users) {
+        createPrivateRoom: function (users, meta) {
 
             var deferred = $q.defer();
 
             var room = Room.newRoom();
+            if(meta) {
+                room.meta = meta;
+            }
 
             this.createRoom(room).then((function() {
 
@@ -1939,6 +1977,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             room.meta = options;
 
+
+
             this.createRoom(room).then((function() {
 
                 // Once the room's created we need to
@@ -1966,6 +2006,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
          */
         createRoom: function (room, rid, bypassSpamTimer) {
 
+
             var deferred = $q.defer();
 
             // Only allow a room to be created every 0.5 seconds
@@ -1981,6 +2022,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     }).bind(this), 500);
                 }
             }
+
+            // If
 
             var ref = Paths.roomsRef();
 
@@ -2014,6 +2057,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
         },
 
         deleteRoom: function (room) {
+
+            // Stop listening to room if it's not
+            // a public room
+//            if(!Cache.getPublicRoomWithID(room.meta.rid)) {
+//                room.off();
+//            }
 
             this.leaveRoom(room);
 

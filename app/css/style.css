@@ -339,6 +339,7 @@ div.cc-message-outer img {
 div.cc-message-outer .time {
     text-align: center;
     color: #777;
+    line-height: 13px;
 }
 
 .cc-abs-right {
@@ -350,7 +351,7 @@ div.cc-message-outer .time {
 }
 
 .cc-message-margin {
-    margin: 3px;
+    margin: 1px 2px 0 2px;
 }
 
 .bubble

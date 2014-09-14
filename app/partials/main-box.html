@@ -20,10 +20,10 @@
 
     <!--Add the search box-->
     <div class="uk-overflow-container">
-        <form class="uk-panel uk-form uk-float-left cc-padded" ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' ? 40 : 10))}">
+        <form class="uk-panel uk-form uk-float-left cc-padded" ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && roomCreationEnabled ? 40 : 10))}">
             <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search[activeTab]" placeholder="Search" />
         </form>
-        <a class="uk-float-right" ng-show="activeTab == 'rooms'" ng-click="showCreateRoomBox()">
+        <a class="uk-float-right" ng-show="activeTab == 'rooms' && roomCreationEnabled" ng-click="showCreateRoomBox()">
             <img class="cc-image-30" src="img/cc-30-plus.png" />
         </a>
     </div>

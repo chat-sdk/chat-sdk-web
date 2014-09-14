@@ -17,6 +17,7 @@ myApp.controller('AppController', [
 
         $scope.on = true;
 
+
     };
 
     $scope.getUser = function () {
@@ -352,6 +353,9 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
 
         // We don't want people deleting rooms from this view
         $scope.canDeleteRoom = false;
+
+        // Can the user create a new public chat room?
+        $scope.roomCreationEnabled = CC_OPTIONS.usersCanCreatePublicRooms;
 
     };
 
@@ -918,7 +922,14 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
     };
 
     $scope.createRoom  = function () {
-        Auth.createPublicRoom($scope.room);
+        // Is this a public room?
+        if($scope.public) {
+            $scope.room.invitesEnabled = true;
+            Auth.createPublicRoom($scope.room);
+        }
+        else {
+            Auth.createPrivateRoom([], $scope.room);
+        }
         $scope.back();
     };
 
@@ -930,7 +941,6 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
     $scope.clearForm = function () {
         $scope.room = {
             invitesEnabled: false,
-            private: false,
             name: null,
             description: null
         };
