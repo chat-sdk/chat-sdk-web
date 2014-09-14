@@ -268,6 +268,8 @@ myApp.controller('AppController', [
     // File uploads
     $scope.onFileSelect = function($files) {
 
+        
+
         $scope.uploadingFile = true;
         $scope.uploadProgress = 0;
 
