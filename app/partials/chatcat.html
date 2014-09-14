@@ -1,0 +1,37 @@
+<div style="display: none" cc-uncloak class="cc-disable-highlight" ng-controller="AppController" >
+
+    <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
+        <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.imageURL20 }}"  />
+        {{ userDrag.user.meta.name }}
+    </div>
+
+    <div id="cc-base">
+
+        <div id="cf-menu-bar" class="cf-menu-bar" ng-click="toggleMainBoxVisibility()">
+            <div class="uk-float-left cc-base-text">
+                <div class="inner">
+                    {{ numberOfUsersOnline() }} People here
+                    <a ng-click="shutdown()" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
+                        <img class="cc-image-30 uk-float-right" ng-src="img/{{ shutdownImage() }}" />
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div ng-show="on">
+            <div ng-show="activeBox == 'loginBox' && !minimize" ng-include="'partials/login-box.html'"></div>
+            <div ng-show="activeBox == 'profileSettingsBox' && !minimize" ng-include="'partials/profile-settings-box.html'"></div>
+            <div ng-show="activeBox == 'mainBox' && !minimize" ng-include="'partials/main-box.html'"></div>
+            <div ng-show="activeBox == 'createRoomBox' && !minimize" ng-include="'partials/create-room-box.html'"></div>
+
+            <div ng-repeat="(id, room) in getAllRooms()">
+                <div ng-controller="ChatController" ng-init="init(room)" ng-include="'partials/chat-room.html'"></div>
+            </div>
+
+            <div ng-include="'partials/room-list-box.html'"></div>
+            <div ng-include="'partials/profile-box.html'"></div>
+        </div>
+    </div>
+</div>
+
+
