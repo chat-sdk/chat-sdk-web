@@ -1,7 +1,11 @@
 <div style="display: none" cc-uncloak class="cc-disable-highlight" ng-controller="AppController" >
 
+    <canvas style="position: absolute; left: -10000px; top:-10000px" thumbnailer>
+
+    </canvas>
+
     <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-        <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.imageURL20 }}"  />
+        <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.meta.image }}"  />
         {{ userDrag.user.meta.name }}
     </div>
 

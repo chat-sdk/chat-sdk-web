@@ -227,7 +227,7 @@ myApp.controller('AppController', [
             $scope.getUser().unblockUser(user);
         }
         else if (user.online) {
-            Auth.createPrivateRoom([user]).then(function(room) {
+            Auth.createPrivateRoom([user], {invitesEnabled: true}).then(function(room) {
                 if (DEBUG) console.log("Room Created: " + room.meta.name);
             });
         }
@@ -268,10 +268,65 @@ myApp.controller('AppController', [
     // File uploads
     $scope.onFileSelect = function($files) {
 
-        
-
-        $scope.uploadingFile = true;
+        $scope.uploadingFile = false;
         $scope.uploadProgress = 0;
+
+        var f = $files[0];
+
+        if(f.type == "image/png" || f.type == 'image/jpeg') {
+
+        }
+        else {
+            $scope.showNotification(bNotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+            return;
+        }
+
+        var reader = new FileReader();
+
+        reader.onload = (function() {
+            return function(e) {
+
+                var image = new Image();
+
+                image.onload = function () {
+
+                    // Resize the image
+                    var canvas = document.createElement('canvas'),
+                        max_size = 100,
+                        width = image.width,
+                        height = image.height;
+
+                    var x = 0;
+                    var y = 0;
+
+                    //thumbnailer(canvas, image, 100, 3);
+
+                    if (width > height) {
+                        x = (width - height)/2;
+
+                    } else {
+                        y = (height - width)/2;
+                    }
+
+                    var size = width - 2 * x;
+
+                    // First rescale the image to be square
+                    canvas.width = max_size;
+                    canvas.height = max_size;
+                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
+
+                    var dataURL = canvas.toDataURL('image/jpeg');
+
+                    $scope.getUser().setImage(dataURL);
+                }
+                image.src = e.target.result;
+            }
+        })(f);
+
+        reader.readAsDataURL(f);
+
+        return;
+
 
         //$files: an array of files selected, each file has name, size, and type.
         for (var i = 0; i < $files.length; i++) {
@@ -476,6 +531,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         //
         $scope.hideNotification();
+
+        try {
+            Auth.removeListenersFromUser();
+        }
+        catch (error) {
+
+        }
     };
 
     $scope.loginWithPassword = function () {

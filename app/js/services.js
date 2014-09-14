@@ -173,19 +173,76 @@ myApp.factory('Utilities', ['$q', function ($q) {
             }
         },
 
-        saveImageFromURL: function (context, url) {
+        pullImageFromURL: function (context, url) {
 
             var deferred = $q.defer();
 
-            context.post('server/pull.php', {'url': url}).success(function(data, status) {
+            context.post('server/pull.php', {'url': url}).success((function(data, status) {
 
-                deferred.resolve(data.fileName);
+                if(data.fileName) {
 
-            }).error(function(data, status) {
+                    // Now load the image into Firebase
+                    var url = bImageDirectory + "resize.php?src=" + data.fileName + "&w=100&h=100";
+
+                    this.saveImageFromURL(url).then(function(imageData) {
+
+                        deferred.resolve(imageData);
+
+                    }, deferred.reject);
+                }
+                else {
+                    deferred.reject();
+                }
+
+            }).bind(this)).error(function(data, status) {
 
                 deferred.reject();
 
             });
+
+            return deferred.promise;
+        },
+
+        saveImageFromURL: function (src) {
+
+            var deferred = $q.defer();
+
+            var image = new Image();
+
+            image.onload = function () {
+
+                // Resize the image
+                var canvas = document.createElement('canvas'),
+                    max_size = 100,
+                    width = image.width,
+                    height = image.height;
+
+                var x = 0;
+                var y = 0;
+
+                if (width > height) {
+                    x = (width - height)/2;
+
+                } else {
+                    y = (height - width)/2;
+                }
+
+                var size = width - 2 * x;
+
+                // First rescale the image to be square
+                canvas.width = max_size;
+                canvas.height = max_size;
+
+                try {
+                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
+                    var dataURL = canvas.toDataURL('image/jpeg');
+                    deferred.resolve(dataURL);
+                }
+                catch (error) {
+                    deferred.reject(error);
+                }
+            }
+            image.src = src;
 
             return deferred.promise;
         },
@@ -824,7 +881,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                         Cache.addOnlineUser(user);
                     }
 
-                    user.setImageName(user.meta.imageName);
+                    user.setImage(user.meta.image);
 
                     $timeout(function(){
                         $rootScope.$digest();
@@ -885,7 +942,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                 ref.update({slot: slot});
             };
 
-            user.on();
+            //user.on();
 
             return user;
         },
@@ -921,37 +978,46 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                 ref.onDisconnect().remove();
             };
 
-            user.setImageName = function (fileName) {
-
-                var setName = function (fileName) {
-
-                    if(!fileName) {
-                        fileName = 'cf-100-profile-pic.png';
-                    }
-
-                    user.meta.imageName = fileName;
-
-                    user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
-                    user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
-                    user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-
-                };
-
-                if(!fileName) {
-                    setName();
+            user.setImage = function (imageData) {
+                if(imageData) {
+                    user.meta.image = imageData;
                 }
                 else {
-                    user.isImage(bImageDirectory + '?src=' + fileName).then(function () {
-                        setName(fileName);
-                    }, function (error) {
-                        setName()
-                    });
+                    user.meta.image = bImageDirectory + "cf-100-profile-pic.png"
                 }
-            };
+            }
+
+//            user.setImageName = function (fileName) {
+//
+//                var setName = function (fileName) {
+//
+//                    if(!fileName) {
+//                        fileName = 'cf-100-profile-pic.png';
+//                    }
+//
+//                    user.meta.imageName = fileName;
+//
+//                    user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
+//                    user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
+//                    user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
+//
+//                    $timeout(function(){
+//                        $rootScope.$digest();
+//                    });
+//
+//                };
+//
+//                if(!fileName) {
+//                    setName();
+//                }
+//                else {
+//                    user.isImage(bImageDirectory + '?src=' + fileName).then(function () {
+//                        setName(fileName);
+//                    }, function (error) {
+//                        setName()
+//                    });
+//                }
+//            };
 
             user.isImage = function (src) {
 
@@ -976,6 +1042,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             var user = Cache.getUserWithID(uid)
             if(!user) {
                 user = this.buildUserWithID(uid);
+                user.on();
                 Cache.addUser(user);
             }
             return user;
@@ -1532,38 +1599,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             return $rootScope.user;
         },
 
-        addOnlineUsersListener: function () {
-
-            var ref = Paths.onlineUsersRef();
-
-            // A user has come online
-            ref.on("child_added", (function (snapshot) {
-
-                // Get the UID of the added user
-                var uid = null;
-                if (snapshot && snapshot.val()) {
-                    uid = snapshot.val().uid;
-                }
-
-                var user = User.getOrCreateUserWithID(uid);
-
-                // Is the user blocking us?
-                if(!user.blockingMe) {
-                    Cache.addOnlineUser(user);
-                }
-
-            }).bind(this));
-
-            ref.on("child_removed", (function (snapshot) {
-
-                var user = User.getOrCreateUserWithID(snapshot.val().uid);
-                if (user) {
-                    Cache.removeOnlineUser(user)
-                }
-
-            }).bind(this));
-        },
-
         /**
          * Create a new AngularFire simple login object
          * this object will try to authenticate the user if
@@ -1593,7 +1628,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
                 user.meta.name = name;
 
-                var imageName = null;
+                var imageURL = null;
                 var thirdPartyData = authUser.thirdPartyUserData;
 
                 /** SOCIAL INFORMATION **/
@@ -1603,12 +1638,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if(!user.meta.imageName) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
 
-                            Utilities.saveImageFromURL($http, response.data.url).then(function(fileName) {
+                            Utilities.pullImageFromURL($http, response.data.url).then(function(imageData) {
 
-                                user.setImageName(fileName);
+                                user.setImage(imageData);
 
                             }, function(error) {
-
+                                user.setImage();
                             });
                         });
                     }
@@ -1617,30 +1652,30 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
-                    imageName = thirdPartyData.profile_image_url.replace("normal", "bigger");
+                    imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
 
                     if(!user.meta.description) {
                         user.meta.description = thirdPartyData.description;
                     }
                 }
                 if(authUser.provider == "github") {
-                    imageName = thirdPartyData.avatar_url;
+                    imageURL = thirdPartyData.avatar_url;
                 }
                 if(authUser.provider == "google") {
-                    imageName = thirdPartyData.picture;
+                    imageURL = thirdPartyData.picture;
                 }
                 if(authUser.provider == "anonymous") {
 
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if(!user.meta.imageName && imageName) {
-                    Utilities.saveImageFromURL($http, imageName).then(function(fileName) {
+                if(!user.meta.image && imageURL) {
+                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
 
-                        user.setImageName(fileName);
+                        user.setImage(imageData);
 
                     }, function(error) {
-
+                        user.setImage();
                     });
                 }
 
@@ -1670,9 +1705,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 /** Create static rooms **/
                 this.addStaticRooms();
-
-                // Track which users are online
-                this.addOnlineUsersListener();
 
                 // Add listeners to the user
                 this.addListenersToUser(authUser.uid);
@@ -1727,9 +1759,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
          * @param uid - the user's Firebase ID
          */
         addListenersToUser: function (uid) {
-
-            // Add a listener to the image URL
-
 
             // Listen to the user's rooms
             var roomsRef = Paths.userRoomsRef(uid);
@@ -1856,6 +1885,47 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 Cache.removeBlockedUserWithID(snapshot.val().uid);
 
             }).bind(this));
+
+            // A user has come online
+            var onlineUsersRef = Paths.onlineUsersRef();
+            onlineUsersRef.on("child_added", (function (snapshot) {
+
+                // Get the UID of the added user
+                var uid = null;
+                if (snapshot && snapshot.val()) {
+                    uid = snapshot.val().uid;
+                }
+
+                var user = User.getOrCreateUserWithID(uid);
+
+                // Is the user blocking us?
+                if(!user.blockingMe) {
+                    Cache.addOnlineUser(user);
+                }
+
+            }).bind(this));
+
+            onlineUsersRef.on("child_removed", (function (snapshot) {
+
+                var user = User.getOrCreateUserWithID(snapshot.val().uid);
+                if (user) {
+                    Cache.removeOnlineUser(user)
+                }
+
+            }).bind(this));
+
+            this.removeListenersFromUser = function () {
+                roomsRef.off('child_added');
+                roomsRef.off('child_removed');
+                publicRoomsRef.off('child_added');
+                publicRoomsRef.off('child_removed');
+                friendsRef.off('child_added');
+                friendsRef.off('child_removed');
+                blockedUsersRef.off('child_added');
+                blockedUsersRef.off('child_removed');
+                onlineUsersRef.off('child_added');
+                onlineUsersRef.off('child_removed');
+            }
         },
 
         bindUserWithUID: function (uid) {
@@ -1871,6 +1941,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
             $rootScope.user = User.buildUserWithID(uid);
+            $rootScope.user.on();
 
             // Bind the user to the user variable
             $userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {

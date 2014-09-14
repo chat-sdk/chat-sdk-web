@@ -34,7 +34,7 @@
 
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.imageURL30 }}" />
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.meta.image }}" />
                         <span class="bubble" ng-class="message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
                             {{ message.meta.text }}
                         </span>

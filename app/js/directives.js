@@ -593,3 +593,19 @@ myApp.directive('ccUncloak', function () {
     }
 });
 
+myApp.directive('thumbnailer',['$rootScope', '$document', function ($rootScope) {
+    return function (scope, element, attr) {
+        $rootScope.$on(bMakeThumbnail, (function (event, args) {
+
+            //angular.createElement();
+
+            var canvas = document.createElement('canvas');
+
+            var element = angular.element('<canvas></canvas>');
+
+            new thumbnailer(element, args.image, args.size, 3);
+
+
+        }).bind(this));
+    }
+}]);

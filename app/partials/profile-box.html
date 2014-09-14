@@ -1,6 +1,6 @@
 <div id="cc-profile-box" class="cc-shadow-diffuse" ng-style="profileBoxStyle" ng-show="currentUser && !userDrag.dragging" ng-mouseenter="cancelTimer()" ng-mouseleave="showProfileBox(null, 0)" center-mouse-y >
     <div class="cc-right-margin-5">
-        <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.imageURL30 }}" />
+        <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.meta.image }}" />
             <span class="uk-float-left" >
                 <span class="uk-text-bold">{{ currentUser.meta.name }}</span><br/>
                 <span class="uk-text-muted cc-italic">{{ currentUser.meta.city }}</span>
