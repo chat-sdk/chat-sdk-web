@@ -4,23 +4,22 @@
 <!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>My AngularJS App</title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
-  <link rel="stylesheet" href="css/app.css"/>
-    <link rel="stylesheet" href="css/cf-default.css"/>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ChatCat.io</title>
+    <meta name="description" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
+    <link rel="stylesheet" href="css/style.css"/>
 
     <!-- Flags -->
     <link rel="stylesheet" href="libs/flags/stylesheets/flags/common.css"/>
     <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags32.css"/>
     <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags16.css"/>
-
-    <!-- Speech bubbles -->
-    <!--<link rel="stylesheet" href="libs/bubble.css" />-->
 
     <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
     <script src="bower_components/jquery/jquery.js"></script>
@@ -29,15 +28,6 @@
     <script src="bower_components/uikit/dist/js/uikit.js"></script>
     <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.css">
     <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.gradient.css">
-
-    <style type="text/css">
-        .css-form input.ng-invalid.ng-dirty {
-            background-color: #fabfbc;
-        }
-        .css-form input.ng-valid {
-            background-color: #cbfac4;
-        }
-    </style>
 
 </head>
 <body >
@@ -60,43 +50,60 @@
 <br>
 <br>
 
-<!-- #45 Added ng-cloak  -->
-<div ng-app="myApp" style="display: none" cc-uncloak class="cc-disable-highlight" ng-controller="AppController" >
+<div ng-app="myApp" ng-include="'partials/chatcat.html'" >
+    <script type="text/javascript">
 
-    <!--<div style="position: absolute; top: 0; left: 0">-->
-        <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.imageURL20 }}"  />
-            {{ userDrag.user.meta.name }}
-        </div>
-    <!--</div>-->
+        // Set options here
+        var CC_OPTIONS = {
 
-    <div id="cc-base">
+            // Users can create public chat rooms?
+            // If this is true users will be able to setup new
+            // public rooms
+            usersCanCreatePublicRooms: true,
 
-        <div id="cf-menu-bar" class="cf-menu-bar" ng-click="toggleMainBoxVisibility()">
-            <div class="uk-float-left cc-base-text">
-                <div class="inner">
-                    {{ numberOfUsersOnline() }} People here
-                    <a ng-click="shutdown()" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
-                        <img class="cc-image-30 uk-float-right" ng-src="img/{{ shutdownImage() }}" />
-                    </a>
-                </div>
-            </div>
-         </div>
+            // This a list of default public rooms
+            // These rooms will appear at the top of the "Rooms" section
+            // of the main box
+            staticRooms: [
+                {
+                    // The name of the room
+                    name: 'Chatcat Discussion',
 
-        <div ng-show="on">
-            <div ng-show="activeBox == 'loginBox' && !minimize" ng-include="'partials/login-box.html'"></div>
-            <div ng-show="activeBox == 'profileSettingsBox' && !minimize" ng-include="'partials/profile-settings-box.html'"></div>
-            <div ng-show="activeBox == 'mainBox' && !minimize" ng-include="'partials/main-box.html'"></div>
-            <div ng-show="activeBox == 'createRoomBox' && !minimize" ng-include="'partials/create-room-box.html'"></div>
+                    // The descriptions - this appears on mouseover
+                    description: 'A space to talk about the Chatcat client - this room will be monitored by our team.',
 
-            <div ng-repeat="(id, room) in getAllRooms()">
-                <div ng-controller="ChatController" ng-init="init(room)" ng-include="'partials/chat-room.html'"></div>
-            </div>
+                    // An identifier for the room - this must be unique
+                    rid: 'CHATCAT_CHAT',
 
-            <div ng-include="'partials/room-list-box.html'"></div>
-            <div ng-include="'partials/profile-box.html'"></div>
-        </div>
-    </div>
+                    // Room weight - lower numbers are light and float to the top
+                    // high numbers are heavy and sink to the bottom
+                    weight: 0
+                },
+                {
+                    // The name of the room
+                    name: 'Chatcat beta bugs',
+
+                    // The descriptions - this appears on mouseover
+                    description: 'If you find any bugs you can discuss them in this chat room.',
+
+                    // An identifier for the room - this must be unique
+                    rid: 'CHATCAT_BUGS',
+
+                    // Room weight - lower numbers are light and float to the top
+                    // high numbers are heavy and sink to the bottom
+                    weight: -1
+                }
+
+            ],
+
+            // Single sign-on
+            singleSignOnEnabled: false,
+
+            // The URL to contact for single sign on
+            singleSignOnURL: ''
+
+        }
+    </script>
 </div>
 
   <!--[if lt IE 7]>
@@ -123,8 +130,6 @@
   <script src="js/controllers.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/directives.js"></script>
-  <script src="js/defines.js"></script>
-  <script src="js/user.js"></script>
   <script src="js/utilities.js"></script>
 
 <script src="bower_components/firebase/firebase.js"></script>
@@ -134,12 +139,6 @@
 <script src="bower_components/angular-facebook/lib/angular-facebook.js"></script>
 <script src="bower_components/FileSaver/FileSaver.js"></script>
 <script src="bower_components/moment/moment.js"></script>
-
-<script type="text/javascript">
-
-
-</script>
-
 
 </body>
 </html>

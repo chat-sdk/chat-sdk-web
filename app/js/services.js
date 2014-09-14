@@ -96,17 +96,17 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
             var deferred = $q.defer();
 
-            // Contact the API
+            //Contact the API
 //            $http({
 //                method: 'post',
-//                url: 'http://chatcat.io/wp-admin/admin-ajax.php'//,
-////                params: {
-////                    action: 'get-api-key',
-////                    url: $window.location.origin
-////                }
+//                url: 'http://chatcat.io/wp-admin/admin-ajax.php',
+//                params: {
+//                    action: 'get-api-key',
+//                    url: 'www.chatcat.io'//$window.location.origin
+//                }
 //            }).then(function (response) {
 //
-//                console.log(response);
+//                console.log(response.data);
 //
 //                deferred.resolve(response);
 //
@@ -120,9 +120,12 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
 
             //Make up some API Details
+
             var api = {
                 cid: "xxyyzz",
-                max: 30,
+                max: 20,
+                ads: true,
+                whiteLabel: false,
                 rooms: [
                     {
                         fid: "123123",
@@ -734,8 +737,32 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
                     rooms.push(this.publicRooms[key]);
                 }
             }
+
+            // Sort by weight first
+            // then number of users
+            // then alphabetically
             rooms.sort(function(a, b) {
-                return b.userCount() - a.userCount();
+
+                // Weight
+                var aw = a.meta.weight; aw = aw ? aw : -100;
+                var bw = b.meta.weight; bw = bw ? bw : -100;
+
+                if(aw != bw) {
+                    return aw - bw;
+                }
+                else {
+
+                    var ac = a.userCount();
+                    var bc = b.userCount();
+
+                    if(ac == bc) {
+                        return bc - ac;
+                    }
+                    else {
+                        return a.name < b.name ? -1 : 1;
+                    }
+                }
+
             });
             return rooms;
         },
@@ -1611,6 +1638,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 /** GRAVATAR **/
 
+                /** Create static rooms **/
+                this.addStaticRooms();
 
                 // Track which users are online
                 this.addOnlineUsersListener();
@@ -1625,6 +1654,41 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             });
 
             return deferred.promise;
+        },
+
+        addStaticRooms: function () {
+
+            var room = null;
+            for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
+
+                room = CC_OPTIONS.staticRooms[i];
+
+                // Validate the room
+                if(room.name == null || room.name.length == 0) {
+                    console.log("ERROR: Room name is undefined or of zero length");
+                    return;
+                }
+                if(room.rid == null || room.rid.length == 0) {
+                    console.log("ERROR: Room rid is undefined or of zero length");
+                    return;
+                }
+                if(room.description == null || room.description.length == 0) {
+                    console.log("WARNING: Room description is undefined or of zero length");
+                }
+                if(room.weight == null) {
+                    room.weight = 0;
+                }
+
+                // Add the rooms
+                this.createStaticRoom({
+                    name: room.name,
+                    description: room.description,
+                    invitesEnabled: true,
+                    rid: room.rid,
+                    weight: room.weight
+                });
+            }
+
         },
 
         /**
@@ -1837,6 +1901,36 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
          * Create a new chat room
          * @param options - room options
          */
+        createStaticRoom: function (options) {
+
+            var deferred = $q.defer();
+
+            var room = Room.newRoom();
+
+            room.meta = options;
+
+            this.createRoom(room, options.rid, true).then((function() {
+
+                // Once the room's created we need to
+                // add it to the list of public rooms
+                var ref = Paths.publicRoomsRef();
+                ref.child(room.meta.rid).set({rid: room.meta.rid});
+
+                //this.joinRoom(room, bUserStatusOwner);
+
+                deferred.resolve();
+
+            }).bind(this), function(error) {
+                deferred.reject(error);
+            });
+
+            return deferred.promise;
+        },
+
+        /**
+         * Create a new chat room
+         * @param options - room options
+         */
         createPublicRoom: function (options) {
 
             var deferred = $q.defer();
@@ -1863,26 +1957,42 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             return deferred.promise;
         },
 
-        createRoom: function (room) {
+        /**
+         * Create a new room
+         * @param room
+         * @param {string=} rid (optional)
+         * @param {boolean=} bypassSpamTimer (optional)
+         * @returns {promise|e.promise|FirebaseObject.$$conf.promise}
+         */
+        createRoom: function (room, rid, bypassSpamTimer) {
 
             var deferred = $q.defer();
 
             // Only allow a room to be created every 0.5 seconds
             // to stop spamming
-            if(this._createRoomTimeoutPromise) {
-                deferred.reject();
-               return deferred.promise;
-            }
-            else {
-                this._createRoomTimeoutPromise = $timeout((function () {
-                    this._createRoomTimeoutPromise = null;
-                }).bind(this), 500);
+            if(!bypassSpamTimer) {
+                if(this._createRoomTimeoutPromise) {
+                    deferred.reject();
+                    return deferred.promise;
+                }
+                else {
+                    this._createRoomTimeoutPromise = $timeout((function () {
+                        this._createRoomTimeoutPromise = null;
+                    }).bind(this), 500);
+                }
             }
 
             var ref = Paths.roomsRef();
 
             // Create a new child ref
-            var roomRef = ref.push();
+            var roomRef = null;
+            if(rid) {
+                roomRef = ref.child(rid);
+            }
+            else {
+                roomRef = ref.push();
+            }
+
             var roomMetaRef = Paths.roomMetaRef(roomRef.name());
 
             // Add the room then set it's firebase ID

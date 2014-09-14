@@ -1,6 +1,6 @@
 <table class="uk-table uk-table-hover room-list">
     <tr ng-repeat="(id, room) in getRooms()">
-        <td class="cc-pointer uk-position-relative" ng-click="roomClicked(room)">
+        <td class="cc-pointer uk-position-relativen" ng-click="roomClicked(room)" title="{{ room.meta.description }}">
             <div class="uk-overflow-container">
                 <!-- Room name -->
                 <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 80 }">

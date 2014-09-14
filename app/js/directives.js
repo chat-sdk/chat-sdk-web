@@ -592,3 +592,11 @@ myApp.directive('ccUncloak', function () {
         element.removeAttr('style');
     }
 });
+
+//myApp.directive('ccOptions', function () {
+//    return function (scope, element, attr) {
+//        var options = eval(attr.ccOptions);
+//
+//        console.log(options);
+//    }
+//});
