@@ -91,53 +91,99 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
 
 myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
     return {
+
+        meta: {},
+
         getAPIDetails: function () {
 
 
             var deferred = $q.defer();
 
             //Contact the API
-//            $http({
-//                method: 'post',
-//                url: 'http://chatcat.io/wp-admin/admin-ajax.php',
-//                params: {
-//                    action: 'get-api-key',
-//                    url: 'www.chatcat.io'//$window.location.origin
-//                }
-//            }).then(function (response) {
-//
-//                console.log(response.data);
-//
-//                deferred.resolve(response);
-//
-//
-//            }, function (error) {
-//
-//                console.log(error);
-//                deferred.reject(error);
-//
-//            });
+            $http({
+                method: 'get',
+                url: 'http://chatcat.io/wp-admin/admin-ajax.php',
+                params: {
+                    action: 'get-api-key',
+                    domain: 'www.chatcat.io'//$window.location.origin
+                }
+            }).then((function (r1) {
+
+                if(r1.data.code == 200 && r1.data.api_key) {
+
+                    // Get the groups
+                    $http({
+                        method: 'get',
+                        url: 'http://chatcat.io/wp-admin/admin-ajax.php',
+                        params: {
+                            action: 'get-group-details',
+                            api_key: r1.data.api_key
+                        }
+                    }).then((function(r2) {
+
+                        if(r2.data.code == 200) {
+
+                            // Sort the rooms
+                            var rooms = [];
+
+                            var details = r2.data.details;
+                            for(var i = 0; i < details.length; i++) {
+                                rooms.push({
+                                    rid: details[i].ID,
+                                    name: details[i].group_name,
+                                    description: details[i].group_description,
+                                    weight: -i
+                                });
+                            }
+
+                            this.meta = {
+                                cid: r1.data.api_key,
+                                max: 20,
+                                ads: false,
+                                whiteLabel: false,
+                                rooms: rooms
+                            }
+
+                            deferred.resolve(this.meta);
+
+                        }
+                        else {
+                            deferred.reject(r2.data.message);
+                        }
+
+                        }).bind(this), deferred.reject);
+
+                }
+                else {
+                    deferred.reject(response.data.messages);
+                }
+
+            }).bind(this), function (error) {
+
+                deferred.reject(error);
+
+            });
 
 
             //Make up some API Details
 
-            var api = {
-                cid: "xxyyzz",
-                max: 20,
-                ads: true,
-                whiteLabel: false,
-                rooms: [
-                    {
-                        fid: "123123",
-                        name: "Fixed 1",
-                        desc: "This is fixed 1"
-                    }
-                ]
-            };
-
-            setTimeout(function () {
-                deferred.resolve(api);
-            },10);
+//            var api = {
+//                cid: "xxyyzz",
+//                max: 20,
+//                ads: true,
+//                whiteLabel: false,
+//                rooms: [
+//                    {
+//                        fid: "123123",
+//                        name: "Fixed 1",
+//                        desc: "This is fixed 1"
+//                    }
+//                ]
+//            };
+//
+//            setTimeout(function () {
+//                deferred.resolve(api);
+//            },10);
 
             return deferred.promise;
         }
@@ -1587,8 +1633,8 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
     return message;
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence',
-              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API',
+              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence, API) {
 
     var Auth = {
 
@@ -1720,11 +1766,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
         addStaticRooms: function () {
 
-            var room = null;
-            for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
-
-                room = CC_OPTIONS.staticRooms[i];
-
+            var addRoom = (function (room) {
                 // Validate the room
                 if(room.name == null || room.name.length == 0) {
                     console.log("ERROR: Room name is undefined or of zero length");
@@ -1749,6 +1791,16 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     rid: room.rid,
                     weight: room.weight
                 });
+            }).bind(this);
+
+            var room = null;
+            for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
+                room = CC_OPTIONS.staticRooms[i];
+                addRoom(room);
+            }
+            for(var i = 0; i < API.meta.rooms.length; i++) {
+                room = API.meta.rooms[i];
+                addRoom(room);
             }
 
         },
