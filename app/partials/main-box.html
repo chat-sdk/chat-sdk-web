@@ -30,13 +30,13 @@
 
     <div class="uk-overflow-container" ng-style="{'height': mainBoxHeight - 135}">
         <!--Add the table of users / chat rooms-->
-        <div ng-show="activeTab == 'users'" ng-include="'partials/user-list.html'"></div>
+        <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
 
         <!--Add the list of public chat rooms-->
-        <div ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" ng-controller="PublicRoomsListController" ng-include="'partials/room-list.html'"></div>
+        <ng-include ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" ng-controller="PublicRoomsListController" src=" baseURL + 'room-list.html'"></ng-include>
 
         <!--Add the table of users / chat rooms-->
-        <div ng-show="activeTab == 'friends'" ng-controller="FriendsListController" ng-include="'partials/user-list.html'"></div>
+        <ng-include ng-show="activeTab == 'friends'" ng-controller="FriendsListController" src=" baseURL + 'user-list.html'"></ng-include>
     </div>
 
     <div id="cc-user-details">

@@ -17,6 +17,12 @@ myApp.controller('AppController', [
 
         $scope.on = true;
 
+        if(PROD) {
+            $rootScope.baseURL = 'https://chatcatio.firebaseapp.com/partials/';
+        }
+        else {
+            $rootScope.baseURL = 'partials/';
+        }
 
     };
 
@@ -120,7 +126,7 @@ myApp.controller('AppController', [
         };
 
         if(!uid) {
-            if(duration == 0) {
+            if(duration === 0) {
                 $scope.currentUser = null;
             }
             else {
@@ -151,7 +157,7 @@ myApp.controller('AppController', [
 
     $scope.isFriend = function (user) {
         if(user) {
-            return Cache.friends[user.meta.uid] != null;
+            return !unORNull(Cache.friends[user.meta.uid]);
         }
         return false;
     };
@@ -167,7 +173,7 @@ myApp.controller('AppController', [
 
     $scope.isBlocked = function (user) {
         if(user) {
-            return Cache.blockedUsers[user.meta.uid] != null;
+            return !unORNull(Cache.blockedUsers[user.meta.uid]);
         }
         return false;
     };
@@ -202,7 +208,7 @@ myApp.controller('AppController', [
 
     $scope.isOnline = function (user) {
         if(user) {
-            return Cache.onlineUsers[user.meta.uid] != null;
+            return !unORNull(Cache.onlineUsers[user.meta.uid]);
         }
         return false;
     };
@@ -318,9 +324,9 @@ myApp.controller('AppController', [
                     var dataURL = canvas.toDataURL('image/jpeg');
 
                     $scope.getUser().setImage(dataURL);
-                }
+                };
                 image.src = e.target.result;
-            }
+            };
         })(f);
 
         reader.readAsDataURL(f);
@@ -329,46 +335,46 @@ myApp.controller('AppController', [
 
 
         //$files: an array of files selected, each file has name, size, and type.
-        for (var i = 0; i < $files.length; i++) {
-            var file = $files[i];
-            $scope.upload = $upload.upload({
-                url: 'server/upload.php', //upload.php script, node.js route, or servlet url
-                // method: 'POST' or 'PUT',
-                // headers: {'header-key': 'header-value'},
-                // withCredentials: true,
-                //data: {myObj: $scope.myModelObj},
-                file: file // or list of files: $files for html5 only
-                /* set the file formData name ('Content-Desposition'). Default is 'file' */
-                //fileFormDataName: myFile, //or a list of names for multiple files (html5).
-                /* customize how data is added to formData. See #40#issuecomment-28612000 for sample code */
-                //formDataAppender: function(formData, key, val){}
-            }).progress(function(evt) {
-
-                if(DEBUG)
-                    console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-
-                $scope.uploadProgress = parseInt(100.0 * evt.loaded / evt.total);
-
-                if($scope.uploadProgress == 100) {
-                    $timeout(function () {
-                        $scope.uploadingFile = false;
-                        $scope.uploadProgress = 0;
-                    }, 1000);
-                }
-
-            }).success(function(data, status, headers, config) {
-
-                if(data.fileName) {
-                    $scope.getUser().setImageName(data.fileName);
-                }
-
-            }).error(function () {
-                $scope.uploadingFile = false;
-            });
-            //.error(...)
-            //.then(success, error, progress);
-            //.xhr(function(xhr){xhr.upload.addEventListener(...)})// access and attach any event listener to XMLHttpRequest.
-        }
+//        for (var i = 0; i < $files.length; i++) {
+//            var file = $files[i];
+//            $scope.upload = $upload.upload({
+//                url: 'server/upload.php', //upload.php script, node.js route, or servlet url
+//                // method: 'POST' or 'PUT',
+//                // headers: {'header-key': 'header-value'},
+//                // withCredentials: true,
+//                //data: {myObj: $scope.myModelObj},
+//                file: file // or list of files: $files for html5 only
+//                /* set the file formData name ('Content-Desposition'). Default is 'file' */
+//                //fileFormDataName: myFile, //or a list of names for multiple files (html5).
+//                /* customize how data is added to formData. See #40#issuecomment-28612000 for sample code */
+//                //formDataAppender: function(formData, key, val){}
+//            }).progress(function(evt) {
+//
+//                if(DEBUG)
+//                    console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
+//
+//                $scope.uploadProgress = parseInt(100.0 * evt.loaded / evt.total);
+//
+//                if($scope.uploadProgress == 100) {
+//                    $timeout(function () {
+//                        $scope.uploadingFile = false;
+//                        $scope.uploadProgress = 0;
+//                    }, 1000);
+//                }
+//
+//            }).success(function(data, status, headers, config) {
+//
+//                if(data.fileName) {
+//                    $scope.getUser().setImageName(data.fileName);
+//                }
+//
+//            }).error(function () {
+//                $scope.uploadingFile = false;
+//            });
+//            //.error(...)
+//            //.then(success, error, progress);
+//            //.xhr(function(xhr){xhr.upload.addEventListener(...)})// access and attach any event listener to XMLHttpRequest.
+//        }
         /* alternative way of uploading, send the file binary with the file's content-type.
          Could be used to upload files to CouchDB, imgur, etc... html5 FileReader is needed.
          It could also be used to monitor the progress of a normal http post/put request with large data*/
@@ -446,7 +452,7 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
     $scope.getUsers = function () {
 
         // Filter online users to remove users that are blocking us
-        var users = Cache.onlineUsers
+        var users = Cache.onlineUsers;
 
         return Utilities.filterByName(Cache.onlineUsers, $scope.search[$scope.activeTab]);
     };
@@ -475,7 +481,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // When the user logs in
         $scope.$on('$firebaseSimpleLogin:login', function (e) {
 
-            if(DEBUG) console.log("firebase simple login")
+            if(DEBUG) console.log("firebase simple login");
 
             // Login was successful so log the user in given their ID
             $scope.handleUserLogin($scope.auth.user);
@@ -487,13 +493,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         // When the user logs out
         $scope.$on('$firebaseSimpleLogin:logout', (function (e) {
-            if(DEBUG) console.log("firebase simple logout")
+            if(DEBUG) console.log("firebase simple logout");
             $scope.logout();
         }).bind(this));
 
         // When there's a login error
         $scope.$on('$firebaseSimpleLogin:error', (function (e) {
-            if(DEBUG) console.log("firebase simple error")
+            if(DEBUG) console.log("firebase simple error");
             $scope.logout();
         }).bind(this));
 
@@ -503,7 +509,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
     };
 
     $scope.setError = function (message) {
-        $scope.showError = message != null;
+        $scope.showError = !unORNull(message);
         $scope.errorMessage = message;
     };
 
@@ -523,6 +529,12 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // Now we need to
         Presence.goOffline();
 
+        //
+        Presence.stop();
+
+        // Nullify the user
+        $rootScope.user = null;
+
         // Clear the cache down
         Cache.clear();
 
@@ -531,6 +543,9 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
         //
         $scope.hideNotification();
+
+        $scope.email = "";
+        $scope.password = "";
 
         try {
             Auth.removeListenersFromUser();
@@ -603,6 +618,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         $scope.showNotification(bNotificationTypeWaiting, "Registering...");
 
         // First create the super
+
         $scope.auth.$createUser(email, password).then((function(user) {
 
             $scope.handleUserLogin(user, true);
@@ -646,16 +662,16 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                         }
 
                     }, function(error) {
-                        // TODO: Handle this
+                        $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
                     });
                 }
 
             }).bind(this), function (error) {
-                // TODO: Handle error
+                $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
             });
 
         }).bind(this), function (error) {
-            // TODO: Handle error
+            $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
         });
     };
 
@@ -774,7 +790,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     };
 
     $scope.acceptInvitation = function () {
-        $scope.room.setStatusForUser($scope.getUser(), bUserStatusMember)
+        $scope.room.setStatusForUser($scope.getUser(), bUserStatusMember);
     };
 
     $scope.minimize = function () {
@@ -1019,7 +1035,7 @@ myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', f
     $scope.getRooms = function() {
         // Filter rooms by search text
         return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
-    }
+    };
 
 }]);
 
@@ -1054,7 +1070,7 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
             }
             else {
                 if(a.meta.name != b.meta.name) {
-                    a.meta.name > b.meta.name ? 1 : -1;
+                    return a.meta.name > b.meta.name ? 1 : -1;
                 }
                 return 0;
             }
@@ -1064,7 +1080,7 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
         array = Utilities.filterByName(array, $scope.search[$scope.activeTab]);
 
         return array;
-    }
+    };
 
 }]);
 
@@ -1139,7 +1155,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
 
         // Is the name valid?
         if($scope.validate()) {
-            $scope.showMainBox()
+            $scope.showMainBox();
         }
         else {
             $scope.showNotification(bNotificationTypeAlert, "Validation failed", "Please check that all fields are valid", "Ok");
@@ -1157,7 +1173,7 @@ myApp.controller('NotificationController', ['$scope', function($scope) {
 
     $scope.submit = function () {
         $scope.notification.show = false;
-    }
+    };
 }]);
 
 myApp.controller('ChatSettingsController', ['$scope', function($scope) {
@@ -1173,7 +1189,8 @@ myApp.controller('ChatSettingsController', ['$scope', function($scope) {
     };
 
     $scope.copyTranscript = function () {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", $scope.room.transcript());    }
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", $scope.room.transcript());
+    };
 
 }]);
 

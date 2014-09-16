@@ -26,7 +26,7 @@ myApp.directive('enterSubmit', function () {
                 }
             });
         }
-    }
+    };
 });
 
 myApp.directive('scrollGlue', function(){
@@ -101,7 +101,7 @@ myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($ro
                 try {
                     scope.wasResized();
                 }
-                catch (e) {}
+                catch (error) {}
 
                 var rooms = Layout.roomsSortedByOffset();
                 for(var i = 0; i < rooms.length; i++) {
@@ -126,7 +126,7 @@ myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($ro
             }
         }).bind(this));
 
-    }
+    };
 }]);
 
 function stopDefault(e) {
@@ -196,7 +196,7 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
                 lastClientX = e.clientX;
 
                 // We must be moving in either a positive direction
-                if(dx == 0) {
+                if(dx === 0) {
                     return false;
                 }
 
@@ -369,7 +369,7 @@ myApp.directive('centerMouseY', ['$document', function ($document) {
                 elm.css({bottom: scope.screenHeight - e.clientY - elm.height()/2});
             }
         }).bind(this));
-    }
+    };
 }]);
 
 myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope, $document) {
@@ -423,7 +423,7 @@ myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope
             $rootScope.userDrag.visible = false;
             $rootScope.$apply();
         }).bind(this));
-    }
+    };
 }]);
 
 myApp.directive('userDropLocation', ['$rootScope','$document', function ($rootScope, $document) {
@@ -448,7 +448,7 @@ myApp.directive('userDropLocation', ['$rootScope','$document', function ($rootSc
                 $rootScope.userDrag.user.addRoom(scope.room);
             }
         }).bind(this));
-    }
+    };
 }]);
 
 
@@ -462,7 +462,7 @@ myApp.directive('disableDrag', ['$rootScope','$document', function ($rootScope, 
         $document.mouseup((function(e) {
             $rootScope.disableDrag = false;
         }).bind(this));
-    }
+    };
 }]);
 
 myApp.directive('consumeEvent', ['$rootScope','$document', function ($rootScope, $document) {
@@ -473,7 +473,7 @@ myApp.directive('consumeEvent', ['$rootScope','$document', function ($rootScope,
             return false;
         }).bind(this));
 
-    }
+    };
 }]);
 
 /**
@@ -494,7 +494,7 @@ myApp.directive('stopShake', ['$rootScope', '$document',function ($rootScope, $d
         $document.mouseup((function(e) {
             $rootScope.disableDrag = false;
         }).bind(this));
-    }
+    };
 }]);
 
 myApp.directive('autoGrow', function() {
@@ -537,7 +537,7 @@ myApp.directive('autoGrow', function() {
 
         element.bind('keyup keydown keypress change', update);
         update();
-    }
+    };
 });
 
 myApp.directive('fitText', function () {
@@ -571,7 +571,7 @@ myApp.directive('fitText', function () {
             element.css({'height': height});
 
         });
-    }
+    };
 });
 
 myApp.directive('ccFocus', function () {
@@ -579,7 +579,7 @@ myApp.directive('ccFocus', function () {
         restrict: 'A',
         link: function (scope, element, attr) {
             scope.$watch(attr.ccFocus, function (n, o) {
-                if (n != 0 && n) {
+                if (n !== 0 && n) {
                     element[0].focus();
                 }
             });
@@ -590,22 +590,6 @@ myApp.directive('ccFocus', function () {
 myApp.directive('ccUncloak', function () {
     return function (scope, element, attr) {
         element.removeAttr('style');
-    }
+    };
 });
 
-myApp.directive('thumbnailer',['$rootScope', '$document', function ($rootScope) {
-    return function (scope, element, attr) {
-        $rootScope.$on(bMakeThumbnail, (function (event, args) {
-
-            //angular.createElement();
-
-            var canvas = document.createElement('canvas');
-
-            var element = angular.element('<canvas></canvas>');
-
-            new thumbnailer(element, args.image, args.size, 3);
-
-
-        }).bind(this));
-    }
-}]);

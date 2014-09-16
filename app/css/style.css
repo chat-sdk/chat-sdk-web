@@ -758,7 +758,7 @@ a {
 
 
 body {
-    background: url(../img/128-191.jpg) repeat; !important
+    background: url(../img/128-191.jpg) repeat !important;
 }
 
 a.disabled {

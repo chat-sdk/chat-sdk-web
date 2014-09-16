@@ -3,15 +3,21 @@
 
 // Declare app level module which depends on filters, and services
 var myApp = angular.module('myApp', [
-  'ngRoute',
   'myApp.filters',
   'myApp.services',
   'myApp.directives',
   'myApp.controllers'
-]);
+]).config(function($sceDelegateProvider) {
+    $sceDelegateProvider.resourceUrlWhitelist([
+        // Allow same origin resource loads.
+        'self',
+        // Allow loading from our assets domain.  Notice the difference between * and **.
+        'https://chatcatio.firebaseapp.com/partials/**'
+    ]);
 
-myApp.config(['$routeProvider', function($routeProvider) {
-  //$routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'MyCtrl1'});
-  //$routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'MyCtrl2'});
-  //$routeProvider.otherwise({redirectTo: '/view1'});
-}]);
+    // The blacklist overrides the whitelist so the open redirect here is blocked.
+//    $sceDelegateProvider.resourceUrlBlacklist([
+//        'http://myapp.example.com/clickThru**'
+//    ]);
+});
+

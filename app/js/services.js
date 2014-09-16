@@ -16,7 +16,7 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
 myApp.factory('Config', function () {
     return {
         maxHistoricMessages: 200
-    }
+    };
 });
 
 myApp.service('Visibility', ['$rootScope', function Visibility($rootScope) {
@@ -86,7 +86,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
                 this.user.goOnline();
             }
         }
-    }
+    };
 }]);
 
 myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
@@ -98,6 +98,29 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
 
             var deferred = $q.defer();
+
+
+            //Make up some API Details
+
+            this.meta = {
+                cid: "xxyyzz",
+                max: 20,
+                ads: true,
+                whiteLabel: false,
+                rooms: [
+                    {
+                        fid: "123123",
+                        name: "Fixed 1",
+                        desc: "This is fixed 1"
+                    }
+                ]
+            };
+
+            setTimeout((function () {
+                deferred.resolve(this.meta);
+            }).bind(this),10);
+
+            return deferred.promise;
 
             //Contact the API
             $http({
@@ -142,7 +165,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                                 ads: false,
                                 whiteLabel: false,
                                 rooms: rooms
-                            }
+                            };
 
                             deferred.resolve(this.meta);
 
@@ -155,7 +178,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
                 }
                 else {
-                    deferred.reject(response.data.messages);
+                    deferred.reject(r1.data.messages);
                 }
 
             }).bind(this), function (error) {
@@ -165,36 +188,18 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
             });
 
 
-            //Make up some API Details
 
-//            var api = {
-//                cid: "xxyyzz",
-//                max: 20,
-//                ads: true,
-//                whiteLabel: false,
-//                rooms: [
-//                    {
-//                        fid: "123123",
-//                        name: "Fixed 1",
-//                        desc: "This is fixed 1"
-//                    }
-//                ]
-//            };
-//
-//            setTimeout(function () {
-//                deferred.resolve(api);
-//            },10);
 
             return deferred.promise;
         }
-    }
+    };
 }]);
 
 myApp.factory('Utilities', ['$q', function ($q) {
     return {
 
         filterByName: function (array, name) {
-            if(!name || name == "") {
+            if(!name || name === "") {
                 return array;
             }
             else {
@@ -287,7 +292,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
                 catch (error) {
                     deferred.reject(error);
                 }
-            }
+            };
             image.src = src;
 
             return deferred.promise;
@@ -298,7 +303,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
             this.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
             return this.textWidth.fakeEl.width();
         }
-    }
+    };
 }]);
 
 myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', function ($rootScope, $timeout, $document, $window) {
@@ -492,7 +497,9 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', funct
             var ar = [];
             for(var i in this.rooms) {
                 if(this.rooms.hasOwnProperty(i)) {
-                    this.rooms[i].active ? ar.push(this.rooms[i]) : null ;
+                    if(this.rooms[i].active) {
+                        ar.push(this.rooms[i]);
+                    }
                 }
             }
             return ar;
@@ -502,7 +509,7 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', funct
 
             var rooms = this.roomsSortedByOffset();
 
-            if(rooms.length == 0) {
+            if(rooms.length === 0) {
                 return;
             }
 
@@ -738,7 +745,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
         },
 
         isFriend: function(uid) {
-            return this.friends[uid] != null;
+            return !unORNull(this.friends[uid]);
         },
 
         addBlockedUser: function (user) {
@@ -755,7 +762,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
 //        },
 
         isBlockedUser: function(uid) {
-            return this.blockedUsers[uid] != null;
+            return !unORNull(this.blockedUsers[uid]);
         },
 
         removeBlockedUserWithID: function (uid) {
@@ -897,7 +904,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             this.digest();
             Layout.rooms = [];
         }
-    }
+    };
 }]);
 
 myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootScope, $timeout, $q, Cache) {
@@ -917,7 +924,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     user.meta = snapshot.val();
 
                     // Am I blocked?
-                    user.blockingMe = user.meta.blocked != null && user.meta.blocked[$rootScope.user.meta.uid] != null;
+                    user.blockingMe = !unORNull(user.meta.blocked) && !unORNull(user.meta.blocked[$rootScope.user.meta.uid]) ;
 
                     // Remove from the online list if they're blocking us
                     if(user.blockingMe) {
@@ -1029,9 +1036,9 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     user.meta.image = imageData;
                 }
                 else {
-                    user.meta.image = bImageDirectory + "cf-100-profile-pic.png"
+                    user.meta.image = bImageDirectory + "cf-100-profile-pic.png";
                 }
-            }
+            };
 
 //            user.setImageName = function (fileName) {
 //
@@ -1085,7 +1092,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
         },
 
         getOrCreateUserWithID: function(uid) {
-            var user = Cache.getUserWithID(uid)
+            var user = Cache.getUserWithID(uid);
             if(!user) {
                 user = this.buildUserWithID(uid);
                 user.on();
@@ -1093,7 +1100,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             }
             return user;
         }
-    }
+    };
 }]);
 
 myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout',function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout) {
@@ -1140,7 +1147,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     // Get the snapshot value
                     var val = snapshot.val();
 
-                    if(!val || val.text.length == 0) {
+                    if(!val || val.text.length === 0) {
                         return;
                     }
 
@@ -1162,7 +1169,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             // same message as this message i.e.
                             // - User 1 (name hidden)
                             // - User 1
-                            lastMessage.hideName = message.meta.uid == lastMessage.meta.uid
+                            lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
 
                             // Last message date
                             var lastDate = new Date(lastMessage.meta.time);
@@ -1452,7 +1459,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 }
                 // TODO: Do this better
                 if(i == 2) {
-                    for(var key in room.users) {
+                    for(key in room.users) {
                         if(room.users.hasOwnProperty(key)) {
                             var user = room.users[key];
 
@@ -1486,7 +1493,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     return room.meta.users[user.meta.uid];
                 }
                 return null;
-            }
+            };
 
             room.getUserStatus = function (user) {
                 var info = room.getUserInfo(user);
@@ -1509,7 +1516,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
             room.sendMessage = function (text, user) {
 
-                if(!text || text.length == 0)
+                if(!text || text.length === 0)
                     return;
 
                 var message = Message.newMessage(room.meta.rid, user.meta.uid, text);
@@ -1543,7 +1550,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
             return room;
         }
-    }
+    };
 }]);
 
 myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootScope, $q, Cache, User) {
@@ -1557,7 +1564,7 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
                     time: Firebase.ServerValue.TIMESTAMP,
                     text: text
                 }
-            }
+            };
         },
 
         buildMessage: function (mid, meta) {
@@ -1611,7 +1618,7 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
                 }
 
                 return deferred.promise;
-            }
+            };
 
             message.readBy = function (uid) {
 
@@ -1619,9 +1626,9 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
                     uid = $rootScope.user.meta.uid;
                 }
 
-                return message.meta.users != null && message.meta.users[uid] != null && message.meta.users[uid][bReadKey] != null;
+                return !unORNull(message.meta.users) && !unORNull(message.meta.users[uid]) && !unORNull(message.meta.users[uid][bReadKey]);
 
-            }
+            };
 
             // Our messages are on the right - other user's messages are
             // on the left
@@ -1629,7 +1636,7 @@ myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootSco
 
             return message;
         }
-    }
+    };
     return message;
 }]);
 
@@ -1663,13 +1670,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var user = this.getUser();
 
                 var name = user.meta.name;
-                if(!name || name.length == 0) {
+                if(!name || name.length === 0) {
                     name = authUser.displayName;
                 }
-                if(!name || name.length == 0) {
+                if(!name || name.length === 0) {
                     name = authUser.username;
                 }
-                if(!name || name.length == 0) {
+                if(!name || name.length === 0) {
                     name = "ChatCat" + Math.floor(Math.random() * 1000 + 1);
                 }
                 user.meta.name = name;
@@ -1728,7 +1735,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 /** LOCATION **/
                 // Get the user's city and country from their IP
                 if(!user.meta.country || !user.meta.city) {
-                    $.get("http://ipinfo.io", (function(response) {
+                    $.get("https://ipinfo.io", (function(response) {
 
                         // The first time the user logs on
                         // try to guess which city and country they're from
@@ -1768,18 +1775,18 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             var addRoom = (function (room) {
                 // Validate the room
-                if(room.name == null || room.name.length == 0) {
+                if(unORNull(room.name) || room.name.length === 0) {
                     console.log("ERROR: Room name is undefined or of zero length");
                     return;
                 }
-                if(room.rid == null || room.rid.length == 0) {
+                if(unORNull(room.rid) || room.rid.length === 0) {
                     console.log("ERROR: Room rid is undefined or of zero length");
                     return;
                 }
-                if(room.description == null || room.description.length == 0) {
+                if(unORNull(room.description) || room.description.length === 0) {
                     console.log("WARNING: Room description is undefined or of zero length");
                 }
-                if(room.weight == null) {
+                if(unORNull(room.weight)) {
                     room.weight = 100;
                 }
 
@@ -1798,7 +1805,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 room = CC_OPTIONS.staticRooms[i];
                 addRoom(room);
             }
-            for(var i = 0; i < API.meta.rooms.length; i++) {
+            for(i = 0; i < API.meta.rooms.length; i++) {
                 room = API.meta.rooms[i];
                 addRoom(room);
             }
@@ -1838,8 +1845,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if (room) {
 
                         if(invitedBy) {
-                            var user = User.getOrCreateUserWithID(invitedBy);
-                            room.invitedBy = user;
+                            room.invitedBy = User.getOrCreateUserWithID(invitedBy);
                         }
 
                         if(Cache.isBlockedUser(invitedBy)) {
@@ -1896,12 +1902,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var uid = snapshot.val().uid;
                 if(uid) {
                     var user = User.getOrCreateUserWithID(uid);
-//                    if(!user) {
-//                        user = User.buildUserWithID(uid);
-//                    }
+
                     user.removeFriend = function () {
                         snapshot.ref().remove();
-                    }
+                    };
                     Cache.addFriend(user);
                 }
 
@@ -1920,12 +1924,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var uid = snapshot.val().uid;
                 if(uid) {
                     var user = User.getOrCreateUserWithID(uid);
-//                    if(!user) {
-//                        user = User.buildUserWithID(uid);
-//                    }
+
                     user.unblock = function () {
                         snapshot.ref().remove();
-                    }
+                    };
 
                     Cache.addBlockedUser(user);
                 }
@@ -1961,7 +1963,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var user = User.getOrCreateUserWithID(snapshot.val().uid);
                 if (user) {
-                    Cache.removeOnlineUser(user)
+                    Cache.removeOnlineUser(user);
                 }
 
             }).bind(this));
@@ -1977,7 +1979,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 blockedUsersRef.off('child_removed');
                 onlineUsersRef.off('child_added');
                 onlineUsersRef.off('child_removed');
-            }
+            };
         },
 
         bindUserWithUID: function (uid) {

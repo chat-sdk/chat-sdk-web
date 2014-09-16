@@ -1,0 +1,113 @@
+body {
+	font-family: Helvetica, arial, freesans, clean, sans-serif;	
+}
+
+.upload-buttons input[type="file"] {	
+	width: 6.3em \0/IE9;
+	height: 1.5em;
+	margin: 5px;
+}
+
+.upload-buttons input[multiple] {
+	width: 6.2em \0/IE9;
+}
+
+.upload-button {
+	width: 170px;
+	Height: 30px;
+	display: inline-block;
+	line-height: 30px;
+	padding: 0 10px;
+	background: #CCC;
+	appearance: button;
+	-moz-appearance: button; /* Firefox */
+	-webkit-appearance: button; /* Safari and Chrome */
+}
+
+.sel-file {
+	padding: 1px 5px;
+	font-size: smaller;
+	color: grey;
+}
+
+.response {
+	padding-top: 30px;
+}
+
+.response>ul {
+	list-style-type: decimal;
+}
+
+.response li, .response .reqh {
+	color: blue;
+	font-size: smaller;
+	padding-bottom: 5px; 
+}
+
+.progress {
+	display: inline-block;
+	width: 100px;	
+	border: 3px groove #CCC;
+}
+
+.progress div {
+	font-size: smaller;
+	background: orange;
+	width: 0;
+}
+
+.drop-box {
+	background: #F8F8F8;
+	border: 5px dashed #DDD;
+	width: 200px;
+	height: 65px; 
+	text-align: center;
+	padding-top: 35px; 
+}
+
+.drop-box.dragover {
+	border: 5px dashed blue;
+}
+
+.drop-box.dragover-err {
+	border: 5px dashed red;
+}
+
+/* for IE*/
+.js-fileapi-wrapper {
+	display: inline-block;
+	vertical-align: middle;	
+}
+
+button {
+	padding: 1px 5px;
+	font-size: smaller;
+	margin: 0 3px; 
+}
+
+.ng-v {
+	float: right;
+}
+
+.sel-file img {
+	float: left;
+	width: 18px;
+	height: 18px;
+	padding-right: 10px;
+}
+
+.sub {
+	font-size: smaller;
+	color: #777;
+	padding-top: 5px;
+	padding-left: 10px;
+}
+
+.err {
+	font-size: 12px;
+	color: #C53F00;
+	margin: 15px;
+	padding: 15px;
+	background-color: #F0F0F0;
+	border: 1px solid black;
+}

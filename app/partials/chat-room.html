@@ -24,9 +24,9 @@
             </div>
         </div>
 
-        <div ng-show="activeTab == 'settings'" ng-include="'partials/chat-settings.html'"></div>
+        <ng-include ng-show="activeTab == 'settings'" src=" baseURL + 'chat-settings.html'"></ng-include>
 
-        <div ng-show="activeTab == 'users'" ng-include="'partials/user-list.html'"></div>
+        <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
         <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
