@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ChatCat.io</title>
+    <meta name="description" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
+    <link rel="stylesheet" href="css/styles.min.css"/>
+
+    <!-- Flags -->
+    <link rel="stylesheet" href="libs/flags/stylesheets/flags/common.css"/>
+    <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags32.css"/>
+    <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags16.css"/>
+
+    <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+    <script src="bower_components/jquery/jquery.js"></script>
+
+    <!-- Include UIKit components -->
+    <script src="bower_components/uikit/dist/js/uikit.js"></script>
+    <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.css">
+    <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.gradient.css">
+
+</head>
+<body >
+<!--<body style="background: url(img/128-191.jpg) repeat">-->
+<div class="uk-panel uk-panel-box" style="margin: 30px; width: 400px">
+    <img src="img/live-beta.png">
+    <p>
+        Welcome to the Chatcat live beta! Here you can test the latest version of our powerful real-time chat client.
+    </p>
+    <p>
+        Login using your email and password or your social account!
+    </p>
+    <p>
+        If you'd like to help us to beta test the app, start by creating an account at <a href="http://www.chatcat.io/home">www.chatcat.io</a> then send us an email at <a href="mailto:support@chatcat.io">support@chatcat.io</a> letting
+        us know the domain of your website and we'll get back to you with instructions on how to start testing Chatcat.
+    </p>
+    <p>
+        If you find any bugs or have any suggestions let us know at <a href="mailto:support@chatcat.io">support@chatcat.io</a>.
+    </p>
+    <p>
+        If you have any queries about migrating from Envolve to Chatcat feel free to send us an email.
+    </p>
+</div>
+
+
+<div ng-app="myApp" >
+
+    <ng-include src=" baseURL + 'chatcat.html'" ng-controller="AppController"></ng-include>
+
+
+    <script type="text/javascript">
+
+        // Set options here
+        var CC_OPTIONS = {
+
+            // Users can create public chat rooms?
+            // If this is true users will be able to setup new
+            // public rooms
+            usersCanCreatePublicRooms: false,
+
+            // This a list of default public rooms
+            // These rooms will appear at the top of the "Rooms" section
+            // of the main box
+            staticRooms: [
+                {
+                    // The name of the room
+                    name: 'Chatcat Discussion',
+
+                    // The descriptions - this appears on mouseover
+                    description: 'A space to talk about the Chatcat client - this room will be monitored by our team.',
+
+                    // An identifier for the room - this must be unique
+                    rid: 'CHATCAT_CHAT',
+
+                    // Room weight - lower numbers are light and float to the top
+                    // high numbers are heavy and sink to the bottom
+                    weight: 0
+                },
+                {
+                    // The name of the room
+                    name: 'Chatcat beta bugs',
+
+                    // The descriptions - this appears on mouseover
+                    description: 'If you find any bugs you can discuss them in this chat room.',
+
+                    // An identifier for the room - this must be unique
+                    rid: 'CHATCAT_BUGS',
+
+                    // Room weight - lower numbers are light and float to the top
+                    // high numbers are heavy and sink to the bottom
+                    weight: 1
+                }
+
+            ],
+
+            // Single sign-on
+            singleSignOnEnabled: false,
+
+            // The URL to contact for single sign on
+            singleSignOnURL: ''
+
+        }
+    </script>
+</div>
+
+  <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+  <![endif]-->
+
+
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-file-upload/dist/angular-file-upload.min.js"></script>
+<script src="bower_components/angular-file-upload/dist/angular-file-upload-shim.min.js"></script>
+<script src="bower_components/firebase/firebase.js"></script>
+<script src="bower_components/angularfire/dist/angularfire.js"></script>
+<script src="bower_components/firebase-simple-login/firebase-simple-login.js"></script>
+<script src="bower_components/angular-facebook/lib/angular-facebook.js"></script>
+<script src="bower_components/FileSaver/FileSaver.js"></script>
+<script src="bower_components/moment/moment.js"></script>
+
+<script src="env.js"></script>
+<script src="js/all.js"></script>
+
+<script src="libs/sha256.js"></script>
+
+
+</body>
+</html>

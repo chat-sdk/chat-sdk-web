@@ -17,12 +17,7 @@ myApp.controller('AppController', [
 
         $scope.on = true;
 
-        if(PROD) {
-            $rootScope.baseURL = 'https://chatcatio.firebaseapp.com/partials/';
-        }
-        else {
-            $rootScope.baseURL = 'partials/';
-        }
+        $rootScope.baseURL = ROOT + 'partials/'
 
     };
 

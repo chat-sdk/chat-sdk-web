@@ -233,7 +233,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
                 if(data.fileName) {
 
                     // Now load the image into Firebase
-                    var url = bImageDirectory + "resize.php?src=" + data.fileName + "&w=100&h=100";
+                    var url = b + "resize.php?src=" + data.fileName + "&w=100&h=100";
 
                     this.saveImageFromURL(url).then(function(imageData) {
 

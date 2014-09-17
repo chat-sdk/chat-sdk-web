@@ -7,7 +7,13 @@ var PROD = false;
 
 var bGroupChatDefaultName = "Private Chat";
 
-var bFirebaseRef = "https://chatcatio.firebaseio.com/";
+//
+// Used to load partials
+//
+//
+//
+var bFirebaseRef = "https://" + FB + ".firebaseio.com/";
+var bImageDirectory = ROOT + 'img/';
 
 // Paths
 var bUsersPath = "users";
@@ -40,7 +46,6 @@ var bShowCreateChatBox = 'showCreateChatBox';
 
 var bVisibilityChangedNotification = 'bVisibilityChangedNotification';
 
-var bImageDirectory = 'https://chatcatio.firebaseapp.com/server/tmp/';
 
 // Chat width
 var bChatRoomWidth = 230;
