@@ -100,8 +100,10 @@
                     // high numbers are heavy and sink to the bottom
                     weight: 1
                 }
-
             ],
+
+            // Allow anonymous login?
+            anonymousLoginDisabled: true,
 
             // Single sign-on
             singleSignOnEnabled: false,
@@ -118,20 +120,12 @@
   <![endif]-->
 
 
-<script src="bower_components/angular/angular.js"></script>
-<script src="bower_components/angular-file-upload/dist/angular-file-upload.min.js"></script>
-<script src="bower_components/angular-file-upload/dist/angular-file-upload-shim.min.js"></script>
-<script src="bower_components/firebase/firebase.js"></script>
-<script src="bower_components/angularfire/dist/angularfire.js"></script>
-<script src="bower_components/firebase-simple-login/firebase-simple-login.js"></script>
-<script src="bower_components/angular-facebook/lib/angular-facebook.js"></script>
-<script src="bower_components/FileSaver/FileSaver.js"></script>
-<script src="bower_components/moment/moment.js"></script>
-
+<link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.css">
+<link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.gradient.css">
+<link rel="stylesheet" href="css/_/styles.min.css"/>
+<script src="js/dist.min.js"></script>
 <script src="env.js"></script>
-<script src="js/all.js"></script>
-
-<script src="libs/sha256.js"></script>
+<script src="js/all.min.js"></script>
 
 
 </body>

@@ -15,11 +15,11 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
 
 myApp.factory('Config', function () {
     return {
-        maxHistoricMessages: 200
+        maxHistoricMessages: 20
     };
 });
 
-myApp.service('Visibility', ['$rootScope', function Visibility($rootScope) {
+myApp.service('Visibility', ['$rootScope', function ($rootScope) {
 
     document.addEventListener("visibilitychange",changed);
     document.addEventListener("webkitvisibilitychange", changed);
@@ -35,7 +35,7 @@ myApp.service('Visibility', ['$rootScope', function Visibility($rootScope) {
  * The presence service handles the user's online / offline
  * status
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($rootScope, $timeout, Visibility) {
+myApp.factory('Presence', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
     return {
 
         user: null,
@@ -106,14 +106,14 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                 cid: "xxyyzz",
                 max: 20,
                 ads: true,
-                whiteLabel: false,
-                rooms: [
-                    {
-                        fid: "123123",
-                        name: "Fixed 1",
-                        desc: "This is fixed 1"
-                    }
-                ]
+                whiteLabel: false
+//                rooms: [
+//                    {
+//                        rid: "123123",
+//                        name: "Fixed 1",
+//                        description: "This is fixed 1"
+//                    }
+//                ]
             };
 
             setTimeout((function () {
@@ -128,7 +128,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                 url: 'http://chatcat.io/wp-admin/admin-ajax.php',
                 params: {
                     action: 'get-api-key',
-                    domain: 'www.chatcat.io'//$window.location.origin
+                    domain: $window.location.host
                 }
             }).then((function (r1) {
 
@@ -178,10 +178,10 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
                 }
                 else {
-                    deferred.reject(r1.data.messages);
+                    deferred.reject(r1.data.message);
                 }
 
-            }).bind(this), function (error) {
+            }).bind(this), function (error, message) {
 
                 deferred.reject(error);
 
@@ -228,12 +228,12 @@ myApp.factory('Utilities', ['$q', function ($q) {
 
             var deferred = $q.defer();
 
-            context.post('server/pull.php', {'url': url}).success((function(data, status) {
+            context.post(bPullURL, {'url': url}).success((function(data, status) {
 
                 if(data.fileName) {
 
                     // Now load the image into Firebase
-                    var url = b + "resize.php?src=" + data.fileName + "&w=100&h=100";
+                    var url = bResizeURL + "?src=" + data.fileName + "&w=100&h=100";
 
                     this.saveImageFromURL(url).then(function(imageData) {
 
@@ -784,6 +784,21 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             }
         },
 
+        getOnlineUsers: function () {
+            // Return the online users who aren't
+            // blocking us
+
+            var ou = {};
+
+            var user;
+            for(var key in this.onlineUsers) {
+                if(this.onlineUsers.hasOwnProperty(key)) {
+                    ou[key] = this.onlineUsers[key];
+                }
+            }
+            return ou;
+        },
+
         getUserWithID: function (uid) {
            var user = this.users[uid];
            if(!user) {
@@ -927,12 +942,12 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     user.blockingMe = !unORNull(user.meta.blocked) && !unORNull(user.meta.blocked[$rootScope.user.meta.uid]) ;
 
                     // Remove from the online list if they're blocking us
-                    if(user.blockingMe) {
-                        Cache.removeOnlineUser(user);
-                    }
-                    else {
-                        Cache.addOnlineUser(user);
-                    }
+//                    if(user.blockingMe) {
+//                        Cache.removeOnlineUser(user);
+//                    }
+//                    else {
+//                        Cache.addOnlineUser(user);
+//                    }
 
                     user.setImage(user.meta.image);
 
@@ -1019,6 +1034,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
         newUserWithID: function (uid) {
             var user = this.newUser();
             user.meta.uid = uid;
+            user.meta.image = bDefaultProfileImage;
 
             user.goOnline = function () {
 
@@ -1036,7 +1052,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     user.meta.image = imageData;
                 }
                 else {
-                    user.meta.image = bImageDirectory + "cf-100-profile-pic.png";
+                    user.meta.image = bDefaultProfileImage;
                 }
             };
 
@@ -1103,7 +1119,8 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
     };
 }]);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout',function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout) {
+myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout',
+    function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout) {
     return {
 
         getOrCreateRoomWithID: function (rid) {
@@ -1366,7 +1383,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             room.addUser = function (user, status) {
 
                 // Are we able to invite the user?
-                if(!room.canInviteUser() && status != bUserStatusOwner) {
+                // If the user is us or if the room is public then we can
+                if(user == $rootScope.user) {//} || Cache.getPublicRoomWithID(room.meta.rid)) {
+
+                }
+                else if(!room.canInviteUser() && status != bUserStatusOwner) {
                     $rootScope.showNotification(bNotificationTypeAlert, 'Invites disabled', 'The creator of this room has disabled invites', 'ok');
                     return;
                 }
@@ -1379,7 +1400,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 else {
                     this.setStatusForUser(user, status);
                 }
-
             };
 
             room.canInviteUser = function () {
@@ -1688,7 +1708,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 if(authUser.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
-                    if(!user.meta.imageName) {
+                    if(!user.meta.image || user.meta.image == bDefaultProfileImage) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
 
                             Utilities.pullImageFromURL($http, response.data.url).then(function(imageData) {
@@ -1722,7 +1742,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if(!user.meta.image && imageURL) {
+                if((!user.meta.image || user.meta.image == bDefaultProfileImage) && imageURL) {
                     Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
 
                         user.setImage(imageData);
@@ -1735,15 +1755,16 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 /** LOCATION **/
                 // Get the user's city and country from their IP
                 if(!user.meta.country || !user.meta.city) {
-                    $.get("https://ipinfo.io", (function(response) {
+
+                    $http.post('http://ip-api.com/json').then((function (r) {
 
                         // The first time the user logs on
                         // try to guess which city and country they're from
                         if(!user.meta.city) {
-                            user.meta.city = response.city;
+                            user.meta.city = r.data.city;
                         }
                         if(!user.meta.country) {
-                            user.meta.country = response.country;
+                            user.meta.country = r.data.countryCode;
                         }
 
                         // Digest to update the interface
@@ -1751,7 +1772,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                             $rootScope.$digest();
                         });
 
-                    }).bind(this), "jsonp");
+
+                    }).bind(this), function (error) {
+
+                    });
+
                 }
 
                 /** GRAVATAR **/
@@ -1801,15 +1826,18 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             }).bind(this);
 
             var room = null;
-            for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
-                room = CC_OPTIONS.staticRooms[i];
-                addRoom(room);
+            if(CC_OPTIONS && CC_OPTIONS.staticRooms) {
+                for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
+                    room = CC_OPTIONS.staticRooms[i];
+                    addRoom(room);
+                }
             }
-            for(i = 0; i < API.meta.rooms.length; i++) {
-                room = API.meta.rooms[i];
-                addRoom(room);
+            if(API.meta && API.meta.rooms) {
+                for(i = 0; i < API.meta.rooms.length; i++) {
+                    room = API.meta.rooms[i];
+                    addRoom(room);
+                }
             }
-
         },
 
         /**
@@ -1859,6 +1887,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                         }
 
                         var slot = snapshot.val().slot;
+
+                        // Join the room
+                        Auth.joinRoom(room, bUserStatusMember);
 
                         Layout.insertRoom(room, slot ? slot : 0);
 
@@ -1953,9 +1984,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var user = User.getOrCreateUserWithID(uid);
 
                 // Is the user blocking us?
-                if(!user.blockingMe) {
+                //if(!user.blockingMe) {
                     Cache.addOnlineUser(user);
-                }
+                //}
 
             }).bind(this));
 
@@ -1994,7 +2025,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            $rootScope.user = User.buildUserWithID(uid);
+            $rootScope.user = User.getOrCreateUserWithID(uid);
+            //$rootScope.user = User.buildUserWithID(uid);
             $rootScope.user.on();
 
             // Bind the user to the user variable

@@ -365,6 +365,8 @@ div.cc-message-outer .time {
     border-radius: 8px;
 
     display: inline-block;
+    word-wrap: break-word;
+
 }
 
 .bubble:after
@@ -758,7 +760,7 @@ a {
 
 
 body {
-    background: url(../img/128-191.jpg) repeat !important;
+    background: url(../../img/128-191.jpg) repeat !important;
 }
 
 a.disabled {

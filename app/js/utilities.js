@@ -3,7 +3,6 @@
 /* Services */
 
 var DEBUG = false;
-var PROD = false;
 
 var bGroupChatDefaultName = "Private Chat";
 
@@ -14,6 +13,10 @@ var bGroupChatDefaultName = "Private Chat";
 //
 var bFirebaseRef = "https://" + FB + ".firebaseio.com/";
 var bImageDirectory = ROOT + 'img/';
+var bDefaultProfileImage = bImageDirectory + 'cf-100-profile-pic.png';
+
+var bPullURL = "http://chat.deluge.co/server/pull.php";
+var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
 
 // Paths
 var bUsersPath = "users";

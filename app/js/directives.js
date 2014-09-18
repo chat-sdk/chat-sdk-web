@@ -426,7 +426,7 @@ myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope
     };
 }]);
 
-myApp.directive('userDropLocation', ['$rootScope','$document', function ($rootScope, $document) {
+myApp.directive('userDropLocation', ['$rootScope', function ($rootScope) {
     return function (scope, elm, attrs) {
 
         elm.mouseenter(function(e) {

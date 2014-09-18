@@ -7,7 +7,7 @@ var myApp = angular.module('myApp', [
   'myApp.services',
   'myApp.directives',
   'myApp.controllers'
-]).config(function($sceDelegateProvider) {
+]).config(['$sceDelegateProvider', function($sceDelegateProvider) {
     $sceDelegateProvider.resourceUrlWhitelist([
         // Allow same origin resource loads.
         'self',
@@ -20,5 +20,5 @@ var myApp = angular.module('myApp', [
 //    $sceDelegateProvider.resourceUrlBlacklist([
 //        'http://myapp.example.com/clickThru**'
 //    ]);
-});
+}]);
 

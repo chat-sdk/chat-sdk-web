@@ -16,6 +16,7 @@
     "gulp": "^3.8.8",
     "gulp-autoprefixer": "^1.0.0",
     "gulp-bower": "0.0.6",
+    "gulp-bower-src": "^0.1.0",
     "gulp-changed": "^1.0.0",
     "gulp-concat": "^2.4.0",
     "gulp-jshint": "^1.8.4",

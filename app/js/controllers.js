@@ -19,6 +19,8 @@ myApp.controller('AppController', [
 
         $rootScope.baseURL = ROOT + 'partials/'
 
+        $rootScope.anonymousLoginDisabled = CC_OPTIONS.anonymousLoginDisabled;
+
     };
 
     $scope.getUser = function () {
@@ -657,16 +659,18 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                         }
 
                     }, function(error) {
-                        $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
+                        $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
                     });
                 }
 
             }).bind(this), function (error) {
-                $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
+                alert(error);
+                //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
             });
 
         }).bind(this), function (error) {
-            $scope.showNotification(bNotificationTypeAlert, 'Login Error', error.message, 'Ok');
+            alert(error);
+            //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
         });
     };
 
