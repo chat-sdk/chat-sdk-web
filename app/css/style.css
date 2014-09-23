@@ -3,26 +3,89 @@
  * Base element - this is the horizontal bar along the bottom of the screen
  */
 
-div#cc-base {
-    position: fixed;
-    width: 100%;
-    height: 30px;
-    bottom: 0;
-    left: 0;
-    font-family: 'Helvetica Neue', 'Helvetica', 'Tahoma', 'Arial', sans-serif;
+/*div#cc-app * {*/
+    /*all: initial;*/
+/*}*/
 
-    background: rgba(0,0,0,0.6);
+/* Reset all styles! */
+* div#cc-base {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+    line-height: 20px !important;
+    font-size: 14px !important;
+    vertical-align: middle !important;
+    display: initial !important;
+}
+
+div#cc-base span {
+    display: initial !important;
+}
+
+div#cc-base table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/*div#cc-base a {*/
+    /*cursor: pointer;*/
+    /*color: #333;*/
+/*}*/
+
+/*div#cc-base button {*/
+    /*cursor: pointer;*/
+    /*color: #FEFEFE;*/
+/*}*/
+
+
+/*div#cc-base a, div#cc-base a.uk-button-danger, div#cc-base button, div#cc-base button.uk-button {*/
+    /*cursor: pointer;*/
+/*}*/
+
+/*div#cc-base a.uk-icon-button, div#cc-base button.uk-icon-button {*/
+    /*cursor: pointer;*/
+    /*color: #333;*/
+/*}*/
+
+div#cc-base textarea {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+div#cc-base .uk-form-row textarea {
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+div#cc-base .uk-button {
+    font-size: 0.9em;
+}
+
+div#cc-base .uk-form-row input, div#cc-base .uk-form-row select {
+    font-size: 0.8em;
+}
+
+div#cc-base {
+
+    color: #444 !important;
+
+    position: fixed !important;
+    width: 100% !important;
+    height: 30px !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    font-family: 'Helvetica Neue', 'Helvetica', 'Tahoma', 'Arial', sans-serif !important;
+
+    background: rgba(0,0,0,0.2) !important;
+
 }
 
 /* The bottom bar for the menu box */
-div#cc-base div.cf-menu-bar {
+ div.cc-menu-bar {
     position: fixed;
     width: 200px;
     right: 0;
 }
 
 /* The style of any text in the base */
-.cc-base-text {
+ .cc-base-text {
     width: 100%;
     height: 30px;
     font-size: 12px;
@@ -31,11 +94,11 @@ div#cc-base div.cf-menu-bar {
     line-height: 30px;
     cursor: pointer;
     /*display: block;*/
-    background-color: rgba(255,255,255,0.8);
+    background-color: rgba(255,255,255,0.9);
 }
 
 /* The inner span is to add padding */
-.cc-base-text div.inner {
+ .cc-base-text div.cc-inner {
     /*padding: 0px 10px;*/
     margin-left: 10px;
 }
@@ -86,19 +149,19 @@ div#cc-base div.cf-menu-bar {
  * Login Box
  */
 
-div#cc-base div#cc-login-box {
+div#cc-login-box {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
 }
 
 /* Make sure the form contained within the
    login box doesn't have a rounded corner */
-div#cc-base div#cc-login-box form {
+div#cc-login-box form {
     border-top-left-radius: 0;
 }
 
 /* Forgot password text */
-#cf-login-forgot-row {
+#cc-login-forgot-row {
     text-align: right;
     font-size: 12px;
     margin-top: 0;
@@ -109,7 +172,7 @@ div#cc-base div#cc-login-box form {
  * Menu box
  */
 
-div#cc-base div#cc-main-box {
+div#cc-main-box {
     /*max-height: 600px;*/
     /*min-height: 300px;*/
 
@@ -120,7 +183,7 @@ div#cc-base div#cc-main-box {
 /* This inner container contains the table
    of users or chats - the margin at the bottom
    is so it doesn't cover the user profile */
-div#cc-base div#cc-main-box .inner {
+div#cc-main-box .cc-inner {
     /*border-left: solid 1px #ddd;*/
     margin-bottom: 30px;
 }
@@ -128,7 +191,7 @@ div#cc-base div#cc-main-box .inner {
 /* The footer exists to allow the menu box to
    change size as the number of users changes
    the footer provides the bottom and left borders */
-div#cc-base div#cc-main-box #cc-main-box {
+div#cc-main-box #cc-main-box {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -143,12 +206,12 @@ div#cc-base div#cc-main-box #cc-main-box {
 /* The user details area shows the user's profile picture
    and name - it's absolutely positioned at the bottom of
    the view */
-div#cc-base div#cc-main-box div#cc-user-details {
+div#cc-main-box div#cc-user-details {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 36px;
-    line-height: 36px;
+    height: 30px;
+    line-height: 30px;
     background: #fff;
     border-top: solid 1px #ddd;
     border-bottom-left-radius: 5px;
@@ -156,8 +219,12 @@ div#cc-base div#cc-main-box div#cc-user-details {
     z-index: 30;
 }
 
+.cc-profile-subtitle {
+    font-size: 0.9em;
+}
+
 /* The user profile overlay */
-div#cc-base div#cc-profile-box {
+div#cc-profile-box {
     position: fixed;
     right: 250px;
     bottom: 144px;
@@ -171,7 +238,11 @@ div#cc-base div#cc-profile-box {
 }
 
 #cc-profile-picture {
-    margin-right: 10px;
+    margin: 5px 10px 5px 5px;
+}
+
+.cc-user-name {
+    margin-top: 5px;
 }
 
 .cc-right-margin-5 {
@@ -182,7 +253,7 @@ div#cc-base div#cc-profile-box {
  * Room list box
  */
 
-div#cc-base div.cc-room-list-box {
+#cc-base div.cc-room-list-box {
     width: 100%;
     height: 300px;
     left: 0;
@@ -196,11 +267,13 @@ div#cc-base div.cc-room-list-box {
 }
 
 /* The base of the room list box */
-div#cc-base div.cc-room-list-bar {
+div.cc-room-list-bar {
     position: fixed;
     width: 100px;
     left: 0;
 }
+
+
 
 /**
  * Room list
@@ -210,20 +283,30 @@ div#cc-base div.cc-room-list-bar {
     /*overflow-x: hidden;*/
 /*}*/
 
-.room-list div.last-message {
+
+#cc-base .cc-room-list td {
+    background: #fff;
+    padding: 5px;
+}
+
+#cc-base .cc-room-list td:hover {
+    background: #EEE;
+}
+
+.cc-room-list div.cc-last-message {
     font-size: 0.8em;
 }
 
-.room-list div.last-message .title {
+.cc-room-list div.cc-last-message .cc-title {
     font-weight: bold;
     max-width: 30%;
 }
 
-.room-list div.last-message .message {
+.cc-room-list div.cc-last-message .cc-message {
     font-style: italic;
 }
 
-.room-list div.cc-badge {
+.cc-room-list div.cc-badge {
     float: right;
     /*position: absolute;*/
     /*top: 6px;*/
@@ -233,7 +316,7 @@ div#cc-base div.cc-room-list-bar {
  * Chat box
  */
 
-div#cc-base div.cc-chat-box-outer {
+div.cc-chat-box-outer {
     position:fixed;
     /*background: red;*/
     /*overflow-y: auto;*/
@@ -243,7 +326,7 @@ div#cc-base div.cc-chat-box-outer {
     /*right: 400px*/
 }
 
-div#cc-base div.cf-chat-box {
+div.cc-chat-box {
     position: relative;
 
     width: 230px;
@@ -267,7 +350,7 @@ div.cc-chat-bar {
     z-index: -10;
 }
 
-div.cc-chat-bar div.name {
+div.cc-chat-bar div.cc-name {
     max-width: 150px;
 }
 
@@ -279,14 +362,14 @@ div.cc-chat-box-outer div.cc-badge {
 }
 
 /* The area that contains the messages */
-div#cc-base div.cf-chat-box div.cf-chat-box-msgs {
+div.cc-chat-box div.cc-chat-box-msgs {
     height: 240px;
     overflow-y: auto;
     width: 100%;
 }
 
 /* The text area container */
-div#cc-base div.cf-chat-box div.cf-chat-box-msg {
+div.cc-chat-box div.cc-chat-box-msg {
     /* Take into account the top border */
     /*height: 59px;*/
     border-top: solid 1px #ddd;
@@ -296,7 +379,7 @@ div#cc-base div.cf-chat-box div.cf-chat-box-msg {
 }
 
 /* The text input text area */
-div#cc-base div.cf-chat-box div.cf-chat-box-msg textarea.cf-chat-box-msg-txt {
+div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt {
     border: 1px solid #fff;
 
     max-height: 28px;
@@ -317,7 +400,7 @@ div#cc-base div.cf-chat-box div.cf-chat-box-msg textarea.cf-chat-box-msg-txt {
     box-sizing: border-box;
 }
 
-div#cc-base div.cf-chat-box div.cf-chat-box-msg textarea.cf-chat-box-msg-txt:focus {
+div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt:focus {
     background: none repeat scroll 0 0 #f5fbfe;
     borde-color: #99baca;
     color: #444444;
@@ -354,7 +437,7 @@ div.cc-message-outer .time {
     margin: 1px 2px 0 2px;
 }
 
-.bubble
+.cc-bubble
 {
     position: relative;
     max-width: 158px;
@@ -369,7 +452,7 @@ div.cc-message-outer .time {
 
 }
 
-.bubble:after
+.cc-bubble:after
 {
     content: "";
     position: absolute;
@@ -380,27 +463,27 @@ div.cc-message-outer .time {
     z-index: 1;
 }
 
-.right-bubble {
+.cc-right-bubble {
     float: right;
     margin-right: 15px;
     background: #EEE;
     right: 27px;
 }
 
-.right-bubble:after {
+.cc-right-bubble:after {
     border-width: 5px 0 5px 9px;
     border-color: transparent #EEE;
     right: -9px;
 }
 
-.left-bubble {
+.cc-left-bubble {
     float: left;
     margin-left: 15px;
     background: #91dfff;
     left: 27px;
 }
 
-.left-bubble:after {
+.cc-left-bubble:after {
     border-width: 5px 9px 5px 0;
     border-color: transparent #91dfff;
     left: -9px;
@@ -421,26 +504,26 @@ div.cc-message-outer .time {
 
 /* Chat invite */
 
-div.cf-chat-box .cf-overlay-content {
+div.cc-chat-box .cc-overlay-content {
     max-width: 100%;
     max-height: 70px;
     color: black;
 }
 
-div.cf-chat-box .cf-overlay-content .title {
+div.cc-chat-box .cc-overlay-content .title {
     font-weight: bold;
     font-size: 1.2em;
     line-height: 1.2em;
     margin-bottom: 5px;
 }
 
-div.cf-chat-box .cf-overlay-content .subtitle {
+div.cc-chat-box .cc-overlay-content .subtitle {
     font-size: 0.9em;
     color: #777;
     font-style: italic;
 }
 
-div.cf-chat-box .cf-overlay-content img {
+div.cc-chat-box .cc-overlay-content img {
     margin: 10px 5px;
 }
 
@@ -474,11 +557,11 @@ div#cc-create-room-box {
  * GENERAL
  */
 
-a {
+div#cc-base a {
     text-decoration: none;
 }
 
-.subtitle {
+div#cc-base .subtitle {
     font-style: italic;
     color: gray;
     font-weight: normal;
@@ -523,7 +606,7 @@ a {
     cursor: pointer;
 }
 
-.cc-resize-cursor {
+#cc-base a.cc-resize-cursor {
     cursor: nwse-resize;
 }
 
@@ -609,27 +692,27 @@ a {
     background-color: #0d82b3;
 }
 
-.cc-row, .uk-table td.cc-row {
+#cc-base .uk-table td.cc-row {
     border: none;
     border-left: 5px solid #FFF;
     cursor: pointer;
+    background: #fff;
 }
 
-.cc-row, .uk-table td.cc-row.online {
+#cc-base .uk-table td.cc-row.cc-online {
     border: none;
     border-left: 5px solid #70f067;
 }
 
-.cc-row, .uk-table td.cc-row.offline {
+#cc-base .uk-table td.cc-row.cc-offline {
     border: none;
     border-left: 5px solid #999;
     cursor: default;
 }
 
-.cc-row, .uk-table td.cc-row.blocked {
+#cc-base .uk-table td.cc-row.cc-blocked {
     border: none;
     border-left: 5px solid #b04848;
-    cursor: default;
 }
 
 /*.cc-row:hover, .uk-table td.cc-row:hover {*/
@@ -674,8 +757,8 @@ a {
  * Overlay
  */
 
-.cf-overlay {
-    position:absolute;
+div#cc-app div.cc-overlay {
+    position:absolute !important;
     width:100%;
     height: 100%;
     bottom:0;
@@ -695,8 +778,8 @@ a {
     opacity: 0.9;
 }
 
-.cf-overlay-content {
-    position: absolute;
+div#cc-app div.cc-overlay-content {
+    position: absolute !important;
     top: 0;
     bottom: 0;
     left: 0;
@@ -709,13 +792,13 @@ a {
     text-align: center;
 }
 
-.cf-overlay-content {
+.cc-overlay-content {
     line-height: 1em;
     font-size: 0.8em;
 }
 
-.cc-notification {
-    position: absolute;
+div#cc-app div.cc-notification {
+    position: absolute !important;
     margin: auto;
 
     top: 0;
@@ -746,7 +829,7 @@ a {
     color: #666;
 }
 
-.cc-notification div span.message {
+.cc-notification div span.cc-message {
     font-size: 0.8em;
     color: #777;
 }
@@ -758,12 +841,7 @@ a {
     left: -5px;
 }
 
-
-body {
-    background: url(../../img/128-191.jpg) repeat !important;
-}
-
-a.disabled {
+ a.disabled {
     pointer-events: none,
     cursor: default;
 }
@@ -793,5 +871,31 @@ a.disabled {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+#cc-base button, #cc-base a {
+    /*color: #ffffff;*/
+    text-decoration: none;
+}
+
+#cc-base button:hover, #cc-base a:hover {
+    /*color: #ffffff;*/
+    text-decoration: none;
+}
+
+/*#cc-base button.cc-dark, #cc-base a.cc-dark {*/
+    /*color: #333;*/
+/*}*/
+
+/*#cc-base button.cc-dark:hover, #cc-base a.cc-dark:hover {*/
+    /*color: #000;*/
+/*}*/
+
+#cc-base .cc-margin-5 {
+    margin:5px;
+}
+
+#cc-base tbody {
+    border: none;
 }
 

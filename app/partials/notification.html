@@ -1,16 +1,16 @@
 <div ng-controller="NotificationController" ng-show="notification.show" >
-    <div class="cf-overlay" ></div>
+    <div class="cc-overlay" ></div>
     <div class="cc-notification cc-shadow">
         <div>
-            <span class="title">{{ notification.title }}</span>
+            <span class="cc-title">{{ notification.title }}</span>
             <br/>
             <!-- Waiting indicator -->
-            <img ng-show="notification.type == 'waiting'" src="img/loader.gif" width="26" height="26" />
+            <img ng-show="notification.type == 'waiting'"  ng-src="{{ img_loader }}" width="26" height="26" />
             <br/>
 
 
             <!-- Payload -->
-            <span class="message" >{{ notification.message }}</span>
+            <span class="cc-message" >{{ notification.message }}</span>
 
         </div>
         <!-- Buttons -->

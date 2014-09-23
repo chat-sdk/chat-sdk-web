@@ -19,9 +19,33 @@ myApp.controller('AppController', [
 
         $rootScope.baseURL = ROOT + 'partials/'
 
-        $rootScope.anonymousLoginDisabled = CC_OPTIONS.anonymousLoginDisabled;
+        $rootScope.anonymousLoginEnabled = CC_OPTIONS.anonymousLoginEnabled;
+        $rootScope.socialLoginEnabled = CC_OPTIONS.socialLoginEnabled;
 
+        $scope.setupImages();
     };
+
+    /**
+     * The images in the partials should be pointed at the correct
+     * server
+     */
+    $scope.setupImages = function () {
+        var imgRoot = ROOT + 'img/';
+        $rootScope.img_30_minimize = imgRoot + 'cc-30-minimize.png';
+        $rootScope.img_30_resize = imgRoot + 'cc-30-resize.png';
+        $rootScope.img_20_cross = imgRoot + 'cc-20-cross.png';
+        $rootScope.img_30_cross = imgRoot + 'cc-30-cross.png';
+        $rootScope.img_40_cross = imgRoot + 'cc-40-cross.png';
+        $rootScope.img_40_tick = imgRoot + 'cc-40-tick.png';
+        $rootScope.img_30_shutdown = imgRoot + 'cc-30-shutdown.png';
+        $rootScope.img_30_shutdown_on = imgRoot + 'cc-30-shutdown_on.png';
+        $rootScope.img_30_plus = imgRoot + 'cc-30-plus.png';
+        $rootScope.img_30_gear = imgRoot + 'cc-30-gear.png';
+        $rootScope.img_loader = imgRoot + 'loader.gif';
+        $rootScope.img_20_user = imgRoot + 'cc-20-user.png';
+        $rootScope.img_20_friend = imgRoot + 'cc-20-friend.png';
+
+    }
 
     $scope.getUser = function () {
         return Auth.getUser();
@@ -261,10 +285,10 @@ myApp.controller('AppController', [
 
     $scope.shutdownImage = function () {
         if($scope.on) {
-            return 'cc-30-shutdown.png';
+            return $scope.img_30_shutdown;
         }
         else {
-            return 'cc-30-shutdown_on.png';
+            return $scope.img_30_shutdown_on;
         }
     };
 
@@ -664,6 +688,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                 }
 
             }).bind(this), function (error) {
+
+                // We couldn't connect to Chatcat.io API
+                // Next check to see if they specified an API key
+
+
                 alert(error);
                 //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
             });
@@ -1093,12 +1122,12 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
 
         $scope.validation = {
             name: {
-                minChars: 3,
+                minChars: 2,
                 maxChars: 18,
                 valid: true
             },
             city: {
-                minChars: 3,
+                minChars: 2,
                 maxChars: 18,
                 valid: true
             }
@@ -1110,7 +1139,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
 
             // Remove the previous listener
             if($scope.ref) {
-                $scope.ref.off();
+                $scope.ref.off('value');
             }
 
             if(Auth.getUser() && Auth.getUser().meta && Auth.getUser().meta.uid) {
@@ -1155,9 +1184,16 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
         // Is the name valid?
         if($scope.validate()) {
             $scope.showMainBox();
+            $scope.ref.off('value');
+            $scope.ref = null;
         }
         else {
-            $scope.showNotification(bNotificationTypeAlert, "Validation failed", "Please check that all fields are valid", "Ok");
+            if(!$scope.validation.name.valid) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The name must be between 2 - 18 characters long ", "Ok");
+            }
+            if(!$scope.validation.city.valid) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between 2 - 18 characters long", "Ok");
+            }
         }
     };
 

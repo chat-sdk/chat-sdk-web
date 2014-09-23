@@ -1,39 +1,40 @@
-<div style="display: none" cc-uncloak class="cc-disable-highlight" >
+<div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight" >
 
-    <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-        <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.meta.image }}"  />
-        {{ userDrag.user.meta.name }}
-    </div>
+        <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
+            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.meta.image }}"  />
+            {{ userDrag.user.meta.name }}
+        </div>
 
-    <div id="cc-base">
 
-        <div id="cf-menu-bar" class="cf-menu-bar" ng-click="toggleMainBoxVisibility()">
-            <div class="uk-float-left cc-base-text">
-                <div class="inner">
-                    {{ numberOfUsersOnline() }} People here
-                    <a ng-click="shutdown()" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
-                        <img class="cc-image-30 uk-float-right" ng-src="img/{{ shutdownImage() }}" />
-                    </a>
+        <div id="cc-base">
+
+            <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
+                <div class="uk-float-left cc-base-text">
+                    <div class="cc-inner">
+                        {{ numberOfUsersOnline() }} People here
+                        <a ng-click="shutdown()" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
+                            <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div ng-show="on">
+            <div ng-show="on">
 
-            <ng-include ng-show="activeBox == 'loginBox' && !minimize" src=" baseURL + 'login-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'loginBox' && !minimize" src=" baseURL + 'login-box.html'"></ng-include>
 
-            <ng-include ng-show="activeBox == 'profileSettingsBox' && !minimize" src=" baseURL + 'profile-settings-box.html'"></ng-include>
-            <ng-include ng-show="activeBox == 'mainBox' && !minimize" src=" baseURL + 'main-box.html'"></ng-include>
-            <ng-include ng-show="activeBox == 'createRoomBox' && !minimize" src=" baseURL + 'create-room-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'profileSettingsBox' && !minimize" src=" baseURL + 'profile-settings-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'mainBox' && !minimize" src=" baseURL + 'main-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'createRoomBox' && !minimize" src=" baseURL + 'create-room-box.html'"></ng-include>
 
-            <div ng-repeat="(id, room) in getAllRooms()">
-                <ng-include ng-controller="ChatController" ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
+                <div ng-repeat="(id, room) in getAllRooms()">
+                    <ng-include ng-controller="ChatController" ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
+                </div>
+
+                <ng-include src=" baseURL + 'room-list-box.html'"></ng-include>
+                <ng-include src=" baseURL + 'profile-box.html'"></ng-include>
             </div>
-
-            <ng-include src=" baseURL + 'room-list-box.html'"></ng-include>
-            <ng-include src=" baseURL + 'profile-box.html'"></ng-include>
         </div>
-    </div>
 </div>
 
 

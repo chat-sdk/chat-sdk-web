@@ -1,28 +1,32 @@
-<table class="uk-table uk-table-hover room-list">
+<table class="uk-table uk-table-hover cc-room-list">
     <tr ng-repeat="(id, room) in getRooms()">
-        <td class="cc-pointer uk-position-relativen" ng-click="roomClicked(room)" title="{{ room.meta.description }}">
+        <td class="cc-pointer" ng-click="roomClicked(room)" title="{{ room.meta.description }}">
             <div class="uk-overflow-container">
                 <!-- Room name -->
                 <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 80 }">
-                    <a ng-show="canDeleteRoom" ng-click="deleteRoom(room)"><img src="../img/cc-20-cross.png" /></a>
-                    {{ room.name }}
+                    <a class="uk-float-left cc-thumbnail-20" ng-show="canDeleteRoom" ng-click="deleteRoom(room)">
+                        <img ng-src="{{ img_20_cross }}" />
+                    </a>
+                    <div class="uk-float-left">
+                        {{ room.name }}
+                    </div>
                 </div>
                 <!-- Number of users -->
                 <div class="uk-float-right cc-right-margin-5">
-                    {{ room.userCount() }}
-                    <img src="../img/cc-20-user.png" />
-                    <div ng-show="room.badge" class="cc-badge">
+                    <div class="cc-badge uk-float-right" ng-show="room.badge" >
                         {{ room.badge }}
                     </div>
+                    <img class="uk-float-right"  ng-src="{{ img_20_user }}" />
+                    <div class="uk-float-right"> {{ room.userCount() }}</div>
                 </div>
             </div>
             <!--We need to subtract 10 for the padding -->
-            <div class="last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
+            <div class="cc-last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
                 <div ng-show="room.lastMessage.user.meta.name && room.lastMessage.meta.text">
-                    <div class="uk-float-left cc-ellipsis title" >
+                    <div class="uk-float-left cc-ellipsis cc-title" >
                         {{ room.lastMessage.user.meta.name }}:
                     </div>
-                    <div class="cc-ellipsis message">
+                    <div class="cc-ellipsis cc-message">
                         &nbsp; {{ room.lastMessage.meta.text }}
                     </div>
                 </div>

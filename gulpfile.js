@@ -29,8 +29,8 @@ gulp.task('minify-css', function() {
 
     var src = [
         'app/css/*.css',
-        'app/bower_components/html5-boilerplate/css/normalize.css',
-        'app/bower_components/html5-boilerplate/css/main.css',
+//         'app/bower_components/html5-boilerplate/css/normalize.css',
+//         'app/bower_components/html5-boilerplate/css/main.css',
         'app/libs/flags/stylesheets/flags/common.css',
         'app/libs/flags/stylesheets/flags/flags32.css',
         'app/libs/flags/stylesheets/flags/flags16.css',
@@ -41,7 +41,7 @@ gulp.task('minify-css', function() {
     ]
 
   return gulp.src(src)
-    .pipe(concat('styles.css'))
+    .pipe(concat('cc_styles.css'))
     .pipe(autoprefix('last 2 versions'))
     .pipe(minifyCSS())
     .pipe(rename({ suffix: '.min' }))
@@ -54,6 +54,10 @@ gulp.task('copy', function () {
 
 	gulp.src('app/img/*.*').pipe(gulp.dest( DIST_PATH + 'img'));
 	gulp.src('app/img/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'img'));
+
+	gulp.src('app/fonts/*.*').pipe(gulp.dest( DIST_PATH + 'css/fonts'));
+	gulp.src('app/fonts/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'css/fonts'));
+
 	
 	gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_PATH + 'libs'));
 	gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'libs'));
@@ -61,8 +65,8 @@ gulp.task('copy', function () {
 //	gulp.src('app/bower_components/**/*.*').pipe(gulp.dest( DIST_PATH + 'bower_components'));
 //	gulp.src('app/bower_components/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'bower_components'));
 
-    gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_PATH + 'bower_components/uikit/dist/'));
-    gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'bower_components/uikit/dist/'));
+//     gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_PATH + 'bower_components/uikit/dist/'));
+//     gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'bower_components/uikit/dist/'));
 
     // Copy the flag images
     gulp.src('app/libs/flags/images/flags/*.png').pipe(gulp.dest( DIST_PATH + 'images/flags/'));
@@ -136,7 +140,7 @@ gulp.task('scripts', function() {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-    gulp.watch('app/js/*.js', ['lint', 'scripts', 'minify-html', 'minify-css', 'copy']);
+    gulp.watch(['app/js/*.js','app/css/*.css', 'app/partials/*.html'], ['lint', 'scripts', 'minify-html', 'minify-css', 'copy']);
 });
 
 

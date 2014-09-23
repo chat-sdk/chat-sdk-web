@@ -1,7 +1,7 @@
 <table class="uk-table">
     <span class="cc-section-header">{{ sectionHeader }}</span>
     <tr ng-repeat="(id, aUser) in getUsers()" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
-        <td class="cc-row" ng-class="aUser.blocked ? 'blocked' : aUser.online ? 'online' : 'offline'" draggable-user="user" ng-click="userClicked(aUser)">
+        <td class="cc-row" ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'" draggable-user="user" ng-click="userClicked(aUser)">
             <img class="cc-thumbnail-20 cc-right-margin-5 uk-float-left" ng-src="{{ aUser.meta.image }}"/>
             <span class="uk-float-left">{{ aUser.meta.name }}</span>
 
@@ -9,7 +9,7 @@
                 <span class="flag {{ aUser.meta.country | lowercase }}"></span>
             </div>
             <button class="uk-button uk-button-mini uk-button-danger uk-float-right" ng-show="aUser.blocked" >Unblock</button>
-            <img class="uk-float-right cc-right-margin-5" src="../img/cc-20-friend.png" ng-show="aUser.friend && !aUser.blocked" />
+            <img class="uk-float-right cc-right-margin-5"  ng-src="{{ img_20_friend }}" ng-show="aUser.friend && !aUser.blocked" />
         </td>
     </tr>
 </table>

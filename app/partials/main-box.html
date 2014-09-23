@@ -2,7 +2,7 @@
     <div class="cc-box-header">
         {{ title }}
         <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimizeMainBox()">
-            <img src="img/cc-30-minimize.png" />
+            <img ng-src="{{ img_30_minimize }}" />
         </a>
     </div>
 
@@ -24,7 +24,7 @@
             <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search[activeTab]" placeholder="Search" />
         </form>
         <a class="uk-float-right" ng-show="activeTab == 'rooms' && roomCreationEnabled" ng-click="showCreateRoomBox()">
-            <img class="cc-image-30" src="img/cc-30-plus.png" />
+            <img class="cc-image-30"  ng-src="{{ img_30_plus }}" />
         </a>
     </div>
 
@@ -33,17 +33,21 @@
         <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
 
         <!--Add the list of public chat rooms-->
-        <ng-include ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" ng-controller="PublicRoomsListController" src=" baseURL + 'room-list.html'"></ng-include>
+        <div ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" ng-controller="PublicRoomsListController" >
+            <ng-include src=" baseURL + 'room-list.html'"></ng-include>
+        </div>
 
         <!--Add the table of users / chat rooms-->
         <ng-include ng-show="activeTab == 'friends'" ng-controller="FriendsListController" src=" baseURL + 'user-list.html'"></ng-include>
     </div>
 
     <div id="cc-user-details">
-        <span class="cc-padded">
-        <img class="cc-thumbnail-20 cc-right-margin-5" ng-src="{{ getUser().meta.image }}" />
-        {{ getUser().meta.name }}
-        <a class="uk-float-right" title="Settings" ng-click="showProfileSettingsBox()"><img class="cc-image-30 cc-right-margin-5" src="img/cc-30-gear.png" /></a>
-        </span>
+        <img class="cc-thumbnail-20 cc-margin-5 uk-float-left" ng-src="{{ getUser().meta.image }}" />
+        <!--<span class="cc-padded">-->
+        <div class="uk-float-left">
+            {{ getUser().meta.name }}
+        </div>
+        <a class="uk-float-right" title="Settings" ng-click="showProfileSettingsBox()"><img class="cc-image-30 cc-right-margin-5" ng-src="{{ img_30_gear }}" /></a>
+        <!--</span>-->
     </div>
 </div>

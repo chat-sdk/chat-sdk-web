@@ -1,7 +1,7 @@
 <div ng-show="showRoomListBox()" ng-style="{'height': boxHeight}"  ng-controller="RoomListBoxController">
     <div class="cc-room-list-bar" ng-click="toggle()">
         <div class="cc-base-text">
-            <div class="inner">
+            <div class="cc-inner">
                 <div class="uk-float-left">More Chats</div>
             </div>
         </div>
@@ -9,10 +9,12 @@
     <div class="cc-box cc-room-list-box cc-shadow" ng-style="{'width' : boxWidth}" ng-hide="hideRoomList">
         <div class="cc-box-header">More Chats
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
-                <img src="img/cc-30-minimize.png" />
+                <img  ng-src="{{ img_30_minimize }}" />
             </a>
         </div>
         <!-- This 30 relates to the header height -->
-        <ng-include class="cc-hide-overflow-x" ng-style="{'height': boxHeight - 30}" src=" baseURL + 'room-list.html'"></ng-include>
+        <div class="cc-hide-overflow-x" ng-style="{'height': boxHeight - 30}" >
+            <ng-include src=" baseURL + 'room-list.html'"></ng-include>
+        </div>
     </div>
 </div>

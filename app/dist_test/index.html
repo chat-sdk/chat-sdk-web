@@ -12,22 +12,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
-    <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
-    <link rel="stylesheet" href="css/styles.min.css"/>
 
-    <!-- Flags -->
-    <link rel="stylesheet" href="libs/flags/stylesheets/flags/common.css"/>
-    <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags32.css"/>
-    <link rel="stylesheet" href="libs/flags/stylesheets/flags/flags16.css"/>
-
-    <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
-    <script src="bower_components/jquery/jquery.js"></script>
-
-    <!-- Include UIKit components -->
-    <script src="bower_components/uikit/dist/js/uikit.js"></script>
-    <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.css">
-    <link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.gradient.css">
 
 </head>
 <body >
@@ -68,6 +53,8 @@
             // public rooms
             usersCanCreatePublicRooms: false,
 
+            primaryDomain: '',
+
             // This a list of default public rooms
             // These rooms will appear at the top of the "Rooms" section
             // of the main box
@@ -103,7 +90,9 @@
             ],
 
             // Allow anonymous login?
-            anonymousLoginDisabled: true,
+            anonymousLoginEnabled: false,
+
+            socialLoginEnabled: false,
 
             // Single sign-on
             singleSignOnEnabled: false,
@@ -115,14 +104,7 @@
     </script>
 </div>
 
-  <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-  <![endif]-->
-
-
-<link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.css">
-<link rel="stylesheet" href="bower_components/uikit/dist/css/uikit.gradient.css">
-<link rel="stylesheet" href="css/_/styles.min.css"/>
+<link rel="stylesheet" href="css/_/cc_styles.min.css"/>
 <script src="js/dist.min.js"></script>
 <script src="env.js"></script>
 <script src="js/all.js"></script>

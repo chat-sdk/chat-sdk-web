@@ -1,13 +1,13 @@
 <!--The 30 in the height is to take account for the bottom bar-->
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{'right': room.offset, 'height': (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location >
 
-    <div class="cf-chat-box cc-shadow" ng-style="{'height': room.height, 'width': room.width}" ng-hide="room.minimized"  >
+    <div class="cc-chat-box cc-shadow" ng-style="{'height': room.height, 'width': room.width}" ng-hide="room.minimized"  >
         <div class="cc-box-header cc-pointer">
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
-                <img src="img/cc-30-minimize.png" />
+                <img ng-src="{{ img_30_minimize }}" />
             </a>
             <a class="uk-float-left cc-image-30 cc-resize-cursor" title="Resize room" resize-room>
-                <img src="img/cc-30-resize.png" />
+                <img ng-src="{{ img_30_resize }}" />
             </a>
             <div class="cc-ellipsis uk-float-left" ng-style="{'width': room.width - 60}">{{ room.name }}</div>
         </div>
@@ -29,13 +29,13 @@
         <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div ng-show="activeTab == 'messages'" class="cf-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
+        <div ng-show="activeTab == 'messages'" class="cc-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 32 - inputHeight}" stop-shake>
             <div  ng-repeat="message in room.getMessages()">
 
                 <div>
                     <div class="cc-message-outer">
                         <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.meta.image }}" />
-                        <span class="bubble" ng-class="message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
+                        <span class="cc-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
                             {{ message.meta.text }}
                         </span>
                     </div>
@@ -54,22 +54,22 @@
             <div style="height: 20px"></div>
         </div>
 
-        <div class="cf-chat-box-msg" ng-show="activeTab == 'messages'" disable-drag>
+        <div class="cc-chat-box-msg" ng-show="activeTab == 'messages'" disable-drag>
             <div class="cc-typing-indicator">
                 {{ getTyping() }}
             </div>
-            <textarea class="cf-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" fit-text="84" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)" ></textarea>
+            <textarea class="cc-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" fit-text="84" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)" ></textarea>
         </div>
 
         <!--The overlay that appears if the user hasn't accepted the invitation-->
         <!--We disable drag here because otherwise when the user clicks they also start a drag-->
         <!--that results in the room data being modified that caues the room to be re-added-->
-        <div class="cf-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
-        <div class="cf-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
-            <div class="uk-width-4-5 cc-center cc-ellipsis title">{{ room.invitedBy.meta.name }}</div>
+        <div class="cc-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
+        <div class="cc-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
+            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title">{{ room.invitedBy.meta.name }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
-            <a ng-click="deleteRoom(room)" ><img src="img/cc-40-cross.png"/></a>
-            <a ng-click="acceptInvitation()" ><img src="img/cc-40-tick.png"/></a>
+            <a ng-click="deleteRoom(room)" ><img ng-src="{{ img_40_cross }}" /></a>
+            <a ng-click="acceptInvitation()" ><img ng-src="{{ img_40_tick }}" /></a>
 
         </div>
     </div>
@@ -80,10 +80,10 @@
 
     <div class="cc-chat-bar" ng-click="toggleVisibility()" >
         <div class="cc-base-text">
-            <div class="inner">
-                <div class="uk-float-left cc-ellipsis name">{{ room.name }}</div>
+            <div class="cc-inner">
+                <div class="uk-float-left cc-ellipsis cc-name">{{ room.name }}</div>
                 <a ng-click="deleteRoom(room)">
-                    <img class="uk-float-right cc-image-30" src="img/cc-30-cross.png" disable-drag/>
+                    <img class="uk-float-right cc-image-30" ng-src="{{ img_30_cross }}" disable-drag/>
                 </a>
                 <div class="uk-float-right">{{ room.userCount() }}</div>
             </div>

@@ -102,25 +102,33 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
             //Make up some API Details
 
-            this.meta = {
-                cid: "xxyyzz",
-                max: 20,
-                ads: true,
-                whiteLabel: false
-//                rooms: [
-//                    {
-//                        rid: "123123",
-//                        name: "Fixed 1",
-//                        description: "This is fixed 1"
-//                    }
-//                ]
-            };
+//            this.meta = {
+//                cid: "xxyyzz",
+//                max: 20,
+//                ads: true,
+//                whiteLabel: false
+////                rooms: [
+////                    {
+////                        rid: "123123",
+////                        name: "Fixed 1",
+////                        description: "This is fixed 1"
+////                    }
+////                ]
+//            };
+//
+//            setTimeout((function () {
+//                deferred.resolve(this.meta);
+//            }).bind(this),10);
+//
+//            return deferred.promise;
 
-            setTimeout((function () {
-                deferred.resolve(this.meta);
-            }).bind(this),10);
+            var url = $window.location.host;
 
-            return deferred.promise;
+            // Is there a www.?
+            if(url.match(/^www\./))
+            {
+                url = url.substring(4);
+            }
 
             //Contact the API
             $http({
@@ -128,7 +136,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                 url: 'http://chatcat.io/wp-admin/admin-ajax.php',
                 params: {
                     action: 'get-api-key',
-                    domain: $window.location.host
+                    domain: url
                 }
             }).then((function (r1) {
 
@@ -183,7 +191,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
             }).bind(this), function (error, message) {
 
-                deferred.reject(error);
+                deferred.reject("Could not connection to Chatcat.io API");
 
             });
 
@@ -230,16 +238,8 @@ myApp.factory('Utilities', ['$q', function ($q) {
 
             context.post(bPullURL, {'url': url}).success((function(data, status) {
 
-                if(data.fileName) {
-
-                    // Now load the image into Firebase
-                    var url = bResizeURL + "?src=" + data.fileName + "&w=100&h=100";
-
-                    this.saveImageFromURL(url).then(function(imageData) {
-
-                        deferred.resolve(imageData);
-
-                    }, deferred.reject);
+                if(data && data.dataURL) {
+                    deferred.resolve(data.dataURL);
                 }
                 else {
                     deferred.reject();
