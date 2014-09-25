@@ -17,7 +17,7 @@
 </head>
 <body >
 <!--<body style="background: url(img/128-191.jpg) repeat">-->
-<div class="uk-panel uk-panel-box" style="margin: 30px; width: 400px">
+<div id="text" class="uk-panel uk-panel-box" style="margin: 30px; width: 400px">
     <img src="img/live-beta.png">
     <p>
         Welcome to the Chatcat live beta! Here you can test the latest version of our powerful real-time chat client.
@@ -37,64 +37,70 @@
     </p>
 </div>
 
-
-<div ng-app="myApp" >
-    <ng-include src=" baseURL + 'chatcat.html'" ng-controller="AppController"></ng-include>
-</div>
-
-    <script type="text/javascript">
-
-
-    </script>
-
+<div ng-app="myApp" ><ng-include src=" baseURL + 'chatcat.html'" ng-controller="AppController"></ng-include></div>
 <script type="text/javascript">
 
     // Set options here
     var CC_OPTIONS = {
 
-        // Users can create public chat rooms?
-        // If this is true users will be able to setup new
-        // public rooms
-        usersCanCreatePublicRooms: false,
+// This variable is used where a page has a number of sub-domains
+// If you had registered the domain yourdomain.com with chatcat.io
+// you may also want to have chat on a sub-domain forums.yourdomain.com
+// for this to work, when you add this code to your sub-domain's footer
+// you'd need to set primaryDomain: 'yourdomain.com'
+        primaryDomain: '',
 
-        primaryDomain: 'ccwp.local',
-
-        // This a list of default public rooms
-        // These rooms will appear at the top of the "Rooms" section
-        // of the main box
+// This a list of default public rooms. These rooms will appear at
+// the top of the "Rooms" section of the main box. To activate this
+// please uncomment the variables and add the relevant details
+// There's no limit to how many rooms you can add
         staticRooms: [
             {
-                // The name of the room
-                name: 'Chatcat Discussion',
-
-                // The descriptions - this appears on mouseover
-                description: 'A space to talk about the Chatcat client - this room will be monitored by our team.',
-
-                // An identifier for the room - this must be unique
-                rid: 'CHATCAT_CHAT',
-
-                // Room weight - lower numbers are light and float to the top
-                // high numbers are heavy and sink to the bottom
-                weight: 0
+//name: 'Room name',
+//description: 'Room description',
+//rid: 'UNIQUE_ROOM_ID', // Each room must have a unique ID
+//weight: 0 // High numbers are heavy and sink to bottom
             }
+// To add more rooms just copy / paste the previous text i.e.
+// ,{
+// Room details...
+// }
         ],
 
-        // Allow anonymous login?
+// Users can create public chat rooms?
+// If this is true users will be able to setup new
+// public rooms
+        usersCanCreatePublicRooms: false,
+
+// Allow anonymous login?
         anonymousLoginEnabled: false,
 
-        // Allow social login?
+// Enable social login - please email us to get your domain whitelisted
         socialLoginEnabled: false,
 
-        // The URL to contact for single sign on
+// The URL to contact for single sign on
         singleSignOnURL: ''
 
     }
 
+    var ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+
 </script>
 
-<link rel="stylesheet" href="css/_/cc_styles.min.css"/>
+<!--<link rel="stylesheet" href="css/reset-uikit.css"/>-->
 <script src="js/dist.min.js"></script>
 <script src="js/all.js"></script>
+
+<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
+<!--<script type="text/javascript">-->
+    <!--$(document).ready(function () {-->
+
+        <!--setTimeout(function () {-->
+            <!--console.log($('#cc-app').css());-->
+        <!--}, 500);-->
+<!--//        alert($('#cc-app').css());-->
+    <!--});-->
+<!--</script>-->
 
 </body>
 </html>

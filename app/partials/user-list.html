@@ -3,8 +3,7 @@
     <tr ng-repeat="(id, aUser) in getUsers()" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
         <td class="cc-row" ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'" draggable-user="user" ng-click="userClicked(aUser)">
             <img class="cc-thumbnail-20 cc-right-margin-5 uk-float-left" ng-src="{{ aUser.meta.image }}"/>
-            <span class="uk-float-left">{{ aUser.meta.name }}</span>
-
+                <span class="uk-float-left cc-pointer">{{ aUser.meta.name }}</span>
             <div class="f16 uk-float-left cc-flag"  >
                 <span class="flag {{ aUser.meta.country | lowercase }}"></span>
             </div>

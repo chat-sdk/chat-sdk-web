@@ -1,12 +1,15 @@
 <table class="uk-table uk-table-hover cc-room-list">
     <tr ng-repeat="(id, room) in getRooms()">
         <td class="cc-pointer" ng-click="roomClicked(room)" title="{{ room.meta.description }}">
-            <div class="uk-overflow-container">
+            <div class="uk-overflow-container cc-height-20">
                 <!-- Room name -->
-                <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 80 }">
-                    <a class="uk-float-left cc-thumbnail-20" ng-show="canDeleteRoom" ng-click="deleteRoom(room)">
+                <!-- Line height is a fix to stop icon being too low down -->
+                <div class="uk-float-left cc-valign-image-fix" >
+                    <a class="cc-thumbnail-20" ng-show="canDeleteRoom" ng-click="deleteRoom(room)">
                         <img ng-src="{{ img_20_cross }}" />
                     </a>
+                </div>
+                <div class="cc-ellipsis uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 80 }">
                     <div class="uk-float-left">
                         {{ room.name }}
                     </div>
