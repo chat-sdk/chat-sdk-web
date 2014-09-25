@@ -62,11 +62,7 @@ gulp.task('copy', function () {
 	gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_PATH + 'libs'));
 	gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'libs'));
 	
-//	gulp.src('app/bower_components/**/*.*').pipe(gulp.dest( DIST_PATH + 'bower_components'));
-//	gulp.src('app/bower_components/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'bower_components'));
-
-//     gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_PATH + 'bower_components/uikit/dist/'));
-//     gulp.src('app/bower_components/uikit/dist/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'bower_components/uikit/dist/'));
+	gulp.src('app/chatcat_include.txt').pipe(gulp.dest( DIST_PATH )).pipe(gulp.dest( DIST_TEST_PATH ));
 
     // Copy the flag images
     gulp.src('app/libs/flags/images/flags/*.png').pipe(gulp.dest( DIST_PATH + 'images/flags/'));

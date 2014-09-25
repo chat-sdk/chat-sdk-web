@@ -39,76 +39,62 @@
 
 
 <div ng-app="myApp" >
-
     <ng-include src=" baseURL + 'chatcat.html'" ng-controller="AppController"></ng-include>
-
+</div>
 
     <script type="text/javascript">
 
-        // Set options here
-        var CC_OPTIONS = {
 
-            // Users can create public chat rooms?
-            // If this is true users will be able to setup new
-            // public rooms
-            usersCanCreatePublicRooms: false,
-
-            primaryDomain: '',
-
-            // This a list of default public rooms
-            // These rooms will appear at the top of the "Rooms" section
-            // of the main box
-            staticRooms: [
-                {
-                    // The name of the room
-                    name: 'Chatcat Discussion',
-
-                    // The descriptions - this appears on mouseover
-                    description: 'A space to talk about the Chatcat client - this room will be monitored by our team.',
-
-                    // An identifier for the room - this must be unique
-                    rid: 'CHATCAT_CHAT',
-
-                    // Room weight - lower numbers are light and float to the top
-                    // high numbers are heavy and sink to the bottom
-                    weight: 0
-                },
-                {
-                    // The name of the room
-                    name: 'Chatcat beta bugs',
-
-                    // The descriptions - this appears on mouseover
-                    description: 'If you find any bugs you can discuss them in this chat room.',
-
-                    // An identifier for the room - this must be unique
-                    rid: 'CHATCAT_BUGS',
-
-                    // Room weight - lower numbers are light and float to the top
-                    // high numbers are heavy and sink to the bottom
-                    weight: 1
-                }
-            ],
-
-            // Allow anonymous login?
-            anonymousLoginEnabled: false,
-
-            socialLoginEnabled: false,
-
-            // Single sign-on
-            singleSignOnEnabled: false,
-
-            // The URL to contact for single sign on
-            singleSignOnURL: ''
-
-        }
     </script>
-</div>
+
+<script type="text/javascript">
+
+    // Set options here
+    var CC_OPTIONS = {
+
+        // Users can create public chat rooms?
+        // If this is true users will be able to setup new
+        // public rooms
+        usersCanCreatePublicRooms: false,
+
+        primaryDomain: 'ccwp.local',
+
+        // This a list of default public rooms
+        // These rooms will appear at the top of the "Rooms" section
+        // of the main box
+        staticRooms: [
+            {
+                // The name of the room
+                name: 'Chatcat Discussion',
+
+                // The descriptions - this appears on mouseover
+                description: 'A space to talk about the Chatcat client - this room will be monitored by our team.',
+
+                // An identifier for the room - this must be unique
+                rid: 'CHATCAT_CHAT',
+
+                // Room weight - lower numbers are light and float to the top
+                // high numbers are heavy and sink to the bottom
+                weight: 0
+            }
+        ],
+
+        // Allow anonymous login?
+        anonymousLoginEnabled: false,
+
+        // Allow social login?
+        socialLoginEnabled: false,
+
+        // The URL to contact for single sign on
+        singleSignOnURL: ''
+
+    }
+
+</script>
 
 <link rel="stylesheet" href="css/_/cc_styles.min.css"/>
 <script src="js/dist.min.js"></script>
-<script src="env.js"></script>
 <script src="js/all.js"></script>
-
 
 </body>
 </html>

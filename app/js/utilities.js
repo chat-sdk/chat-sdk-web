@@ -9,14 +9,40 @@ var bGroupChatDefaultName = "Private Chat";
 //
 // Used to load partials
 //
-//
-//
-var bFirebaseRef = "https://" + FB + ".firebaseio.com/";
-var bImageDirectory = ROOT + 'img/';
-var bDefaultProfileImage = bImageDirectory + 'cf-100-profile-pic.png';
 
-var bPullURL = "http://chat.deluge.co/server/pull.php";
-var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
+//var ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+
+// Are we testing locally?
+var bRootURL = '';
+var bPartialURL = '';
+var bFirebase = '';
+
+// If we are then set the root URL to nothing
+if(document.location.origin === "http://chatcat") {
+    bRootURL = '';
+    bPartialURL = 'partials/';
+    bFirebase = 'chatcatio';
+}
+// Are we testing on the wordpress plugin?
+else if(document.location.origin === "http://ccwp") {
+    bRootURL = '//chatcat/dist/';
+    bPartialURL = bRootURL + 'partials/';
+    bFirebase = 'chatcatio';
+}
+// We're live so we need to use the full remote URL
+else {
+    bRootURL = '//chatcat.firebaseapp.com/';
+    bPartialURL = 'https://chatcat.firebaseapp.com/partials/';
+    bFirebase = 'chatcat';
+}
+
+var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
+
+var bImagesURL = bRootURL + 'img/';
+var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
+
+var bPullURL = "//chat.deluge.co/server/pull.php";
+//var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
 
 // Paths
 var bUsersPath = "users";

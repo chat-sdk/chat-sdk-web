@@ -31,6 +31,36 @@ myApp.service('Visibility', ['$rootScope', function ($rootScope) {
     }
 }]);
 
+myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope, $q, $http) {
+
+    return {
+
+        authenticate: function (url) {
+
+            var deferred = $q.defer();
+
+            // We need to make an AJAX call to the URL provided to get
+            // the user's token
+            $http({
+                method: 'get',
+                url: url
+            }).then((function (r) {
+
+                console.log("Success! " + r);
+
+            }).bind(this), function (error) {
+
+                console.log("Error! " + error);
+
+            });
+
+            return deferred.promise();
+        }
+
+    }
+
+}]);
+
 /**
  * The presence service handles the user's online / offline
  * status
@@ -122,36 +152,43 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 //
 //            return deferred.promise;
 
-            var url = $window.location.host;
+            // Do we have a primaryURL?
+            var url = CC_OPTIONS.primaryDomain;
 
-            // Is there a www.?
-            if(url.match(/^www\./))
-            {
-                url = url.substring(4);
+            if(!url || url.length == 0) {
+                url = $window.location.host;
+
+                // Is there a www.?
+                if(url.match(/^www\./))
+                {
+                    url = url.substring(4);
+                }
             }
 
             //Contact the API
             $http({
                 method: 'get',
-                url: 'http://chatcat.io/wp-admin/admin-ajax.php',
+                url: '//chatcat.io/wp-admin/admin-ajax.php',
                 params: {
                     action: 'get-api-key',
                     domain: url
                 }
             }).then((function (r1) {
 
+                // Here we should be provided with the API key
                 if(r1.data.code == 200 && r1.data.api_key) {
 
-                    // Get the groups
+                    // Using the API key get the groups
                     $http({
                         method: 'get',
-                        url: 'http://chatcat.io/wp-admin/admin-ajax.php',
+                        url: '//chatcat.io/wp-admin/admin-ajax.php',
                         params: {
                             action: 'get-group-details',
                             api_key: r1.data.api_key
                         }
                     }).then((function(r2) {
 
+                        // Here we should have the groups
                         if(r2.data.code == 200) {
 
                             // Sort the rooms
@@ -175,6 +212,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                                 rooms: rooms
                             };
 
+                            // Success! Now return the API meta data
                             deferred.resolve(this.meta);
 
                         }
@@ -182,8 +220,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                             deferred.reject(r2.data.message);
                         }
 
-                        }).bind(this), deferred.reject);
-
+                    }).bind(this), deferred.reject);
                 }
                 else {
                     deferred.reject(r1.data.message);
@@ -194,9 +231,6 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
                 deferred.reject("Could not connection to Chatcat.io API");
 
             });
-
-
-
 
             return deferred.promise;
         }
@@ -1048,45 +1082,13 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             };
 
             user.setImage = function (imageData) {
-                if(imageData) {
+                if(imageData && imageData) {
                     user.meta.image = imageData;
                 }
                 else {
                     user.meta.image = bDefaultProfileImage;
                 }
             };
-
-//            user.setImageName = function (fileName) {
-//
-//                var setName = function (fileName) {
-//
-//                    if(!fileName) {
-//                        fileName = 'cf-100-profile-pic.png';
-//                    }
-//
-//                    user.meta.imageName = fileName;
-//
-//                    user.imageURL20 = bImageDirectory + '?src=' + fileName + '&w=20&h=20';
-//                    user.imageURL30 = bImageDirectory + '?src=' + fileName + '&w=30&h=30';
-//                    user.imageURL100 = bImageDirectory + '?src=' + fileName + '&w=100&h=100';
-//
-//                    $timeout(function(){
-//                        $rootScope.$digest();
-//                    });
-//
-//                };
-//
-//                if(!fileName) {
-//                    setName();
-//                }
-//                else {
-//                    user.isImage(bImageDirectory + '?src=' + fileName).then(function () {
-//                        setName(fileName);
-//                    }, function (error) {
-//                        setName()
-//                    });
-//                }
-//            };
 
             user.isImage = function (src) {
 

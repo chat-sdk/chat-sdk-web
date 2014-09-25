@@ -1,3 +1,3 @@
-var PROD = true;
-var FB = 'chatcatio';
-var ROOT = PROD ? 'https://' + FB + '.firebaseapp.com/' : '';
+var PROD = false;
+var CC_FB = 'chatcatio-test';
+var CC_ROOT = PROD ? 'https://' + CC_FB + '.firebaseapp.com/' : '';

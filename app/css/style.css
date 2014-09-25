@@ -3,8 +3,8 @@
  * Base element - this is the horizontal bar along the bottom of the screen
  */
 
-/*div#cc-app * {*/
-    /*all: initial;*/
+/*div#cc-app *.cc-overlay, div#cc-app *.cc-notification {*/
+    /*position: absolute;*/
 /*}*/
 
 /* Reset all styles! */
@@ -25,25 +25,16 @@ div#cc-base table {
     border-spacing: 0;
 }
 
-/*div#cc-base a {*/
-    /*cursor: pointer;*/
-    /*color: #333;*/
-/*}*/
+div#cc-app a {
+    cursor: pointer;
+    color: #333;
+    text-transform: none;
+}
 
-/*div#cc-base button {*/
-    /*cursor: pointer;*/
-    /*color: #FEFEFE;*/
-/*}*/
-
-
-/*div#cc-base a, div#cc-base a.uk-button-danger, div#cc-base button, div#cc-base button.uk-button {*/
-    /*cursor: pointer;*/
-/*}*/
-
-/*div#cc-base a.uk-icon-button, div#cc-base button.uk-icon-button {*/
-    /*cursor: pointer;*/
-    /*color: #333;*/
-/*}*/
+div#cc-app a:hover {
+    cursor: pointer;
+    color: #777;
+}
 
 div#cc-base textarea {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -75,6 +66,7 @@ div#cc-base {
 
     background: rgba(0,0,0,0.2) !important;
 
+    z-index: 900000 !important;
 }
 
 /* The bottom bar for the menu box */
@@ -503,6 +495,10 @@ div.cc-message-outer .time {
 }
 
 /* Chat invite */
+
+div.cc-notification-outer {
+    position: inherit!important;
+}
 
 div.cc-chat-box .cc-overlay-content {
     max-width: 100%;

@@ -14,7 +14,12 @@ var myApp = angular.module('myApp', [
         // Allow loading from our assets domain.  Notice the difference between * and **.
         'https://chatcatio.firebaseapp.com/partials/**',
         'https://chatcatio-test.firebaseapp.com/partials/**',
-        'https://chatcat.firebaseapp.com/partials/**'
+        'https://chatcat.firebaseapp.com/partials/**',
+        'http://chatcatio.firebaseapp.com/partials/**',
+        'http://chatcatio-test.firebaseapp.com/partials/**',
+        'http://chatcat.firebaseapp.com/partials/**',
+        'http://chatcat/dist_test/partials/**',
+        'http://chatcat/dist/partials/**'
     ]);
 
     // The blacklist overrides the whitelist so the open redirect here is blocked.

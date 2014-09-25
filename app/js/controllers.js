@@ -17,7 +17,31 @@ myApp.controller('AppController', [
 
         $scope.on = true;
 
-        $rootScope.baseURL = ROOT + 'partials/'
+
+        $rootScope.baseURL = bPartialURL;
+        $rootScope.websiteName = $window.location.host;
+
+        /**
+         * Single Sign on
+         */
+
+        // Setup the login and register URLs
+        var ssoURL = CC_OPTIONS.singleSignOnURL;
+        $rootScope.singleSignOnEnabled = ssoURL && ssoURL.length > 0;
+
+        var loginURL = CC_OPTIONS.loginURL;
+        if(loginURL && loginURL.length > 0) {
+            $rootScope.loginURL = loginURL;
+        }
+
+        var registerURL = CC_OPTIONS.registerURL;
+        if(registerURL && registerURL.length > 0) {
+            $rootScope.registerURL = registerURL;
+        }
+
+        /**
+         * Anonymous login and social login
+         */
 
         $rootScope.anonymousLoginEnabled = CC_OPTIONS.anonymousLoginEnabled;
         $rootScope.socialLoginEnabled = CC_OPTIONS.socialLoginEnabled;
@@ -30,21 +54,19 @@ myApp.controller('AppController', [
      * server
      */
     $scope.setupImages = function () {
-        var imgRoot = ROOT + 'img/';
-        $rootScope.img_30_minimize = imgRoot + 'cc-30-minimize.png';
-        $rootScope.img_30_resize = imgRoot + 'cc-30-resize.png';
-        $rootScope.img_20_cross = imgRoot + 'cc-20-cross.png';
-        $rootScope.img_30_cross = imgRoot + 'cc-30-cross.png';
-        $rootScope.img_40_cross = imgRoot + 'cc-40-cross.png';
-        $rootScope.img_40_tick = imgRoot + 'cc-40-tick.png';
-        $rootScope.img_30_shutdown = imgRoot + 'cc-30-shutdown.png';
-        $rootScope.img_30_shutdown_on = imgRoot + 'cc-30-shutdown_on.png';
-        $rootScope.img_30_plus = imgRoot + 'cc-30-plus.png';
-        $rootScope.img_30_gear = imgRoot + 'cc-30-gear.png';
-        $rootScope.img_loader = imgRoot + 'loader.gif';
-        $rootScope.img_20_user = imgRoot + 'cc-20-user.png';
-        $rootScope.img_20_friend = imgRoot + 'cc-20-friend.png';
-
+        $rootScope.img_30_minimize = bImagesURL + 'cc-30-minimize.png';
+        $rootScope.img_30_resize = bImagesURL + 'cc-30-resize.png';
+        $rootScope.img_20_cross = bImagesURL + 'cc-20-cross.png';
+        $rootScope.img_30_cross = bImagesURL + 'cc-30-cross.png';
+        $rootScope.img_40_cross = bImagesURL + 'cc-40-cross.png';
+        $rootScope.img_40_tick = bImagesURL + 'cc-40-tick.png';
+        $rootScope.img_30_shutdown = bImagesURL + 'cc-30-shutdown_on.png';
+        $rootScope.img_30_shutdown_on = bImagesURL + 'cc-30-shutdown.png';
+        $rootScope.img_30_plus = bImagesURL + 'cc-30-plus.png';
+        $rootScope.img_30_gear = bImagesURL + 'cc-30-gear.png';
+        $rootScope.img_loader = bImagesURL + 'loader.gif';
+        $rootScope.img_20_user = bImagesURL + 'cc-20-user.png';
+        $rootScope.img_20_friend = bImagesURL + 'cc-20-friend.png';
     }
 
     $scope.getUser = function () {
@@ -515,7 +537,17 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // When the user logs out
         $scope.$on('$firebaseSimpleLogin:logout', (function (e) {
             if(DEBUG) console.log("firebase simple logout");
-            $scope.logout();
+
+            // This is called whenever the page loads
+            if($rootScope.singleSignOnEnabled) {
+                // Try to authenticate
+
+                $scope.logout();
+            }
+            else {
+                $scope.logout();
+            }
+
         }).bind(this));
 
         // When there's a login error
@@ -663,6 +695,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
             Paths.setCID(api.cid);
 
+            // Get the number of chatters that are currently online
             Auth.numberOfChatters().then((function(number) {
 
                 $scope.hideNotification();

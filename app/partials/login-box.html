@@ -2,9 +2,10 @@
 
     <div class="uk-vertical-align uk-text-center uk-height-1-1">
         <div class="uk-vertical-align-middle uk-width-1-1" >
+
             <div class="cc-box-header">Login or Register</div>
 
-            <form id="cc-login-form" class="uk-panel uk-form cc-inner-margin">
+            <form ng-hide="singleSignOnEnabled" class="uk-panel uk-form cc-inner-margin">
                 <div class="uk-form-row">
                     <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" enter-submit="loginWithPassword()" required />
                 </div>
@@ -40,7 +41,14 @@
                     <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</button>
                 </div>
             </form>
-
+            <form ng-show="singleSignOnEnabled" class="uk-panel uk-form cc-inner-margin">
+                <a ng-show="loginURL" ng-href="{{ loginURL }}"> Login </a>
+                <div ng-hide="loginURL"> Login </div>
+                &nbsp;or
+                <a ng-show="registerURL" ng-href="{{ registerURL }}"> Register </a>
+                <div ng-hide="registerURL"> Register </div>
+                &nbsp;with {{ websiteName }} to start chatting!
+            </form>
         </div>
     </div>
 
