@@ -28,12 +28,14 @@ var DIST_TEST_PATH = 'app/dist_test/';
 gulp.task('minify-css', function() {
 
     var src = [
-        'app/css/*.css',
+        //'app/css/*.css',
 //         'app/bower_components/html5-boilerplate/css/normalize.css',
 //         'app/bower_components/html5-boilerplate/css/main.css',
         'app/libs/flags/stylesheets/flags/common.css',
         'app/libs/flags/stylesheets/flags/flags32.css',
         'app/libs/flags/stylesheets/flags/flags16.css',
+        'app/css/reset-uikit.css',
+        'app/css/style.css',
         //'app/bower_components/uikit/dist/css/uikit.css',
         //'app/bower_components/uikit/dist/css/uikit.gradient.css',
         '!*.min.css',
@@ -43,6 +45,8 @@ gulp.task('minify-css', function() {
   return gulp.src(src)
     .pipe(concat('cc_styles.css'))
     .pipe(autoprefix('last 2 versions'))
+    .pipe(gulp.dest(DIST_PATH + 'css/_'))
+    .pipe(gulp.dest(DIST_TEST_PATH + 'css/_'))
     .pipe(minifyCSS())
     .pipe(rename({ suffix: '.min' }))
       // Copy to _ otherwise flags won't work

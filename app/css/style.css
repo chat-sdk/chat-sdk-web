@@ -61,6 +61,10 @@
     /*font-size: 0.8em;*/
 /*}*/
 
+div#cc-app {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+}
+
 div#cc-app span, div#cc-app div {
     font-size: 14px;
     color: #444;
@@ -446,9 +450,10 @@ div#cc-app div.cc-message-outer {
     position: relative;
     width:100%;
     overflow: auto;
-    line-height: 30px;
+    /*line-height: 30px;*/
     /*height: 30px;*/
     margin-top: 2px;
+    overflow: hidden;
 }
 
 div#cc-app div.cc-message-outer img {

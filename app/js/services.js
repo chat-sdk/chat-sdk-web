@@ -96,7 +96,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', function ($rootScope, $time
                     // 2 minutes take them offline
                     this.inactiveTimerPromise = $timeout((function () {
                         this.goOffline();
-                    }).bind(this), 1000 * 60 * 2);
+                    }).bind(this), 1000 * 60 * 7);
                 }
             }).bind(this));
 

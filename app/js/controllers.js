@@ -17,7 +17,6 @@ myApp.controller('AppController', [
 
         $scope.on = true;
 
-
         $rootScope.baseURL = bPartialURL;
         $rootScope.websiteName = $window.location.host;
 

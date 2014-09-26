@@ -1,12 +1,12 @@
 /*! UIkit 2.9.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 
-div#cc-app * {
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
-}
+/*div#cc-app * {*/
+    /*font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
+/*}*/
 
 
 div#cc-app span,
-div#cc-app a,
+/*div#cc-app a,*/
 div#cc-app button,
 div#cc-app textarea,
 div#cc-app input,
@@ -92,7 +92,7 @@ div#cc-app td,
     /*float : none;*/
     font : normal;
     font-family: sans-serif;
-    font-size : medium;
+    font-size : small;
     font-style : normal;
     font-variant : normal;
     font-weight : normal;

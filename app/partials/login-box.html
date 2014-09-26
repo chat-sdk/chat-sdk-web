@@ -29,7 +29,7 @@
                 </div>
                 <div class="uk-form-row uk-text-small">
                     <label class="uk-float-left cc-dark"><input type="checkbox" ng-model="rememberMe">&nbsp;Remember Me</label>
-                    <a class="uk-float-right uk-link uk-link-muted cc-dark" ng-click="forgotPassword(email)" ng-class="email.length == 0 ? 'disabled' : ''">Forgot Password?</a>
+                    <a class="uk-float-right uk-link uk-link-muted cc-dark " ng-click="forgotPassword(email)" ng-class="email.length == 0 ? 'disabled' : ''">Forgot Password?</a>
                 </div>
                 <div class="uk-form-row" ng-show="socialLoginEnabled">
                     <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" ng-click="login('facebook', {'rememberMe': rememberMe})"></a>
