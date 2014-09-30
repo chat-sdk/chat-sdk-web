@@ -42,7 +42,7 @@ myApp.factory('CookieTin', function () {
     return {
 
         isOffline: function () {
-            var cookie = $.cookie('cc_offline');
+            var cookie = $.cookie()['cc_offline'];
             if(cookie) {
                 return eval(cookie);
             }
@@ -50,7 +50,7 @@ myApp.factory('CookieTin', function () {
         },
 
         setOffline: function (offline) {
-            var result = $.cookie('cc_offline', offline, {domain: 'chatcat', path: '/'});
+            var result = $.cookie('cc_offline', offline, {domain: '', path: '/'});
             console.log(result);
         }
 
@@ -1179,6 +1179,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
             room.on = function () {
 
+                var deferred = $q.defer();
+
+                if(room.isOn) {
+                    deferred.resolve();
+                    return deferred.promise;
+                }
+                room.isOn = true;
+
                 // Get the room meta data
                 var ref = Paths.roomMetaRef(rid);
 
@@ -1191,19 +1199,107 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         $rootScope.$digest();
                     });
 
+                    deferred.resolve();
+
                 }).bind(this));
 
+                // Listen to users being added to the thread
+                ref = Paths.roomUsersRef(rid);
+                ref.on('child_added', function (snapshot) {
+                    // Get the user
+                    if(snapshot.val()) {
+
+                        var uid = snapshot.val().uid;
+
+                        var user = User.getOrCreateUserWithID(uid);
+
+                        room.users[user.meta.uid] = user;
+
+                        // Update name
+                        room.updateName();
+
+                        // TODO: Should digest here
+                        $timeout(function(){
+                            $rootScope.$digest();
+                        });
+                    }
+                });
+
+                ref.on('child_removed', function (snapshot) {
+                    if(snapshot.val()) {
+
+                        var uid = snapshot.val().uid;
+
+                        delete room.users[uid];
+
+                        // Update name
+                        room.updateName();
+
+                        // TODO: Should digest here
+                        $timeout(function(){
+                            $rootScope.$digest();
+                        });
+                    }
+                });
+
+                // Handle typing
+                ref = Paths.roomTypingRef(rid);
+
+                ref.on('child_added', function (snapshot) {
+                    room.typing[snapshot.name()] = snapshot.val().name;
+
+                    $timeout(function(){
+                        $rootScope.$digest();
+                    });
+                });
+
+                ref.on('child_removed', function (snapshot) {
+                    delete room.typing[snapshot.name()];
+
+                    $timeout(function(){
+                        $rootScope.$digest();
+                    });
+                });
+
+                return deferred.promise;
+            };
+
+            room.messagesOn = function () {
+
+                if(room.messagesAreOn) {
+                   return;
+                }
+
+                room.messagesAreOn = true;
+
                 // Also get the messages from the room
-                ref = Paths.roomMessagesRef(rid);
+                var ref = Paths.roomMessagesRef(rid);
+
+                if(room.lastMessage && room.lastMessage.meta.time) {
+                    ref = ref.startAt(room.lastMessage.meta.time);
+                }
+                else {
+                    ref = ref.endAt();
+                }
 
                 // Add listen to messages added to this thread
-                ref.endAt().limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
+                ref.limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
 
                     // Get the snapshot value
                     var val = snapshot.val();
 
                     if(!val || val.text.length === 0) {
                         return;
+                    }
+
+                    if(room.lastMessage) {
+                        // TODO: This is a bit hacky
+                        // it looks like the time changes from the first time it
+                        // goes on the server and the second time...
+                        var lm = room.lastMessage.meta;
+                        if(lm.uid == val.uid && lm.text == val.text && Math.abs(lm.time - val.time) < 2000) {
+                            return;
+                        }
                     }
 
                     // Create the message object
@@ -1277,65 +1373,16 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         $rootScope.$digest();
                     });
                 });
+            }
 
-                // Listen to users being added to the thread
-                ref = Paths.roomUsersRef(rid);
-                ref.on('child_added', function (snapshot) {
-                    // Get the user
-                    if(snapshot.val()) {
+            room.messagesOff = function () {
 
-                        var uid = snapshot.val().uid;
+                room.messagesAreOn = false;
 
-                        var user = User.getOrCreateUserWithID(uid);
-
-                        room.users[user.meta.uid] = user;
-
-                        // Update name
-                        room.updateName();
-
-                        // TODO: Should digest here
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
-                    }
-                });
-
-                ref.on('child_removed', function (snapshot) {
-                    if(snapshot.val()) {
-
-                        var uid = snapshot.val().uid;
-
-                        delete room.users[uid];
-
-                        // Update name
-                        room.updateName();
-
-                        // TODO: Should digest here
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
-                    }
-                });
-
-                // Handle typing
-                ref = Paths.roomTypingRef(rid);
-
-                ref.on('child_added', function (snapshot) {
-                    room.typing[snapshot.name()] = snapshot.val().name;
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-                });
-
-                ref.on('child_removed', function (snapshot) {
-                    delete room.typing[snapshot.name()];
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-                });
+                // Get the room meta data
+                Paths.roomMessagesRef(rid).off();
             };
+
 
             room.startTyping = function (user) {
                 // The user is typing...
@@ -1353,9 +1400,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             };
 
             room.off = function () {
+
+                room.isOn = false;
+
+                room.messagesOff();
+
                 // Get the room meta data
                 Paths.roomMetaRef(rid).off();
-                Paths.roomMessagesRef(rid).off();
                 Paths.roomUsersRef(rid).off();
                 Paths.roomTypingRef(rid).off();
             };
@@ -1384,8 +1435,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 room.active = true;
                 room.markRead();
             };
-
-            room.on();
 
             return room;
         },
@@ -1898,45 +1947,49 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 if (rid) {
 
                     var room = Room.getOrCreateRoomWithID(rid);
+                    room.on().then(function () {
 
-                    // Make sure we reset the offset
-                    // this can cause a bug with public rooms
-                    // because when they're removed they
-                    // aren't necessarily destroyed because
-                    // they stay in the cache
-                    room.offset = 0;
+                        // Make sure we reset the offset
+                        // this can cause a bug with public rooms
+                        // because when they're removed they
+                        // aren't necessarily destroyed because
+                        // they stay in the cache
+                        room.offset = 0;
 
-                    if (room) {
+                        if (room) {
 
-                        // If we've created this room just return
-                        if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
+                            // If we've created this room just return
+                            if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
 
-                            if(invitedBy) {
-                                room.invitedBy = User.getOrCreateUserWithID(invitedBy);
+                                if(invitedBy) {
+                                    room.invitedBy = User.getOrCreateUserWithID(invitedBy);
+                                }
+
+                                if(Cache.isBlockedUser(invitedBy)) {
+                                    return;
+                                }
+
+                                // If the user is a friend
+                                if(Cache.isFriend(invitedBy)) {
+                                    // Set the user to member
+                                    room.setStatusForUser($rootScope.user, bUserStatusMember);
+                                }
+                                else {
+                                    // Join the room
+                                    Auth.joinRoom(room, bUserStatusInvited);
+                                }
+
                             }
 
-                            if(Cache.isBlockedUser(invitedBy)) {
-                                return;
-                            }
+                            var slot = snapshot.val().slot;
 
-                            // If the user is a friend
-                            if(Cache.isFriend(invitedBy)) {
-                                // Set the user to member
-                                room.setStatusForUser($rootScope.user, bUserStatusMember);
-                            }
-                            else {
-                                // Join the room
-                                Auth.joinRoom(room, bUserStatusInvited);
-                            }
+                            Layout.insertRoom(room, slot ? slot : 0);
 
                         }
 
-                        var slot = snapshot.val().slot;
+                        room.messagesOn();
 
-                        Layout.insertRoom(room, slot ? slot : 0);
-
-                    }
-
+                    });
                 }
 
             }).bind(this));
@@ -1955,6 +2008,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var rid = snapshot.name();
                 if(rid) {
                     var room = Room.getOrCreateRoomWithID(rid);
+                    room.on();
+
                     if(room) {
                         Cache.addPublicRoom(room);
                     }
@@ -2256,6 +2311,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
         },
 
         deleteRoom: function (room) {
+
+            // TODO: Don't listen to hundres of rooms
+            room.messagesOff();
 
             // Stop listening to room if it's not
             // a public room

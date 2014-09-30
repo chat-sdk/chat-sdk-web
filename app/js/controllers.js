@@ -522,6 +522,7 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
     };
 
     $scope.roomClicked = function (room) {
+        // Messages on is called by when we add the room to the user
         Auth.joinRoom(room, bUserStatusMember);
     };
 
