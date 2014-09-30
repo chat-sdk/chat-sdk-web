@@ -9,7 +9,7 @@
             <a class="uk-float-left cc-image-30 cc-resize-cursor" title="Resize room" resize-room>
                 <img ng-src="{{ img_30_resize }}" />
             </a>
-            <div class="cc-ellipsis uk-float-left" ng-style="{'width': room.width - 60}">{{ room.name }}</div>
+            <div class="cc-ellipsis uk-float-left cc-pointer" ng-style="{'width': room.width - 60}">{{ room.name }}</div>
         </div>
 
         <div class="cc-tab-container cc-bottom-shadow">
@@ -24,9 +24,11 @@
             </div>
         </div>
 
-        <ng-include ng-show="activeTab == 'settings'" src=" baseURL + 'chat-settings.html'"></ng-include>
+        <div ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" ng-style="{'height': room.height - 30 - 30}" stop-shake>
+            <ng-include ng-show="activeTab == 'settings'" src=" baseURL + 'chat-settings.html'"></ng-include>
 
-        <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
+            <ng-include ng-show="activeTab == 'users'" src=" baseURL + 'user-list.html'"></ng-include>
+        </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
         <div ng-show="activeTab == 'messages'" class="cc-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
@@ -40,7 +42,7 @@
                         </span>
                     </div>
                     <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
-                        <div class="cc-message-margin" ng-class="'uk-float-' + message.side">
+                        <div class="cc-message-margin cc-ellipsis" ng-class="'uk-float-' + message.side">
                             <span class="cc-user-name" ng-hide="message.hideName" class="uk-text-bold">{{ message.user.meta.name }}</span>
                         </div>
                         <div class="uk-float-left uk-width-1-1 time" ng-hide="message.hideTime">
@@ -66,7 +68,7 @@
         <!--that results in the room data being modified that caues the room to be re-added-->
         <div class="cc-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
         <div class="cc-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
-            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title">{{ room.invitedBy.meta.name }}</div>
+            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.meta.name }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
             <a ng-click="deleteRoom(room)" ><img ng-src="{{ img_40_cross }}" /></a>
             <a ng-click="acceptInvitation()" ><img ng-src="{{ img_40_tick }}" /></a>
@@ -81,7 +83,7 @@
     <div class="cc-chat-bar" ng-click="toggleVisibility()" >
         <div class="cc-base-text">
             <div class="cc-inner">
-                <div class="uk-float-left cc-ellipsis cc-name">{{ room.name }}</div>
+                <div class="uk-float-left cc-ellipsis cc-name cc-pointer">{{ room.name }}</div>
                 <a ng-click="deleteRoom(room)">
                     <img class="uk-float-right cc-image-30" ng-src="{{ img_30_cross }}" disable-drag/>
                 </a>

@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence) {
+    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin',
+    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin) {
 
     $scope.init = function () {
 
@@ -15,10 +15,19 @@ myApp.controller('AppController', [
             show: false
         };
 
-        $scope.on = true;
+        if(CookieTin.isOffline()) {
+            $scope.on = false;
+            Presence.goOffline();
+        }
+        else {
+            $scope.on = true;
+        }
 
         $rootScope.baseURL = bPartialURL;
         $rootScope.websiteName = $window.location.host;
+
+        // By default the main box isn't minimized
+        //$scope.minimize = false;
 
         /**
          * Single Sign on
@@ -46,6 +55,7 @@ myApp.controller('AppController', [
         $rootScope.socialLoginEnabled = CC_OPTIONS.socialLoginEnabled;
 
         $scope.setupImages();
+
     };
 
     /**
@@ -71,11 +81,6 @@ myApp.controller('AppController', [
     $scope.getUser = function () {
         return Auth.getUser();
     };
-
-    /**
-     * Resize the main box in proportion to the window height
-     * - this is called whenever the window size changes
-     */
 
     /**
      * Show the login box
@@ -294,22 +299,39 @@ myApp.controller('AppController', [
         $scope.showLoginBox();
     };
 
-    $scope.shutdown = function () {
+    $scope.shutdown = function ($event) {
+
+        if (typeof $event.stopPropagation != "undefined") {
+            $event.stopPropagation();
+        } else {
+            $event.cancelBubble = true;
+        }
+
         $scope.on = !$scope.on;
         if($scope.on) {
+            CookieTin.setOffline(false);
             Presence.goOnline();
+
+            // If the user is online then we show the main box
+//            if($rootScope.user) {
+//                this.showMainBox();
+//            }
+//            else {
+//                this.showLoginBox();
+//            }
         }
         else {
             Presence.goOffline();
+            CookieTin.setOffline(true);
         }
     };
 
     $scope.shutdownImage = function () {
         if($scope.on) {
-            return $scope.img_30_shutdown;
+            return $scope.img_30_shutdown_on;
         }
         else {
-            return $scope.img_30_shutdown_on;
+            return $scope.img_30_shutdown;
         }
     };
 
@@ -506,8 +528,8 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', 'Presence',
-    function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API, Presence) {
+myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', 'Presence', 'SingleSignOn',
+    function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API, Presence, SingleSignOn) {
 
     /**
      * Initialize the login controller
@@ -540,8 +562,27 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
             // This is called whenever the page loads
             if($rootScope.singleSignOnEnabled) {
                 // Try to authenticate
+                
+                SingleSignOn.authenticate(CC_OPTIONS.singleSignOnURL).then((function (data) {
 
-                $scope.logout();
+                    // Authenticate with firebase using token
+//                    console.log("");
+//
+//                    Paths.firebase().auth(data.token, function(error) {
+//
+//                        console.log("Done");
+//
+//                        // We currently handle this using an observer
+//
+//                    });
+//
+//                    $scope.auth.$login(data.token)
+
+                    $scope.logout();
+
+                }).bind(this), function (error) {
+                    $scope.logout();
+                });
             }
             else {
                 $scope.logout();
@@ -635,6 +676,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
             // TODO:  We currently handle this using an observer
             //$scope.handleUserLogin(user);
+
 
         }, function(error) {
             $scope.handleLoginError(error);
@@ -1155,12 +1197,12 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
         $scope.validation = {
             name: {
                 minChars: 2,
-                maxChars: 18,
+                maxChars: 50,
                 valid: true
             },
             city: {
                 minChars: 2,
-                maxChars: 18,
+                maxChars: 50,
                 valid: true
             }
         };
@@ -1221,10 +1263,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
         }
         else {
             if(!$scope.validation.name.valid) {
-                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The name must be between 2 - 18 characters long ", "Ok");
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation.name.minChars+" - "+$scope.validation.name.maxChars+" characters long ", "Ok");
             }
             if(!$scope.validation.city.valid) {
-                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between 2 - 18 characters long", "Ok");
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between "+$scope.validation.city.minChars+" - "+$scope.validation.city.maxChars+" characters long", "Ok");
             }
         }
     };
@@ -1241,6 +1283,9 @@ myApp.controller('NotificationController', ['$scope', function($scope) {
     $scope.submit = function () {
         $scope.notification.show = false;
     };
+}]);
+
+myApp.controller('DraggableUserController', ['$scope', function($scope) {
 }]);
 
 myApp.controller('ChatSettingsController', ['$scope', function($scope) {

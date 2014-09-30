@@ -943,7 +943,7 @@ fb.simplelogin.transports.WinChan_.prototype.open = function(url, opts, cb) {
     }
   }, 500);
   var req = fb.simplelogin.util.json.stringify({a:"request", d:opts.params});
-  function cleanup() {
+  function cleanup(forceKeepWindowOpen) {
     if (iframe) {
       document.body.removeChild(iframe);
     }
@@ -953,7 +953,7 @@ fb.simplelogin.transports.WinChan_.prototype.open = function(url, opts, cb) {
     }
     removeListener(window, "message", onMessage);
     removeListener(window, "unload", cleanup);
-    if (w) {
+    if (w && !forceKeepWindowOpen) {
       try {
         w.close();
       } catch (securityViolation) {
@@ -980,7 +980,7 @@ fb.simplelogin.transports.WinChan_.prototype.open = function(url, opts, cb) {
           }
         } else {
           if (d.a === "response") {
-            cleanup();
+            cleanup(d.forceKeepWindowOpen);
             if (cb) {
               cb(null, d.d);
               cb = null;
@@ -1032,7 +1032,7 @@ fb.simplelogin.transports.WinChan_.prototype.onOpen = function(cb) {
         cb(o, d.d, function(r, forceKeepWindowOpen) {
           autoClose = !forceKeepWindowOpen;
           cb = undefined;
-          doPost({a:"response", d:r});
+          doPost({a:"response", d:r, forceKeepWindowOpen:forceKeepWindowOpen});
         });
       }, 0);
     }
@@ -1756,13 +1756,18 @@ fb.simplelogin.transports.XHR_.prototype.open = function(url, data, onComplete) 
   var xhr = new XMLHttpRequest, method = (options.method || "GET").toUpperCase(), contentType = options.contentType || "application/x-www-form-urlencoded", callbackInvoked = false, key;
   var callbackHandler = function() {
     if (!callbackInvoked && xhr.readyState === 4) {
-      callbackInvoked = true;
       var data, error;
-      try {
-        data = fb.simplelogin.util.json.parse(xhr.responseText);
-        error = data["error"] || null;
-        delete data["error"];
-      } catch (e) {
+      callbackInvoked = true;
+      if (xhr.status >= 200 && xhr.status < 300 || (xhr.status == 304 || xhr.status == 1223)) {
+        try {
+          data = fb.simplelogin.util.json.parse(xhr.responseText);
+          error = data["error"] || null;
+          delete data["error"];
+        } catch (e) {
+          error = "UNKNOWN_ERROR";
+        }
+      } else {
+        error = "RESPONSE_PAYLOAD_ERROR";
       }
       return onComplete && onComplete(error, data);
     }
@@ -2622,7 +2627,7 @@ goog.require("fb.simplelogin.transports.TriggerIoTab");
 goog.require("fb.simplelogin.transports.WinChan");
 goog.require("fb.simplelogin.transports.WindowsMetroAuthBroker");
 goog.require("goog.string");
-var CLIENT_VERSION = "1.6.3";
+var CLIENT_VERSION = "1.6.4";
 fb.simplelogin.client = function(ref, callback, context, apiHost) {
   var self = this;
   this.mRef = ref;

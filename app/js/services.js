@@ -19,17 +19,43 @@ myApp.factory('Config', function () {
     };
 });
 
-myApp.service('Visibility', ['$rootScope', function ($rootScope) {
+myApp.service('Visibility', ['$rootScope', '$window', '$document', function ($rootScope, $window, $document) {
 
     document.addEventListener("visibilitychange",changed);
     document.addEventListener("webkitvisibilitychange", changed);
     document.addEventListener("mozvisibilitychange", changed);
     document.addEventListener("msvisibilitychange", changed);
 
+//    $window.focus(function (e) {
+//        console.log('Focus');
+//    });
+//    $window.blur(function (e) {
+//        console.log('Blur');
+//    });
+
     function changed() {
         $rootScope.$broadcast(bVisibilityChangedNotification, document.hidden || document.webkitHidden || document.mozHidden || document.msHidden);
     }
 }]);
+
+myApp.factory('CookieTin', function () {
+    return {
+
+        isOffline: function () {
+            var cookie = $.cookie('cc_offline');
+            if(cookie) {
+                return eval(cookie);
+            }
+            return false;
+        },
+
+        setOffline: function (offline) {
+            var result = $.cookie('cc_offline', offline, {domain: 'chatcat', path: '/'});
+            console.log(result);
+        }
+
+    };
+});
 
 myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope, $q, $http) {
 
@@ -39,6 +65,8 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope
 
             var deferred = $q.defer();
 
+            var defaultError = "Unable to reach server";
+
             // We need to make an AJAX call to the URL provided to get
             // the user's token
             $http({
@@ -46,30 +74,38 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope
                 url: url
             }).then((function (r) {
 
-                console.log("Success! " + r);
-
+                if(r && r.data && !r.data.error) {
+                    if(!r.data.error && r.status == 200) {
+                        deferred.resolve(r.data);
+                    }
+                    else {
+                        deferred.reject(r.data.error ? r.data.error : defaultError);
+                    }
+                }
+                else {
+                    deferred.reject(defaultError);
+                }
             }).bind(this), function (error) {
-
-                console.log("Error! " + error);
-
+                deferred.reject(error.message ? error.message : defaultError);
             });
 
-            return deferred.promise();
+            return deferred.promise;
         }
-
     }
-
 }]);
 
 /**
  * The presence service handles the user's online / offline
  * status
+ * We need to call visibility to make sure it's initilized
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($rootScope, $timeout, Visibility) {
     return {
 
         user: null,
         inactiveTimerPromise: null,
+
+
 
         // Initialize the visibility service
         start: function (user) {
@@ -96,7 +132,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', function ($rootScope, $time
                     // 2 minutes take them offline
                     this.inactiveTimerPromise = $timeout((function () {
                         this.goOffline();
-                    }).bind(this), 1000 * 60 * 7);
+                    }).bind(this), 1000 * 60 * bUserTimeout);
                 }
             }).bind(this));
 
@@ -1859,8 +1895,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 var rid = snapshot.val().rid;
                 var invitedBy = snapshot.val().invitedBy;
 
-                // Is this person a friend?
-
                 if (rid) {
 
                     var room = Room.getOrCreateRoomWithID(rid);
@@ -1874,24 +1908,30 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                     if (room) {
 
-                        if(invitedBy) {
-                            room.invitedBy = User.getOrCreateUserWithID(invitedBy);
-                        }
+                        // If we've created this room just return
+                        if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
 
-                        if(Cache.isBlockedUser(invitedBy)) {
-                            return;
-                        }
+                            if(invitedBy) {
+                                room.invitedBy = User.getOrCreateUserWithID(invitedBy);
+                            }
 
-                        // If the user is a friend
-                        if(Cache.isFriend(invitedBy)) {
-                            // Set the user to member
-                            room.setStatusForUser($rootScope.user, bUserStatusMember);
+                            if(Cache.isBlockedUser(invitedBy)) {
+                                return;
+                            }
+
+                            // If the user is a friend
+                            if(Cache.isFriend(invitedBy)) {
+                                // Set the user to member
+                                room.setStatusForUser($rootScope.user, bUserStatusMember);
+                            }
+                            else {
+                                // Join the room
+                                Auth.joinRoom(room, bUserStatusInvited);
+                            }
+
                         }
 
                         var slot = snapshot.val().slot;
-
-                        // Join the room
-                        Auth.joinRoom(room, bUserStatusMember);
 
                         Layout.insertRoom(room, slot ? slot : 0);
 

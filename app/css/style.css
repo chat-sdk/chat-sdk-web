@@ -147,7 +147,7 @@ div#cc-app .cc-inner-margin {
 }
 
 /* The header region of a box */
-div#cc-app .cc-box-header {
+div#cc-app div.cc-box-header {
     font-size: 14px;
     font-weight: bold;
     line-height: 30px;
@@ -241,9 +241,20 @@ div#cc-app div#cc-main-box div#cc-user-details {
     z-index: 30;
 }
 
+div#cc-app div#cc-main-box div#cc-user-details div.cc-user-name {
+    max-width: 160px;
+}
+
 div#cc-app .cc-profile-subtitle {
     font-size: 0.9em;
+    max-width: 180px;
+    margin: 4px 5px;
 }
+
+div#cc-app .cc-profile-description {
+    margin: 5px 5px;
+}
+
 
 /* The user profile overlay */
 div#cc-app div#cc-profile-box {
@@ -257,19 +268,29 @@ div#cc-app div#cc-profile-box {
     z-index: 200;
     overflow: auto;
     background: white;
+    overflow: hidden;
+}
+
+div#cc-app div#cc-profile-box div.cc-user-name {
+    font-size: 15px;
+    max-width: 200px;
+    margin: 10px 0 3px 5px;
 }
 
 div#cc-app #cc-profile-picture {
     margin: 5px 10px 5px 5px;
 }
 
-div#cc-app .cc-user-name {
-    margin-top: 5px;
+
+div#cc-app img.cc-user-image {
+    margin-right: 4px;
+    /*margin-left: 3px;*/
 }
 
 div#cc-app .cc-right-margin-5 {
     margin-right: 5px;
 }
+
 
 /**
  * Room list box
@@ -436,7 +457,16 @@ div#cc-app div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt {
     overflow: hidden;
 
     box-sizing: border-box;
+
+    padding: 0 !important;
 }
+
+div#cc-app .cc-user-name {
+    font-size: 12px;
+    font-weight: bold;
+    width: 100%;
+}
+
 
 div#cc-app div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt:focus {
     background: none repeat scroll 0 0 #f5fbfe;
@@ -468,10 +498,7 @@ div#cc-app div.cc-message-outer .time {
     font-size: 12px;
 }
 
-div#cc-app .cc-user-name {
-    font-size: 12px;
-    font-weight: bold;
-}
+
 
 div#cc-app .cc-abs-right {
     right: 2px;
@@ -542,7 +569,7 @@ div#cc-app .cc-left-bubble:after {
 }
 
 div#cc-app .cc-user-drag {
-    position: absolute;
+    position: absolute !important;
     opacity: 0.6;
     z-index: 990000;
     pointer-events:none;
@@ -695,8 +722,9 @@ div#cc-app .cc-bottom-shadow {
 div#cc-app .cc-tab-container {
     width: 100%;
     margin-bottom: 5px;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(255,255,255,0.8);
+    box-sizing:content-box !important;
 }
 
 div#cc-app .cc-tab {
@@ -713,6 +741,7 @@ div#cc-app .cc-tab {
     color: #AAA;
     cursor: pointer;
     transition: all 0.2s linear 0s;
+    box-sizing: content-box !important;
 }
 
 div#cc-app .cc-tab:hover {
@@ -749,12 +778,14 @@ div#cc-app .cc-bg-blue {
 }
 
 div#cc-app .uk-table td.cc-row {
+    position:relative;
     border: none;
     border-left: 5px solid #FFF;
     background: #fff;
-    height: 30px;
+    height: 40px;
     width: 100%;
     cursor: pointer;
+    padding: 0 5px 0 2px;
 }
 
 div#cc-app .uk-table td.cc-row.cc-online {
@@ -773,12 +804,41 @@ div#cc-app .uk-table td.cc-row.cc-blocked {
     border-left: 5px solid #b04848;
 }
 
+div#cc-app td.cc-row div.cc-user-name {
+    font-size: 12px;
+    font-weight: bold;
+    width: 129px;
+    line-height: 30px;
+    height: 30px;
+}
+
+div#cc-app td.cc-row div.cc-user-name .cc-inner {
+    max-width: 105px;
+}
+
+
+div#cc-app td.cc-row div.cc-user-name.cc-show-status {
+    line-height: 18px;
+    height: 18px;
+}
+
+div#cc-app td.cc-row div.cc-user-subtitle {
+    line-height: 11px;
+    height: 11px;
+    float: left;
+    color: grey;
+    font-style: italic;
+    font-size: 10px;
+    width: 140px;
+}
+
+
 /*.cc-row:hover, .uk-table td.cc-row:hover {*/
     /*border-left: 5px solid #0d82b3;*/
 /*}*/
 
 div#cc-app .cc-flag {
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 div#cc-app .cc-badge {
@@ -821,8 +881,9 @@ div#cc-app div.cc-overlay {
     height: 100%;
     bottom:0;
     right: 0;
-    background: black;
-    opacity: 0.1;
+    background: #FFF;
+    color: #000;
+    opacity: 0.9;
     z-index:100;
 
     border-top-left-radius: 5px;
@@ -848,6 +909,11 @@ div#cc-app div.cc-overlay-content {
     max-height: 150px;
     color: #BBBBBB;
     text-align: center;
+}
+
+div#cc-app div.cc-overlay-content .cc-user-name {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 div#cc-app .cc-overlay-content {
@@ -922,7 +988,8 @@ div#cc-app .cc-hide-overflow-x {
     overflow-x: hidden;
 }
 
-div#cc-app .cc-disable-highlight {
+/*Disable highlight on all elements*/
+div#cc-app * {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

@@ -331,6 +331,11 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
                 var offset = Layout.offsetForSlot(args.room.targetSlot);
 
+                // If the offset is same as the target offset then we don't do anything
+                if(offset == scope.room.offset) {
+                    return;
+                }
+
                 if(DEBUG) console.log(args.room.meta.name + " -> " + args.room.targetSlot);
 
                 // Stop the previous animation
@@ -413,15 +418,17 @@ myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope
                 $rootScope.userDrag.y = Math.min($rootScope.userDrag.y, $rootScope.screenHeight - 30);
 
                 // If we're in the drop loc
-                $rootScope.$apply();
+                scope.$apply();
             }
 
         }).bind(this));
 
         $document.mouseup((function(e) {
-            $rootScope.userDrag.dragging = false;
-            $rootScope.userDrag.visible = false;
-            $rootScope.$apply();
+            if($rootScope.userDrag.dragging) {
+                $rootScope.userDrag.dragging = false;
+                $rootScope.userDrag.visible = false;
+                scope.$apply();
+            }
         }).bind(this));
     };
 }]);
@@ -497,48 +504,48 @@ myApp.directive('stopShake', ['$rootScope', '$document',function ($rootScope, $d
     };
 }]);
 
-myApp.directive('autoGrow', function() {
-    return function(scope, element, attr){
-        var minHeight = element[0].offsetHeight,
-            paddingLeft = element.css('paddingLeft'),
-            paddingRight = element.css('paddingRight');
-
-        var $shadow = angular.element('<div></div>').css({
-            position: 'absolute',
-            top: -10000,
-            left: -10000,
-            width: element[0].offsetWidth - parseInt(paddingLeft || 0) - parseInt(paddingRight || 0),
-            fontSize: element.css('fontSize'),
-            fontFamily: element.css('fontFamily'),
-            lineHeight: element.css('lineHeight'),
-            resize: 'none'
-        });
-        angular.element(document.body).append($shadow);
-
-        var update = function() {
-
-            var times = function(string, number) {
-                for (var i = 0, r = ''; i < number; i++) {
-                    r += string;
-                }
-                return r;
-            };
-
-            var val = element.val().replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/&/g, '&amp;')
-                .replace(/\n$/, '<br/>&nbsp;')
-                .replace(/\n/g, '<br/>')
-                .replace(/\s{2,}/g, function(space) { return times('&nbsp;', space.length - 1) + ' ' });
-            $shadow.html(val);
-
-            element.css('height', Math.max($shadow[0].offsetHeight + 10 /* the "threshold" */, minHeight) + 'px');
-        };
-
-        element.bind('keyup keydown keypress change', update);
-        update();
-    };
-});
+//myApp.directive('autoGrow', function() {
+//    return function(scope, element, attr){
+//        var minHeight = element[0].offsetHeight,
+//            paddingLeft = element.css('paddingLeft'),
+//            paddingRight = element.css('paddingRight');
+//
+//        var $shadow = angular.element('<div></div>').css({
+//            position: 'absolute',
+//            top: -10000,
+//            left: -10000,
+//            width: element[0].offsetWidth - parseInt(paddingLeft || 0) - parseInt(paddingRight || 0),
+//            fontSize: element.css('fontSize'),
+//            fontFamily: element.css('fontFamily'),
+//            lineHeight: element.css('lineHeight'),
+//            resize: 'none'
+//        });
+//        angular.element(document.body).append($shadow);
+//
+//        var update = function() {
+//
+//            var times = function(string, number) {
+//                for (var i = 0, r = ''; i < number; i++) {
+//                    r += string;
+//                }
+//                return r;
+//            };
+//
+//            var val = element.val().replace(/</g, '&lt;')
+//                .replace(/>/g, '&gt;')
+//                .replace(/&/g, '&amp;')
+//                .replace(/\n$/, '<br/>&nbsp;')
+//                .replace(/\n/g, '<br/>')
+//                .replace(/\s{2,}/g, function(space) { return times('&nbsp;', space.length - 1) + ' ' });
+//            $shadow.html(val);
+//
+//            element.css('height', Math.max($shadow[0].offsetHeight + 10 /* the "threshold" */, minHeight) + 'px');
+//        };
+//
+//        element.bind('keyup keydown keypress change', update);
+//        update();
+//    };
+//});
 
 myApp.directive('fitText', function () {
 

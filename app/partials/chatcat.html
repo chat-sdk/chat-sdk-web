@@ -1,6 +1,6 @@
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight" >
 
-        <div class="cc-user-drag" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
+        <div class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
             <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.meta.image }}"  />
             {{ userDrag.user.meta.name }}
         </div>
@@ -8,11 +8,11 @@
 
         <div id="cc-base">
 
-            <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
+            <div ng-controller="DraggableUserController" id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
-                    <div class="cc-inner">
-                        {{ numberOfUsersOnline() }} People here
-                        <a ng-click="shutdown()" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
+                    <div class="cc-inner cc-pointer">
+                        {{ numberOfUsersOnline() }} {{ numberOfUsersOnline() == 1 ? 'Person' : 'People' }} here
+                        <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
                             <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
                         </a>
                     </div>

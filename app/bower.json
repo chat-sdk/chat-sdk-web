@@ -17,6 +17,8 @@
     "angularfire": "latest",
     "angular-facebook": "latest",
     "FileSaver": "latest",
-    "moment": "latest"
+    "moment": "latest",
+    "jquery-cookie": "latest"
+    
   }
 }

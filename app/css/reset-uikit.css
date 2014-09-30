@@ -7,6 +7,7 @@
 
 div#cc-app span,
 /*div#cc-app a,*/
+div#cc-app div,
 div#cc-app button,
 div#cc-app textarea,
 div#cc-app input,
@@ -67,7 +68,7 @@ div#cc-app td,
     border-top-width : medium;
     bottom : auto;
     box-shadow : none;
-    box-sizing : content-box;
+    /*box-sizing : initial;*/
     caption-side : top;
     clear : none;
     clip : auto;
@@ -91,11 +92,11 @@ div#cc-app td,
     empty-cells : show;
     /*float : none;*/
     font : normal;
-    font-family: sans-serif;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
     font-size : small;
     font-style : normal;
     font-variant : normal;
-    font-weight : normal;
+    /*font-weight : normal;*/
     height : auto;
     hyphens : none;
     left : auto;
@@ -111,7 +112,7 @@ div#cc-app td,
     margin-right : 0;
     margin-top : 0;
     max-height : none;
-    max-width : none;
+    /*max-width : none;*/
     min-height : 0;
     min-width : 0;
     opacity : 1;
@@ -139,7 +140,7 @@ div#cc-app td,
     right : auto;
     tab-size : 8;
     table-layout : auto;
-    text-align : left;
+    /*text-align : initial;*/
     text-align-last : auto;
     text-decoration : none;
     text-decoration-color : inherit;
@@ -166,6 +167,16 @@ div#cc-app td,
     z-index : auto;
 }
 
+/* Fix layout on Chatcat.io */
+div#cc-app input,
+div#cc-app select {
+    padding: 0 0.5em !important;
+}
+
+div#cc-app select {
+    border: 1px solid #DDD !important;
+    box-shadow: none !important;
+}
 
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this

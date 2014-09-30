@@ -2,18 +2,16 @@
     <div class="cc-right-margin-5">
         <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.meta.image }}" />
             <span class="uk-float-left" >
-                <span class="uk-text-bold cc-user-name">{{ currentUser.meta.name }}</span><br/>
-                <span class="cc-profile-subtitle uk-text-muted cc-italic">{{ currentUser.meta.city }}</span>
+                <div class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.meta.name }}</div>
+                <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.meta.city }}</div>
             </span>
         <div class="f32 uk-float-right" >
             <span class="flag {{ currentUser.meta.country | lowercase }}"></span>
         </div>
     </div>
     <div class="uk-grid">
-        <div class="uk-width-1-1 uk-text-justify uk-text-small">
-            <div style="padding: 10px 5px;">
-                {{ currentUser.meta.description }}
-            </div>
+        <div class="uk-text-justify uk-text-small cc-profile-description">
+            {{ currentUser.meta.description }}
         </div>
     </div>
     <div class="uk-grid uk-grid-small" style="padding: 5px;">

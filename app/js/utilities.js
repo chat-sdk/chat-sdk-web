@@ -21,13 +21,13 @@ var bFirebase = '';
 if(document.location.origin === "http://chatcat") {
     bRootURL = '';
     bPartialURL = 'partials/';
-    bFirebase = 'chatcatio';
+    bFirebase = 'chatcatio-test';
 }
 // Are we testing on the wordpress plugin?
 else if(document.location.origin === "http://ccwp") {
     bRootURL = '//chatcat/dist/';
     bPartialURL = bRootURL + 'partials/';
-    bFirebase = 'chatcatio';
+    bFirebase = 'chatcatio-test';
 }
 // We're live so we need to use the full remote URL
 else {
@@ -40,6 +40,11 @@ var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
 
 var bImagesURL = bRootURL + 'img/';
 var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
+
+// User timeout
+var bUserTimeout = CC_OPTIONS.inactivityTimeout ? CC_OPTIONS.inactivityTimeout : 5;
+bUserTimeout = Math.max(bUserTimeout, 2);
+bUserTimeout = Math.min(bUserTimeout, 15);
 
 var bPullURL = "//chat.deluge.co/server/pull.php";
 //var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
@@ -84,7 +89,7 @@ var bChatRoomTopMargin = 60;
 var bChatRoomSpacing = 15;
 
 var bMainBoxWidth = 250;
-var bMainBoxHeight = 230;
+var bMainBoxHeight = 300;
 
 var bRoomListBoxWidth = 200;
 var bRoomListBoxHeight = 300;

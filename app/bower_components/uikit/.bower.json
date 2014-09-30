@@ -1,6 +1,7 @@
 {
   "name": "uikit",
-  "version": "2.9.0",
+  "version": "2.10.0",
+  "homepage": "http://getuikit.com",
   "main": [
     "./dist/addons/**/*.*",
     "./dist/js/uikit.min.js",
@@ -10,7 +11,7 @@
     "./dist/fonts/fontawesome-webfont.woff"
   ],
   "dependencies": {
-    "jquery": "~1.8"
+    "jquery": ">= 1.9.0"
   },
   "ignore": [
     "node_modules",
@@ -21,12 +22,11 @@
     "composer.json",
     "index.html"
   ],
-  "homepage": "https://github.com/uikit/uikit",
-  "_release": "2.9.0",
+  "_release": "2.10.0",
   "_resolution": {
     "type": "version",
-    "tag": "v2.9.0",
-    "commit": "47df67ac3c4ab7434d5ffe168ec6b6a0222e7004"
+    "tag": "v2.10.0",
+    "commit": "3bf62e80dcdc5a5d3dc8671674188ed7733ac1d6"
   },
   "_source": "git://github.com/uikit/uikit.git",
   "_target": "*",
