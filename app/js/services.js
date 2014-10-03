@@ -42,7 +42,7 @@ myApp.factory('CookieTin', function () {
     return {
 
         isOffline: function () {
-            var cookie = $.cookie()['cc_offline'];
+            var cookie = jQuery.cookie()['cc_offline'];
             if(cookie) {
                 return eval(cookie);
             }
@@ -50,7 +50,7 @@ myApp.factory('CookieTin', function () {
         },
 
         setOffline: function (offline) {
-            var result = $.cookie('cc_offline', offline, {domain: '', path: '/'});
+            var result = jQuery.cookie('cc_offline', offline, {domain: '', path: '/'});
             console.log(result);
         }
 
@@ -369,7 +369,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
         },
 
         textWidth: function (text, font) {
-            if (!this.textWidth.fakeEl) this.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
+            if (!this.textWidth.fakeEl) this.textWidth.fakeEl = jQuery('<span>').hide().appendTo(document.body);
             this.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
             return this.textWidth.fakeEl.width();
         }
@@ -1288,7 +1288,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     // Get the snapshot value
                     var val = snapshot.val();
 
-                    if(!val || val.text.length === 0) {
+                    if(!val || !val.text || val.text.length === 0) {
                         return;
                     }
 
@@ -1827,6 +1827,26 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 if(authUser.provider == "anonymous") {
 
                 }
+                if(authUser.provider == "custom") {
+                    if(!user.meta.name && authUser.thirdPartyData.name) {
+                        user.meta.name = authUser.thirdPartyData.name;
+                    }
+                    if(!user.meta.description && authUser.thirdPartyData.description) {
+                        user.meta.description = authUser.thirdPartyData.description;
+                    }
+                    if(!user.meta.city && authUser.thirdPartyData.city) {
+                        user.meta.city = authUser.thirdPartyData.city;
+                    }
+                    if(!user.meta.gender && authUser.thirdPartyData.gender) {
+                        user.meta.gender = authUser.thirdPartyData.gender;
+                    }
+                    if(!user.meta.country && authUser.thirdPartyData.countryCode) {
+                        user.meta.country = authUser.thirdPartyData.countryCode;
+                    }
+                    if(!user.meta.yearOfBirth && authUser.thirdPartyData.yearOfBirth) {
+                        user.meta.yearOfBirth = authUser.thirdPartyData.yearOfBirth;
+                    }
+                }
 
                 // If they don't have a profile picture load it from the social network
                 if((!user.meta.image || user.meta.image == bDefaultProfileImage) && imageURL) {
@@ -2124,7 +2144,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             // TODO: if we do this we'll also be listening for meta updates...
             $rootScope.user = User.getOrCreateUserWithID(uid);
             //$rootScope.user = User.buildUserWithID(uid);
-            $rootScope.user.on();
+            //$rootScope.user.on();
 
             // Bind the user to the user variable
             $userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
@@ -2369,6 +2389,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
 
                 deferred.resolve(i);
+            }, function (error) {
+                deferred.reject(error);
             });
 
             return deferred.promise;

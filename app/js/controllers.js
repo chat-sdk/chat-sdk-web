@@ -10,6 +10,8 @@ myApp.controller('AppController', [
 
     $scope.init = function () {
 
+
+
         // Show the waiting overlay
         $scope.notification = {
             show: false
@@ -37,6 +39,11 @@ myApp.controller('AppController', [
         var ssoURL = CC_OPTIONS.singleSignOnURL;
         $rootScope.singleSignOnEnabled = ssoURL && ssoURL.length > 0;
 
+        if($rootScope.singleSignOnEnabled) {
+            Paths.firebase().unauth();
+        }
+
+
         var loginURL = CC_OPTIONS.loginURL;
         if(loginURL && loginURL.length > 0) {
             $rootScope.loginURL = loginURL;
@@ -55,6 +62,7 @@ myApp.controller('AppController', [
         $rootScope.socialLoginEnabled = CC_OPTIONS.socialLoginEnabled;
 
         $scope.setupImages();
+
 
     };
 
@@ -548,8 +556,14 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
             if(DEBUG) console.log("firebase simple login");
 
-            // Login was successful so log the user in given their ID
-            $scope.handleUserLogin($scope.auth.user);
+            if($rootScope.singleSignOnEnabled) {
+                Paths.firebase().unauth();
+                $scope.singleSignOn();
+            }
+            else {
+                // Login was successful so log the user in given their ID
+                $scope.handleUserLogin($scope.auth.user);
+            }
 
             // Hide the waiting overlay
             //$scope.setOverlayHidden(true);
@@ -563,27 +577,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
             // This is called whenever the page loads
             if($rootScope.singleSignOnEnabled) {
                 // Try to authenticate
-                
-                SingleSignOn.authenticate(CC_OPTIONS.singleSignOnURL).then((function (data) {
-
-                    // Authenticate with firebase using token
-//                    console.log("");
-//
-//                    Paths.firebase().auth(data.token, function(error) {
-//
-//                        console.log("Done");
-//
-//                        // We currently handle this using an observer
-//
-//                    });
-//
-//                    $scope.auth.$login(data.token)
-
-                    $scope.logout();
-
-                }).bind(this), function (error) {
-                    $scope.logout();
-                });
+                $scope.singleSignOn();
             }
             else {
                 $scope.logout();
@@ -601,6 +595,33 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // Setup an AngularFire auth reference
         $rootScope.auth = $firebaseSimpleLogin(Paths.firebase());
     };
+
+    $scope.singleSignOn = function () {
+        SingleSignOn.authenticate(CC_OPTIONS.singleSignOnURL).then((function (data) {
+
+            // Authenticate with firebase using token
+            Paths.firebase().auth(data.token, (function(error, result) {
+                if (error) {
+                    $scope.logout();
+                } else {
+
+                    $rootScope.auth = result.auth;
+                    $rootScope.auth.provider = 'custom';
+                    $rootScope.auth.thirdPartyData = data;
+
+                    $scope.handleUserLogin($rootScope.auth, false);
+
+                    console.log('Authenticated successfully with payload:', result.auth);
+                    console.log('Auth expires at:', new Date(result.expires * 1000));
+                }
+            }).bind(this));
+
+            //$scope.logout();
+
+        }).bind(this), function (error) {
+            $scope.logout();
+        });
+    }
 
     $scope.setError = function (message) {
         $scope.showError = !unORNull(message);

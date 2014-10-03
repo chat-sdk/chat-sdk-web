@@ -38,10 +38,10 @@
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
-                        <div class="uk-width-1-2">
-                            <button class="uk-width-1-1 uk-button uk-button-danger" ng-click="logout()">Logout</button>
+                        <div class="uk-width-1-2" ng-hide="singleSignOnEnabled">
+                            <button class="uk-width-1-1 uk-button uk-button-danger"  ng-click="logout()">Logout</button>
                         </div>
-                        <div class="uk-width-1-2">
+                        <div ng-class="singleSignOnEnabled ? 'uk-width-1-1' : 'uk-width-1-2'">
                             <button class="uk-width-1-1 uk-button uk-button-primary" ng-click="done()">Done</button>
                         </div>
                     </div>

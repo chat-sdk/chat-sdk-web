@@ -552,8 +552,8 @@ myApp.directive('fitText', function () {
     return function(scope, element, attr) {
 
         element.bind('keyup', function(e) {
-            $(element).height(0);
-            var height = $(element)[0].scrollHeight;
+            jQuery(element).height(0);
+            var height = jQuery(element)[0].scrollHeight;
 
             // 8 is for the padding
             if (height < 26) {

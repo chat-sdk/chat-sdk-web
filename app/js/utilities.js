@@ -105,7 +105,12 @@ var Paths = {
     },
 
     firebase: function () {
-        return new Firebase(bFirebaseRef + this.cid);
+        if(this.cid) {
+            return new Firebase(bFirebaseRef + this.cid);
+        }
+        else {
+            return new Firebase(bFirebaseRef);
+        }
     },
 
     usersRef: function () {
