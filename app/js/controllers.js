@@ -565,6 +565,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                 $scope.handleUserLogin($scope.auth.user);
             }
 
+
             // Hide the waiting overlay
             //$scope.setOverlayHidden(true);
             $scope.hideNotification();
@@ -736,6 +737,10 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // First create the super
 
         $scope.auth.$createUser(email, password).then((function(user) {
+
+            // Authenticate the user - creating the user doesn't
+            // also authenticate it for some reason...
+            Paths.firebase().auth(user.token);
 
             $scope.handleUserLogin(user, true);
 

@@ -1,0 +1,1 @@
+console.log("dist.min.js is no longer required - please update your include code: chatcat.io/support");

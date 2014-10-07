@@ -242,7 +242,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 
                             this.meta = {
                                 cid: r1.data.api_key,
-                                max: 20,
+                                max: 250,
                                 ads: false,
                                 whiteLabel: false,
                                 rooms: rooms
@@ -1887,6 +1887,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
 
                 /** GRAVATAR **/
+
+                /** Tidy up existing rooms **/
+
 
                 /** Create static rooms **/
                 this.addStaticRooms();
