@@ -42,7 +42,7 @@
     </div>
 
     <div id="cc-user-details">
-        <img class="cc-thumbnail-20 cc-margin-5 uk-float-left" ng-src="{{ getUser().meta.image }}" />
+        <img class="cc-thumbnail-20 cc-margin-5 uk-float-left" ng-src="{{ user.getThumbnail() }}" />
         <!--<span class="cc-padded">-->
         <div class="uk-float-left cc-user-name cc-ellipsis">
             {{ getUser().meta.name }}

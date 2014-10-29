@@ -1,7 +1,7 @@
 <table class="uk-table uk-table-hover cc-room-list">
     <tr ng-repeat="(id, room) in getRooms()">
         <td class="cc-pointer" ng-click="roomClicked(room)" title="{{ room.meta.description }}">
-            <div class="uk-overflow-container cc-height-20">
+            <div class="uk-overflow-container cc-height-20 cc-pointer">
                 <!-- Room name -->
                 <!-- Line height is a fix to stop icon being too low down -->
                 <div class="uk-float-left cc-valign-image-fix" >
@@ -10,12 +10,12 @@
                     </a>
                 </div>
                 <div class="uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 85 }">
-                    <div class="cc-ellipsis uk-float-left">
+                    <div class="cc-ellipsis uk-float-left cc-pointer">
                         {{ room.name }}
                     </div>
                 </div>
                 <!-- Number of users -->
-                <div class="uk-float-right cc-right-margin-5">
+                <div class="uk-float-right cc-right-margin-5 cc-pointer">
                     <div class="cc-badge uk-float-right" ng-show="room.badge" >
                         {{ room.badge }}
                     </div>
@@ -26,10 +26,10 @@
             <!--We need to subtract 10 for the padding -->
             <div class="cc-last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
                 <div ng-show="room.lastMessage.user.meta.name && room.lastMessage.meta.text">
-                    <div class="uk-float-left cc-ellipsis cc-title" >
+                    <div class="uk-float-left cc-ellipsis cc-title cc-pointer" >
                         {{ room.lastMessage.user.meta.name }}:
                     </div>
-                    <div class="cc-ellipsis cc-message">
+                    <div class="cc-ellipsis cc-message cc-pointer">
                         &nbsp; {{ room.lastMessage.meta.text }}
                     </div>
                 </div>

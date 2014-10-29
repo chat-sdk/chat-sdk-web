@@ -18,7 +18,9 @@
     "angular-facebook": "latest",
     "FileSaver": "latest",
     "moment": "latest",
-    "jquery-cookie": "latest"
+    "jquery-cookie": "latest",
+    "angular-sanitize": "1.2.x",
+    "angular-emoji-filter": "latest"
     
   }
 }

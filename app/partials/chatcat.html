@@ -1,7 +1,7 @@
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight" >
 
         <div ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.meta.image }}"  />
+            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.getThumbnail() }}"  />
             {{ userDrag.user.meta.name }}
         </div>
 
@@ -21,11 +21,11 @@
 
             <div ng-show="on">
 
-                <ng-include ng-show="activeBox == 'loginBox' && !minimize" src=" baseURL + 'login-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" baseURL + 'login-box.html'"></ng-include>
 
-                <ng-include ng-show="activeBox == 'profileSettingsBox' && !minimize" src=" baseURL + 'profile-settings-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'mainBox' && !minimize" src=" baseURL + 'main-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'createRoomBox' && !minimize" src=" baseURL + 'create-room-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" baseURL + 'profile-settings-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" baseURL + 'main-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" baseURL + 'create-room-box.html'"></ng-include>
 
                 <div ng-repeat="(id, room) in getAllRooms()">
                     <ng-include ng-controller="ChatController" ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>

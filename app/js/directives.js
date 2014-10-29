@@ -22,6 +22,10 @@ myApp.directive('enterSubmit', function () {
                     if (!event.shiftKey) {
                         event.preventDefault();
                         scope.$apply(attrs.enterSubmit);
+
+                        // Scroll down on enter too
+                        scope.$broadcast('enterScrollDown');
+
                     }
                 }
             });
@@ -58,6 +62,11 @@ myApp.directive('scrollGlue', function(){
                 if(activate !== ngModel.$viewValue){
                     scope.$apply(ngModel.$setViewValue.bind(ngModel, activate));
                 }
+            });
+
+            // If they press enter scroll down
+            scope.$on('enterScrollDown', function () {
+                scrollToBottom();
             });
         }
     };

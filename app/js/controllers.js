@@ -2,14 +2,13 @@
 
 /* Controllers */
 
-var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload']);
+var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin) {
+    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room',
+    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room) {
 
     $scope.init = function () {
-
 
 
         // Show the waiting overlay
@@ -63,6 +62,7 @@ myApp.controller('AppController', [
 
         $scope.setupImages();
 
+        $scope.setMainBoxMinimized(CookieTin.getProperty(CookieTin.mainMinimizedKey));
 
     };
 
@@ -87,7 +87,7 @@ myApp.controller('AppController', [
     }
 
     $scope.getUser = function () {
-        return Auth.getUser();
+        return $rootScope.user;
     };
 
     /**
@@ -124,12 +124,17 @@ myApp.controller('AppController', [
     };
 
     $scope.toggleMainBoxVisibility = function() {
-        $scope.minimize = !$scope.minimize;
+        $scope.setMainBoxMinimized(!$scope.mainBoxMinimized);
     };
 
     $scope.minimizeMainBox = function () {
-        $scope.minimize = true;
+        $scope.setMainBoxMinimized(true);
     };
+
+    $scope.setMainBoxMinimized = function (minimized) {
+        $scope.mainBoxMinimized = minimized;
+        CookieTin.setProperty(minimized, CookieTin.mainMinimizedKey);
+    }
 
     /**
      * Return a list of all the user's current
@@ -288,9 +293,15 @@ myApp.controller('AppController', [
             $scope.getUser().unblockUser(user);
         }
         else if (user.online) {
-            Auth.createPrivateRoom([user], {invitesEnabled: true}).then(function(room) {
+            var room = Room.newRoom(null, true, null, true);
+
+            room.create([user]).then(function () {
                 if (DEBUG) console.log("Room Created: " + room.meta.name);
             });
+
+//            Auth.createPrivateRoom([user], {invitesEnabled: true}).then(function(room) {
+//                if (DEBUG) console.log("Room Created: " + room.meta.name);
+//            });
         }
         else if(user.blockingMe) {
         }
@@ -395,7 +406,22 @@ myApp.controller('AppController', [
 
                     var dataURL = canvas.toDataURL('image/jpeg');
 
-                    $scope.getUser().setImage(dataURL);
+                    // Set the user's image
+                    $scope.getUser().setImage(dataURL, true);
+
+                    // Set the user's thumbnail
+                    var thumb_size = 30;
+
+                    canvas.width = thumb_size;
+                    canvas.height = thumb_size;
+                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, thumb_size, thumb_size);
+
+                    var dataURL = canvas.toDataURL('image/jpeg');
+
+                    // Set the user's image
+                    $scope.getUser().setThumbnail(dataURL, true);
+
+
                 };
                 image.src = e.target.result;
             };
@@ -531,7 +557,7 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
 
     $scope.roomClicked = function (room) {
         // Messages on is called by when we add the room to the user
-        Auth.joinRoom(room, bUserStatusMember);
+        room.join(bUserStatusMember);
     };
 
     $scope.init();
@@ -792,14 +818,15 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
 
                 // We couldn't connect to Chatcat.io API
                 // Next check to see if they specified an API key
+                console.log(error);
 
-
-                alert(error);
+                //alert(error);
                 //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
             });
 
         }).bind(this), function (error) {
-            alert(error);
+            console.log(error);
+            //alert(error);
             //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
         });
     };
@@ -868,9 +895,10 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     };
 
     $scope.sendMessage = function () {
-        var user = Auth.getUser();
+        var user = $scope.getUser();
 
         $scope.room.sendMessage($scope.input.text, user);
+
 
         $scope.input.text = "";
 
@@ -881,7 +909,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     };
 
     $scope.deleteRoom = function(room) {
-        Auth.deleteRoom(room);
+        room.remove();
     };
 
     $scope.chatBoxStyle = function () {
@@ -988,16 +1016,29 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     };
 
     $scope.getUsers = function () {
-        var users = {};
-        for(var key in $scope.room.users) {
-            if($scope.room.users.hasOwnProperty(key)) {
-                var user = $scope.room.users[key];
-                if(user.meta.uid != $scope.getUser().meta.uid) {
-                    users[user.meta.uid] = user;
-                }
+
+        var users = $scope.room.getUsers();
+        // Add the users to an array
+        var array = [];
+        for(var key in users) {
+            if(users.hasOwnProperty(key)) {
+                array.push(users[key]);
             }
         }
-        return users;
+        // Sort the array
+        array.sort(function (a, b) {
+            a = unORNull(a.online) ? false : a.online;
+            b = unORNull(b.online) ? false : b.online;
+
+            if(a == b) {
+                return 0;
+            }
+            else {
+                return a == true ? -1 : 1;
+            }
+        });
+
+        return array;
     };
 
     // Get the nearest allowable position for a chat room
@@ -1040,12 +1081,16 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function($scope, Auth, Layout) {
+myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTin', function($scope, Auth, Layout, CookieTin) {
 
     $scope.init = function () {
         $scope.boxWidth = bRoomListBoxWidth;
         $scope.boxHeight = bRoomListBoxHeight;
         $scope.canDeleteRoom = true;
+
+        // Is the more box minimized?
+        $scope.setMoreBoxMinimized(CookieTin.getProperty(CookieTin.moreMinimizedKey));
+
     };
 
     $scope.superGetRooms = $scope.getRooms;
@@ -1105,22 +1150,27 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', function(
     };
 
     $scope.minimize = function () {
-        $scope.hideRoomList = true;
+        $scope.setMoreBoxMinimized(true);
     };
 
     $scope.toggle = function () {
-        $scope.hideRoomList = !$scope.hideRoomList;
+        $scope.setMoreBoxMinimized(!$scope.hideRoomList);
     };
 
+    $scope.setMoreBoxMinimized = function (minimized) {
+        $scope.hideRoomList = minimized;
+        CookieTin.setProperty(minimized, CookieTin.moreMinimizedKey);
+    }
+
     $scope.deleteRoom = function(room) {
-        Auth.deleteRoom(room);
+        room.remove();
     };
 
     $scope.init();
 
 }]);
 
-myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Auth) {
+myApp.controller('CreateRoomController', ['$scope', 'Auth', 'Room', function($scope, Auth, Room) {
 
     $scope.init = function () {
         $scope.clearForm();
@@ -1133,11 +1183,21 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', function($scope, Aut
     $scope.createRoom  = function () {
         // Is this a public room?
         if($scope.public) {
-            $scope.room.invitesEnabled = true;
-            Auth.createPublicRoom($scope.room);
+
+            var room = Room.newRoom($scope.room.name, true, $scope.room.description, true, true);
+            room.create();
+
         }
         else {
-            Auth.createPrivateRoom([], $scope.room);
+            var room = Room.newRoom(
+                $scope.room.name,
+                $scope.room.invitesEnabled,
+                $scope.room.description,
+                true
+            );
+            room.create();
+
+
         }
         $scope.back();
     };
@@ -1195,7 +1255,7 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
             var bOnline = Cache.onlineUsers[b.meta.uid];
 
             if(aOnline != bOnline) {
-                return aOnline ? -1 : 1;
+                return aOnline ? 1 : -1;
             }
             else {
                 if(a.meta.name != b.meta.name) {
@@ -1243,10 +1303,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
                 $scope.ref.off('value');
             }
 
-            if(Auth.getUser() && Auth.getUser().meta && Auth.getUser().meta.uid) {
+            if($scope.getUser() && $scope.getUser().meta && $scope.getUser().meta.uid) {
 
                 // Create a firebase ref to the user
-                $scope.ref = Paths.userMetaRef(Auth.getUser().meta.uid);
+                $scope.ref = Paths.userMetaRef($scope.getUser().meta.uid);
 
                 $scope.ref.on('value', function (snapshot) {
 
@@ -1263,7 +1323,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
 
     $scope.validate = function () {
 
-        var meta = Auth.getUser().meta;
+        var meta = $scope.getUser().meta;
 
         // Validate the user
         var nameValid = meta.name && meta.name.length >= $scope.validation.name.minChars && meta.name.length <= $scope.validation.name.maxChars;

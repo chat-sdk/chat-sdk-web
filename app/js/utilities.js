@@ -51,6 +51,7 @@ var bPullURL = "//chat.deluge.co/server/pull.php";
 
 // Paths
 var bUsersPath = "users";
+var bUsersMetaPath = "usersMeta";
 var bRoomsPath = "rooms";
 var bPublicRoomsPath = "public-rooms";
 var bMessagesPath = 'messages';
@@ -62,11 +63,16 @@ var bBlockedPath = 'blocked';
 var bReadKey = 'read';
 
 var bMetaKey = "meta";
+var bImageKey = "image";
+var bThumbnailKey = "thumbnail";
+var bTimeKey = "time";
+
 var bOnlineKey = "online";
 
 var bUserStatusOwner = 'owner';
 var bUserStatusMember = 'member';
 var bUserStatusInvited = 'invited';
+var bUserStatusClosed = 'closed';
 
 // Tabs
 var bUsersTab = 'users';
@@ -96,6 +102,10 @@ var bRoomListBoxHeight = 300;
 
 var bProfileBoxWidth = 300;
 
+var bMinute = 60;
+var bHour = bMinute * 60;
+var bDay = bHour * 24;
+
 var Paths = {
 
     cid: null,
@@ -117,12 +127,24 @@ var Paths = {
         return this.firebase().child(bUsersPath);
     },
 
+    timeRef: function (uid) {
+        return this.firebase().child(bTimeKey).child(uid);
+    },
+
     userRef: function (fid) {
         return this.usersRef().child(fid);
     },
 
     userMetaRef: function (fid) {
         return this.userRef(fid).child(bMetaKey);
+    },
+
+    userImageRef: function (fid) {
+        return this.userRef(fid).child(bImageKey);
+    },
+
+    userThumbnailRef: function (fid) {
+        return this.userRef(fid).child(bThumbnailKey);
     },
 
     userFriendsRef: function (fid) {
@@ -149,9 +171,9 @@ var Paths = {
         return this.firebase().child(bPublicRoomsPath);
     },
 
-//    publicRoomRef: function (fid) {
-//        return this.publicRoomsRef().child(fid);
-//    },
+    publicRoomRef: function (rid) {
+        return this.publicRoomsRef().child(rid);
+    },
 
     roomRef: function (fid) {
         return this.roomsRef().child(fid);
@@ -166,7 +188,7 @@ var Paths = {
     },
 
     roomUsersRef: function (fid) {
-        return this.roomMetaRef(fid).child(bUsersPath);
+        return this.roomRef(fid).child(bUsersMetaPath);
     },
 
     roomTypingRef: function (fid) {
@@ -188,4 +210,21 @@ var Paths = {
 
 function unORNull (object) {
     return object === 'undefined' || object == null;
+}
+
+function timeSince (timestamp) {
+    if(unORNull(timestamp)) {
+        return -1;
+    }
+    else {
+        var date =  new Date(timestamp);
+        var time = 0;
+        if(!date.now) {
+            time = date.getTime();
+        }
+        else {
+            time = date.now();
+        }
+        return time * 1000;
+    }
 }

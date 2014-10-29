@@ -41,6 +41,13 @@ myApp.service('Visibility', ['$rootScope', '$window', '$document', function ($ro
 myApp.factory('CookieTin', function () {
     return {
 
+        roomMinimizedKey: 'cc_room_minimized_',
+        roomWidthKey: 'cc_room_width_',
+        roomHeightKey: 'cc_room_height_',
+
+        mainMinimizedKey: 'cc_main_minimized',
+        moreMinimizedKey: 'cc_more_minimized',
+
         isOffline: function () {
             var cookie = jQuery.cookie()['cc_offline'];
             if(cookie) {
@@ -52,8 +59,55 @@ myApp.factory('CookieTin', function () {
         setOffline: function (offline) {
             var result = jQuery.cookie('cc_offline', offline, {domain: '', path: '/'});
             console.log(result);
-        }
+        },
 
+        // Persist Room details
+        setRoom: function (room) {
+
+            if(!room || !room.meta || !room.meta.rid) {
+                return;
+            }
+
+            // Save room minimization state
+            this.setProperty(room.minimized, this.roomMinimizedKey, room.meta.rid);
+            this.setProperty(room.width, this.roomWidthKey, room.meta.rid);
+            this.setProperty(room.height, this.roomHeightKey, room.meta.rid);
+
+        },
+
+        getRoom: function (room) {
+
+            if(!room || !room.meta || !room.meta.rid) {
+                return;
+            }
+
+            var minimized = this.getProperty(this.roomMinimizedKey, room.meta.rid);
+            if(!unORNull(minimized)) {
+                room.minimized = minimized;
+            }
+            var width = this.getProperty(this.roomWidthKey, room.meta.rid);
+            if(!unORNull(width)) {
+                room.width = width;
+            }
+            var height = this.getProperty(this.roomHeightKey, room.meta.rid);
+            if(!unORNull(height)) {
+                room.height = height;
+            }
+        },
+
+        setProperty: function(value, root, id) {
+            jQuery.cookie(root + id, value, {domain: '', path: '/'});
+        },
+
+        getProperty: function (root, id) {
+            var c = jQuery.cookie(root + id);
+            if(!unORNull(c)) {
+                return eval(c);
+            }
+            else {
+                return null;
+            }
+        }
     };
 });
 
@@ -71,6 +125,9 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope
             // the user's token
             $http({
                 method: 'get',
+                params: {
+                    action: 'cc_auth'
+                },
                 url: url
             }).then((function (r) {
 
@@ -148,8 +205,23 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
 
         goOnline: function () {
             Firebase.goOnline();
+            this.update();
+        },
+
+        update: function () {
             if(this.user) {
-                this.user.goOnline();
+                var uid = this.user.meta.uid;
+                if (uid) {
+                    var ref = Paths.onlineUserRef(uid);
+
+                    ref.onDisconnect().remove();
+
+                    ref.setWithPriority({
+                            uid: uid,
+                            time: Firebase.ServerValue.TIMESTAMP
+                        }, this.user.meta.name
+                    );
+                }
             }
         }
     };
@@ -376,7 +448,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
     };
 }]);
 
-myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', function ($rootScope, $timeout, $document, $window) {
+myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', function ($rootScope, $timeout, $document, $window, CookieTin) {
 
     var layout = {
 
@@ -484,7 +556,7 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', funct
         insertRoom: function(room, index) {
 
             // If the room is a valid variable
-            if(room && room.meta.rid) {
+            if(room && room.meta && room.meta.rid) {
 
                 // Set the room's target position
                 room.targetSlot = index;
@@ -759,16 +831,35 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', funct
     return layout;
 }]);
 
-myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope, $timeout, Layout) {
-    return {
+myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTin', function ($rootScope, $timeout, $window, Layout, CookieTin) {
+    var Cache = {
 
         // Dict
         users: {},
-        rooms: [],
         onlineUsers: {},
         publicRooms: {},
         friends: {},
         blockedUsers: {},
+
+        init: function () {
+
+            var beforeUnloadHandler = (function (e) {
+
+                // Save the rooms to cookies
+                var rooms = Layout.getAllRooms();
+                for(var i in rooms) {
+                    CookieTin.setRoom(rooms[i]);
+                }
+
+            }).bind(this);
+
+            if ($window.addEventListener) {
+                $window.addEventListener('beforeunload', beforeUnloadHandler);
+            } else {
+                $window.onbeforeunload = beforeUnloadHandler;
+            }
+
+        },
 
         // A cache of all users
         addUser: function (user) {
@@ -942,6 +1033,10 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             // then alphabetically
             rooms.sort(function(a, b) {
 
+                if(a.meta.userCreated != b.meta.userCreated) {
+                    return a.userCreated ? 1 : -1;
+                }
+
                 // Weight
                 var aw = a.meta.weight; aw = aw ? aw : 100;
                 var bw = b.meta.weight; bw = bw ? bw : 100;
@@ -976,6 +1071,24 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
             return room;
         },
 
+        getRoomWithOtherUser: function (user) {
+            var room;
+            var rooms = Layout.getAllRooms();
+
+            for(var i = 0; i < rooms.length; i++) {
+                room = rooms[i];
+
+                // Only look at rooms that are private chats
+                // between only two people
+                if(room.userCount(true) == 2) {
+                    if(room.users[user.meta.uid]) {
+                        return room;
+                    }
+                }
+            }
+            return null;
+        },
+
         digest: function () {
             $timeout(function() {
                 $rootScope.$digest();
@@ -984,780 +1097,21 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'Layout', function ($rootScope
 
         clear: function () {
             this.users = {};
-            //this.rooms = {};
             this.onlineUsers = {};
             this.digest();
             Layout.rooms = [];
         }
     };
+
+    Cache.init();
+
+    return Cache;
 }]);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootScope, $timeout, $q, Cache) {
-    return {
-
-        buildUserWithID: function (uid) {
-            var user = this.newUserWithID(uid);
-
-            // Start listening to the Firebase location
-            user.on = (function () {
-
-                var ref = Paths.userMetaRef(uid);
-
-                // Add a method to listen for updates to this user
-                ref.on('value',(function(snapshot) {
-
-                    user.meta = snapshot.val();
-
-                    // Am I blocked?
-                    user.blockingMe = !unORNull(user.meta.blocked) && !unORNull(user.meta.blocked[$rootScope.user.meta.uid]) ;
-
-                    // Remove from the online list if they're blocking us
-//                    if(user.blockingMe) {
-//                        Cache.removeOnlineUser(user);
-//                    }
-//                    else {
-//                        Cache.addOnlineUser(user);
-//                    }
-
-                    user.setImage(user.meta.image);
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-
-                }).bind(this));
-
-            }).bind(this);
-
-            // Stop listening to the Firebase location
-            user.off = (function () {
-                var ref = Paths.userMetaRef(uid);
-                ref.off();
-            }).bind(this);
-
-            user.addRoom = function (room) {
-                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-                ref.update({
-                    rid: room.meta.rid,
-                    invitedBy: $rootScope.user.meta.uid
-                });
-            };
-
-            user.removeRoom = function (room) {
-                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-                ref.remove();
-            };
-
-            user.addFriend = function (friend) {
-                var ref = Paths.userFriendsRef(user.meta.uid);
-                ref = ref.push();
-                ref.set({uid: friend.meta.uid});
-            };
-
-            user.removeFriend = function (friend) {
-                friend.removeFriend();
-                friend.removeFriend = null;
-            };
-
-            user.blockUser = function (block) {
-                var ref = Paths.userBlockedRef(user.meta.uid);
-
-                var data = {};
-                data[block.meta.uid] = {uid: block.meta.uid};
-                ref.set(data);
-
-//                ref = ref.push();
-//                ref.set({block.meta.uid : {uid: block.meta.uid}});
-            };
-
-            user.unblockUser = function (block) {
-                block.unblock();
-                block.unblock = null;
-            };
-
-            user.updateRoomSlot = function (room, slot) {
-                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-                ref.update({slot: slot});
-            };
-
-            //user.on();
-
-            return user;
-        },
-
-        // Create a new template object
-        // This is mainly useful to have the data
-        // structure clearly defined
-        newUser: function () {
-            var user = {
-                meta: {
-                    uid: null,
-                    name: null,
-                    description: null,
-                    city: null,
-                    country: null
-                }
-            };
-            return user;
-        },
-
-        newUserWithID: function (uid) {
-            var user = this.newUser();
-            user.meta.uid = uid;
-            user.meta.image = bDefaultProfileImage;
-
-            user.goOnline = function () {
-
-                var ref = Paths.onlineUserRef(uid);
-
-                ref.setWithPriority({
-                        uid: uid
-                    }, user.meta.name
-                );
-                ref.onDisconnect().remove();
-            };
-
-            user.setImage = function (imageData) {
-                if(imageData && imageData) {
-                    user.meta.image = imageData;
-                }
-                else {
-                    user.meta.image = bDefaultProfileImage;
-                }
-            };
-
-            user.isImage = function (src) {
-
-                var deferred = $q.defer();
-
-                var image = new Image();
-                image.onerror = function() {
-                    deferred.reject();
-                };
-                image.onload = function() {
-                    deferred.resolve();
-                };
-                image.src = src;
-
-                return deferred.promise;
-            };
-
-            return user;
-        },
-
-        getOrCreateUserWithID: function(uid) {
-            var user = Cache.getUserWithID(uid);
-            if(!user) {
-                user = this.buildUserWithID(uid);
-                user.on();
-                Cache.addUser(user);
-            }
-            return user;
-        }
-    };
-}]);
-
-myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout',
-    function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout) {
-    return {
-
-        getOrCreateRoomWithID: function (rid) {
-
-            var room = Cache.getRoomWithID(rid);
-
-            if(!room) {
-                room = this.buildRoomWithID(rid);
-            }
-
-            return room;
-        },
-
-        buildRoomWithID: function (rid) {
-
-            var room = this.newRoom();
-            room.meta.rid = rid;
-
-            room.on = function () {
-
-                var deferred = $q.defer();
-
-                if(room.isOn) {
-                    deferred.resolve();
-                    return deferred.promise;
-                }
-                room.isOn = true;
-
-                // Get the room meta data
-                var ref = Paths.roomMetaRef(rid);
-
-                ref.on('value', (function(snapshot) {
-                    room.meta = snapshot.val();
-
-                    room.updateName();
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-
-                    deferred.resolve();
-
-                }).bind(this));
-
-                // Listen to users being added to the thread
-                ref = Paths.roomUsersRef(rid);
-                ref.on('child_added', function (snapshot) {
-                    // Get the user
-                    if(snapshot.val()) {
-
-                        var uid = snapshot.val().uid;
-
-                        var user = User.getOrCreateUserWithID(uid);
-
-                        room.users[user.meta.uid] = user;
-
-                        // Update name
-                        room.updateName();
-
-                        // TODO: Should digest here
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
-                    }
-                });
-
-                ref.on('child_removed', function (snapshot) {
-                    if(snapshot.val()) {
-
-                        var uid = snapshot.val().uid;
-
-                        delete room.users[uid];
-
-                        // Update name
-                        room.updateName();
-
-                        // TODO: Should digest here
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
-                    }
-                });
-
-                // Handle typing
-                ref = Paths.roomTypingRef(rid);
-
-                ref.on('child_added', function (snapshot) {
-                    room.typing[snapshot.name()] = snapshot.val().name;
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-                });
-
-                ref.on('child_removed', function (snapshot) {
-                    delete room.typing[snapshot.name()];
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-                });
-
-                return deferred.promise;
-            };
-
-            room.messagesOn = function () {
-
-                if(room.messagesAreOn) {
-                   return;
-                }
-
-                room.messagesAreOn = true;
-
-                // Also get the messages from the room
-                var ref = Paths.roomMessagesRef(rid);
-
-                if(room.lastMessage && room.lastMessage.meta.time) {
-                    ref = ref.startAt(room.lastMessage.meta.time);
-                }
-                else {
-                    ref = ref.endAt();
-                }
-
-                // Add listen to messages added to this thread
-                ref.limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
-
-                    // Get the snapshot value
-                    var val = snapshot.val();
-
-                    if(!val || !val.text || val.text.length === 0) {
-                        return;
-                    }
-
-                    if(room.lastMessage) {
-                        // TODO: This is a bit hacky
-                        // it looks like the time changes from the first time it
-                        // goes on the server and the second time...
-                        var lm = room.lastMessage.meta;
-                        if(lm.uid == val.uid && lm.text == val.text && Math.abs(lm.time - val.time) < 2000) {
-                            return;
-                        }
-                    }
-
-                    // Create the message object
-                    var message = Message.buildMessage(snapshot.name(), val);
-
-                    // Add the message to this room
-                    if(message) {
-
-                        // This logic handles whether the date and name should be
-                        // show
-
-                        // Get the previous message if it exists
-                        if(room.lastMessage) {
-
-                            var lastMessage = room.lastMessage;
-
-                            // We hide the name on the last message if it is sent by the
-                            // same message as this message i.e.
-                            // - User 1 (name hidden)
-                            // - User 1
-                            lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
-
-                            // Last message date
-                            var lastDate = new Date(lastMessage.meta.time);
-
-                            var newDate = new Date(message.meta.time);
-
-                            // If messages have the same day, hour and minute
-                            // hide the time
-
-                            lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
-
-                            // Add a pointer to the lastMessage
-                            message.lastMessage = lastMessage;
-
-                        }
-
-                        // We always hide the time for the latest message
-                        message.hideTime = true;
-
-                        room.messages.push(message);
-                        room.lastMessage = message;
-                        room.messagesDirty = true;
-                    }
-
-                    // If the room is inactive or minimized increase the badge
-                    if((!room.active || room.minimized) && !message.readBy()) {
-
-                        if(!room.unreadMessages) {
-                            room.unreadMessages  = [];
-                        }
-
-                        room.unreadMessages.push(message);
-
-                        // If this is the first badge then room.badge will
-                        // undefined - so set it to one
-                        if(!room.badge) {
-                            room.badge = 1;
-                        }
-                        else {
-                            room.badge = Math.min(room.badge + 1, 99);
-                        }
-                    }
-                    else {
-                        // Is the room active? If it is then mark the message
-                        // as seen
-                        message.markRead();
-                    }
-
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
-                });
-            }
-
-            room.messagesOff = function () {
-
-                room.messagesAreOn = false;
-
-                // Get the room meta data
-                Paths.roomMessagesRef(rid).off();
-            };
-
-
-            room.startTyping = function (user) {
-                // The user is typing...
-                var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
-                ref.set({name: user.meta.name});
-
-                // If the user disconnects, tidy up by removing the typing
-                // inidcator
-                ref.onDisconnect().remove();
-            };
-
-            room.finishTyping = function (user) {
-                var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
-                ref.remove();
-            };
-
-            room.off = function () {
-
-                room.isOn = false;
-
-                room.messagesOff();
-
-                // Get the room meta data
-                Paths.roomMetaRef(rid).off();
-                Paths.roomUsersRef(rid).off();
-                Paths.roomTypingRef(rid).off();
-            };
-
-            room.markRead = function () {
-
-                var messages = room.unreadMessages;
-
-                if(messages && messages.length > 0) {
-
-                    for(var i in messages) {
-                        if(messages.hasOwnProperty(i)) {
-                            messages[i].markRead();
-                        }
-                    }
-
-                    // Clear the messages array
-                    while(messages.length > 0) {
-                        messages.pop();
-                    }
-                }
-                room.badge = null;
-            };
-
-            room.activate = function () {
-                room.active = true;
-                room.markRead();
-            };
-
-            return room;
-        },
-
-        newRoom: function () {
-            var room = {
-                meta: {
-                    name: null,
-                    invitesEnabled: false,
-                    users: []
-                },
-                users: {},
-                messages: [],
-                typing: {},
-                offset: 0,
-                targetSlot: null,
-                width: bChatRoomWidth,
-                height: bChatRoomHeight,
-                zIndex: null,
-                active: true
-            };
-
-            room.userCount = function () {
-                var i = 0;
-                for(var key in room.users) {
-                    if(room.users.hasOwnProperty(key)) {
-                        i++;
-                    }
-                }
-                return i;
-            };
-
-            room.addUser = function (user, status) {
-
-                // Are we able to invite the user?
-                // If the user is us or if the room is public then we can
-                if(user == $rootScope.user) {//} || Cache.getPublicRoomWithID(room.meta.rid)) {
-
-                }
-                else if(!room.canInviteUser() && status != bUserStatusOwner) {
-                    $rootScope.showNotification(bNotificationTypeAlert, 'Invites disabled', 'The creator of this room has disabled invites', 'ok');
-                    return;
-                }
-
-                // If the user is already a member of the
-                // room
-                if(room.users[user.meta.uid]) {
-                    return;
-                }
-                else {
-                    this.setStatusForUser(user, status);
-                }
-            };
-
-            room.canInviteUser = function () {
-
-                // Is this room an invite only room?
-                if(room.meta.invitesEnabled) {
-                    return true;
-                }
-                else {
-                    // Are we the owner?
-                    var owner = room.getOwner();
-                    if(owner && owner.meta) {
-                        return owner.meta.uid == $rootScope.user.meta.uid;
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            };
-
-            room.setStatusForUser = function(user, status) {
-                var ref = Paths.roomUsersRef(room.meta.rid);
-                ref.child(user.meta.uid).update({
-                    status: status,
-                    uid: user.meta.uid
-                });
-            };
-
-            room.removeUser = function (user) {
-
-                var deferred = $q.defer();
-
-                var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
-                ref.remove(function(error) {
-                    if(error) {
-                        deferred.reject(error);
-                    }
-                    else {
-                        deferred.resolve();
-                    }
-                });
-
-                return deferred.promise;
-            };
-
-            room.getOwner = function () {
-                // get the owner's ID
-                var data = null;
-
-                for(var key in room.meta.users) {
-                    if(room.meta.users.hasOwnProperty(key)) {
-                        data = room.meta.users[key];
-                        if(data.status == bUserStatusOwner) {
-                            break;
-                        }
-                    }
-                }
-                if(data) {
-                    return User.getOrCreateUserWithID(data.uid);
-                }
-                return null;
-            };
-
-            room.updateName = function () {
-
-                if(room.meta.name) {
-                    room.name = room.meta.name;
-                    return;
-                }
-
-                // How many users are there?
-                var i = 0;
-                for(var key in room.users) {
-                    if(room.users.hasOwnProperty(key)) {
-                        i++;
-                    }
-                }
-                // TODO: Do this better
-                if(i == 2) {
-                    for(key in room.users) {
-                        if(room.users.hasOwnProperty(key)) {
-                            var user = room.users[key];
-
-                            // We only want to use the name of a user
-                            // who isn't the current user
-                            if(Cache.onlineUsers[user.meta.uid]) {
-                                if(user.meta.name) {
-                                    room.name = user.meta.name;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Private chat x users
-                // Ben Smiley
-                if(!room.name) {
-                    room.name = bGroupChatDefaultName;
-                }
-
-            };
-
-            room.slot = function () {
-                return Layout.nearestSlotToOffset(room.offset);
-            };
-
-            room.getUserInfo = function (user) {
-                // This could be called from the UI so it's important
-                // to wait until users has been populated
-                if(room.meta && room.meta.users) {
-                    return room.meta.users[user.meta.uid];
-                }
-                return null;
-            };
-
-            room.getUserStatus = function (user) {
-                var info = room.getUserInfo(user);
-                return info ? info.status : null;
-            };
-
-            room.getMessages = function () {
-
-                if(!room.messagesDirty) {
-                    return room.messages;
-                }
-                // Sort messages by time
-                room.messages.sort(function (a, b) {
-                    return a.meta.time - b.meta.time;
-                });
-                room.messagesDirty = false;
-
-                return room.messages;
-            };
-
-            room.sendMessage = function (text, user) {
-
-                if(!text || text.length === 0)
-                    return;
-
-                var message = Message.newMessage(room.meta.rid, user.meta.uid, text);
-                message.user = null;
-
-                // Get a ref to the room
-                var ref = Paths.roomMessagesRef(room.meta.rid);
-
-                var newRef = ref.push();
-                newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP);
-
-            };
-
-            room.transcript = function () {
-
-                var transcript = "";
-
-                // Loop over messages and format them
-                var messages = room.getMessages();
-
-                var m = null;
-                for(var i in messages) {
-                    if(messages.hasOwnProperty(i)) {
-                        m = messages[i];
-                        transcript += moment(m.meta.time).format('HH:mm:ss') + " " + m.user.meta.name + ": " + m.meta.text + "\n";
-                    }
-                }
-
-                return transcript;
-            };
-
-            return room;
-        }
-    };
-}]);
-
-myApp.factory('Message', ['$rootScope', '$q','Cache', 'User', function ($rootScope, $q, Cache, User) {
-    var message = {
-
-        newMessage: function (rid, uid, text) {
-            return {
-                meta: {
-                    rid: rid,
-                    uid: uid,
-                    time: Firebase.ServerValue.TIMESTAMP,
-                    text: text
-                }
-            };
-        },
-
-        buildMessage: function (mid, meta) {
-
-            var message = {meta : meta};
-            message.mid = mid;
-
-            message.timeString = moment(meta.time).format('h:mm a');
-
-            // Set the user
-            if(message.meta.uid) {
-
-                // We need to set the user here
-                if(message.meta.uid == $rootScope.user.meta.uid) {
-                    message.user = $rootScope.user;
-                }
-                else {
-                    message.user = User.getOrCreateUserWithID(message.meta.uid);
-                }
-            }
-
-            message.markRead = function (uid) {
-
-                if(!uid) {
-                    uid = $rootScope.user.meta.uid;
-                }
-
-                var deferred = $q.defer();
-
-                // Is this message already marked as read?
-                if(message.readBy()) {
-                    deferred.resolve();
-                }
-                else if(!uid) {
-                    deferred.reject();
-                }
-                else {
-                    var ref = Paths.messageUsersRef(message.meta.rid, message.mid).child(uid);
-
-                    var data = {};
-                    data[bReadKey] = true;
-
-                    ref.set(data, function (error) {
-                        if(error) {
-                            deferred.reject(error);
-                        }
-                        else {
-                            deferred.resolve();
-                        }
-                    });
-                }
-
-                return deferred.promise;
-            };
-
-            message.readBy = function (uid) {
-
-                if(!uid) {
-                    uid = $rootScope.user.meta.uid;
-                }
-
-                return !unORNull(message.meta.users) && !unORNull(message.meta.users[uid]) && !unORNull(message.meta.users[uid][bReadKey]);
-
-            };
-
-            // Our messages are on the right - other user's messages are
-            // on the left
-            message.side = message.meta.uid == $rootScope.user.meta.uid ? 'right' : 'left';
-
-            return message;
-        }
-    };
-    return message;
-}]);
-
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API',
-              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence, API) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API', 'StateManager',
+              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence, API, StateManager) {
 
     var Auth = {
-
-        _model: null,
-        _createRoomTimeoutPromise: null,
-
-        getUser: function () {
-            return $rootScope.user;
-        },
 
         /**
          * Create a new AngularFire simple login object
@@ -1774,7 +1128,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
             this.bindUserWithUID(authUser.uid).then((function () {
 
-                var user = this.getUser();
+                var user = $rootScope.user;
 
                 var name = user.meta.name;
                 if(!name || name.length === 0) {
@@ -1782,6 +1136,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 }
                 if(!name || name.length === 0) {
                     name = authUser.username;
+                }
+                if(!name || name.length === 0) {
+                    if(authUser.thirdPartyData) {
+                        name = authUser.thirdPartyData.name;
+                    }
                 }
                 if(!name || name.length === 0) {
                     name = "ChatCat" + Math.floor(Math.random() * 1000 + 1);
@@ -1795,7 +1154,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 if(authUser.provider == "facebook") {
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
-                    if(!user.meta.image || user.meta.image == bDefaultProfileImage) {
+                    if(!user.hasImage()) {
                         Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
 
                             Utilities.pullImageFromURL($http, response.data.url).then(function(imageData) {
@@ -1831,8 +1190,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if(!user.meta.name && authUser.thirdPartyData.name) {
                         user.meta.name = authUser.thirdPartyData.name;
                     }
-                    if(!user.meta.description && authUser.thirdPartyData.description) {
-                        user.meta.description = authUser.thirdPartyData.description;
+                    if(!user.meta.description && authUser.thirdPartyData.status) {
+                        user.meta.description = authUser.thirdPartyData.status;
                     }
                     if(!user.meta.city && authUser.thirdPartyData.city) {
                         user.meta.city = authUser.thirdPartyData.city;
@@ -1846,10 +1205,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if(!user.meta.yearOfBirth && authUser.thirdPartyData.yearOfBirth) {
                         user.meta.yearOfBirth = authUser.thirdPartyData.yearOfBirth;
                     }
+                    if(authUser.thirdPartyData.imageURL) {
+                        imageURL = authUser.thirdPartyData.imageURL;
+                    }
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if((!user.meta.image || user.meta.image == bDefaultProfileImage) && imageURL) {
+                if((!user.hasImage()) && imageURL) {
                     Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
 
                         user.setImage(imageData);
@@ -1894,8 +1256,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                 /** Create static rooms **/
                 this.addStaticRooms();
 
+
+                StateManager.on();
+                StateManager.userOn(authUser.uid);
+
                 // Add listeners to the user
-                this.addListenersToUser(authUser.uid);
+                //this.addListenersToUser(authUser.uid);
 
                 deferred.resolve();
 
@@ -1904,233 +1270,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             });
 
             return deferred.promise;
-        },
-
-        addStaticRooms: function () {
-
-            var addRoom = (function (room) {
-                // Validate the room
-                if(unORNull(room.name) || room.name.length === 0) {
-                    console.log("ERROR: Room name is undefined or of zero length");
-                    return;
-                }
-                if(unORNull(room.rid) || room.rid.length === 0) {
-                    console.log("ERROR: Room rid is undefined or of zero length");
-                    return;
-                }
-                if(unORNull(room.description) || room.description.length === 0) {
-                    console.log("WARNING: Room description is undefined or of zero length");
-                }
-                if(unORNull(room.weight)) {
-                    room.weight = 100;
-                }
-
-                // Add the rooms
-                this.createStaticRoom({
-                    name: room.name,
-                    description: room.description,
-                    invitesEnabled: true,
-                    rid: room.rid,
-                    weight: room.weight
-                });
-            }).bind(this);
-
-            var room = null;
-            if(CC_OPTIONS && CC_OPTIONS.staticRooms) {
-                for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
-                    room = CC_OPTIONS.staticRooms[i];
-                    addRoom(room);
-                }
-            }
-            if(API.meta && API.meta.rooms) {
-                for(i = 0; i < API.meta.rooms.length; i++) {
-                    room = API.meta.rooms[i];
-                    addRoom(room);
-                }
-            }
-        },
-
-        /**
-         * This adds a listener to the user's chat rooms
-         * and then adds a message listener to each room
-         * @param uid - the user's Firebase ID
-         */
-        addListenersToUser: function (uid) {
-
-            // Listen to the user's rooms
-            var roomsRef = Paths.userRoomsRef(uid);
-
-            // A new room was added so we should start listening to it
-            roomsRef.on('child_added', (function (snapshot) {
-
-                // Get the room id
-                var rid = snapshot.val().rid;
-                var invitedBy = snapshot.val().invitedBy;
-
-                if (rid) {
-
-                    var room = Room.getOrCreateRoomWithID(rid);
-                    room.on().then(function () {
-
-                        // Make sure we reset the offset
-                        // this can cause a bug with public rooms
-                        // because when they're removed they
-                        // aren't necessarily destroyed because
-                        // they stay in the cache
-                        room.offset = 0;
-
-                        if (room) {
-
-                            // If we've created this room just return
-                            if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
-
-                                if(invitedBy) {
-                                    room.invitedBy = User.getOrCreateUserWithID(invitedBy);
-                                }
-
-                                if(Cache.isBlockedUser(invitedBy)) {
-                                    return;
-                                }
-
-                                // If the user is a friend
-                                if(Cache.isFriend(invitedBy)) {
-                                    // Set the user to member
-                                    room.setStatusForUser($rootScope.user, bUserStatusMember);
-                                }
-                                else {
-                                    // Join the room
-                                    Auth.joinRoom(room, bUserStatusInvited);
-                                }
-
-                            }
-
-                            var slot = snapshot.val().slot;
-
-                            Layout.insertRoom(room, slot ? slot : 0);
-
-                        }
-
-                        room.messagesOn();
-
-                    });
-                }
-
-            }).bind(this));
-
-            roomsRef.on('child_removed', (function (snapshot) {
-
-                Layout.removeRoomWithID(snapshot.name());
-
-            }).bind(this));
-
-            // Listen to the public rooms
-            var publicRoomsRef = Paths.publicRoomsRef();
-
-            publicRoomsRef.on('child_added', (function (snapshot) {
-
-                var rid = snapshot.name();
-                if(rid) {
-                    var room = Room.getOrCreateRoomWithID(rid);
-                    room.on();
-
-                    if(room) {
-                        Cache.addPublicRoom(room);
-                    }
-                }
-
-            }).bind(this));
-
-            publicRoomsRef.on('child_removed', (function (snapshot) {
-
-                Cache.removePublicRoomWithID(snapshot.name());
-
-            }).bind(this));
-
-            // Listen to friends
-            var friendsRef = Paths.userFriendsRef(uid);
-            friendsRef.on('child_added', (function (snapshot) {
-
-                var uid = snapshot.val().uid;
-                if(uid) {
-                    var user = User.getOrCreateUserWithID(uid);
-
-                    user.removeFriend = function () {
-                        snapshot.ref().remove();
-                    };
-                    Cache.addFriend(user);
-                }
-
-            }).bind(this));
-
-            friendsRef.on('child_removed', (function (snapshot) {
-
-                Cache.removeFriendWithID(snapshot.val().uid);
-
-            }).bind(this));
-
-            // Listen to blocked
-            var blockedUsersRef = Paths.userBlockedRef(uid);
-            blockedUsersRef.on('child_added', (function (snapshot) {
-
-                var uid = snapshot.val().uid;
-                if(uid) {
-                    var user = User.getOrCreateUserWithID(uid);
-
-                    user.unblock = function () {
-                        snapshot.ref().remove();
-                    };
-
-                    Cache.addBlockedUser(user);
-                }
-
-            }).bind(this));
-
-            blockedUsersRef.on('child_removed', (function (snapshot) {
-
-                Cache.removeBlockedUserWithID(snapshot.val().uid);
-
-            }).bind(this));
-
-            // A user has come online
-            var onlineUsersRef = Paths.onlineUsersRef();
-            onlineUsersRef.on("child_added", (function (snapshot) {
-
-                // Get the UID of the added user
-                var uid = null;
-                if (snapshot && snapshot.val()) {
-                    uid = snapshot.val().uid;
-                }
-
-                var user = User.getOrCreateUserWithID(uid);
-
-                // Is the user blocking us?
-                //if(!user.blockingMe) {
-                    Cache.addOnlineUser(user);
-                //}
-
-            }).bind(this));
-
-            onlineUsersRef.on("child_removed", (function (snapshot) {
-
-                var user = User.getOrCreateUserWithID(snapshot.val().uid);
-                if (user) {
-                    Cache.removeOnlineUser(user);
-                }
-
-            }).bind(this));
-
-            this.removeListenersFromUser = function () {
-                roomsRef.off('child_added');
-                roomsRef.off('child_removed');
-                publicRoomsRef.off('child_added');
-                publicRoomsRef.off('child_removed');
-                friendsRef.off('child_added');
-                friendsRef.off('child_removed');
-                blockedUsersRef.off('child_added');
-                blockedUsersRef.off('child_removed');
-                onlineUsersRef.off('child_added');
-                onlineUsersRef.off('child_removed');
-            };
         },
 
         bindUserWithUID: function (uid) {
@@ -2153,11 +1292,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             $userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
 
                 // If the user hasn't got a name yet don't throw an error
-                if (!this.getUser().meta.name) {
-                    this.getUser().meta.name = "";
+                if (!$rootScope.user.meta.name) {
+                    $rootScope.user.meta.name = "";
                 }
 
-                Presence.start(this.getUser());
+                Presence.start($rootScope.user);
 
                 $rootScope.unbindUser = (function () {
                     unbind();
@@ -2178,202 +1317,106 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
             return deferred.promise;
         },
 
-        /**
-         * Create a new chat room
-         * @param A list of users to add
-         * @param {Obj=} the room meta
-         */
-        createPrivateRoom: function (users, meta) {
+        addStaticRooms: function () {
 
-            var deferred = $q.defer();
+            var addRoom = (function (roomDef) {
+                // Validate the room
+                if(unORNull(roomDef.name) || roomDef.name.length === 0) {
+                    console.log("ERROR: Room name is undefined or of zero length");
+                    return;
+                }
+                if(unORNull(roomDef.rid) || roomDef.rid.length === 0) {
+                    console.log("ERROR: Room rid is undefined or of zero length");
+                    return;
+                }
+                if(unORNull(roomDef.description) || roomDef.description.length === 0) {
+                    console.log("WARNING: Room description is undefined or of zero length");
+                }
+                if(unORNull(roomDef.weight)) {
+                    roomDef.weight = 100;
+                }
 
-            var room = Room.newRoom();
-            if(meta) {
-                room.meta = meta;
-            }
+                var room = Room.newRoom(roomDef.name, true, roomDef.description, false, true, roomDef.weight);
+                room.setRID(roomDef.rid);
+                room.create();
 
-            this.createRoom(room).then((function() {
+            }).bind(this);
 
-                this.joinRoom(room, bUserStatusOwner);
+            var staticRooms = this.getStaticRooms();
 
-                for (var i in users) {
-                    if(users.hasOwnProperty(i)) {
-                        room.addUser(users[i], bUserStatusInvited);
-                        users[i].addRoom(room);
+            // Get the existing static rooms
+            var ref = Paths.publicRoomsRef();
+
+            // Get the existing public rooms and add any that don't exist
+            ref.once('value', (function (snapshot) {
+
+                var existingRooms = snapshot.val();
+
+                // Now add the rooms
+                for(var key in staticRooms) {
+                    if(staticRooms.hasOwnProperty(key)) {
+                        if(!existingRooms || (existingRooms && !existingRooms[key])) {
+                            addRoom(staticRooms[key]);
+                        }
                     }
                 }
 
-                deferred.resolve(room);
-
-            }).bind(this), function(error) {
-                deferred.reject(error);
-            });
-
-            return deferred.promise;
-        },
-
-        /**
-         * Create a new chat room
-         * @param options - room options
-         */
-        createStaticRoom: function (options) {
-
-            var deferred = $q.defer();
-
-            var room = Room.newRoom();
-
-            room.meta = options;
-
-            this.createRoom(room, options.rid, true).then((function() {
-
-                // Once the room's created we need to
-                // add it to the list of public rooms
-                var ref = Paths.publicRoomsRef();
-                ref.child(room.meta.rid).set({rid: room.meta.rid});
-
-                //this.joinRoom(room, bUserStatusOwner);
-
-                deferred.resolve();
-
-            }).bind(this), function(error) {
-                deferred.reject(error);
-            });
-
-            return deferred.promise;
-        },
-
-        /**
-         * Create a new chat room
-         * @param options - room options
-         */
-        createPublicRoom: function (options) {
-
-            var deferred = $q.defer();
-
-            var room = Room.newRoom();
-
-            room.meta = options;
-
-
-
-            this.createRoom(room).then((function() {
-
-                // Once the room's created we need to
-                // add it to the list of public rooms
-                var ref = Paths.publicRoomsRef();
-                ref.child(room.meta.rid).set({rid: room.meta.rid});
-
-                this.joinRoom(room, bUserStatusOwner);
-
-                deferred.resolve();
-
-            }).bind(this), function(error) {
-                deferred.reject(error);
-            });
-
-            return deferred.promise;
-        },
-
-        /**
-         * Create a new room
-         * @param room
-         * @param {string=} rid (optional)
-         * @param {boolean=} bypassSpamTimer (optional)
-         * @returns {promise|e.promise|FirebaseObject.$$conf.promise}
-         */
-        createRoom: function (room, rid, bypassSpamTimer) {
-
-
-            var deferred = $q.defer();
-
-            // Only allow a room to be created every 0.5 seconds
-            // to stop spamming
-            if(!bypassSpamTimer) {
-                if(this._createRoomTimeoutPromise) {
-                    deferred.reject();
-                    return deferred.promise;
-                }
-                else {
-                    this._createRoomTimeoutPromise = $timeout((function () {
-                        this._createRoomTimeoutPromise = null;
-                    }).bind(this), 500);
-                }
-            }
-
-            // If
-
-            var ref = Paths.roomsRef();
-
-            // Create a new child ref
-            var roomRef = null;
-            if(rid) {
-                roomRef = ref.child(rid);
-            }
-            else {
-                roomRef = ref.push();
-            }
-
-            var roomMetaRef = Paths.roomMetaRef(roomRef.name());
-
-            // Add the room then set it's firebase ID
-            room.meta.rid = roomRef.name();
-
-            // Add the room to Firebase
-            roomMetaRef.set(room.meta, (function (error) {
-
-                if(error) {
-                    deferred.reject(error);
-                }
-                else {
-                    deferred.resolve();
-                }
+                this.cleanStaticRooms(existingRooms);
 
             }).bind(this));
 
-            return deferred.promise;
         },
 
-        deleteRoom: function (room) {
+        getStaticRooms: function () {
+            // Get a full list of static rooms
+            var staticRooms = {};
 
-            // TODO: Don't listen to hundres of rooms
-            room.messagesOff();
-
-            // Stop listening to room if it's not
-            // a public room
-//            if(!Cache.getPublicRoomWithID(room.meta.rid)) {
-//                room.off();
-//            }
-
-            this.leaveRoom(room);
-
-            // Remove the room from the cache
-            Layout.removeRoom(room);
-
-        },
-
-        joinRoom: function (room, status) {
-            if(room) {
-                // Add the user to the room
-                room.addUser(this.getUser(), status);
-
-                // Add the room to the user
-                this.getUser().addRoom(room);
+            var room = null;
+            if(CC_OPTIONS && CC_OPTIONS.staticRooms) {
+                for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
+                    room = CC_OPTIONS.staticRooms[i];
+                    staticRooms[room.rid] = room;
+                }
             }
-        },
-
-        leaveRoom: function (room) {
-            if(room) {
-                // Remove the user from the room
-                room.removeUser(this.getUser());
-
-                // Remove the room from the user's list
-                this.getUser().removeRoom(room);
+            if(API.meta && API.meta.rooms) {
+                for(i = 0; i < API.meta.rooms.length; i++) {
+                    room = API.meta.rooms[i];
+                    staticRooms[room.rid] = room;
+                }
             }
+
+            return staticRooms;
         },
 
-//        uidIsMine: function (uid) {
-//            return uid == this.getUser().meta.uid;
-//        },
+        cleanStaticRooms: function (existingRooms) {
+
+            var staticRooms = this.getStaticRooms();
+
+            // Now we want to compare the static rooms with the list of
+            // public rooms
+
+            for(var key in existingRooms) {
+                if(existingRooms.hasOwnProperty(key)) {
+
+                    var rid = existingRooms[key].rid;
+
+                    // This means that it's not a user created room
+                    if(rid && rid.length != 20 && !existingRooms[key].userCreated) {
+                        // Is this room included in the list of rooms we made?
+                        if(!staticRooms[rid]) {
+                            // Get the room
+                            var room = Room.getOrCreateRoomWithID(rid);
+
+                            // Remove the room from the public list and delete the room
+                            //room.delete();
+                            room.removeFromPublicRooms();
+
+                        }
+                    }
+                }
+            }
+
+        },
 
         numberOfChatters: function () {
 

@@ -31,14 +31,14 @@
         </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div ng-show="activeTab == 'messages'" class="cc-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
+        <div ng-show="activeTab == 'messages'" class="cc-chat-box-msgs" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake disable-drag>
             <div  ng-repeat="message in room.getMessages()">
 
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.meta.image }}" />
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.getThumbnail() }}" />
                         <span class="cc-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
-                            {{ message.meta.text }}
+                            <div class="cc-enable-select" ng-bind-html="message.meta.text | linky | emoji"></div>
                         </span>
                     </div>
                     <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">

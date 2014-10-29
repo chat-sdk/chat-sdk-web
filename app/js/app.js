@@ -6,7 +6,12 @@ var myApp = angular.module('myApp', [
   'myApp.filters',
   'myApp.services',
   'myApp.directives',
-  'myApp.controllers'
+  'myApp.controllers',
+  'myApp.room',
+  'myApp.user',
+  'myApp.message',
+  'myApp.stateManager'
+
 ]).config(['$sceDelegateProvider', function($sceDelegateProvider) {
     $sceDelegateProvider.resourceUrlWhitelist([
         // Allow same origin resource loads.
