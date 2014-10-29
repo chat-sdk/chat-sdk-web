@@ -20,6 +20,8 @@ var minifyCSS = require('gulp-minify-css');
 
 var bowerSrc = require('gulp-bower-src');
 
+var insert = require('gulp-insert');
+
 // Setup paths
 var DIST_PATH = 'app/dist/';
 var DIST_TEST_PATH = 'app/dist_test/';
@@ -36,10 +38,11 @@ gulp.task('minify-css', function() {
         'app/libs/flags/stylesheets/flags/flags16.css',
         'app/css/reset-uikit.css',
         'app/css/style.css',
+        'app/bower_components/angular-emoji-filter/dist/emoji.min.css'
         //'app/bower_components/uikit/dist/css/uikit.css',
         //'app/bower_components/uikit/dist/css/uikit.gradient.css',
-        '!*.min.css',
-        '!/**/*.min.css'
+        //'!*.min.css',
+        //'!/**/*.min.css'
     ]
 
   return gulp.src(src)
@@ -72,6 +75,8 @@ gulp.task('copy', function () {
     gulp.src('app/libs/flags/images/flags/*.png').pipe(gulp.dest( DIST_PATH + 'images/flags/'));
     gulp.src('app/libs/flags/images/flags/*.png').pipe(gulp.dest( DIST_TEST_PATH + 'images/flags/'));
 
+    gulp.src('app/bower_components/angular-emoji-filter/dist/*.png').pipe(gulp.dest( DIST_PATH + 'css/_/'));
+    gulp.src('app/bower_components/angular-emoji-filter/dist/*.png').pipe(gulp.dest( DIST_TEST_PATH + 'css/_/'));
 
 });
 
@@ -97,24 +102,12 @@ var opts = {empty:true, quotes:true};
 gulp.task('scripts', function() {
 
     var paths = [
-//        'app/env.js',
-        'app/js/*.js'
-    ];
-
-    gulp.src(paths)
-        .pipe(concat('all.js'))
-        .pipe(gulp.dest(DIST_PATH + 'js'))
-        .pipe(gulp.dest(DIST_TEST_PATH + 'js'))
-        .pipe(rename('all.min.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest(DIST_PATH + 'js'))
-        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
-
-    paths = [
-        'app/bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
-        'app/bower_components/jquery/jquery.min.js',
-        'app/bower_components/uikit/dist/js/uikit.min.js',
+//        'app/bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
+        'app/bower_components/jquery/dist/jquery.min.js',
+//        'app/bower_components/uikit/dist/js/uikit.min.js',
         'app/bower_components/angular/angular.min.js',
+//         'app/bower_components/angular-cookies/angular-cookies.min.js',
+		'app/bower_components/jquery-cookie/jquery.cookie.js',
         'app/bower_components/angular-file-upload/dist/angular-file-upload.min.js',
         'app/bower_components/angular-file-upload/dist/angular-file-upload-shim.min.js',
         'app/bower_components/firebase/firebase.js',
@@ -122,14 +115,42 @@ gulp.task('scripts', function() {
         'app/bower_components/firebase-simple-login/firebase-simple-login.js',
         'app/bower_components/angular-facebook/lib/angular-facebook.js',
         'app/bower_components/FileSaver/FileSaver.js',
-        'app/bower_components/moment/moment.js',
-        'app/libs/sha256.js'
+        'app/bower_components/moment/min/moment.min.js',
+        'app/bower_components/angular-sanitize/angular-sanitize.min.js',
+        'app/bower_components/angular-emoji-filter/lib/cc-emoji.js',
+        'app/libs/sha256.js', 
+        'app/js/*.js'
     ];
 
+	// Non-minified version
     gulp.src(paths)
-        .pipe(concat('dist.min.js'))
+        .pipe(concat('all.js'))
+    	.pipe(insert.wrap('var cc = (function () {', '}());$.noConflict();'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+        
+    gulp.src(paths)
+        .pipe(concat('all.js'))
+        .pipe(rename('all.min.js'))
+//	    .pipe(uglify('all.min.js', {
+//    	  outSourceMap: true
+//    	}))
+    	.pipe(insert.wrap('var cc = (function () {', '}()); $.noConflict();'))
+        .pipe(gulp.dest(DIST_PATH + 'js'))
+        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+        
+	gulp.src(['app/bower_components/dist.js'])
+        .pipe(rename('dist.min.js'))
+        .pipe(gulp.dest(DIST_PATH + 'js'))
+        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+
+//     paths = [
+//     ];
+// 
+//     gulp.src(paths)
+//         .pipe(concat('dist.min.js'))
+//         .pipe(gulp.dest(DIST_PATH + 'js'))
+//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
 });
 
