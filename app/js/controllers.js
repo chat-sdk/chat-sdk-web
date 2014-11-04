@@ -1079,6 +1079,10 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         return typing;
     };
 
+    $scope.loadMoreMessages = function () {
+
+    }
+
 }]);
 
 myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTin', function($scope, Auth, Layout, CookieTin) {
