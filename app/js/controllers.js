@@ -8,6 +8,11 @@ myApp.controller('AppController', [
     '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room',
     function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room) {
 
+    $scope.$on('$locationChangeStart', function (event, location) {
+        console.log("");
+        event.preventDefault();
+    });
+
     $scope.init = function () {
 
 

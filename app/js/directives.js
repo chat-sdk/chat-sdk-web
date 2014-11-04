@@ -686,3 +686,4 @@ myApp.directive('infiniteScroll', [
         };
     }
 ]);
+

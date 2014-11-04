@@ -6,10 +6,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "angular": "1.2.x",
-    "angular-loader": "1.2.x",
-    "angular-mocks": "1.2.x",
-    "html5-boilerplate": "4.3.0",
+    "angular": "latest",
+    "angular-loader": "latest",
+    "angular-mocks": "latest",
+    "html5-boilerplate": "latest",
     "ng-file-upload": "latest",
     "uikit":"latest",
     "firebase": "latest",
@@ -19,7 +19,7 @@
     "FileSaver": "latest",
     "moment": "latest",
     "jquery-cookie": "latest",
-    "angular-sanitize": "1.2.x",
+    "angular-sanitize": "latest",
     "angular-emoji-filter": "latest"
     
   }

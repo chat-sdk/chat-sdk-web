@@ -12,7 +12,7 @@ var myApp = angular.module('myApp', [
   'myApp.message',
   'myApp.stateManager'
 
-]).config(['$sceDelegateProvider', function($sceDelegateProvider) {
+]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([
         // Allow same origin resource loads.
         'self',
@@ -26,6 +26,12 @@ var myApp = angular.module('myApp', [
         'http://chatcat/dist_test/partials/**',
         'http://chatcat/dist/partials/**'
     ]);
+
+    $provide.decorator('$browser', ['$delegate', function ($delegate) {
+        $delegate.onUrlChange = function () {};
+        $delegate.url = function () { return ""};
+        return $delegate;
+    }]);
 
     // The blacklist overrides the whitelist so the open redirect here is blocked.
 //    $sceDelegateProvider.resourceUrlBlacklist([
