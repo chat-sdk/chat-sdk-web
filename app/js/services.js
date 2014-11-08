@@ -13,9 +13,113 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
+
 myApp.factory('Config', function () {
+
+    var setByDefault = 0;
+    var setByInclude = 1;
+    var setBySingleSignOn = 2;
+    var setByFirebase = 3;
+
     return {
-        maxHistoricMessages: 20
+
+        setByDefault: setByDefault,
+        setByInclude: setByInclude,
+        setBySingleSignOn: setBySingleSignOn,
+        setByFirebase: setByFirebase,
+
+        // How many historic messages to set by default
+        maxHistoricMessages: 20,
+        maxHistoricMessagesSet: setByDefault,
+
+        // Stop the user from changing their name
+        disableUserNameChange: false,
+        disableUserNameChangeSet: setByDefault,
+
+        // Stop the profile box from being displayed
+        disableProfileBox: false,
+        disableProfileBoxSet: setByDefault,
+
+        // Clock type:
+        // - 12hour
+        // - 24hour
+        clockType: '12hour',
+        clockTypeSet: setByDefault,
+
+        // Are users allowed to create their own public rooms
+        usersCanCreatePublicRooms: false,
+        usersCanCreatePublicRoomsSet: setByDefault,
+
+        // The primary domain is used when the chat is needed
+        // across multiple subdomains
+        primaryDomain: '',
+        primaryDomainSet: setByDefault,
+
+        // Allow anonymous login?
+        anonymousLoginEnabled: false,
+        anonymousLoginEnabledSet: setByDefault,
+
+        // Can the user log in using social logins
+        socialLoginEnabled: true,
+        socialLoginEnabledSet: setByDefault,
+
+        // Header and tab color
+        headerColor: '#0d82b3',
+        headerColorSet: setByDefault,
+
+        // After how long should the user be marked as offline
+        inactivityTimeout: 5,
+        inactivityTimeoutSet: setByDefault,
+
+        // We update the config using the data provided
+        // but we only update variables where the priority
+        // of this setBy entity is higher than the previous
+        // one
+        setConfig: function (setBy, config) {
+
+            if(config.maxHistoricMessages && this.maxHistoricMessagesSet < setBy) {
+                this.maxHistoricMessages = config.maxHistoricMessages;
+                this.maxHistoricMessagesSet = setBy;
+            }
+            if(config.disableUserNameChange && this.disableUserNameChangeSet < setBy) {
+                this.disableUserNameChange = config.disableUserNameChange;
+                this.disableUserNameChangeSet = setBy;
+            }
+            if(config.disableProfileBox && this.disableProfileBoxSet < setBy) {
+                this.disableProfileBox = config.disableProfileBox;
+                this.disableProfileBoxSet = setBy;
+            }
+            if(config.clockType && this.clockTypeSet < setBy) {
+                this.clockType = config.clockType;
+                this.clockTypeSet = setBy;
+            }
+            if(config.usersCanCreatePublicRooms && this.usersCanCreatePublicRoomsSet < setBy) {
+                this.usersCanCreatePublicRooms = config.usersCanCreatePublicRooms;
+                this.usersCanCreatePublicRoomsSet = setBy;
+            }
+            if(config.primaryDomain && this.primaryDomainSet < setBy) {
+                this.primaryDomain = config.primaryDomain;
+                this.primaryDomainSet = setBy;
+            }
+            if(config.anonymousLoginEnabled && this.anonymousLoginEnabledSet < setBy) {
+                this.anonymousLoginEnabled = config.anonymousLoginEnabled;
+                this.anonymousLoginEnabledSet = setBy;
+            }
+            if(config.socialLoginEnabled && this.socialLoginEnabledSet < setBy) {
+                this.socialLoginEnabled = config.socialLoginEnabled;
+                this.socialLoginEnabledSet = setBy;
+            }
+            if(config.headerColor && this.headerColorSet < setBy) {
+                this.headerColor = config.headerColor;
+                this.headerColorSet = setBy;
+            }
+            if(config.inactivityTimeout && this.inactivityTimeoutSet < setBy) {
+                this.inactivityTimeout = config.inactivityTimeout;
+                this.inactivityTimeout = Math.max(this.inactivityTimeout, 2);
+                this.inactivityTimeout = Math.min(this.inactivityTimeout, 15);
+                this.inactivityTimeoutSet = setBy;
+            }
+        }
     };
 });
 
@@ -111,7 +215,7 @@ myApp.factory('CookieTin', function () {
     };
 });
 
-myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope, $q, $http) {
+myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', function ($rootScope, $q, $http, Config) {
 
     return {
 
@@ -133,6 +237,12 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope
 
                 if(r && r.data && !r.data.error) {
                     if(!r.data.error && r.status == 200) {
+
+                        // Update the config object with options that are set
+                        // These will be overridden by options which are set on the
+                        // config tab of the user's Firebase install
+                        Config.setConfig(Config.setBySingleSignOn, r.data);
+
                         deferred.resolve(r.data);
                     }
                     else {
@@ -156,13 +266,11 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', function ($rootScope
  * status
  * We need to call visibility to make sure it's initilized
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($rootScope, $timeout, Visibility) {
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', function ($rootScope, $timeout, Visibility, Config) {
     return {
 
         user: null,
         inactiveTimerPromise: null,
-
-
 
         // Initialize the visibility service
         start: function (user) {
@@ -189,7 +297,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
                     // 2 minutes take them offline
                     this.inactiveTimerPromise = $timeout((function () {
                         this.goOffline();
-                    }).bind(this), 1000 * 60 * bUserTimeout);
+                    }).bind(this), 1000 * 60 * Config.inactivityTimeout);
                 }
             }).bind(this));
 
@@ -227,7 +335,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', function ($ro
     };
 }]);
 
-myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
+myApp.factory('API', ['$q', '$http', '$window', 'Config', function ($q, $http, $window, Config) {
     return {
 
         meta: {},
@@ -261,7 +369,7 @@ myApp.factory('API', ['$q', '$http', '$window', function ($q, $http, $window) {
 //            return deferred.promise;
 
             // Do we have a primaryURL?
-            var url = CC_OPTIONS.primaryDomain;
+            var url = Config.primaryDomain;
 
             if(!url || url.length == 0) {
                 url = $window.location.host;
@@ -1208,6 +1316,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                     if(authUser.thirdPartyData.imageURL) {
                         imageURL = authUser.thirdPartyData.imageURL;
                     }
+                    if(authUser.thirdPartyData.profileHTML) {
+                        user.meta.profileHTML = authUser.thirdPartyData.profileHTML;
+                    }
+                    else {
+                        user.meta.profileHTML = '';
+                    }
                 }
 
                 // If they don't have a profile picture load it from the social network
@@ -1407,10 +1521,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
                             // Get the room
                             var room = Room.getOrCreateRoomWithID(rid);
 
-                            // Remove the room from the public list and delete the room
-                            //room.delete();
-                            room.removeFromPublicRooms();
-
+                            // TODO: this is a workout around until we remove the Anuj code
+                            // Is this a newPanel room
+                            if(!room.meta.newPanel) {
+                                // Remove the room from the public list and delete the room
+                                //room.delete();
+                                room.removeFromPublicRooms();
+                            }
                         }
                     }
                 }

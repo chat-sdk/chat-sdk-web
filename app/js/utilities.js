@@ -41,11 +41,6 @@ var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
 var bImagesURL = bRootURL + 'img/';
 var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
 
-// User timeout
-var bUserTimeout = CC_OPTIONS.inactivityTimeout ? CC_OPTIONS.inactivityTimeout : 5;
-bUserTimeout = Math.max(bUserTimeout, 2);
-bUserTimeout = Math.min(bUserTimeout, 15);
-
 var bPullURL = "//chat.deluge.co/server/pull.php";
 //var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
 

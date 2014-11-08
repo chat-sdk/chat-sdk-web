@@ -5,13 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room',
-    function($rootScope, $scope, $timeout, $window, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room) {
-
-    $scope.$on('$locationChangeStart', function (event, location) {
-        console.log("");
-        event.preventDefault();
-    });
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config) {
 
     $scope.init = function () {
 
@@ -62,14 +57,19 @@ myApp.controller('AppController', [
          * Anonymous login and social login
          */
 
-        $rootScope.anonymousLoginEnabled = CC_OPTIONS.anonymousLoginEnabled;
-        $rootScope.socialLoginEnabled = CC_OPTIONS.socialLoginEnabled;
+        // Set the config object that contains settings for the chat
+        Config.setConfig(Config.setByInclude, CC_OPTIONS);
+        $rootScope.getConfig = function() {
+            return Config;
+        }
 
         $scope.setupImages();
 
         $scope.setMainBoxMinimized(CookieTin.getProperty(CookieTin.mainMinimizedKey));
 
     };
+
+
 
     /**
      * The images in the partials should be pointed at the correct
@@ -89,6 +89,7 @@ myApp.controller('AppController', [
         $rootScope.img_loader = bImagesURL + 'loader.gif';
         $rootScope.img_20_user = bImagesURL + 'cc-20-user.png';
         $rootScope.img_20_friend = bImagesURL + 'cc-20-friend.png';
+        $rootScope.img_30_logout = bImagesURL + 'cc-30-logout.png';
     }
 
     $scope.getUser = function () {
@@ -203,13 +204,15 @@ myApp.controller('AppController', [
         else {
             $scope.cancelTimer();
             $scope.currentUser = Cache.getUserWithID(uid);
+            var profileHTML = $scope.currentUser.meta.profileHTML;
+            $scope.currentUserHTML = !profileHTML ? null : $sce.trustAsHtml(profileHTML);
         }
     };
+
 
     $scope.cancelTimer = function () {
         $timeout.cancel($scope.profileHideTimeoutPromise);
     };
-
 
     $scope.addRemoveFriend = function(user) {
         if($scope.isFriend(user)) {
@@ -311,6 +314,7 @@ myApp.controller('AppController', [
         else if(user.blockingMe) {
         }
     };
+
 
     /**
      * Log the user out
@@ -500,7 +504,7 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', function($scope, Auth, Cache, Utilities) {
+myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', 'Config', function($scope, Auth, Cache, Utilities, Config) {
 
     $scope.init = function () {
 
@@ -520,10 +524,11 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', f
         // We don't want people deleting rooms from this view
         $scope.canDeleteRoom = false;
 
-        // Can the user create a new public chat room?
-        $scope.roomCreationEnabled = CC_OPTIONS.usersCanCreatePublicRooms;
-
     };
+
+    $scope.profileBoxDisabled = function () {
+        return Config.disableProfileBox;
+    }
 
     $scope.showOverlay = function (message) {
         $scope.notification.show = true;
@@ -640,6 +645,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                     $rootScope.auth = result.auth;
                     $rootScope.auth.provider = 'custom';
                     $rootScope.auth.thirdPartyData = data;
+
+                    if(result)
 
                     $scope.handleUserLogin($rootScope.auth, false);
 
@@ -909,6 +916,10 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
     };
 
+    $scope.loadMoreMessages = function () {
+        console.log("Load more messages");
+    };
+
     $scope.tabClicked = function (tab) {
         $scope.activeTab = tab;
     };
@@ -1084,9 +1095,6 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         return typing;
     };
 
-    $scope.loadMoreMessages = function () {
-
-    }
 
 }]);
 
@@ -1282,7 +1290,7 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
 
 }]);
 
-myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope, Auth) {
+myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', function($scope, Auth, Config) {
 
     $scope.ref = null,
 
@@ -1366,6 +1374,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', function($scope
             }
         }
     };
+
+    $scope.disableUserNameChange = function () {
+        return Config.disableUserNameChange;
+    }
 
     $scope.init();
 

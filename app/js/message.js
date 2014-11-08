@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.message', ['firebase']);
 
-myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', function ($rootScope, $q, $sce, Cache, User) {
+myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', function ($rootScope, $q, $sce, Cache, User, Config) {
     var message = {
 
         newMessage: function (rid, uid, text) {
@@ -29,7 +29,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', function (
 
             message.mid = mid;
 
-            if(CC_OPTIONS.clockType == '24hour') {
+            if(Config.clockType == '24hour') {
                 message.timeString = moment(meta.time).format('HH:mm');
             }
             else {

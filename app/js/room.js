@@ -33,6 +33,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     users: {},
                     usersMeta: {},
                     messages: [],
+                    allMessages: [],
                     typing: {},
                     offset: 0,
                     targetSlot: null,
@@ -454,26 +455,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     return users;
                 };
 
-                room.getMessages = function () {
-
-                    if(!room.messagesDirty) {
-                        return room.messages;
-                    }
-                    // Sort messages by time
-                    room.messages.sort(function (a, b) {
-                        return a.meta.time - b.meta.time;
-                    });
-                    room.messagesDirty = false;
-
-                    // If the messages array contains more than 40 messages
-                    // remove the oldest messages
-                    if(room.messages.length > Config.maxHistoricMessages) {
-                        room.messages.splice(0, room.messages.length - Config.maxHistoricMessages);
-                    }
-
-                    return room.messages;
-                };
-
                 room.sendMessage = function (text, user) {
 
                     if(!text || text.length === 0)
@@ -619,8 +600,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     return deferred.promise;
                 };
 
+                /**
+                 * Start listening to messages being added
+                 */
                 room.messagesOn = function () {
 
+                    // Make sure the room is valid
                     if(room.messagesAreOn || !room.meta || !room.meta.rid) {
                         return;
                     }
@@ -630,6 +615,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     // Also get the messages from the room
                     var ref = Paths.roomMessagesRef(room.meta.rid);
 
+                    // If we already have a message then only listen for new
+                    // messages
                     if(room.lastMessage && room.lastMessage.meta.time) {
                         ref = ref.startAt(room.lastMessage.meta.time);
                     }
@@ -696,6 +683,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             message.hideTime = true;
 
                             room.messages.push(message);
+                            room.allMessages.push(message);
+
+                            room.sortMessages();
+
                             room.lastMessage = message;
                             room.messagesDirty = true;
                         }
@@ -729,6 +720,36 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         });
                     });
                 }
+
+                room.sortMessages = function () {
+                    // Now we should sort all messages
+                    room.allMessages.sort(function (a, b) {
+                        return a.meta.time - b.meta.time;
+                    });
+                    room.messages.sort(function (a, b) {
+                        return a.meta.time - b.meta.time;
+                    });
+                }
+
+                room.getMessages = function () {
+
+                    if(!room.messagesDirty) {
+                        return room.messages;
+                    }
+                    // Sort messages by time
+                    room.messages.sort(function (a, b) {
+                        return a.meta.time - b.meta.time;
+                    });
+                    room.messagesDirty = false;
+
+                    // If the messages array contains more than 40 messages
+                    // remove the oldest messages
+                    if(room.messages.length > Config.maxHistoricMessages) {
+                        room.messages.splice(0, room.messages.length - Config.maxHistoricMessages);
+                    }
+
+                    return room.messages;
+                };
 
                 room.messagesOff = function () {
 

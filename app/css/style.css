@@ -253,6 +253,7 @@ div#cc-app .cc-profile-subtitle {
 
 div#cc-app .cc-profile-description {
     margin: 5px 5px;
+    min-height: 80px;
 }
 
 
