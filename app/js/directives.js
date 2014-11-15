@@ -641,8 +641,9 @@ myApp.directive('infiniteScroll', [
                 }
 
                 elem.on('scroll', handler);
+
                 scope.$on('$destroy', function() {
-                    return $window.off('scroll', handler);
+                    return elem.off('scroll', handler);
                 });
 
             }

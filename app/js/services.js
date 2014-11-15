@@ -1141,23 +1141,28 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
             // then alphabetically
             rooms.sort(function(a, b) {
 
-                if(a.meta.userCreated != b.meta.userCreated) {
-                    return a.userCreated ? 1 : -1;
+                var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
+                var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+
+                if(au != bu) {
+                    return au ? 1 : -1;
                 }
 
                 // Weight
-                var aw = a.meta.weight; aw = aw ? aw : 100;
-                var bw = b.meta.weight; bw = bw ? bw : 100;
+                var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
+                var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
 
                 if(aw != bw) {
                     return aw - bw;
                 }
                 else {
 
-                    var ac = a.userCount();
-                    var bc = b.userCount();
+                    var ac = a.onlineUserCount();
+                    var bc = b.onlineUserCount();
 
-                    if(ac == bc) {
+                    //console.log("1: " + ac + ", 2: " + bc);
+
+                    if(ac != bc) {
                         return bc - ac;
                     }
                     else {

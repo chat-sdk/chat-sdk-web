@@ -189,17 +189,18 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 }
 
                 room.userCount = function (includeClosed) {
-                    var i = 0;
-                    var user = null;
-                    for(var key in room.usersMeta) {
-                        if(room.usersMeta.hasOwnProperty(key)) {
-                            user = room.usersMeta[key];
-                            if(includeClosed || user.status != bUserStatusClosed) {
-                                i++;
-                            }
-                        }
-                    }
-                    return i;
+//                    var i = 0;
+//                    var user = null;
+//                    for(var key in room.usersMeta) {
+//                        if(room.usersMeta.hasOwnProperty(key)) {
+//                            user = room.usersMeta[key];
+//                            if(includeClosed || user.status != bUserStatusClosed) {
+//                                i++;
+//                            }
+//                        }
+//                    }
+//                    return i;
+                    return room.onlineUserCount();
 
 //                    for(var key in room.users) {
 //                        if(room.users.hasOwnProperty(key)) {
@@ -208,6 +209,20 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 //                        }
 //                    }
 //                    return i;
+                };
+
+                room.onlineUserCount = function () {
+                    var user;
+                    var i = 0;
+                    for(var key in room.usersMeta) {
+                        if(room.users.hasOwnProperty(key)) {
+                            user = room.usersMeta[key];
+                            if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
+                                i++;
+                            }
+                        }
+                    }
+                    return i;
                 };
 
                 room.addUser = function (user, status) {
