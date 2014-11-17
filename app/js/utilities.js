@@ -204,7 +204,7 @@ var Paths = {
 };
 
 function unORNull (object) {
-    return object === 'undefined' || object == null;
+    return !object || object === 'undefined' || object == null;
 }
 
 function timeSince (timestamp) {

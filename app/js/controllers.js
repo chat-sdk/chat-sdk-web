@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config, Parse) {
 
     $scope.init = function () {
 
@@ -379,6 +379,8 @@ myApp.controller('AppController', [
             return;
         }
 
+
+
         var reader = new FileReader();
 
         reader.onload = (function() {
@@ -430,6 +432,11 @@ myApp.controller('AppController', [
                     // Set the user's image
                     $scope.getUser().setThumbnail(dataURL, true);
 
+                    // Upload the files
+                    for(var i = 0; i < $files.length; i++) {
+                        var file = $files[i];
+                        Parse.uploadFile(file);
+                    }
 
                 };
                 image.src = e.target.result;
@@ -633,25 +640,42 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         $rootScope.auth = $firebaseSimpleLogin(Paths.firebase());
     };
 
+    $scope.tries = 0;
     $scope.singleSignOn = function () {
         SingleSignOn.authenticate(CC_OPTIONS.singleSignOnURL).then((function (data) {
 
             // Authenticate with firebase using token
             Paths.firebase().auth(data.token, (function(error, result) {
                 if (error) {
-                    $scope.logout();
+
+                    // If this is the first try then maybe the token has expired...
+                    // invalidate the token and try again
+                    if($scope.tries == 0) {
+                        $scope.tries++;
+                        // Invalidate the token and try again
+                        SingleSignOn.invalidate();
+                        $scope.singleSignOn();
+                    }
+                    else {
+                        $scope.logout();
+                    }
+
                 } else {
 
                     $rootScope.auth = result.auth;
                     $rootScope.auth.provider = 'custom';
                     $rootScope.auth.thirdPartyData = data;
 
-                    if(result)
+                    if(result) {
+                        $scope.handleUserLogin($rootScope.auth, false);
 
-                    $scope.handleUserLogin($rootScope.auth, false);
+                        console.log('Authenticated successfully with payload:', result.auth);
+                        console.log('Auth expires at:', new Date(result.expires * 1000));
+                    }
+                    else {
+                        $scope.logout();
+                    }
 
-                    console.log('Authenticated successfully with payload:', result.auth);
-                    console.log('Auth expires at:', new Date(result.expires * 1000));
                 }
             }).bind(this));
 

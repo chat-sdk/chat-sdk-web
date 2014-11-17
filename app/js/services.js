@@ -13,6 +13,73 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
+myApp.factory('Cloudinary', ['$http', function ($http) {
+
+    return {
+
+        uploadFile: function (file) {
+
+            var serverUrl = 'https://api.cloudinary.com/v1_1/demo/image/upload';
+            return $http({
+                method: "post",
+                headers: {
+                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
+                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
+                    "Content-Type": file.type
+                },
+                url: serverUrl,
+                data: file,
+                processData: false,
+                contentType: false,
+                async:  true
+            });
+        }
+    };
+}]);
+
+myApp.factory('Parse', ['$http', function ($http) {
+
+    return {
+
+        uploadFile: function (file) {
+
+//            var serverUrl = 'https://api.parse.com/1/functions/hello';
+//            return $http({
+//                method: "post",
+//                headers: {
+//                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
+//                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
+//                    "Content-Type": 'application/json'
+//                },
+//                url: serverUrl,
+//                data: file,
+//                processData: false,
+//                contentType: false,
+//                async:  true
+//            }).then(function (response) {
+//                console.log("Success");
+//            }, function (error) {
+//                console.log("Error");
+//            });
+
+
+            var serverUrl = 'https://api.parse.com/1/files/' + file.name;
+            return $http({
+                method: "post",
+                headers: {
+                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
+                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
+                    "Content-Type": file.type
+                },
+                url: serverUrl,
+                data: file,
+                processData: false,
+                contentType: false,
+                async:  true
+            });
+        }
+    };
+}]);
 
 myApp.factory('Config', function () {
 
@@ -152,6 +219,10 @@ myApp.factory('CookieTin', function () {
         mainMinimizedKey: 'cc_main_minimized',
         moreMinimizedKey: 'cc_more_minimized',
 
+        tokenKey: 'cc_token',
+        UIDKey: 'cc_uid',
+        tokenExpiryKey: 'cc_token_expiry',
+
         isOffline: function () {
             var cookie = jQuery.cookie()['cc_offline'];
             if(cookie) {
@@ -206,42 +277,164 @@ myApp.factory('CookieTin', function () {
         getProperty: function (root, id) {
             var c = jQuery.cookie(root + id);
             if(!unORNull(c)) {
-                return eval(c);
+                var e;
+                try {
+                    e = eval(c);
+                }
+                catch (error) {
+                    e = c;
+                }
+                return e;
             }
             else {
                 return null;
             }
+        },
+
+        removeProperty: function (root, id) {
+            jQuery.cookie(root + id, null, {domain: '', path: '/'})
         }
     };
 });
 
-myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', function ($rootScope, $q, $http, Config) {
+myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin', function ($rootScope, $q, $http, Config, CookieTin) {
+
+    // API Levels
+
+    // 0: Client makes request to SSO server every time chat loads
+    // each time it requests a new token
+
+    // 1: Introduced user token caching - client first makes request
+    // to get user's ID. It only requests a new token if the ID has
+    // changed
 
     return {
 
+        defaultError: "Unable to reach server",
+
+        getAPILevel: function () {
+            if(unORNull(CC_OPTIONS.singleSignOnAPILevel)) {
+                return 0;
+            }
+            else {
+                return CC_OPTIONS.singleSignOnAPILevel;
+            }
+        },
+
+        invalidate: function () {
+            CookieTin.removeProperty(CookieTin.tokenKey);
+            CookieTin.removeProperty(CookieTin.tokenExpiryKey);
+            CookieTin.removeProperty(CookieTin.UIDKey);
+        },
+
         authenticate: function (url) {
+            switch (this.getAPILevel()) {
+                case 0:
+                    return this.authenticateLevel0(url);
+                    break;
+                case 1:
+                    return this.authenticateLevel1(url);
+                    break;
+            }
+        },
+
+        authenticateLevel0: function (url) {
 
             var deferred = $q.defer();
 
-            var defaultError = "Unable to reach server";
-
-            // We need to make an AJAX call to the URL provided to get
-            // the user's token
-            $http({
+            this.executeRequest({
                 method: 'get',
                 params: {
                     action: 'cc_auth'
                 },
                 url: url
-            }).then((function (r) {
+            }).then(function (data) {
+
+                // Update the config object with options that are set
+                // These will be overridden by options which are set on the
+                // config tab of the user's Firebase install
+                Config.setConfig(Config.setBySingleSignOn, data);
+
+                deferred.resolve(data);
+
+            }, deferred.reject);
+
+            return deferred.promise();
+        },
+
+        authenticateLevel1: function (url) {
+
+            var deferred = $q.defer();
+
+            // Get the current user's information
+            this.getUserUID(url).then((function (response) {
+
+                var currentUID = response.uid;
+
+                // Check to see if we have a token cached
+                var token = CookieTin.getProperty(CookieTin.tokenKey);
+                var expiry = CookieTin.getProperty(CookieTin.tokenExpiryKey);
+                var uid = CookieTin.getProperty(CookieTin.UIDKey);
+
+                // If any value isn't set or if the token is expired get a new token
+                if(!unORNull(token) && !unORNull(expiry) && !unORNull(uid)) {
+                    // Time since token was refreshed...
+                    var timeSince = new Date().getTime() - expiry;
+                    // Longer than 20 days
+                    if(timeSince < 60 * 60 * 24 * 20 && uid == currentUID) {
+                        deferred.resolve({
+                            token: token
+                        });
+                        return deferred.promise;
+                    }
+                }
+
+                this.executeRequest({
+                    method: 'get',
+                    params: {
+                        action: 'cc_get_token'
+                    },
+                    url: url
+                }).then(function (data) {
+
+                    // Cache the token and the user's current ID
+                    CookieTin.setProperty(data.token, CookieTin.tokenKey);
+                    CookieTin.setProperty(currentUID, CookieTin.UIDKey);
+                    CookieTin.setProperty(new Date().getTime(), CookieTin.tokenExpiryKey);
+
+                    // Update the config object with options that are set
+                    // These will be overridden by options which are set on the
+                    // config tab of the user's Firebase install
+                    Config.setConfig(Config.setBySingleSignOn, data);
+
+                    deferred.resolve(data);
+
+                }, deferred.reject);
+
+            }).bind(this), deferred.reject);
+
+            return deferred.promise;
+        },
+
+        getUserUID: function (url) {
+
+            return this.executeRequest({
+                method: 'get',
+                params: {
+                    action: 'cc_get_uid'
+                },
+                url: url
+            });
+        },
+
+        executeRequest: function (params) {
+
+            var deferred = $q.defer();
+
+            $http(params).then((function (r) {
 
                 if(r && r.data && !r.data.error) {
                     if(!r.data.error && r.status == 200) {
-
-                        // Update the config object with options that are set
-                        // These will be overridden by options which are set on the
-                        // config tab of the user's Firebase install
-                        Config.setConfig(Config.setBySingleSignOn, r.data);
 
                         deferred.resolve(r.data);
                     }
@@ -250,7 +443,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', function (
                     }
                 }
                 else {
-                    deferred.reject(defaultError);
+                    deferred.reject(this.defaultError);
                 }
             }).bind(this), function (error) {
                 deferred.reject(error.message ? error.message : defaultError);
@@ -258,7 +451,8 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', function (
 
             return deferred.promise;
         }
-    }
+    };
+
 }]);
 
 /**
