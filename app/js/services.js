@@ -315,7 +315,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
 
             }, deferred.reject);
 
-            return deferred.promise();
+            return deferred.promise;
         },
 
         authenticateLevel1: function (url) {
