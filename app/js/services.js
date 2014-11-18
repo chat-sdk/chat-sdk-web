@@ -320,6 +320,8 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
 
         authenticateLevel1: function (url) {
 
+            //this.invalidate();
+
             var deferred = $q.defer();
 
             // Get the current user's information
