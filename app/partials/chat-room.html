@@ -41,7 +41,7 @@
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
         <div ng-show="activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake disable-drag>
-            <div ng-repeat="message in room.getMessages() ">
+            <div ng-repeat="message in room.messages ">
 
                 <div>
                     <div class="cc-message-outer">

@@ -81,6 +81,9 @@ var bShowCreateChatBox = 'showCreateChatBox';
 
 var bVisibilityChangedNotification = 'bVisibilityChangedNotification';
 
+var bPublicRoomAddedNotification = 'bPublicRoomAddedNotification';
+var bPublicRoomRemovedNotification = 'bPublicRoomRemovedNotification';
+var bRoomUpdatedNotification = 'bRoomUpdatedNotification';
 
 // Chat width
 var bChatRoomWidth = 230;
@@ -223,3 +226,46 @@ function timeSince (timestamp) {
         return time * 1000;
     }
 }
+
+var CCArray = {
+
+    indexOf: function (array, id, getID) {
+        for(var i in array) {
+            if(id == getID(array[i])) {
+                return i;
+            }
+        }
+    },
+
+    removeItem: function (array, id, getID) {
+        var i = this.indexOf(array, id, getID);
+        array.splice(i, 1);
+    },
+
+    getItem: function (array, id, getID) {
+        var i = this.indexOf(array, id, getID);
+        return array[i];
+    },
+
+    filterByKey: function (array, key, getKey) {
+        if(!key || key.length == 0 || key === "") {
+            return array;
+        }
+        else {
+            // Loop over all users
+            var result = [];
+            var elm, t1, t2;
+            for(var i in array) {
+                elm = array[i];
+                // Switch to lower case and remove spaces
+                // to improve search results
+                t1 = key.toLowerCase().replace(/ /g,'');
+                t2 = getKey(elm).toLowerCase().replace(/ /g,'');
+                if(t2.substring(0, t1.length) == t1) {
+                    result.push(elm);
+                }
+            }
+            return result;
+        }
+    }
+};

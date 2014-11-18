@@ -379,10 +379,27 @@ myApp.controller('AppController', [
             return;
         }
 
+        if($files.length > 0) {
+            Parse.uploadFile($files[0]).then((function(r) {
 
+                if(r.data && r.data.url) {
+
+                    var imageURL = 'http://skbb48.cloudimage.io/s/crop/100x100/' + r.data.url;
+                    var thumbnailURL = 'http://skbb48.cloudimage.io/s/crop/30x30/' + r.data.url;
+
+                    $scope.getUser().setImage(imageURL, true);
+                    $scope.getUser().setThumbnail(thumbnailURL, true);
+                }
+
+            }).bind(this), (function (error) {
+
+            }).bind(this));
+        }
 
         var reader = new FileReader();
 
+        // Load the image into the canvas immediately - so the user
+        // doesn't have to wait for it to upload
         reader.onload = (function() {
             return function(e) {
 
@@ -415,10 +432,7 @@ myApp.controller('AppController', [
                     canvas.height = max_size;
                     canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
 
-                    var dataURL = canvas.toDataURL('image/jpeg');
-
-                    // Set the user's image
-                    $scope.getUser().setImage(dataURL, true);
+                    var imageDataURL = canvas.toDataURL('image/jpeg');
 
                     // Set the user's thumbnail
                     var thumb_size = 30;
@@ -427,16 +441,13 @@ myApp.controller('AppController', [
                     canvas.height = thumb_size;
                     canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, thumb_size, thumb_size);
 
-                    var dataURL = canvas.toDataURL('image/jpeg');
+                    var thumbnailDataURL = canvas.toDataURL('image/jpeg');
 
                     // Set the user's image
-                    $scope.getUser().setThumbnail(dataURL, true);
-
-                    // Upload the files
-                    for(var i = 0; i < $files.length; i++) {
-                        var file = $files[i];
-                        Parse.uploadFile(file);
-                    }
+                    $scope.$apply(function () {
+                        $scope.getUser().setImage(imageDataURL, false);
+                        $scope.getUser().setThumbnail(thumbnailDataURL, false);
+                    });
 
                 };
                 image.src = e.target.result;
@@ -1122,7 +1133,9 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTin', function($scope, Auth, Layout, CookieTin) {
+myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout', 'CookieTin', function($scope, $timeout, Auth, Layout, CookieTin) {
+
+    $scope.rooms = [];
 
     $scope.init = function () {
         $scope.boxWidth = bRoomListBoxWidth;
@@ -1132,14 +1145,17 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTi
         // Is the more box minimized?
         $scope.setMoreBoxMinimized(CookieTin.getProperty(CookieTin.moreMinimizedKey));
 
+        // Update the list when a room changes
+        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+
     };
 
-    $scope.superGetRooms = $scope.getRooms;
-    $scope.getRooms = function() {
-        var rooms = $scope.superGetRooms(false);
+    $scope.updateList = function () {
+
+        $scope.rooms = Layout.getRooms(false);
 
         // Sort rooms by the number of unread messages
-        rooms.sort(function (a, b) {
+        $scope.rooms.sort(function (a, b) {
             // First order by number of unread messages
             // Badge can be null
             var ab = a.badge ? a.badge : 0;
@@ -1154,8 +1170,17 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTi
             }
         });
 
-        return rooms;
+        $timeout(function(){
+            $scope.$digest();
+        });
     };
+
+//    $scope.superGetRooms = $scope.getRooms;
+//    $scope.getRooms = function() {
+//        var rooms = $scope.superGetRooms(false);
+//
+//        return rooms;
+//    };
 
     $scope.roomClicked = function(room) {
 
@@ -1175,13 +1200,14 @@ myApp.controller('RoomListBoxController', ['$scope', 'Auth', 'Layout', 'CookieTi
                 rooms[i].offset = room.offset;
                 rooms[i].width = room.width;
                 rooms[i].height = room.height;
-                rooms[i].active = false;
+                //rooms[i].active = false;
+                rooms[i].setActive(false);
 
                 // Update the new room
                 room.offset = offset;
                 room.width = width;
                 room.height = height;
-                room.activate();
+                room.setActive(true);
                 room.badge = null;
                 room.minimized = false;
 
@@ -1260,12 +1286,33 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', 'Room', function($sc
 
 }]);
 
-myApp.controller('PublicRoomsListController', ['$scope', 'Cache', 'Utilities', function($scope, Cache, Utilities) {
+myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Cache', 'Utilities', function($scope, $timeout, Cache, Utilities) {
 
-    $scope.getRooms = function() {
-        // Filter rooms by search text
-        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
+    $scope.rooms = [];
+
+    $scope.init = function () {
+        $scope.$on(bPublicRoomAddedNotification, $scope.updateList);
+        $scope.$on(bPublicRoomRemovedNotification, $scope.updateList);
+        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+        $scope.$watchCollection('search', $scope.updateList);
     };
+
+    $scope.updateList = function () {
+        Cache.sortPublicRooms();
+        $scope.rooms = CCArray.filterByKey(Cache.publicRooms, $scope.search[$scope.activeTab], function (room) {
+            return room.meta.name;
+        });
+        $timeout(function(){
+            $scope.$digest();
+        });
+    };
+
+//    $scope.getRooms = function() {
+//        // Filter rooms by search text
+//        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
+//    };
+
+    $scope.init();
 
 }]);
 

@@ -21,13 +21,10 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', 
 
         buildMessage: function (mid, meta) {
 
-            var message = {meta : meta};
-
-            // Replace the links in the text with real links
-//            meta.text = this.parseText(meta.text);
-//            meta.text = $sce.trustAsHtml(meta.text);
-
-            message.mid = mid;
+            var message = {
+                meta : meta,
+                mid: mid
+            };
 
             if(Config.clockType == '24hour') {
                 message.timeString = moment(meta.time).format('HH:mm');

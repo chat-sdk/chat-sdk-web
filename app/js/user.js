@@ -120,7 +120,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             user.setThumbnail = function (imageData, push) {
                 var deferred = $q.defer();
 
-
                 if(imageData && imageData == user.thumbnail) {
                     deferred.resolve();
                     return deferred.promise;

@@ -13,55 +13,11 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
-myApp.factory('Cloudinary', ['$http', function ($http) {
-
-    return {
-
-        uploadFile: function (file) {
-
-            var serverUrl = 'https://api.cloudinary.com/v1_1/demo/image/upload';
-            return $http({
-                method: "post",
-                headers: {
-                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
-                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
-                    "Content-Type": file.type
-                },
-                url: serverUrl,
-                data: file,
-                processData: false,
-                contentType: false,
-                async:  true
-            });
-        }
-    };
-}]);
-
 myApp.factory('Parse', ['$http', function ($http) {
 
     return {
 
         uploadFile: function (file) {
-
-//            var serverUrl = 'https://api.parse.com/1/functions/hello';
-//            return $http({
-//                method: "post",
-//                headers: {
-//                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
-//                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
-//                    "Content-Type": 'application/json'
-//                },
-//                url: serverUrl,
-//                data: file,
-//                processData: false,
-//                contentType: false,
-//                async:  true
-//            }).then(function (response) {
-//                console.log("Success");
-//            }, function (error) {
-//                console.log("Error");
-//            });
-
 
             var serverUrl = 'https://api.parse.com/1/files/' + file.name;
             return $http({
@@ -962,10 +918,10 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
             for(var i in rooms) {
                 if(rooms.hasOwnProperty(i)) {
                     if((rooms[i].offset + rooms[i].width) < effectiveScreenWidth) {
-                        rooms[i].activate();
+                        rooms[i].setActive(true);
                     }
                     else {
-                        rooms[i].active = false;
+                        rooms[i].setActive(false);
                     }
                 }
             }
@@ -1139,7 +1095,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
         // Dict
         users: {},
         onlineUsers: {},
-        publicRooms: {},
+        publicRooms: [],
         friends: {},
         blockedUsers: {},
 
@@ -1295,11 +1251,17 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
 
         addPublicRoom: function (room) {
             if(room && room.meta.rid) {
-                this.publicRooms[room.meta.rid] = room;
+                this.publicRooms.push(room);
+
+                //this.publicRooms[room.meta.rid] = room;
+
+                //this.sortPublicRooms();
+
+                $rootScope.$broadcast(bPublicRoomAddedNotification);
 
                 // TODO: do we need this?
                 //this.sortRooms();
-                this.digest();
+                //this.digest();
             }
         },
 
@@ -1312,28 +1274,73 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
 
         removePublicRoomWithID: function (rid) {
             if(rid) {
-                delete this.publicRooms[rid];
-                this.digest();
+                CCArray.removeItem(this.publicRooms, rid, function (room) {
+                    return room.meta.rid;
+                });
+
+                $rootScope.$broadcast(bPublicRoomRemovedNotification);
+
+                //delete this.publicRooms[rid];
+                //this.digest();
             }
         },
 
         getPublicRoomWithID: function (rid) {
-            return this.publicRooms[rid];
+            return CCArray.getItem(this.publicRooms, rid, function (room) {
+                return room.meta.rid;
+            });
+            //return this.publicRooms[rid];
         },
 
-        getPublicRooms: function () {
-            // Add the public rooms to an array
-            var rooms = [];
-            for(var key in this.publicRooms) {
-                if(this.publicRooms.hasOwnProperty(key)) {
-                    rooms.push(this.publicRooms[key]);
-                }
-            }
+//        getPublicRooms: function () {
+//            // Add the public rooms to an array
+//            var rooms = [];
+//            for(var key in this.publicRooms) {
+//                if(this.publicRooms.hasOwnProperty(key)) {
+//                    rooms.push(this.publicRooms[key]);
+//                }
+//            }
+//
+//            // Sort by weight first
+//            // then number of users
+//            // then alphabetically
+//            rooms.sort(function(a, b) {
+//
+//                var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
+//                var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+//
+//                if(au != bu) {
+//                    return au ? 1 : -1;
+//                }
+//
+//                // Weight
+//                var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
+//                var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
+//
+//                if(aw != bw) {
+//                    return aw - bw;
+//                }
+//                else {
+//
+//                    var ac = a.onlineUserCount();
+//                    var bc = b.onlineUserCount();
+//
+//                    //console.log("1: " + ac + ", 2: " + bc);
+//
+//                    if(ac != bc) {
+//                        return bc - ac;
+//                    }
+//                    else {
+//                        return a.name < b.name ? -1 : 1;
+//                    }
+//                }
+//
+//            });
+//            return rooms;
+//        },
 
-            // Sort by weight first
-            // then number of users
-            // then alphabetically
-            rooms.sort(function(a, b) {
+        sortPublicRooms: function () {
+            this.publicRooms.sort(function(a, b) {
 
                 var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
                 var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
@@ -1365,11 +1372,14 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
                 }
 
             });
-            return rooms;
         },
 
         getRoomWithID: function (rid) {
-            var room = this.publicRooms[rid];
+            var room = CCArray.getItem(this.publicRooms, rid, function (room) {
+               return room.meta.rid;
+            });
+
+            //var room = this.publicRooms[rid];
 
             if(!room) {
                 room = Layout.getRoomWithID(rid);

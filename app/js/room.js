@@ -489,10 +489,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     // Now update this room with this data
                     var roomMetaRef = Paths.roomMetaRef(room.meta.rid);
 
+                    //
+                    var lastMessageMeta = message.meta;
+                    lastMessageMeta['userName'] = user.meta.name;
+
                     // Update the room
                     roomMetaRef.update({
                         lastUpdated: Firebase.ServerValue.TIMESTAMP,
-                        lastMessage: message.meta
+                        lastMessage: lastMessageMeta
                     });
 
                     // Update the user's presence state
@@ -540,9 +544,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                         room.updateName();
 
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
+//                        $timeout(function(){
+//                            $rootScope.$digest();
+//                        });
+
+                        $rootScope.$broadcast(bRoomUpdatedNotification);
 
                         deferred.resolve();
 
@@ -563,10 +569,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             // Update name
                             room.updateName();
 
+                            $rootScope.$broadcast(bRoomUpdatedNotification);
+
                             // TODO: Should digest here
-                            $timeout(function(){
-                                $rootScope.$digest();
-                            });
+                            //$timeout(function(){
+                            //    $rootScope.$digest();
+                            //});
                         }
                     });
 
@@ -590,6 +598,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     ref.on('value', function (snapshot) {
                         if(snapshot && snapshot.val()) {
                             room.usersMeta = snapshot.val();
+                            $rootScope.$broadcast(bRoomUpdatedNotification);
                         }
                     });
 
@@ -624,7 +633,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     if(room.messagesAreOn || !room.meta || !room.meta.rid) {
                         return;
                     }
-
                     room.messagesAreOn = true;
 
                     // Also get the messages from the room
@@ -650,11 +658,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         }
 
                         if(room.lastMessage) {
-                            // TODO: This is a bit hacky
-                            // it looks like the time changes from the first time it
-                            // goes on the server and the second time...
-                            var lm = room.lastMessage.meta;
-                            if(lm.uid == val.uid && lm.text == val.text && Math.abs(lm.time - val.time) < 2000) {
+                            // Sometimes we get double messages
+                            // check that this message hasn't been added already
+                            if(room.lastMessage.mid == snapshot.name()) {
                                 return;
                             }
                         }
@@ -746,25 +752,25 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     });
                 }
 
-                room.getMessages = function () {
-
-                    if(!room.messagesDirty) {
-                        return room.messages;
-                    }
-                    // Sort messages by time
-                    room.messages.sort(function (a, b) {
-                        return a.meta.time - b.meta.time;
-                    });
-                    room.messagesDirty = false;
-
-                    // If the messages array contains more than 40 messages
-                    // remove the oldest messages
-                    if(room.messages.length > Config.maxHistoricMessages) {
-                        room.messages.splice(0, room.messages.length - Config.maxHistoricMessages);
-                    }
-
-                    return room.messages;
-                };
+//                room.getMessages = function () {
+//
+//                    if(!room.messagesDirty) {
+//                        return room.messages;
+//                    }
+//                    // Sort messages by time
+//                    room.messages.sort(function (a, b) {
+//                        return a.meta.time - b.meta.time;
+//                    });
+//                    room.messagesDirty = false;
+//
+//                    // If the messages array contains more than 40 messages
+//                    // remove the oldest messages
+//                    if(room.messages.length > Config.maxHistoricMessages) {
+//                        room.messages.splice(0, room.messages.length - Config.maxHistoricMessages);
+//                    }
+//
+//                    return room.messages;
+//                };
 
                 room.messagesOff = function () {
 
@@ -823,10 +829,17 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     room.badge = null;
                 };
 
-                room.activate = function () {
-                    room.active = true;
-                    room.markRead();
-                };
+//                room.activate = function () {
+//                    room.setActive(true);
+//                };
+
+                room.setActive = function (active) {
+                    if(active) {
+                        room.markRead();
+                    }
+                    room.active = active;
+                    $rootScope.$broadcast(bRoomUpdatedNotification);
+                }
 
                 /**
                  * If this public room doesn't already exist
@@ -878,7 +891,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     });
 
                     return deferred.promise;
-                }
+                };
 
                 return room;
             },

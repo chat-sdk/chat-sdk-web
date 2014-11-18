@@ -32,7 +32,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
                 var rid = snapshot.name();
                 if(rid) {
                     var room = Room.getOrCreateRoomWithID(rid);
-                    Cache.addPublicRoom(room);
+                    //Cache.addPublicRoom(room);
 
                     room.on().then(function () {
 
