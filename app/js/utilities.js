@@ -230,7 +230,7 @@ function timeSince (timestamp) {
 var CCArray = {
 
     indexOf: function (array, id, getID) {
-        for(var i in array) {
+        for(var i = 0; i < array.length; i++) {
             if(id == getID(array[i])) {
                 return i;
             }
@@ -238,11 +238,17 @@ var CCArray = {
     },
 
     removeItem: function (array, id, getID) {
+        if(array.length == 0) {
+            return;
+        }
         var i = this.indexOf(array, id, getID);
         array.splice(i, 1);
     },
 
     getItem: function (array, id, getID) {
+        if(array.length == 0) {
+            return null;
+        }
         var i = this.indexOf(array, id, getID);
         return array[i];
     },

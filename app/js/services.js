@@ -1375,8 +1375,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
         },
 
         getRoomWithID: function (rid) {
-            var room = CCArray.getItem(this.publicRooms, rid, function (room) {
-               return room.meta.rid;
+
+            var room = CCArray.getItem(this.publicRooms, rid, function (r) {
+               return r.meta.rid;
             });
 
             //var room = this.publicRooms[rid];
