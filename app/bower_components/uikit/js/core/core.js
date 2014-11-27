@@ -1,4 +1,4 @@
-/*! UIkit 2.11.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(core) {
 
     if (typeof define == "function" && define.amd) { // AMD
@@ -47,7 +47,7 @@
         return UI;
     }
 
-    UI.version = '2.11.1';
+    UI.version = '2.12.0';
     UI.$doc    = $doc;
     UI.$win    = $win;
     UI.$html   = $html;
@@ -182,8 +182,36 @@
         }
     };
 
-    UI.Utils.checkDisplay = function(context) {
-        $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document).trigger('uk.check.display');
+    UI.Utils.checkDisplay = function(context, initanimation) {
+
+        var elements = $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document), animated;
+
+        if (context && !elements.length) {
+            elements = $(context);
+        }
+
+        elements.trigger('uk.check.display');
+
+        // fix firefox / IE animations
+        if (initanimation) {
+
+            if (typeof(initanimation)!='string') {
+                initanimation = '[class*="uk-animation-"]';
+            }
+
+            elements.find(initanimation).each(function(){
+
+                var ele  = $(this),
+                    cls  = ele.attr('class'),
+                    anim = cls.match(/uk\-animation\-(.+)/);
+
+                ele.removeClass(anim[0]).width();
+
+                ele.addClass(anim[0]);
+            });
+        }
+
+        return elements;
     };
 
     UI.Utils.options = function(string) {
@@ -199,6 +227,22 @@
         }
 
         return options;
+    };
+
+    UI.Utils.animate = function(element, cls) {
+
+        var d = $.Deferred();
+
+        element = $(element);
+
+        element.css('display', 'none').addClass(cls).one(UI.support.animation.end, function() {
+            element.removeClass(cls);
+            d.resolve();
+        }).width();
+
+        element.css('display', '');
+
+        return d.promise();
     };
 
     UI.Utils.template = function(str, data) {
@@ -271,39 +315,6 @@
 
     $.UIkit.langdirection = $html.attr("dir") == "rtl" ? "right" : "left";
 
-
-    // DOM mutation save ready helper function
-
-    UI.domObservers = [];
-
-    UI.domObserve = function(selector, fn) {
-
-        if(!UI.support.mutationobserver) return;
-
-        $(selector).each(function() {
-
-            var element = this;
-
-            try {
-
-                var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
-                    fn.apply(element, []);
-                    $(element).trigger('uk.dom.changed');
-                }, 50));
-
-                // pass in the target node, as well as the observer options
-                observer.observe(element, { childList: true, subtree: true });
-
-            } catch(e) {}
-        });
-    };
-
-    UI.ready = function(fn) {
-        $(function() { fn(document); });
-        UI.domObservers.push(fn);
-    };
-
-
     UI.components = {};
 
     UI.component = function(name, def) {
@@ -331,7 +342,7 @@
 
             });
 
-            this.trigger('init', [this]);
+            this.trigger('uk.component.init', [name, this]);
         };
 
         fn.plugins = {};
@@ -378,7 +389,7 @@
                 methods.split(' ').forEach(function(method) {
                     if (!$this[method]) $this[method] = obj[method].bind($this);
                 });
-            },
+            }
 
         }, def);
 
@@ -422,14 +433,102 @@
     };
 
 
-    $doc.on('uk.domready', function(){
+    // DOM mutation save ready helper function
+
+    UI.domObservers = [];
+    UI.domready     = false;
+
+    UI.ready = function(fn) {
+
+        UI.domObservers.push(fn);
+
+        if (UI.domready) {
+            fn(document);
+        }
+    };
+
+    UI.on = function(){
+
+        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
+            arguments[1].apply($doc);
+        }
+
+        return $doc.on.apply($doc, arguments);
+    };
+
+    UI.one = function(){
+
+        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
+            arguments[1].apply($doc);
+            return $doc;
+        }
+
+        return $doc.one.apply($doc, arguments);
+    };
+
+    UI.trigger = function(evt, params) {
+        return $doc.trigger(evt, params);
+    };
+
+    UI.domObserve = function(selector, fn) {
+
+        if(!UI.support.mutationobserver) return;
+
+        fn = fn || function() {};
+
+        $(selector).each(function() {
+
+            var element  = this,
+                $element = $(element);
+
+            if ($element.data('observer')) {
+                return;
+            }
+
+            try {
+
+                var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
+                    fn.apply(element, []);
+                    $element.trigger('uk.dom.changed');
+                }, 50));
+
+                // pass in the target node, as well as the observer options
+                observer.observe(element, { childList: true, subtree: true });
+
+                $element.data('observer', observer);
+
+            } catch(e) {}
+        });
+    };
+
+    UI.ready(function(context){
+        UI.domObserve($('[data-uk-observe]', context || document));
+    });
+
+    UI.on('uk.domready', function(){
+
         UI.domObservers.forEach(function(fn){
             fn(document);
         });
-        $doc.trigger('uk.dom.changed');
+
+        if (UI.domready) UI.Utils.checkDisplay(document);
     });
 
+    UI.on('uk.dom.changed', function(e) {
+
+        var ele = e.target;
+
+        UI.domObservers.forEach(function(fn){
+            fn(ele);
+        });
+
+        UI.Utils.checkDisplay(ele);
+    });
+
+
     $(function(){
+
+        UI.trigger('uk.domready.before');
 
         // custom scroll observer
         setInterval((function(){
@@ -454,16 +553,8 @@
 
         })(), 15);
 
-        // Check for dom modifications
-        UI.domObserve('[data-uk-observe]', function() {
-
-            var ele = this;
-
-            UI.domObservers.forEach(function(fn){
-                fn(ele);
-            });
-        });
-
+        // run component init functions on dom
+        UI.trigger('uk.domready');
 
         if (UI.support.touch) {
 
@@ -485,6 +576,11 @@
                 })(), 100));
             }
         }
+
+        UI.trigger('uk.domready.after');
+
+        // mark that domready is left behind
+        UI.domready = true;
     });
 
     // add touch identifier class
@@ -493,15 +589,15 @@
     // add uk-hover class on tap to support overlays on touch devices
     if (UI.support.touch) {
 
-        var hoverset = false, selector = '.uk-overlay, .uk-overlay-toggle, .uk-has-hover', exclude;
+        var hoverset = false, selector = '.uk-overlay, .uk-overlay-toggle, .uk-caption-toggle, .uk-animation-hover, .uk-has-hover', exclude;
 
-        $html.on('touchstart MSPointerDown', selector, function() {
+        $html.on('touchstart MSPointerDown pointerdown', selector, function() {
 
-            if(hoverset) $('.uk-hover').removeClass('uk-hover');
+            if (hoverset) $('.uk-hover').removeClass('uk-hover');
 
             hoverset = $(this).addClass('uk-hover');
 
-        }).on('touchend MSPointerUp', function(e) {
+        }).on('touchend MSPointerUp pointerup', function(e) {
 
             exclude = $(e.target).parents(selector);
 

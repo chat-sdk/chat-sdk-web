@@ -190,6 +190,10 @@ div#cc-app #cc-login-forgot-row {
     margin-bottom: 10px;
 }
 
+div#cc-app .cc-size-bg-to-fit {
+    background-size: 100% auto;
+}
+
 /**
  * Menu box
  */
@@ -252,8 +256,8 @@ div#cc-app .cc-profile-subtitle {
 }
 
 div#cc-app .cc-profile-description {
-    margin: 5px 5px;
-    min-height: 80px;
+    margin: 10px;
+    min-width: 300px;
 }
 
 

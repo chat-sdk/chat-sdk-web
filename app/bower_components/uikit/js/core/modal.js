@@ -1,4 +1,4 @@
-/*! UIkit 2.11.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function($, UI) {
 
     "use strict";
@@ -59,7 +59,7 @@
 
             this.element.addClass("uk-open").trigger("uk.modal.show");
 
-            UI.Utils.checkDisplay(this.dialog);
+            UI.Utils.checkDisplay(this.dialog, true);
 
             return this;
         },

@@ -113,16 +113,22 @@ myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($ro
                 catch (error) {}
 
                 var rooms = Layout.roomsSortedByOffset();
-                for(var i = 0; i < rooms.length; i++) {
+
+                // Only loop from this room's position onwards
+                for(var i = rooms.indexOf(scope.room); i < rooms.length; i++) {
                     if(rooms[i] != scope.room) {
                         rooms[i].offset = Layout.offsetForSlot(i);
                     }
                 }
 
                 // Apply the change
-                Layout.updateRoomSize();
+                Layout.updateRoomSize(scope.room);
 
-                scope.$apply();
+                $rootScope.$digest();
+
+
+
+                //scope.$apply();
 
                 //scope.$digest();
                 return false;

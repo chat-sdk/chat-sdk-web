@@ -1,4 +1,4 @@
-/*! UIkit 2.11.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(core) {
 
     if (typeof define == "function" && define.amd) { // AMD
@@ -47,7 +47,7 @@
         return UI;
     }
 
-    UI.version = '2.11.1';
+    UI.version = '2.12.0';
     UI.$doc    = $doc;
     UI.$win    = $win;
     UI.$html   = $html;
@@ -182,8 +182,36 @@
         }
     };
 
-    UI.Utils.checkDisplay = function(context) {
-        $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document).trigger('uk.check.display');
+    UI.Utils.checkDisplay = function(context, initanimation) {
+
+        var elements = $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document), animated;
+
+        if (context && !elements.length) {
+            elements = $(context);
+        }
+
+        elements.trigger('uk.check.display');
+
+        // fix firefox / IE animations
+        if (initanimation) {
+
+            if (typeof(initanimation)!='string') {
+                initanimation = '[class*="uk-animation-"]';
+            }
+
+            elements.find(initanimation).each(function(){
+
+                var ele  = $(this),
+                    cls  = ele.attr('class'),
+                    anim = cls.match(/uk\-animation\-(.+)/);
+
+                ele.removeClass(anim[0]).width();
+
+                ele.addClass(anim[0]);
+            });
+        }
+
+        return elements;
     };
 
     UI.Utils.options = function(string) {
@@ -199,6 +227,22 @@
         }
 
         return options;
+    };
+
+    UI.Utils.animate = function(element, cls) {
+
+        var d = $.Deferred();
+
+        element = $(element);
+
+        element.css('display', 'none').addClass(cls).one(UI.support.animation.end, function() {
+            element.removeClass(cls);
+            d.resolve();
+        }).width();
+
+        element.css('display', '');
+
+        return d.promise();
     };
 
     UI.Utils.template = function(str, data) {
@@ -271,39 +315,6 @@
 
     $.UIkit.langdirection = $html.attr("dir") == "rtl" ? "right" : "left";
 
-
-    // DOM mutation save ready helper function
-
-    UI.domObservers = [];
-
-    UI.domObserve = function(selector, fn) {
-
-        if(!UI.support.mutationobserver) return;
-
-        $(selector).each(function() {
-
-            var element = this;
-
-            try {
-
-                var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
-                    fn.apply(element, []);
-                    $(element).trigger('uk.dom.changed');
-                }, 50));
-
-                // pass in the target node, as well as the observer options
-                observer.observe(element, { childList: true, subtree: true });
-
-            } catch(e) {}
-        });
-    };
-
-    UI.ready = function(fn) {
-        $(function() { fn(document); });
-        UI.domObservers.push(fn);
-    };
-
-
     UI.components = {};
 
     UI.component = function(name, def) {
@@ -331,7 +342,7 @@
 
             });
 
-            this.trigger('init', [this]);
+            this.trigger('uk.component.init', [name, this]);
         };
 
         fn.plugins = {};
@@ -378,7 +389,7 @@
                 methods.split(' ').forEach(function(method) {
                     if (!$this[method]) $this[method] = obj[method].bind($this);
                 });
-            },
+            }
 
         }, def);
 
@@ -422,14 +433,102 @@
     };
 
 
-    $doc.on('uk.domready', function(){
+    // DOM mutation save ready helper function
+
+    UI.domObservers = [];
+    UI.domready     = false;
+
+    UI.ready = function(fn) {
+
+        UI.domObservers.push(fn);
+
+        if (UI.domready) {
+            fn(document);
+        }
+    };
+
+    UI.on = function(){
+
+        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
+            arguments[1].apply($doc);
+        }
+
+        return $doc.on.apply($doc, arguments);
+    };
+
+    UI.one = function(){
+
+        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
+            arguments[1].apply($doc);
+            return $doc;
+        }
+
+        return $doc.one.apply($doc, arguments);
+    };
+
+    UI.trigger = function(evt, params) {
+        return $doc.trigger(evt, params);
+    };
+
+    UI.domObserve = function(selector, fn) {
+
+        if(!UI.support.mutationobserver) return;
+
+        fn = fn || function() {};
+
+        $(selector).each(function() {
+
+            var element  = this,
+                $element = $(element);
+
+            if ($element.data('observer')) {
+                return;
+            }
+
+            try {
+
+                var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
+                    fn.apply(element, []);
+                    $element.trigger('uk.dom.changed');
+                }, 50));
+
+                // pass in the target node, as well as the observer options
+                observer.observe(element, { childList: true, subtree: true });
+
+                $element.data('observer', observer);
+
+            } catch(e) {}
+        });
+    };
+
+    UI.ready(function(context){
+        UI.domObserve($('[data-uk-observe]', context || document));
+    });
+
+    UI.on('uk.domready', function(){
+
         UI.domObservers.forEach(function(fn){
             fn(document);
         });
-        $doc.trigger('uk.dom.changed');
+
+        if (UI.domready) UI.Utils.checkDisplay(document);
     });
 
+    UI.on('uk.dom.changed', function(e) {
+
+        var ele = e.target;
+
+        UI.domObservers.forEach(function(fn){
+            fn(ele);
+        });
+
+        UI.Utils.checkDisplay(ele);
+    });
+
+
     $(function(){
+
+        UI.trigger('uk.domready.before');
 
         // custom scroll observer
         setInterval((function(){
@@ -454,16 +553,8 @@
 
         })(), 15);
 
-        // Check for dom modifications
-        UI.domObserve('[data-uk-observe]', function() {
-
-            var ele = this;
-
-            UI.domObservers.forEach(function(fn){
-                fn(ele);
-            });
-        });
-
+        // run component init functions on dom
+        UI.trigger('uk.domready');
 
         if (UI.support.touch) {
 
@@ -485,6 +576,11 @@
                 })(), 100));
             }
         }
+
+        UI.trigger('uk.domready.after');
+
+        // mark that domready is left behind
+        UI.domready = true;
     });
 
     // add touch identifier class
@@ -493,15 +589,15 @@
     // add uk-hover class on tap to support overlays on touch devices
     if (UI.support.touch) {
 
-        var hoverset = false, selector = '.uk-overlay, .uk-overlay-toggle, .uk-has-hover', exclude;
+        var hoverset = false, selector = '.uk-overlay, .uk-overlay-toggle, .uk-caption-toggle, .uk-animation-hover, .uk-has-hover', exclude;
 
-        $html.on('touchstart MSPointerDown', selector, function() {
+        $html.on('touchstart MSPointerDown pointerdown', selector, function() {
 
-            if(hoverset) $('.uk-hover').removeClass('uk-hover');
+            if (hoverset) $('.uk-hover').removeClass('uk-hover');
 
             hoverset = $(this).addClass('uk-hover');
 
-        }).on('touchend MSPointerUp', function(e) {
+        }).on('touchend MSPointerUp pointerup', function(e) {
 
             exclude = $(e.target).parents(selector);
 
@@ -517,6 +613,7 @@
 //  Zepto.js may be freely distributed under the MIT license.
 
 ;(function($){
+
   var touch = {},
     touchTimeout, tapTimeout, swipeTimeout, longTapTimeout,
     longTapDelay = 750,
@@ -561,7 +658,8 @@
     }
 
     $(document)
-      .bind('MSGestureEnd', function(e){
+      .on('MSGestureEnd gestureend', function(e){
+
         var swipeDirectionFromVelocity = e.originalEvent.velocityX > 1 ? 'Right' : e.originalEvent.velocityX < -1 ? 'Left' : e.originalEvent.velocityY > 1 ? 'Down' : e.originalEvent.velocityY < -1 ? 'Up' : null;
 
         if (swipeDirectionFromVelocity) {
@@ -569,11 +667,13 @@
           touch.el.trigger('swipe'+ swipeDirectionFromVelocity);
         }
       })
-      .on('touchstart MSPointerDown', function(e){
+      // MSPointerDown: for IE10
+      // pointerdown: for IE11
+      .on('touchstart MSPointerDown pointerdown', function(e){
 
         if(e.type == 'MSPointerDown' && !isPrimaryTouch(e.originalEvent)) return;
 
-        firstTouch = e.type == 'MSPointerDown' ? e : e.originalEvent.touches[0];
+        firstTouch = (e.type == 'MSPointerDown' || e.type == 'pointerdown') ? e : e.originalEvent.touches[0];
 
         now      = Date.now();
         delta    = now - (touch.last || now);
@@ -590,13 +690,18 @@
         longTapTimeout = setTimeout(longTap, longTapDelay);
 
         // adds the current touch contact for IE gesture recognition
-        if (gesture && e.type == 'MSPointerDown') gesture.addPointer(e.originalEvent.pointerId);
+        if (gesture && ( e.type == 'MSPointerDown' || e.type == 'pointerdown' || e.type == 'touchstart' ) ) {
+          gesture.addPointer(e.originalEvent.pointerId);
+        }
+
       })
-      .on('touchmove MSPointerMove', function(e){
+      // MSPointerMove: for IE10
+      // pointermove: for IE11
+      .on('touchmove MSPointerMove pointermove', function(e){
 
-        if(e.type == 'MSPointerMove' && !isPrimaryTouch(e.originalEvent)) return;
+        if (e.type == 'MSPointerMove' && !isPrimaryTouch(e.originalEvent)) return;
 
-        firstTouch = e.type == 'MSPointerMove' ? e : e.originalEvent.touches[0];
+        firstTouch = (e.type == 'MSPointerMove' || e.type == 'pointermove') ? e : e.originalEvent.touches[0];
 
         cancelLongTap();
         touch.x2 = firstTouch.pageX;
@@ -605,9 +710,11 @@
         deltaX += Math.abs(touch.x1 - touch.x2);
         deltaY += Math.abs(touch.y1 - touch.y2);
       })
-      .on('touchend MSPointerUp', function(e){
+      // MSPointerUp: for IE10
+      // pointerup: for IE11
+      .on('touchend MSPointerUp pointerup', function(e){
 
-        if(e.type == 'MSPointerUp' && !isPrimaryTouch(e.originalEvent)) return;
+        if (e.type == 'MSPointerUp' && !isPrimaryTouch(e.originalEvent)) return;
 
         cancelLongTap();
 
@@ -775,38 +882,40 @@
 
     UI.component('smoothScroll', {
 
-        defaults: {
-            duration: 1000,
-            transition: 'easeOutExpo',
-            offset: 0,
-            complete: function(){}
-        },
-
         init: function() {
 
             var $this = this;
 
             this.on("click", function(e) {
-
-                // get / set parameters
-                var ele       = ($(this.hash).length ? $(this.hash) : $("body")),
-                    target    = ele.offset().top - $this.options.offset,
-                    docheight = UI.$doc.height(),
-                    winheight = UI.$win.height();
-
-                if ((target + winheight) > docheight) {
-                    target = docheight - winheight;
-                }
-
-                // animate to target, fire callback when done
-                $("html,body").stop().animate({scrollTop: target}, $this.options.duration, $this.options.transition).promise().done($this.options.complete);
-
-                // cancel default click action
-                return false;
+                e.preventDefault();
+                scrollToElement($(this.hash).length ? $(this.hash) : $("body"), $this.options);
             });
-
         }
     });
+
+    function scrollToElement(ele, options) {
+
+        options = $.extend({
+            duration: 1000,
+            transition: 'easeOutExpo',
+            offset: 0,
+            complete: function(){}
+        }, options);
+
+        // get / set parameters
+        var target    = ele.offset().top - options.offset,
+            docheight = UI.$doc.height(),
+            winheight = window.innerHeight;
+
+        if ((target + winheight) > docheight) {
+            target = docheight - winheight;
+        }
+
+        // animate to target, fire callback when done
+        $("html,body").stop().animate({scrollTop: target}, options.duration, options.transition).promise().done(options.complete);
+    }
+
+    UI.Utils.scrollToElement = scrollToElement;
 
     if (!$.easing['easeOutExpo']) {
         $.easing['easeOutExpo'] = function(x, t, b, c, d) { return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b; };
@@ -1001,16 +1110,19 @@
     });
 
 })(jQuery, jQuery.UIkit);
-
 (function(global, $, UI){
+
+    "use strict";
 
     var togglers = [];
 
     UI.component('toggle', {
 
         defaults: {
-            target: false,
-            cls: 'uk-hidden'
+            target    : false,
+            cls       : 'uk-hidden',
+            animation : false,
+            duration  : 200
         },
 
         init: function() {
@@ -1031,9 +1143,42 @@
 
             if(!this.totoggle.length) return;
 
-            this.totoggle.toggleClass(this.options.cls);
+            if (this.options.animation) {
 
-            if (this.options.cls == 'uk-hidden') {
+                var $this = this, animations = this.options.animation.split(',');
+
+                if (animations.length == 1) {
+                    animations[1] = animations[0];
+                }
+
+                animations[0] = animations[0].trim();
+                animations[1] = animations[1].trim();
+
+                this.totoggle.css('animation-duration', this.options.duration+'ms');
+
+                if (this.totoggle.hasClass(this.options.cls)) {
+
+                    this.totoggle.toggleClass(this.options.cls);
+
+                    this.totoggle.each(function(){
+                        UI.Utils.animate(this, animations[0]).then(function(){
+                            $(this).css('animation-duration', '');
+                            UI.Utils.checkDisplay(this);
+                        });
+                    });
+
+                } else {
+
+                    this.totoggle.each(function(){
+                        UI.Utils.animate(this, animations[1]+' uk-animation-reverse').then(function(){
+                            $(this).toggleClass($this.options.cls).css('animation-duration', '');
+                            UI.Utils.checkDisplay(this);
+                        }.bind(this));
+                    });
+                }
+
+            } else {
+                this.totoggle.toggleClass(this.options.cls);
                 UI.Utils.checkDisplay(this.totoggle);
             }
         },
@@ -1063,7 +1208,10 @@
         }, 0);
     });
 
+
+
 })(this, jQuery, jQuery.UIkit);
+
 (function($, UI) {
 
     "use strict";
@@ -1285,7 +1433,7 @@
 
                     if (!$target.parents(".uk-dropdown").length) {
 
-                        if ($target.is("a[href='#']") || $target.parent().is("a[href='#']")){
+                        if ($target.is("a[href='#']") || $target.parent().is("a[href='#']") || ($this.dropdown.length && !$this.dropdown.is(":visible")) ){
                             e.preventDefault();
                         }
 
@@ -1361,7 +1509,7 @@
             this.element.addClass("uk-open");
             this.trigger('uk.dropdown.show', [this]);
 
-            UI.Utils.checkDisplay(this.dropdown);
+            UI.Utils.checkDisplay(this.dropdown, true);
             active = this.element;
 
             this.registerOuterClick();
@@ -1717,7 +1865,7 @@
 
             this.element.addClass("uk-open").trigger("uk.modal.show");
 
-            UI.Utils.checkDisplay(this.dialog);
+            UI.Utils.checkDisplay(this.dialog, true);
 
             return this;
         },
@@ -2045,34 +2193,14 @@
 
             element.addClass("uk-active");
 
-            $body.css({"width": window.innerWidth, "height": $win.height()}).addClass("uk-offcanvas-page");
+            $body.css({"width": window.innerWidth, "height": window.innerHeight}).addClass("uk-offcanvas-page");
             $body.css((rtl ? "margin-right" : "margin-left"), (rtl ? -1 : 1) * (bar.outerWidth() * dir)).width(); // .width() - force redraw
 
             $html.css('margin-top', scrollpos.y * -1);
 
             bar.addClass("uk-offcanvas-bar-show");
 
-            element.off(".ukoffcanvas").on("click.ukoffcanvas swipeRight.ukoffcanvas swipeLeft.ukoffcanvas", function(e) {
-
-                var target = $(e.target);
-
-                if (!e.type.match(/swipe/)) {
-
-                    if (!target.hasClass("uk-offcanvas-close")) {
-                        if (target.hasClass("uk-offcanvas-bar")) return;
-                        if (target.parents(".uk-offcanvas-bar:first").length) return;
-                    }
-                }
-
-                e.stopImmediatePropagation();
-                Offcanvas.hide();
-            });
-
-            $html.on('keydown.ukoffcanvas', function(e) {
-                if (e.keyCode === 27) { // ESC
-                    Offcanvas.hide();
-                }
-            });
+            this._initElement(element);
 
             $doc.trigger('uk.offcanvas.show', [element, bar]);
         },
@@ -2107,9 +2235,56 @@
             } else {
                 finalize();
             }
+        },
 
-            panel.off(".ukoffcanvas");
-            $html.off(".ukoffcanvas");
+        _initElement: function(element) {
+
+            if (element.data("ukOffcanvasInit")) return;
+
+            element.on("click.ukoffcanvas swipeRight.ukoffcanvas swipeLeft.ukoffcanvas", function(e) {
+
+                var target = $(e.target);
+
+                if (!e.type.match(/swipe/)) {
+
+                    if (!target.hasClass("uk-offcanvas-close")) {
+                        if (target.hasClass("uk-offcanvas-bar")) return;
+                        if (target.parents(".uk-offcanvas-bar:first").length) return;
+                    }
+                }
+
+                e.stopImmediatePropagation();
+                Offcanvas.hide();
+            });
+
+            element.on("click", "a[href^='#']", function(e){
+
+                var element = $(this),
+                    href = element.attr("href");
+
+                if (href == "#") {
+                    return;
+                }
+
+                $doc.one('uk.offcanvas.hide', function() {
+
+                    var target = $(href);
+
+                    if (!target.length) {
+                        target = $('[name="'+href.replace('#','')+'"]');
+                    }
+
+                    if (UI.Utils.scrollToElement && target.length) {
+                        UI.Utils.scrollToElement(target);
+                    } else {
+                        window.location.href = href;
+                    }
+                });
+
+                Offcanvas.hide();
+            });
+
+            element.data("ukOffcanvasInit", true);
         }
     };
 
@@ -2145,6 +2320,12 @@
         }
     });
 
+    $html.on('keydown.ukoffcanvas', function(e) {
+        if (e.keyCode === 27) { // ESC
+            Offcanvas.hide();
+        }
+    });
+
 })(jQuery, jQuery.UIkit);
 (function($, UI) {
 
@@ -2155,11 +2336,14 @@
     UI.component('switcher', {
 
         defaults: {
-            connect : false,
-            toggle  : ">*",
-            active  : 0,
-            animation: false
+            connect   : false,
+            toggle    : ">*",
+            active    : 0,
+            animation : false,
+            duration  : 200
         },
+
+        animating: false,
 
         init: function() {
 
@@ -2197,23 +2381,49 @@
                 }
 
                 var toggles = this.find(this.options.toggle),
-                    active   = toggles.filter(".uk-active");
+                    active  = toggles.filter(".uk-active");
 
                 if (active.length) {
-                    this.show(active);
+                    this.show(active, false);
                 } else {
                     active = toggles.eq(this.options.active);
-                    this.show(active.length ? active : toggles.eq(0));
+                    this.show(active.length ? active : toggles.eq(0), false);
                 }
             }
 
         },
 
-        show: function(tab) {
+        show: function(tab, animate) {
+
+            if (this.animating) {
+                return;
+            }
 
             tab = isNaN(tab) ? $(tab) : this.find(this.options.toggle).eq(tab);
 
-            var $this = this, active = tab, animation = Animations[this.options.animation] || Animations['none'];
+            var $this     = this,
+                active    = tab,
+                animation = Animations[this.options.animation] || function(current, next) {
+
+                    if (!$this.options.animation) {
+                        return Animations.none.apply($this);
+                    }
+
+                    var anim = $this.options.animation.split(',');
+
+                    if (anim.length == 1) {
+                        anim[1] = anim[0];
+                    }
+
+                    anim[0] = anim[0].trim();
+                    anim[1] = anim[1].trim();
+
+                    return coreAnimation.apply($this, [anim, current, next]);
+                };
+
+            if (animate===false) {
+                animation = Animations.none;
+            }
 
             if (active.hasClass("uk-disabled")) return;
 
@@ -2235,11 +2445,15 @@
                         current   = children.filter('.uk-active'),
                         next      = children.eq($this.index);
 
+                        $this.animating = true;
+
                         animation.apply($this, [current, next]).then(function(){
 
                             current.removeClass("uk-active");
                             next.addClass("uk-active");
-                            UI.Utils.checkDisplay(next);
+                            UI.Utils.checkDisplay(next, true);
+
+                            $this.animating = false;
                         });
                 });
             }
@@ -2248,32 +2462,62 @@
         }
     });
 
-
     Animations = {
 
         'none': function() {
-
             var d = $.Deferred();
             d.resolve();
             return d.promise();
         },
 
-        'fade': function(current, next, dir) {
+        'fade': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-fade', current, next]);
+        },
 
-            var d = $.Deferred();
+        'slide-bottom': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-slide-bottom', current, next]);
+        },
 
-            if (current) {
-                current.removeClass('uk-active');
+        'slide-top': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-slide-top', current, next]);
+        },
+
+        'slide-vertical': function(current, next, dir) {
+
+            var anim = ['uk-animation-slide-top', 'uk-animation-slide-bottom'];
+
+            if (current && current.index() > next.index()) {
+                anim.reverse();
             }
 
-            next.fadeIn(300, function(){
-                next.css({opacity:'', display:''});
-                d.resolve();
-            });
+            return coreAnimation.apply(this, [anim, current, next]);
+        },
 
-            return d.promise();
+        'slide-left': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-slide-left', current, next]);
+        },
+
+        'slide-right': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-slide-right', current, next]);
+        },
+
+        'slide-horizontal': function(current, next, dir) {
+
+            var anim = ['uk-animation-slide-left', 'uk-animation-slide-right'];
+
+            if (current && current.index() > next.index()) {
+                anim.reverse();
+            }
+
+            return coreAnimation.apply(this, [anim, current, next]);
+        },
+
+        'scale': function(current, next) {
+            return coreAnimation.apply(this, ['uk-animation-scale-up', current, next]);
         }
     };
+
+    UI.switcher.animations = Animations;
 
 
     // init code
@@ -2288,6 +2532,56 @@
         });
     });
 
+
+    // helpers
+
+    function coreAnimation(cls, current, next) {
+
+        var d = $.Deferred(), clsIn = cls, clsOut = cls, release;
+
+        if(next[0]===current[0]) {
+            d.resolve();
+            return d.promise();
+        }
+
+        if (typeof(cls) == 'object') {
+            clsIn  = cls[0];
+            clsOut = cls[1] || cls[0];
+        }
+
+        release = function() {
+
+            if (current) current.hide().removeClass('uk-active '+clsOut+' uk-animation-reverse');
+
+            next.addClass(clsIn).one(UI.support.animation.end, function() {
+
+                next.removeClass(''+clsIn+'').css({opacity:'', display:''});
+
+                d.resolve();
+
+                if (current) current.css({opacity:'', display:''});
+
+            }.bind(this)).show();
+        };
+
+        next.css('animation-duration', this.options.duration+'ms');
+
+        if (current && current.length) {
+
+            current.css('animation-duration', this.options.duration+'ms');
+
+            current.css('display', 'none').addClass(clsOut+' uk-animation-reverse').one(UI.support.animation.end, function() {
+                release();
+            }.bind(this)).css('display', '');
+
+        } else {
+            next.addClass('uk-active');
+            release();
+        }
+
+        return d.promise();
+    }
+
 })(jQuery, jQuery.UIkit);
 
 (function($, UI) {
@@ -2298,9 +2592,11 @@
     UI.component('tab', {
 
         defaults: {
-            'target'  : '>li:not(.uk-tab-responsive, .uk-disabled)',
-            'connect' : false,
-            'active'  : 0
+            'target'    : '>li:not(.uk-tab-responsive, .uk-disabled)',
+            'connect'   : false,
+            'active'    : 0,
+            'animation' : false,
+            'duration'  : 200
         },
 
         init: function() {
@@ -2345,7 +2641,13 @@
 
             // init UIkit components
             if (this.options.connect) {
-                UI.switcher(this.element, {"toggle": ">li:not(.uk-tab-responsive)", "connect": this.options.connect, "active": this.options.active});
+                UI.switcher(this.element, {
+                    "toggle"    : ">li:not(.uk-tab-responsive)",
+                    "connect"   : this.options.connect,
+                    "active"    : this.options.active,
+                    "animation" : this.options.animation,
+                    "duration"  : this.options.duration
+                });
             }
 
             UI.dropdown(this.responsivetab, {"mode": "click"});
@@ -2419,6 +2721,7 @@
     });
 
 })(jQuery, jQuery.UIkit);
+
 (function($, UI, $win) {
 
     "use strict";

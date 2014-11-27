@@ -15,25 +15,25 @@ var bGroupChatDefaultName = "Private Chat";
 // Are we testing locally?
 var bRootURL = '';
 var bPartialURL = '';
-var bFirebase = '';
+var bFirebase = 'chatcat';
 
 // If we are then set the root URL to nothing
 if(document.location.origin === "http://chatcat") {
-    bRootURL = '';
-    bPartialURL = 'partials/';
-    bFirebase = 'chatcatio-test';
+      bRootURL = '';
+      bPartialURL = 'partials/';
+//    bFirebase = 'chatcatio-test';
 }
 // Are we testing on the wordpress plugin?
 else if(document.location.origin === "http://ccwp") {
     bRootURL = '//chatcat/dist/';
     bPartialURL = bRootURL + 'partials/';
-    bFirebase = 'chatcatio-test';
+//    bFirebase = 'chatcatio-test';
 }
-// We're live so we need to use the full remote URL
+//// We're live so we need to use the full remote URL
 else {
     bRootURL = '//chatcat.firebaseapp.com/';
     bPartialURL = 'https://chatcat.firebaseapp.com/partials/';
-    bFirebase = 'chatcat';
+    //bFirebase = 'chatcat';
 }
 
 var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
@@ -83,7 +83,15 @@ var bVisibilityChangedNotification = 'bVisibilityChangedNotification';
 
 var bPublicRoomAddedNotification = 'bPublicRoomAddedNotification';
 var bPublicRoomRemovedNotification = 'bPublicRoomRemovedNotification';
+
+var bRoomAddedNotification = 'bRoomAddedNotification';
+
 var bRoomUpdatedNotification = 'bRoomUpdatedNotification';
+
+var bChatUpdatedNotification = 'bChatUpdatedNotification';
+
+var bUserOnlineStateChangedNotification = 'bUserOnlineStateChangedNotification';
+var bUserValueChangedNotification = 'bUserValueChangedNotification';
 
 // Chat width
 var bChatRoomWidth = 230;

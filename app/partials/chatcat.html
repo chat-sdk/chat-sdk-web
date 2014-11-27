@@ -1,7 +1,7 @@
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight" >
 
         <div ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.getThumbnail() }}"  />
+            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.thumbnail }}"  />
             {{ userDrag.user.meta.name }}
         </div>
 
@@ -11,7 +11,7 @@
             <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
                     <div class="cc-inner cc-pointer">
-                        {{ numberOfUsersOnline() }} {{ numberOfUsersOnline() == 1 ? 'Person' : 'People' }} here
+                        {{ totalUserCount }} {{ totalUserCount == 1 ? 'Person' : 'People' }} here
                         <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
                             <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
                         </a>
@@ -27,7 +27,7 @@
                 <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" baseURL + 'main-box.html'"></ng-include>
                 <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" baseURL + 'create-room-box.html'"></ng-include>
 
-                <div ng-repeat="(id, room) in getAllRooms()">
+                <div ng-controller="ChatBarController" ng-repeat="(id, room) in getAllRooms()">
                     <ng-include ng-controller="ChatController" ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
                 </div>
 

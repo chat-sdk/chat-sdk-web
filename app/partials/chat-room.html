@@ -45,7 +45,7 @@
 
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.getThumbnail() }}" />
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.thumbnail }}" />
                         <span class="cc-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
                             <div class="cc-enable-select" ng-bind-html="message.meta.text | linky: '_blank' | emoji"></div>
                         </span>
@@ -67,7 +67,7 @@
 
         <div class="cc-chat-box-msg" ng-show="activeTab == 'messages'" disable-drag>
             <div class="cc-typing-indicator">
-                {{ getTyping() }}
+                {{ room.typingMessage }}
             </div>
             <textarea class="cc-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" fit-text="84" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)" ></textarea>
         </div>
@@ -96,7 +96,7 @@
                 <a ng-click="deleteRoom(room)">
                     <img class="uk-float-right cc-image-30" ng-src="{{ img_30_cross }}" disable-drag/>
                 </a>
-                <div class="uk-float-right">{{ room.userCount() }}</div>
+                <div class="uk-float-right">{{ room.userCount }}</div>
             </div>
         </div>
     </div>

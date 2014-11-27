@@ -1,4 +1,4 @@
-/*! UIkit 2.11.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
 
     var component;
@@ -14,6 +14,8 @@
     }
 
 })(function($, UI){
+
+    "use strict";
 
     var $win         = UI.$win,
         $doc         = UI.$doc,
@@ -93,7 +95,7 @@
 
                     var scrollTop      = $win.scrollTop(),
                         documentHeight = $doc.height(),
-                        dwh            = documentHeight - $win.height(),
+                        dwh            = documentHeight - window.innerHeight,
                         extra          = (scrollTop > dwh) ? dwh - scrollTop : 0,
                         elementTop     = this.wrapper.offset().top,
                         etse           = elementTop - this.options.top - extra;

@@ -32,6 +32,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     },
                     users: {},
                     usersMeta: {},
+                    userCount: 0,
                     messages: [],
                     allMessages: [],
                     typing: {},
@@ -42,21 +43,53 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     zIndex: null,
                     active: true,
                     minimized: false,
+                    typingMessage: null,
                     badge: 0
 
                 };
 
                 room.setRID = function (rid) {
                     room.meta.rid = rid;
-                }
+                };
 
                 room.getRID = function () {
                     return room.meta.rid;
-                }
+                };
 
                 room.getUserCreated = function () {
                     return room.meta.userCreated;
-                }
+                };
+
+                room.update = function () {
+                    room.updateName();
+                    room.updateOnlineUserCount();
+                    $rootScope.$broadcast(bRoomUpdatedNotification, room);
+                };
+
+                room.updateTyping = function () {
+
+                    var i = 0;
+                    var name = null;
+                    for(var key in room.typing) {
+                        if(room.typing.hasOwnProperty(key)) {
+                            if(key == $rootScope.user.meta.uid) {
+                                continue;
+                            }
+                            name = room.typing[key];
+                            i++;
+                        }
+                    }
+
+                    var typing = null;
+                    if (i == 1) {
+                        typing = name + "...";
+                    }
+                    else if (i > 1) {
+                        typing = i + " people typing";
+                    }
+
+                    room.typingMessage = typing;
+                };
 
                 room.create = function (users) {
 
@@ -73,8 +106,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                                 r.addUser(user, bUserStatusInvited),
                                 user.addRoom(r)
                             ]);
-                            // Invite the other user
-                            //return r.addUser(users[0], bUserStatusInvited);
                         }
                     }
 
@@ -87,10 +118,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     }
                     else {
                         roomRef = ref.push();
-                        room.meta.rid = roomRef.name();
+                        room.meta.rid = roomRef.key();
                     }
 
-                    var roomMetaRef = Paths.roomMetaRef(roomRef.name());
+                    var roomMetaRef = Paths.roomMetaRef(roomRef.key());
 
                     // Does the room already exist?
                     roomMetaRef.once('value', function (snapshot) {
@@ -165,7 +196,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                     return deferred.promise;
 
-                }
+                };
 
                 room.join = function (status) {
                     if(room) {
@@ -186,29 +217,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         // Remove the room from the user's list
                         $rootScope.user.removeRoom(room);
                     }
-                }
+                };
 
-                room.userCount = function (includeClosed) {
-//                    var i = 0;
-//                    var user = null;
-//                    for(var key in room.usersMeta) {
-//                        if(room.usersMeta.hasOwnProperty(key)) {
-//                            user = room.usersMeta[key];
-//                            if(includeClosed || user.status != bUserStatusClosed) {
-//                                i++;
-//                            }
-//                        }
-//                    }
-//                    return i;
-                    return room.onlineUserCount();
-
-//                    for(var key in room.users) {
-//                        if(room.users.hasOwnProperty(key)) {
-//
-//                            i++;
-//                        }
-//                    }
-//                    return i;
+                room.updateOnlineUserCount = function () {
+                    room.userCount = room.onlineUserCount();
                 };
 
                 room.onlineUserCount = function () {
@@ -223,6 +235,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         }
                     }
                     return i;
+                };
+
+                room.containsUser = function (user) {
+                    if(room.users[user.meta.uid]) {
+                        return true;
+                    }
+                    return false;
                 };
 
                 room.addUser = function (user, status) {
@@ -288,24 +307,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                     return deferred.promise;
                 };
-
-//                room.removeUser = function (user) {
-//
-//                    var deferred = $q.defer();
-//
-//                    var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
-//
-//                    ref.remove(function(error) {
-//                        if(error) {
-//                            deferred.reject(error);
-//                        }
-//                        else {
-//                            deferred.resolve();
-//                        }
-//                    });
-//
-//                    return deferred.promise;
-//                };
 
                 room.getOwner = function () {
                     // get the owner's ID
@@ -421,7 +422,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             var lastUpdated = timeSince(room.meta.lastUpdated);
 
                             // if there are no users check when
-                            if(room.userCount() == 0) {
+                            if(room.onlineUserCount() == 0) {
 
                                 // Check when the last message was sent
                                 if(lastUpdated < 0 || lastUpdated > bDay) {
@@ -536,19 +537,20 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     }
                     room.isOn = true;
 
+                    room.userOnlineStateChangedNotificationOff = $rootScope.$on(bUserOnlineStateChangedNotification, function (event, user) {
+                        // If the user is a member of this room, update the room
+                        room.update();
+                    });
+
                     // Get the room meta data
                     var ref = Paths.roomMetaRef(room.meta.rid);
 
                     ref.on('value', (function(snapshot) {
                         room.meta = snapshot.val();
 
-                        room.updateName();
+                        // Update the room's meta data
+                        room.update();
 
-//                        $timeout(function(){
-//                            $rootScope.$digest();
-//                        });
-
-                        $rootScope.$broadcast(bRoomUpdatedNotification);
 
                         deferred.resolve();
 
@@ -566,15 +568,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                             room.users[user.meta.uid] = user;
 
-                            // Update name
-                            room.updateName();
+                            // Update the room's meta data
+                            room.update();
 
-                            $rootScope.$broadcast(bRoomUpdatedNotification);
-
-                            // TODO: Should digest here
-                            //$timeout(function(){
-                            //    $rootScope.$digest();
-                            //});
                         }
                     });
 
@@ -585,20 +581,18 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                             delete room.users[uid];
 
-                            // Update name
-                            room.updateName();
+                            // Update the room's meta data
+                            room.update();
 
-                            // TODO: Should digest here
-                            $timeout(function(){
-                                $rootScope.$digest();
-                            });
                         }
                     });
 
                     ref.on('value', function (snapshot) {
                         if(snapshot && snapshot.val()) {
                             room.usersMeta = snapshot.val();
-                            $rootScope.$broadcast(bRoomUpdatedNotification);
+
+                            // Update the room's meta data
+                            room.update();
                         }
                     });
 
@@ -606,19 +600,21 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     ref = Paths.roomTypingRef(room.meta.rid);
 
                     ref.on('child_added', function (snapshot) {
-                        room.typing[snapshot.name()] = snapshot.val().name;
+                        room.typing[snapshot.key()] = snapshot.val().name;
 
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
+                        room.updateTyping();
+
+                        // Send a notification to the chat room
+                        $rootScope.$broadcast(bChatUpdatedNotification, room);
                     });
 
                     ref.on('child_removed', function (snapshot) {
-                        delete room.typing[snapshot.name()];
+                        delete room.typing[snapshot.key()];
 
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
+                        room.updateTyping();
+
+                        // Send a notification to the chat room
+                        $rootScope.$broadcast(bChatUpdatedNotification, room);
                     });
 
                     return deferred.promise;
@@ -660,13 +656,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         if(room.lastMessage) {
                             // Sometimes we get double messages
                             // check that this message hasn't been added already
-                            if(room.lastMessage.mid == snapshot.name()) {
+                            if(room.lastMessage.mid == snapshot.key()) {
                                 return;
                             }
                         }
 
                         // Create the message object
-                        var message = Message.buildMessage(snapshot.name(), val);
+                        var message = Message.buildMessage(snapshot.key(), val);
 
                         // Add the message to this room
                         if(message) {
@@ -736,9 +732,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             message.markRead();
                         }
 
-                        $timeout(function(){
-                            $rootScope.$digest();
-                        });
+                        room.update();
+
                     });
                 }
 
@@ -751,26 +746,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         return a.meta.time - b.meta.time;
                     });
                 }
-
-//                room.getMessages = function () {
-//
-//                    if(!room.messagesDirty) {
-//                        return room.messages;
-//                    }
-//                    // Sort messages by time
-//                    room.messages.sort(function (a, b) {
-//                        return a.meta.time - b.meta.time;
-//                    });
-//                    room.messagesDirty = false;
-//
-//                    // If the messages array contains more than 40 messages
-//                    // remove the oldest messages
-//                    if(room.messages.length > Config.maxHistoricMessages) {
-//                        room.messages.splice(0, room.messages.length - Config.maxHistoricMessages);
-//                    }
-//
-//                    return room.messages;
-//                };
 
                 room.messagesOff = function () {
 
@@ -800,6 +775,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 room.off = function () {
 
                     room.isOn = false;
+
+                    if(room.userOnlineStateChangedNotificationOff) {
+                        room.userOnlineStateChangedNotificationOff();
+                    }
 
                     room.messagesOff();
 

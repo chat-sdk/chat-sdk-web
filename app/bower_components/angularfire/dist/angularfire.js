@@ -4,9 +4,9 @@
  * provides you with the $firebase service which allows you to easily keep your $scope
  * variables in sync with your Firebase backend.
  *
- * AngularFire 0.0.0
+ * AngularFire 0.9.0
  * https://github.com/firebase/angularfire/
- * Date: 08/28/2014
+ * Date: 11/18/2014
  * License: MIT
  */
 (function(exports) {
@@ -35,16 +35,23 @@
    * manually invoked. Instead, one should create a $firebase object and call $asArray
    * on it:  <code>$firebase( firebaseRef ).$asArray()</code>;
    *
-   * Internally, the $firebase object depends on this class to provide 5 methods, which it invokes
+   * Internally, the $firebase object depends on this class to provide 5 $$ methods, which it invokes
    * to notify the array whenever a change has been made at the server:
    *    $$added - called whenever a child_added event occurs
    *    $$updated - called whenever a child_changed event occurs
    *    $$moved - called whenever a child_moved event occurs
    *    $$removed - called whenever a child_removed event occurs
    *    $$error - called when listeners are canceled due to a security error
+   *    $$process - called immediately after $$added/$$updated/$$moved/$$removed
+   *                to splice/manipulate the array and invokes $$notify
+   *
+   * Additionally, these methods may be of interest to devs extending this class:
+   *    $$notify - triggers notifications to any $watch listeners, called by $$process
+   *    $$getKey - determines how to look up a record's key (returns $id by default)
    *
    * Instead of directly modifying this class, one should generally use the $extendFactory
-   * method to add or change how methods behave:
+   * method to add or change how methods behave. $extendFactory modifies the prototype of
+   * the array class by returning a clone of $FirebaseArray.
    *
    * <pre><code>
    * var NewFactory = $FirebaseArray.$extendFactory({
@@ -52,14 +59,18 @@
    *    foo: function() { return 'bar'; },
    *
    *    // change how records are created
-   *    $$added: function(snap) {
-   *       var rec = new Widget(snap);
-   *       this._process('child_added', rec);
+   *    $$added: function(snap, prevChild) {
+   *       return new Widget(snap, prevChild);
+   *    },
+   *
+   *    // change how records are updated
+   *    $$updated: function(snap) {
+   *      return this.$getRecord(snap.key()).update(snap);
    *    }
    * });
    * </code></pre>
    *
-   * And then the new factory can be used by passing it as an argument:
+   * And then the new factory can be passed as an argument:
    * <code>$firebase( firebaseRef, {arrayFactory: NewFactory}).$asArray();</code>
    */
   angular.module('firebase').factory('$FirebaseArray', ["$log", "$firebaseUtils",
@@ -82,6 +93,13 @@
         this._inst = $firebase;
         this._promise = readyPromise;
         this._destroyFn = destroyFn;
+
+        // indexCache is a weak hashmap (a lazy list) of keys to array indices,
+        // items are not guaranteed to stay up to date in this list (since the data
+        // array can be manually edited without calling the $ methods) and it should
+        // always be used with skepticism regarding whether it is accurate
+        // (see $indexFor() below for proper usage)
+        this._indexCache = {};
 
         // Array.isArray will not work on objects which extend the Array class.
         // So instead of extending the Array class, we just return an actual array.
@@ -138,7 +156,7 @@
           if( key !== null ) {
             return self.$inst().$set(key, $firebaseUtils.toJSON(item))
               .then(function(ref) {
-                self._notify('child_changed', key);
+                self.$$notify('child_changed', key);
                 return ref;
               });
           }
@@ -182,7 +200,7 @@
          */
         $keyAt: function(indexOrItem) {
           var item = this._resolveItem(indexOrItem);
-          return this._getKey(item);
+          return this.$$getKey(item);
         },
 
         /**
@@ -195,8 +213,16 @@
          */
         $indexFor: function(key) {
           var self = this;
-          // todo optimize and/or cache these? they wouldn't need to be perfect
-          return this.$list.findIndex(function(rec) { return self._getKey(rec) === key; });
+          var cache = self._indexCache;
+          // evaluate whether our key is cached and, if so, whether it is up to date
+          if( !cache.hasOwnProperty(key) || self.$keyAt(cache[key]) !== key ) {
+            // update the hashmap
+            var pos = self.$list.findIndex(function(rec) { return self.$$getKey(rec) === key; });
+            if( pos !== -1 ) {
+              cache[key] = pos;
+            }
+          }
+          return cache.hasOwnProperty(key)? cache[key] : -1;
         },
 
         /**
@@ -281,71 +307,76 @@
          * Called by $firebase to inform the array when a new item has been added at the server.
          * This method must exist on any array factory used by $firebase.
          *
-         * @param snap
+         * @param {object} snap a Firebase snapshot
          * @param {string} prevChild
+         * @return {object} the record to be inserted into the array
          */
-        $$added: function(snap, prevChild) {
+        $$added: function(snap/*, prevChild*/) {
           // check to make sure record does not exist
-          var i = this.$indexFor(snap.name());
+          var i = this.$indexFor($firebaseUtils.getKey(snap));
           if( i === -1 ) {
             // parse data and create record
             var rec = snap.val();
             if( !angular.isObject(rec) ) {
               rec = { $value: rec };
             }
-            rec.$id = snap.name();
+            rec.$id = $firebaseUtils.getKey(snap);
             rec.$priority = snap.getPriority();
             $firebaseUtils.applyDefaults(rec, this.$$defaults);
 
-            // add it to array and send notifications
-            this._process('child_added', rec, prevChild);
+            return rec;
           }
+          return false;
         },
 
         /**
          * Called by $firebase whenever an item is removed at the server.
-         * This method must exist on any arrayFactory passed into $firebase
+         * This method does not physically remove the objects, but instead
+         * returns a boolean indicating whether it should be removed (and
+         * taking any other desired actions before the remove completes).
          *
-         * @param snap
+         * @param {object} snap a Firebase snapshot
+         * @return {boolean} true if item should be removed
          */
         $$removed: function(snap) {
-          var rec = this.$getRecord(snap.name());
-          if( angular.isObject(rec) ) {
-            this._process('child_removed', rec);
-          }
+          return this.$indexFor($firebaseUtils.getKey(snap)) > -1;
         },
 
         /**
          * Called by $firebase whenever an item is changed at the server.
-         * This method must exist on any arrayFactory passed into $firebase
+         * This method should apply the changes, including changes to data
+         * and to $priority, and then return true if any changes were made.
          *
-         * @param snap
+         * @param {object} snap a Firebase snapshot
+         * @return {boolean} true if any data changed
          */
         $$updated: function(snap) {
-          var rec = this.$getRecord(snap.name());
+          var changed = false;
+          var rec = this.$getRecord($firebaseUtils.getKey(snap));
           if( angular.isObject(rec) ) {
             // apply changes to the record
-            var changed = $firebaseUtils.updateRec(rec, snap);
+            changed = $firebaseUtils.updateRec(rec, snap);
             $firebaseUtils.applyDefaults(rec, this.$$defaults);
-            if( changed ) {
-              this._process('child_changed', rec);
-            }
           }
+          return changed;
         },
 
         /**
          * Called by $firebase whenever an item changes order (moves) on the server.
-         * This method must exist on any arrayFactory passed into $firebase
+         * This method should set $priority to the updated value and return true if
+         * the record should actually be moved. It should not actually apply the move
+         * operation.
          *
-         * @param snap
+         * @param {object} snap a Firebase snapshot
          * @param {string} prevChild
          */
-        $$moved: function(snap, prevChild) {
-          var rec = this.$getRecord(snap.name());
+        $$moved: function(snap/*, prevChild*/) {
+          var rec = this.$getRecord($firebaseUtils.getKey(snap));
           if( angular.isObject(rec) ) {
             rec.$priority = snap.getPriority();
-            this._process('child_moved', rec, prevChild);
+            return true;
           }
+          return false;
         },
 
         /**
@@ -364,29 +395,30 @@
          * @returns {string||null}
          * @private
          */
-        _getKey: function(rec) {
+        $$getKey: function(rec) {
           return angular.isObject(rec)? rec.$id : null;
         },
 
         /**
          * Handles placement of recs in the array, sending notifications,
-         * and other internals.
+         * and other internals. Called by the $firebase synchronization process
+         * after $$added, $$updated, $$moved, and $$removed.
          *
          * @param {string} event one of child_added, child_removed, child_moved, or child_changed
          * @param {object} rec
          * @param {string} [prevChild]
          * @private
          */
-        _process: function(event, rec, prevChild) {
-          var key = this._getKey(rec);
+        $$process: function(event, rec, prevChild) {
+          var key = this.$$getKey(rec);
           var changed = false;
-          var pos;
+          var curPos;
           switch(event) {
             case 'child_added':
-              pos = this.$indexFor(key);
+              curPos = this.$indexFor(key);
               break;
             case 'child_moved':
-              pos = this.$indexFor(key);
+              curPos = this.$indexFor(key);
               this._spliceOut(key);
               break;
             case 'child_removed':
@@ -397,27 +429,28 @@
               changed = true;
               break;
             default:
-              // nothing to do
+              throw new Error('Invalid event type: ' + event);
           }
-          if( angular.isDefined(pos) ) {
+          if( angular.isDefined(curPos) ) {
             // add it to the array
-            changed = this._addAfter(rec, prevChild) !== pos;
+            changed = this._addAfter(rec, prevChild) !== curPos;
           }
           if( changed ) {
             // send notifications to anybody monitoring $watch
-            this._notify(event, key, prevChild);
+            this.$$notify(event, key, prevChild);
           }
           return changed;
         },
 
         /**
          * Used to trigger notifications for listeners registered using $watch
+         *
          * @param {string} event
          * @param {string} key
          * @param {string} [prevChild]
          * @private
          */
-        _notify: function(event, key, prevChild) {
+        $$notify: function(event, key, prevChild) {
           var eventData = {event: event, key: key};
           if( angular.isDefined(prevChild) ) {
             eventData.prevChild = prevChild;
@@ -446,6 +479,7 @@
             if( i === 0 ) { i = this.$list.length; }
           }
           this.$list.splice(i, 0, rec);
+          this._indexCache[this.$$getKey(rec)] = i;
           return i;
         },
 
@@ -460,6 +494,7 @@
         _spliceOut: function(key) {
           var i = this.$indexFor(key);
           if( i > -1 ) {
+            delete this._indexCache[key];
             return this.$list.splice(i, 1)[0];
           }
           return null;
@@ -479,12 +514,13 @@
             return list[indexOrItem];
           }
           else if( angular.isObject(indexOrItem) ) {
-            var i = list.length;
-            while(i--) {
-              if( list[i] === indexOrItem ) {
-                return indexOrItem;
-              }
-            }
+            // it must be an item in this array; it's not sufficient for it just to have
+            // a $id or even a $id that is in the array, it must be an actual record
+            // the fastest way to determine this is to use $getRecord (to avoid iterating all recs)
+            // and compare the two
+            var key = this.$$getKey(indexOrItem);
+            var rec = this.$getRecord(key);
+            return rec === indexOrItem? rec : null;
           }
           return null;
         },
@@ -544,6 +580,278 @@
     }
   ]);
 })();
+
+/* istanbul ignore next */
+(function() {
+  'use strict';
+  var FirebaseAuth;
+
+  // Define a service which provides user authentication and management.
+  angular.module('firebase').factory('$firebaseAuth', [
+    '$q', function($q) {
+      // This factory returns an object containing the current authentication state of the client.
+      // This service takes one argument:
+      //
+      //   * `ref`: A Firebase reference.
+      //
+      // The returned object contains methods for authenticating clients, retrieving authentication
+      // state, and managing users.
+      return function(ref) {
+        var auth = new FirebaseAuth($q, ref);
+        return auth.construct();
+      };
+    }
+  ]);
+
+  FirebaseAuth = function($q, ref) {
+    this._q = $q;
+
+    if (typeof ref === 'string') {
+      throw new Error('Please provide a Firebase reference instead of a URL when creating a `$firebaseAuth` object.');
+    }
+    this._ref = ref;
+  };
+
+  FirebaseAuth.prototype = {
+    construct: function() {
+      this._object = {
+        // Authentication methods
+        $authWithCustomToken: this.authWithCustomToken.bind(this),
+        $authAnonymously: this.authAnonymously.bind(this),
+        $authWithPassword: this.authWithPassword.bind(this),
+        $authWithOAuthPopup: this.authWithOAuthPopup.bind(this),
+        $authWithOAuthRedirect: this.authWithOAuthRedirect.bind(this),
+        $authWithOAuthToken: this.authWithOAuthToken.bind(this),
+        $unauth: this.unauth.bind(this),
+
+        // Authentication state methods
+        $onAuth: this.onAuth.bind(this),
+        $getAuth: this.getAuth.bind(this),
+        $requireAuth: this.requireAuth.bind(this),
+        $waitForAuth: this.waitForAuth.bind(this),
+
+        // User management methods
+        $createUser: this.createUser.bind(this),
+        $changePassword: this.changePassword.bind(this),
+        $removeUser: this.removeUser.bind(this),
+        $sendPasswordResetEmail: this.sendPasswordResetEmail.bind(this)
+      };
+
+      return this._object;
+    },
+
+
+    /********************/
+    /*  Authentication  */
+    /********************/
+    // Common login completion handler for all authentication methods.
+    _onLoginHandler: function(deferred, error, authData) {
+      if (error !== null) {
+        deferred.reject(error);
+      } else {
+        deferred.resolve(authData);
+      }
+    },
+
+    // Authenticates the Firebase reference with a custom authentication token.
+    authWithCustomToken: function(authToken, options) {
+      var deferred = this._q.defer();
+
+      this._ref.authWithCustomToken(authToken, this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Authenticates the Firebase reference anonymously.
+    authAnonymously: function(options) {
+      var deferred = this._q.defer();
+
+      this._ref.authAnonymously(this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Authenticates the Firebase reference with an email/password user.
+    authWithPassword: function(credentials, options) {
+      var deferred = this._q.defer();
+
+      this._ref.authWithPassword(credentials, this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Authenticates the Firebase reference with the OAuth popup flow.
+    authWithOAuthPopup: function(provider, options) {
+      var deferred = this._q.defer();
+
+      this._ref.authWithOAuthPopup(provider, this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Authenticates the Firebase reference with the OAuth redirect flow.
+    authWithOAuthRedirect: function(provider, options) {
+      var deferred = this._q.defer();
+
+      this._ref.authWithOAuthRedirect(provider, this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Authenticates the Firebase reference with an OAuth token.
+    authWithOAuthToken: function(provider, credentials, options) {
+      var deferred = this._q.defer();
+
+      this._ref.authWithOAuthToken(provider, credentials, this._onLoginHandler.bind(this, deferred), options);
+
+      return deferred.promise;
+    },
+
+    // Unauthenticates the Firebase reference.
+    unauth: function() {
+      if (this.getAuth() !== null) {
+        this._ref.unauth();
+      }
+    },
+
+
+    /**************************/
+    /*  Authentication State  */
+    /**************************/
+    // Asynchronously fires the provided callback with the current authentication data every time
+    // the authentication data changes. It also fires as soon as the authentication data is
+    // retrieved from the server.
+    onAuth: function(callback, context) {
+      var self = this;
+
+      this._ref.onAuth(callback, context);
+
+      // Return a method to detach the `onAuth()` callback.
+      return function() {
+        self._ref.offAuth(callback, context);
+      };
+    },
+
+    // Synchronously retrieves the current authentication data.
+    getAuth: function() {
+      return this._ref.getAuth();
+    },
+
+    // Helper onAuth() callback method for the two router-related methods.
+    _routerMethodOnAuthCallback: function(deferred, rejectIfAuthDataIsNull, authData) {
+      if (authData !== null) {
+        deferred.resolve(authData);
+      } else if (rejectIfAuthDataIsNull) {
+        deferred.reject("AUTH_REQUIRED");
+      } else {
+        deferred.resolve(null);
+      }
+
+      // Turn off this onAuth() callback since we just needed to get the authentication data once.
+      this._ref.offAuth(this._routerMethodOnAuthCallback);
+    },
+
+    // Returns a promise which is resolved if the client is authenticated and rejects otherwise.
+    // This can be used to require that a route has a logged in user.
+    requireAuth: function() {
+      var deferred = this._q.defer();
+
+      this._ref.onAuth(this._routerMethodOnAuthCallback.bind(this, deferred, /* rejectIfAuthDataIsNull */ true));
+
+      return deferred.promise;
+    },
+
+    // Returns a promise which is resolved with the client's current authenticated data. This can
+    // be used in a route's resolve() method to grab the current authentication data.
+    waitForAuth: function() {
+      var deferred = this._q.defer();
+
+      this._ref.onAuth(this._routerMethodOnAuthCallback.bind(this, deferred, /* rejectIfAuthDataIsNull */ false));
+
+      return deferred.promise;
+    },
+
+
+    /*********************/
+    /*  User Management  */
+    /*********************/
+    // Creates a new email/password user. Note that this function only creates the user, if you
+    // wish to log in as the newly created user, call $authWithPassword() after the promise for
+    // this method has been resolved.
+    createUser: function(email, password) {
+      var deferred = this._q.defer();
+
+      this._ref.createUser({
+        email: email,
+        password: password
+      }, function(error) {
+        if (error !== null) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve();
+        }
+      });
+
+      return deferred.promise;
+    },
+
+    // Changes the password for an email/password user.
+    changePassword: function(email, oldPassword, newPassword) {
+      var deferred = this._q.defer();
+
+      this._ref.changePassword({
+        email: email,
+        oldPassword: oldPassword,
+        newPassword: newPassword
+      }, function(error) {
+          if (error !== null) {
+            deferred.reject(error);
+          } else {
+            deferred.resolve();
+          }
+        }
+      );
+
+      return deferred.promise;
+    },
+
+    // Removes an email/password user.
+    removeUser: function(email, password) {
+      var deferred = this._q.defer();
+
+      this._ref.removeUser({
+        email: email,
+        password: password
+      }, function(error) {
+        if (error !== null) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve();
+        }
+      });
+
+      return deferred.promise;
+    },
+
+    // Sends a password reset email to an email/password user.
+    sendPasswordResetEmail: function(email) {
+      var deferred = this._q.defer();
+
+      this._ref.resetPassword({
+        email: email
+      }, function(error) {
+        if (error !== null) {
+          deferred.reject(error);
+        } else {
+          deferred.resolve();
+        }
+      });
+
+      return deferred.promise;
+    }
+  };
+})();
+
 (function() {
   'use strict';
   /**
@@ -601,7 +909,7 @@
           value: this.$$conf
         });
 
-        this.$id = $firebase.$ref().ref().name();
+        this.$id = $firebaseUtils.getKey($firebase.$ref().ref());
         this.$priority = null;
 
         $firebaseUtils.applyDefaults(this, this.$$defaults);
@@ -619,6 +927,22 @@
               self.$$notify();
               return ref;
             });
+        },
+
+        /**
+         * Removes all keys from the FirebaseObject and also removes
+         * the remote data from the server.
+         *
+         * @returns a promise which will resolve after the op completes
+         */
+        $remove: function() {
+          var self = this;
+          $firebaseUtils.trimKeys(this, {});
+          this.$value = null;
+          return self.$inst().$remove(self.$id).then(function(ref) {
+            self.$$notify();
+            return ref;
+          });
         },
 
         /**
@@ -718,17 +1042,19 @@
          * Called by $firebase whenever an item is changed at the server.
          * This method must exist on any objectFactory passed into $firebase.
          *
-         * @param snap
+         * It should return true if any changes were made, otherwise `$$notify` will
+         * not be invoked.
+         *
+         * @param {object} snap a Firebase snapshot
+         * @return {boolean} true if any changes were made.
          */
         $$updated: function (snap) {
           // applies new data to this object
           var changed = $firebaseUtils.updateRec(this, snap);
+          // applies any defaults set using $$defaults
           $firebaseUtils.applyDefaults(this, this.$$defaults);
-          if( changed ) {
-            // notifies $watch listeners and
-            // updates $scope if bound to a variable
-            this.$$notify();
-          }
+          // returning true here causes $$notify to be triggered
+          return changed;
         },
 
         /**
@@ -755,8 +1081,8 @@
         },
 
         /**
-         * Updates any bound scope variables and notifies listeners registered
-         * with $watch any time there is a change to data
+         * Updates any bound scope variables and
+         * notifies listeners registered with $watch
          */
         $$notify: function() {
           var self = this, list = this.$$conf.listeners.slice();
@@ -823,7 +1149,7 @@
       function ThreeWayBinding(rec) {
         this.subs = [];
         this.scope = null;
-        this.name = null;
+        this.key = null;
         this.rec = rec;
       }
 
@@ -831,7 +1157,7 @@
         assertNotBound: function(varName) {
           if( this.scope ) {
             var msg = 'Cannot bind to ' + varName + ' because this instance is already bound to ' +
-              this.name + '; one binding per instance ' +
+              this.key + '; one binding per instance ' +
               '(call unbind method or create another $firebase instance)';
             $log.error(msg);
             return $firebaseUtils.reject(msg);
@@ -934,7 +1260,7 @@
             });
             this.subs = [];
             this.scope = null;
-            this.name = null;
+            this.key = null;
           }
         },
 
@@ -948,6 +1274,7 @@
     }
   ]);
 })();
+
 (function() {
   'use strict';
 
@@ -1011,8 +1338,8 @@
               // the entire Firebase path
               ref.once('value', function(snap) {
                 snap.forEach(function(ss) {
-                  if( !dataCopy.hasOwnProperty(ss.name()) ) {
-                    dataCopy[ss.name()] = null;
+                  if( !dataCopy.hasOwnProperty($firebaseUtils.getKey(ss)) ) {
+                    dataCopy[$firebaseUtils.getKey(ss)] = null;
                   }
                 });
                 ref.ref().update(dataCopy, this._handle(def, ref));
@@ -1170,10 +1497,39 @@
           var def     = $firebaseUtils.defer();
           var array   = new ArrayFactory($inst, destroy, def.promise);
           var batch   = $firebaseUtils.batch();
-          var created = batch(array.$$added, array);
-          var updated = batch(array.$$updated, array);
-          var moved   = batch(array.$$moved, array);
-          var removed = batch(array.$$removed, array);
+          var created = batch(function(snap, prevChild) {
+            var rec = array.$$added(snap, prevChild);
+            if( rec ) {
+              array.$$process('child_added', rec, prevChild);
+            }
+          });
+          var updated = batch(function(snap) {
+            var rec = array.$getRecord($firebaseUtils.getKey(snap));
+            if( rec ) {
+              var changed = array.$$updated(snap);
+              if( changed ) {
+                array.$$process('child_changed', rec);
+              }
+            }
+          });
+          var moved   = batch(function(snap, prevChild) {
+            var rec = array.$getRecord($firebaseUtils.getKey(snap));
+            if( rec ) {
+              var confirmed = array.$$moved(snap, prevChild);
+              if( confirmed ) {
+                array.$$process('child_moved', rec, prevChild);
+              }
+            }
+          });
+          var removed = batch(function(snap) {
+            var rec = array.$getRecord($firebaseUtils.getKey(snap));
+            if( rec ) {
+              var confirmed = array.$$removed(snap);
+              if( confirmed ) {
+                array.$$process('child_removed', rec);
+              }
+            }
+          });
           var error   = batch(array.$$error, array);
           var resolve = batch(_resolveFn);
 
@@ -1211,7 +1567,14 @@
           var obj = new ObjectFactory($inst, destroy, def.promise);
           var ref = $inst.$ref();
           var batch = $firebaseUtils.batch();
-          var applyUpdate = batch(obj.$$updated, obj);
+          var applyUpdate = batch(function(snap) {
+            var changed = obj.$$updated(snap);
+            if( changed ) {
+              // notifies $watch listeners and
+              // updates $scope if bound to a variable
+              obj.$$notify();
+            }
+          });
           var error = batch(obj.$$error, obj);
           var resolve = batch(_resolveFn);
 
@@ -1225,240 +1588,7 @@
       }
     ]);
 })();
-/* istanbul ignore next */
-(function() {
-  'use strict';
-  var AngularFireAuth;
 
-  // Defines the `$firebaseSimpleLogin` service that provides simple
-  // user authentication support for AngularFire.
-  angular.module("firebase").factory("$firebaseSimpleLogin", [
-    "$q", "$timeout", "$rootScope", function($q, $t, $rs) {
-      // The factory returns an object containing the authentication state
-      // of the current user. This service takes one argument:
-      //
-      //   * `ref`     : A Firebase reference.
-      //
-      // The returned object has the following properties:
-      //
-      //  * `user`: Set to "null" if the user is currently logged out. This
-      //    value will be changed to an object when the user successfully logs
-      //    in. This object will contain details of the logged in user. The
-      //    exact properties will vary based on the method used to login, but
-      //    will at a minimum contain the `id` and `provider` properties.
-      //
-      // The returned object will also have the following methods available:
-      // $login(), $logout(), $createUser(), $changePassword(), $removeUser(),
-      // and $getCurrentUser().
-      return function(ref) {
-        var auth = new AngularFireAuth($q, $t, $rs, ref);
-        return auth.construct();
-      };
-    }
-  ]);
-
-  AngularFireAuth = function($q, $t, $rs, ref) {
-    this._q = $q;
-    this._timeout = $t;
-    this._rootScope = $rs;
-    this._loginDeferred = null;
-    this._getCurrentUserDeferred = [];
-    this._currentUserData = undefined;
-
-    if (typeof ref == "string") {
-      throw new Error("Please provide a Firebase reference instead " +
-        "of a URL, eg: new Firebase(url)");
-    }
-    this._fRef = ref;
-  };
-
-  AngularFireAuth.prototype = {
-    construct: function() {
-      var object = {
-        user: null,
-        $login: this.login.bind(this),
-        $logout: this.logout.bind(this),
-        $createUser: this.createUser.bind(this),
-        $changePassword: this.changePassword.bind(this),
-        $removeUser: this.removeUser.bind(this),
-        $getCurrentUser: this.getCurrentUser.bind(this),
-        $sendPasswordResetEmail: this.sendPasswordResetEmail.bind(this)
-      };
-      this._object = object;
-
-      // Initialize Simple Login.
-      if (!window.FirebaseSimpleLogin) {
-        var err = new Error("FirebaseSimpleLogin is undefined. " +
-          "Did you forget to include firebase-simple-login.js?");
-        this._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-        throw err;
-      }
-
-      var client = new FirebaseSimpleLogin(this._fRef,
-        this._onLoginEvent.bind(this));
-      this._authClient = client;
-      return this._object;
-    },
-
-    // The login method takes a provider (for Simple Login) and authenticates
-    // the Firebase reference with which the service was initialized. This
-    // method returns a promise, which will be resolved when the login succeeds
-    // (and rejected when an error occurs).
-    login: function(provider, options) {
-      var deferred = this._q.defer();
-      var self = this;
-
-      // To avoid the promise from being fulfilled by our initial login state,
-      // make sure we have it before triggering the login and creating a new
-      // promise.
-      this.getCurrentUser().then(function() {
-        self._loginDeferred = deferred;
-        self._authClient.login(provider, options);
-      });
-
-      return deferred.promise;
-    },
-
-    // Unauthenticate the Firebase reference.
-    logout: function() {
-      // Tell the simple login client to log us out.
-      this._authClient.logout();
-
-      // Forget who we were, so that any getCurrentUser calls will wait for
-      // another user event.
-      delete this._currentUserData;
-    },
-
-    // Creates a user for Firebase Simple Login. Function 'cb' receives an
-    // error as the first argument and a Simple Login user object as the second
-    // argument. Note that this function only creates the user, if you wish to
-    // log in as the newly created user, call $login() after the promise for
-    // this method has been fulfilled.
-    createUser: function(email, password) {
-      var self = this;
-      var deferred = this._q.defer();
-
-      self._authClient.createUser(email, password, function(err, user) {
-        if (err) {
-          self._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-          deferred.reject(err);
-        } else {
-          deferred.resolve(user);
-        }
-      });
-
-      return deferred.promise;
-    },
-
-    // Changes the password for a Firebase Simple Login user. Take an email,
-    // old password and new password as three mandatory arguments. Returns a
-    // promise.
-    changePassword: function(email, oldPassword, newPassword) {
-      var self = this;
-      var deferred = this._q.defer();
-
-      self._authClient.changePassword(email, oldPassword, newPassword,
-        function(err) {
-          if (err) {
-            self._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-            deferred.reject(err);
-          } else {
-            deferred.resolve();
-          }
-        }
-      );
-
-      return deferred.promise;
-    },
-
-    // Gets a promise for the current user info.
-    getCurrentUser: function() {
-      var self = this;
-      var deferred = this._q.defer();
-
-      if (self._currentUserData !== undefined) {
-        deferred.resolve(self._currentUserData);
-      } else {
-        self._getCurrentUserDeferred.push(deferred);
-      }
-
-      return deferred.promise;
-    },
-
-    // Remove a user for the listed email address. Returns a promise.
-    removeUser: function(email, password) {
-      var self = this;
-      var deferred = this._q.defer();
-
-      self._authClient.removeUser(email, password, function(err) {
-        if (err) {
-          self._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-          deferred.reject(err);
-        } else {
-          deferred.resolve();
-        }
-      });
-
-      return deferred.promise;
-    },
-
-    // Send a password reset email to the user for an email + password account.
-    sendPasswordResetEmail: function(email) {
-      var self = this;
-      var deferred = this._q.defer();
-
-      self._authClient.sendPasswordResetEmail(email, function(err) {
-        if (err) {
-          self._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-          deferred.reject(err);
-        } else {
-          deferred.resolve();
-        }
-      });
-
-      return deferred.promise;
-    },
-
-    // Internal callback for any Simple Login event.
-    _onLoginEvent: function(err, user) {
-      // HACK -- calls to logout() trigger events even if we're not logged in,
-      // making us get extra events. Throw them away. This should be fixed by
-      // changing Simple Login so that its callbacks refer directly to the
-      // action that caused them.
-      if (this._currentUserData === user && err === null) {
-        return;
-      }
-
-      var self = this;
-      if (err) {
-        if (self._loginDeferred) {
-          self._loginDeferred.reject(err);
-          self._loginDeferred = null;
-        }
-        self._rootScope.$broadcast("$firebaseSimpleLogin:error", err);
-      } else {
-        this._currentUserData = user;
-
-        self._timeout(function() {
-          self._object.user = user;
-          if (user) {
-            self._rootScope.$broadcast("$firebaseSimpleLogin:login", user);
-          } else {
-            self._rootScope.$broadcast("$firebaseSimpleLogin:logout");
-          }
-          if (self._loginDeferred) {
-            self._loginDeferred.resolve(user);
-            self._loginDeferred = null;
-          }
-          while (self._getCurrentUserDeferred.length > 0) {
-            var def = self._getCurrentUserDeferred.pop();
-            def.resolve(user);
-          }
-        });
-      }
-    }
-  };
-})();
 'use strict';
 
 // Shim Array.indexOf for IE compatibility.
@@ -1679,7 +1809,7 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
            *   fn2();
            *   console.log(total); // 0 (nothing invoked yet)
            *   // after 10ms will log "10" and then "20"
-           * </pre></code>
+           * </code></pre>
            *
            * @param {int} wait number of milliseconds to pause before sending out after each invocation
            * @param {int} maxWait max milliseconds to wait before sending out, defaults to wait * 10 or 100
@@ -1968,6 +2098,16 @@ if ( typeof Object.getPrototypeOf !== "function" ) {
               }
             }
             return obj;
+          },
+
+          /**
+           * A utility for retrieving a Firebase reference or DataSnapshot's
+           * key name. This is backwards-compatible with `name()` from Firebase
+           * 1.x.x and `key()` from Firebase 2.0.0+. Once support for Firebase
+           * 1.x.x is dropped in AngularFire, this helper can be removed.
+           */
+          getKey: function(refOrSnapshot) {
+            return (typeof refOrSnapshot.key === 'function') ? refOrSnapshot.key() : refOrSnapshot.name();
           },
 
           /**

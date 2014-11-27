@@ -3,7 +3,7 @@
     <tr ng-repeat="(id, aUser) in getUsers()" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
         <td style="position: relative" class="cc-row" ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'" draggable-user="user" ng-click="userClicked(aUser)">
 
-            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.getThumbnail() }}"/>
+            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}"/>
 
             <div class="uk-float-left cc-user-name cc-user-name" ng-class="aUser.meta.description ? 'cc-show-status' : ''" >
                 <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.meta.name }}</div>

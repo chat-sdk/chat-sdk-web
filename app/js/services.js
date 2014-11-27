@@ -37,7 +37,7 @@ myApp.factory('Parse', ['$http', function ($http) {
     };
 }]);
 
-myApp.factory('Config', function () {
+myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
 
     var setByDefault = 0;
     var setByInclude = 1;
@@ -142,9 +142,16 @@ myApp.factory('Config', function () {
                 this.inactivityTimeout = Math.min(this.inactivityTimeout, 15);
                 this.inactivityTimeoutSet = setBy;
             }
+
+            // After we've updated the config we need to digest the
+            // root scope
+            $timeout(function() {
+                $rootScope.$digest();
+            });
+
         }
     };
-});
+}]);
 
 myApp.service('Visibility', ['$rootScope', '$window', '$document', function ($rootScope, $window, $document) {
 
@@ -175,9 +182,13 @@ myApp.factory('CookieTin', function () {
         mainMinimizedKey: 'cc_main_minimized',
         moreMinimizedKey: 'cc_more_minimized',
 
+        // Tokens
         tokenKey: 'cc_token',
         UIDKey: 'cc_uid',
         tokenExpiryKey: 'cc_token_expiry',
+
+        // API Details
+        apiDetailsKey: 'cc_api_details',
 
         isOffline: function () {
             var cookie = jQuery.cookie()['cc_offline'];
@@ -432,7 +443,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
             // Take the user online
             this.goOnline();
 
-            $rootScope.$on(bVisibilityChangedNotification, (function (e, hidden) {
+            $rootScope.$on(bVisibilityChangedNotification, (function (event, hidden) {
 
                 if(this.inactiveTimerPromise) {
                     $timeout.cancel(this.inactiveTimerPromise);
@@ -487,38 +498,38 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
     };
 }]);
 
-myApp.factory('API', ['$q', '$http', '$window', 'Config', function ($q, $http, $window, Config) {
+myApp.factory('API', ['$q', '$http', '$window', 'Config', 'CookieTin', function ($q, $http, $window, Config, CookieTin) {
     return {
 
         meta: {},
 
-        getAPIDetails: function () {
+        saveAPIDetails: function (details) {
+            details.time = new Date().getTime();
+            CookieTin.setProperty(JSON.stringify(details), CookieTin.apiDetailsKey);
+        },
 
+        loadAPIDetails: function () {
+            var details = CookieTin.getProperty(CookieTin.apiDetailsKey);
+            if(details) {
+                details = JSON.parse(details);
+                if((new Date().getTime() - details.time)/1000 < 30 * 60) {
+                    return details;
+                }
+            }
+            return null;
+        },
+
+        getAPIDetails: function () {
 
             var deferred = $q.defer();
 
-
-            //Make up some API Details
-
-//            this.meta = {
-//                cid: "xxyyzz",
-//                max: 20,
-//                ads: true,
-//                whiteLabel: false
-////                rooms: [
-////                    {
-////                        rid: "123123",
-////                        name: "Fixed 1",
-////                        description: "This is fixed 1"
-////                    }
-////                ]
-//            };
-//
-//            setTimeout((function () {
-//                deferred.resolve(this.meta);
-//            }).bind(this),10);
-//
-//            return deferred.promise;
+            // Do we have the cached details? Only update the details every hour
+            var details = this.loadAPIDetails();
+            if(details) {
+                this.meta = details;
+                deferred.resolve(this.meta);
+                return deferred.promise;
+            }
 
             // Do we have a primaryURL?
             var url = Config.primaryDomain;
@@ -579,6 +590,9 @@ myApp.factory('API', ['$q', '$http', '$window', 'Config', function ($q, $http, $
                                 whiteLabel: false,
                                 rooms: rooms
                             };
+
+                            // Save the meta data
+                            this.saveAPIDetails(this.meta);
 
                             // Success! Now return the API meta data
                             deferred.resolve(this.meta);
@@ -852,26 +866,6 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
                     }
                 }
 
-                // Check every room against every other room to see if the
-                // target is valid
-
-//                var ri = null;
-//                var rj = null;
-//                for(var i = 0; i < rooms.length; i++) {
-//                    ri = rooms[i];
-//
-//                    // Now check it against all the rooms
-//                    for(var j = i; j < rooms.length; j++) {
-//                        rj = rooms[j];
-//
-//                        if(ri != rj && ri.targetSlot == rj.targetSlot && !rj.draggable) {
-//
-//                            moveToSlot(rj, rj.targetSlot + 1);
-//
-//                        }
-//                    }
-//                }
-
                 // Set the initial position of the first room
                 room.offset = this.offsetForSlot(room.targetSlot);
 
@@ -880,7 +874,10 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
 
                 this.updateRoomSize();
 
-                this.digest();
+                // We need to update:
+                // - Room list
+                // - Chat bar
+                $rootScope.$broadcast(bRoomAddedNotification, room);
             }
         },
 
@@ -907,7 +904,7 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
             return ar;
         },
 
-        updateRoomSize: function () {
+        updateRoomSize: function (room) {
 
             var rooms = this.roomsSortedByOffset();
 
@@ -916,6 +913,9 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
             }
 
             var effectiveScreenWidth = this.effectiveScreenWidth();
+
+            // Get the index of the current room
+
 
             for(var i in rooms) {
                 if(rooms.hasOwnProperty(i)) {
@@ -948,7 +948,6 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
             }
             this.updateRoomPositions();
         },
-
 
         updateRoomPositions: function (duration) {
             var i = 0;
@@ -1255,24 +1254,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
             if(room && room.meta.rid) {
                 this.publicRooms.push(room);
 
-                //this.publicRooms[room.meta.rid] = room;
-
-                //this.sortPublicRooms();
-
                 $rootScope.$broadcast(bPublicRoomAddedNotification);
-
-                // TODO: do we need this?
-                //this.sortRooms();
-                //this.digest();
             }
         },
-
-//        removePublicRoom: function (room) {
-//            if(room && room.meta.rid) {
-//                this.removePublicRoomWithID(room.meta.rid);
-//                this.digest();
-//            }
-//        },
 
         removePublicRoomWithID: function (rid) {
             if(rid) {
@@ -1282,63 +1266,13 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
 
                 $rootScope.$broadcast(bPublicRoomRemovedNotification);
 
-                //delete this.publicRooms[rid];
-                //this.digest();
             }
         },
 
-        getPublicRoomWithID: function (rid) {
-            return CCArray.getItem(this.publicRooms, rid, function (room) {
-                return room.meta.rid;
-            });
-            //return this.publicRooms[rid];
-        },
-
-//        getPublicRooms: function () {
-//            // Add the public rooms to an array
-//            var rooms = [];
-//            for(var key in this.publicRooms) {
-//                if(this.publicRooms.hasOwnProperty(key)) {
-//                    rooms.push(this.publicRooms[key]);
-//                }
-//            }
-//
-//            // Sort by weight first
-//            // then number of users
-//            // then alphabetically
-//            rooms.sort(function(a, b) {
-//
-//                var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
-//                var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
-//
-//                if(au != bu) {
-//                    return au ? 1 : -1;
-//                }
-//
-//                // Weight
-//                var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
-//                var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
-//
-//                if(aw != bw) {
-//                    return aw - bw;
-//                }
-//                else {
-//
-//                    var ac = a.onlineUserCount();
-//                    var bc = b.onlineUserCount();
-//
-//                    //console.log("1: " + ac + ", 2: " + bc);
-//
-//                    if(ac != bc) {
-//                        return bc - ac;
-//                    }
-//                    else {
-//                        return a.name < b.name ? -1 : 1;
-//                    }
-//                }
-//
+//        getPublicRoomWithID: function (rid) {
+//            return CCArray.getItem(this.publicRooms, rid, function (room) {
+//                return room.meta.rid;
 //            });
-//            return rooms;
 //        },
 
         sortPublicRooms: function () {
@@ -1400,7 +1334,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
 
                 // Only look at rooms that are private chats
                 // between only two people
-                if(room.userCount(true) == 2) {
+                if(room.userCount == 2) {
                     if(room.users[user.meta.uid]) {
                         return room;
                     }
@@ -1428,8 +1362,8 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTi
     return Cache;
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$firebaseSimpleLogin', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API', 'StateManager',
-              function ($rootScope, $timeout, $http, $q, $firebase, $firebaseSimpleLogin, Facebook, Cache, User, Room, Layout, Utilities, Presence, API, StateManager) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API', 'StateManager',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, Cache, User, Room, Layout, Utilities, Presence, API, StateManager) {
 
     var Auth = {
 
@@ -1450,40 +1384,45 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                 var user = $rootScope.user;
 
-                var name = user.meta.name;
-                if(!name || name.length === 0) {
-                    name = authUser.displayName;
-                }
-                if(!name || name.length === 0) {
-                    name = authUser.username;
-                }
-                if(!name || name.length === 0) {
-                    if(authUser.thirdPartyData) {
-                        name = authUser.thirdPartyData.name;
+                var setUserProperty = function (property, value) {
+                    if((!user.meta[property] || user.meta[property].length == 0) && value && value.length > 0) {
+                        user.meta[property] = value;
                     }
+                };
+
+                // Get the third party data
+                var userData = null;
+
+                var p = authUser.provider;
+                if(p == "facebook" || p == "twitter" || p == "google" || p == "github") {
+                    userData = authUser[p].cachedUserProfile;
                 }
-                if(!name || name.length === 0) {
-                    name = "ChatCat" + Math.floor(Math.random() * 1000 + 1);
+                else if (p == "custom") {
+                    userData = authUser.thirdPartyData;
                 }
-                user.meta.name = name;
+                else {
+                    userData = {name: null}
+                }
+
+                // Set the user's name
+                setUserProperty("name", userData.name);
+                setUserProperty("name", "ChatCat" + Math.floor(Math.random() * 1000 + 1));
 
                 var imageURL = null;
-                var thirdPartyData = authUser.thirdPartyUserData;
 
                 /** SOCIAL INFORMATION **/
                 if(authUser.provider == "facebook") {
+
+                    setUserProperty("gender", userData.gender == "male" ? "M": "F");
+
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
                     if(!user.hasImage()) {
-                        Facebook.api('http://graph.facebook.com/'+thirdPartyData.id+'/picture?width=100', function(response) {
-
-                            Utilities.pullImageFromURL($http, response.data.url).then(function(imageData) {
-
-                                user.setImage(imageData);
-
-                            }, function(error) {
-                                user.setImage();
-                            });
+                        Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=100', function(response) {
+                            user.setImage(response.data.url, true);
+                        });
+                        Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=40', function(response) {
+                            user.setThumbnail(response.data.url, true);
                         });
                     }
                 }
@@ -1491,60 +1430,64 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', '$f
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
-                    imageURL = thirdPartyData.profile_image_url.replace("normal", "bigger");
+                    imageURL = userData.profile_image_url.replace("normal", "bigger");
 
-                    if(!user.meta.description) {
-                        user.meta.description = thirdPartyData.description;
-                    }
+                    setUserProperty("description", userData.description);
+                    setUserProperty("city", userData.location);
+
                 }
                 if(authUser.provider == "github") {
-                    imageURL = thirdPartyData.avatar_url;
+                    imageURL = userData.avatar_url;
+                    setUserProperty("name", authUser.login)
                 }
                 if(authUser.provider == "google") {
-                    imageURL = thirdPartyData.picture;
+                    imageURL = userData.picture;
+                    setUserProperty("gender", userData.gender == "male" ? "M": "F");
                 }
                 if(authUser.provider == "anonymous") {
 
                 }
                 if(authUser.provider == "custom") {
-                    if(!user.meta.name && authUser.thirdPartyData.name) {
-                        user.meta.name = authUser.thirdPartyData.name;
-                    }
-                    if(!user.meta.description && authUser.thirdPartyData.status) {
-                        user.meta.description = authUser.thirdPartyData.status;
-                    }
-                    if(!user.meta.city && authUser.thirdPartyData.city) {
-                        user.meta.city = authUser.thirdPartyData.city;
-                    }
-                    if(!user.meta.gender && authUser.thirdPartyData.gender) {
-                        user.meta.gender = authUser.thirdPartyData.gender;
-                    }
-                    if(!user.meta.country && authUser.thirdPartyData.countryCode) {
-                        user.meta.country = authUser.thirdPartyData.countryCode;
-                    }
-                    if(!user.meta.yearOfBirth && authUser.thirdPartyData.yearOfBirth) {
-                        user.meta.yearOfBirth = authUser.thirdPartyData.yearOfBirth;
-                    }
-                    if(authUser.thirdPartyData.imageURL) {
-                        imageURL = authUser.thirdPartyData.imageURL;
-                    }
-                    if(authUser.thirdPartyData.profileHTML) {
-                        user.meta.profileHTML = authUser.thirdPartyData.profileHTML;
+
+                    setUserProperty("description", userData.status);
+                    setUserProperty("city", userData.city);
+                    setUserProperty("gender", userData.gender);
+                    setUserProperty("country", userData.countryCode);
+                    setUserProperty("yearOfBirth", userData.yearOfBirth);
+                    setUserProperty("homePageLink", userData.homePageLink);
+
+                    if(userData.profileHTML && userData.profileHTML.length > 0) {
+                        setUserProperty("profileHTML", userData.profileHTML);
                     }
                     else {
-                        user.meta.profileHTML = '';
+                        user.meta.profileHTML = "";
+                    }
+
+                    if(userData.imageURL) {
+                        imageURL = userData.imageURL;
                     }
                 }
 
                 // If they don't have a profile picture load it from the social network
                 if((!user.hasImage()) && imageURL) {
-                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
+                    if(imageURL) {
+                        user.setImage(imageURL, true);
+                        user.setThumbnail(imageURL, true);
 
-                        user.setImage(imageData);
+//                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
+//
+//                        user.setImage(imageData);
+//                        user.setThumbnail(imageData)
+//
+//                    }, function(error) {
+//                        user.setImage();
+//                    });
 
-                    }, function(error) {
-                        user.setImage();
-                    });
+                    }
+                    else {
+                        user.setImage(bDefaultProfileImage, true);
+                        user.setThumbnail(bDefaultProfileImage, true);
+                    }
                 }
 
                 /** LOCATION **/

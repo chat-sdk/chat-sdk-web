@@ -5,8 +5,10 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$firebaseSimpleLogin', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $firebaseSimpleLogin, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config, Parse) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config, Parse) {
+
+    $scope.totalUserCount = 0;
 
     $scope.init = function () {
 
@@ -67,9 +69,18 @@ myApp.controller('AppController', [
 
         $scope.setMainBoxMinimized(CookieTin.getProperty(CookieTin.mainMinimizedKey));
 
+        $scope.$on(bUserOnlineStateChangedNotification, function () {
+            $scope.updateTotalUserCount();
+            $timeout(function () {
+                $scope.$digest();
+            });
+        });
+
     };
 
+    $scope.playAlert1 = function () {
 
+    }
 
     /**
      * The images in the partials should be pointed at the correct
@@ -284,14 +295,14 @@ myApp.controller('AppController', [
     /**
      * @return number of online users
      */
-    $scope.numberOfUsersOnline = function () {
+    $scope.updateTotalUserCount = function () {
         var i = 0;
         for(var key in Cache.onlineUsers) {
             if(Cache.onlineUsers.hasOwnProperty(key)) {
                 i++;
             }
         }
-        return i;
+        $scope.totalUserCount = i;
     };
 
     $scope.userClicked = function (user) {
@@ -307,9 +318,6 @@ myApp.controller('AppController', [
                 if (DEBUG) console.log("Room Created: " + room.meta.name);
             });
 
-//            Auth.createPrivateRoom([user], {invitesEnabled: true}).then(function(room) {
-//                if (DEBUG) console.log("Room Created: " + room.meta.name);
-//            });
         }
         else if(user.blockingMe) {
         }
@@ -322,7 +330,7 @@ myApp.controller('AppController', [
     $scope.logout = function () {
 
         // This will be handled by the logout listener anyway
-        $scope.auth.$logout();
+        Paths.firebase().unauth();
 
         $scope.showLoginBox();
     };
@@ -339,14 +347,6 @@ myApp.controller('AppController', [
         if($scope.on) {
             CookieTin.setOffline(false);
             Presence.goOnline();
-
-            // If the user is online then we show the main box
-//            if($rootScope.user) {
-//                this.showMainBox();
-//            }
-//            else {
-//                this.showLoginBox();
-//            }
         }
         else {
             Presence.goOffline();
@@ -384,11 +384,8 @@ myApp.controller('AppController', [
 
                 if(r.data && r.data.url) {
 
-                    var imageURL = 'http://skbb48.cloudimage.io/s/crop/100x100/' + r.data.url;
-                    var thumbnailURL = 'http://skbb48.cloudimage.io/s/crop/30x30/' + r.data.url;
-
-                    $scope.getUser().setImage(imageURL, true);
-                    $scope.getUser().setThumbnail(thumbnailURL, true);
+                    $scope.getUser().setImage(r.data.url, true);
+                    $scope.getUser().setThumbnail(r.data.url, true);
                 }
 
             }).bind(this), (function (error) {
@@ -522,7 +519,21 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', 'Config', function($scope, Auth, Cache, Utilities, Config) {
+myApp.controller('ChatBarController', ['$scope', '$timeout', function($scope, $timeout) {
+
+    $scope.init = function () {
+        $scope.$on(bRoomAddedNotification, function (event, room) {
+            $timeout(function () {
+                $scope.$digest();
+            });
+        });
+    };
+
+    $scope.init();
+
+}]);
+
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', function($scope, $timeout, Auth, Cache, Utilities, Config) {
 
     $scope.init = function () {
 
@@ -542,6 +553,12 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', '
         // We don't want people deleting rooms from this view
         $scope.canDeleteRoom = false;
 
+        // When the user value changes update the user interface
+        $scope.$on(bUserValueChangedNotification, function (user) {
+            $timeout(function () {
+                $scope.$digest();
+            });
+        });
     };
 
     $scope.profileBoxDisabled = function () {
@@ -591,8 +608,8 @@ myApp.controller('MainBoxController', ['$scope', 'Auth', 'Cache', 'Utilities', '
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$firebaseSimpleLogin', 'API', 'Presence', 'SingleSignOn',
-    function($rootScope, $scope, Auth, Cache, $firebaseSimpleLogin, API, Presence, SingleSignOn) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn) {
 
     /**
      * Initialize the login controller
@@ -604,51 +621,37 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // Show the notification to say we're authenticating
         $scope.showNotification(bNotificationTypeWaiting, "Authenticating");
 
-        // Add observers for AngularFire login events
-        // When the user logs in
-        $scope.$on('$firebaseSimpleLogin:login', function (e) {
-
-            if(DEBUG) console.log("firebase simple login");
-
-            if($rootScope.singleSignOnEnabled) {
-                Paths.firebase().unauth();
-                $scope.singleSignOn();
-            }
-            else {
-                // Login was successful so log the user in given their ID
-                $scope.handleUserLogin($scope.auth.user);
-            }
-
+        var ref = Paths.firebase();
+        ref.onAuth(function(authData) {
 
             // Hide the waiting overlay
-            //$scope.setOverlayHidden(true);
             $scope.hideNotification();
+
+            if (authData) {
+                // user authenticated with Firebase
+                console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
+
+                if($rootScope.singleSignOnEnabled) {
+                    Paths.firebase().unauth();
+                    $scope.singleSignOn();
+                }
+                else {
+                    // Login was successful so log the user in given their ID
+                    $scope.handleUserLogin(authData);
+                }
+
+            } else {
+                // This is called whenever the page loads
+                if($rootScope.singleSignOnEnabled) {
+                    // Try to authenticate
+                    $scope.singleSignOn();
+                }
+                else {
+                    $scope.logout();
+                }
+
+            }
         });
-
-        // When the user logs out
-        $scope.$on('$firebaseSimpleLogin:logout', (function (e) {
-            if(DEBUG) console.log("firebase simple logout");
-
-            // This is called whenever the page loads
-            if($rootScope.singleSignOnEnabled) {
-                // Try to authenticate
-                $scope.singleSignOn();
-            }
-            else {
-                $scope.logout();
-            }
-
-        }).bind(this));
-
-        // When there's a login error
-        $scope.$on('$firebaseSimpleLogin:error', (function (e) {
-            if(DEBUG) console.log("firebase simple error");
-            $scope.logout();
-        }).bind(this));
-
-
-        // Setup an AngularFire auth reference
-        $rootScope.auth = $firebaseSimpleLogin(Paths.firebase());
     };
 
     $scope.tries = 0;
@@ -768,15 +771,50 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
         // Hide the overlay
         $scope.showNotification(bNotificationTypeWaiting, "Logging in");
 
-        $scope.auth.$login(method, options).then(function(user) {
+        var handleResult = function (error, authData) {
+            if(error) {
+                $scope.hideNotification();
+                $scope.handleLoginError(error);
 
-            // TODO:  We currently handle this using an observer
-            //$scope.handleUserLogin(user);
+                $timeout(function(){
+                    $scope.$digest();
+                });
+            }
+        };
 
+        var ref = Paths.firebase();
 
-        }, function(error) {
-            $scope.handleLoginError(error);
-        });
+        if(method == 'password') {
+            ref.authWithPassword({
+                email    : options.email,
+                password : options.password
+            }, handleResult, {
+                remember: "sessionOnly"
+            });
+        }
+        else {
+//            ref.authWithOAuthRedirect(method, handleResult,{
+//                    remember: "sessionOnly",
+//                    scope: "email,user_likes"
+//            });
+
+            var scope = null;
+
+            if(method == "facebook") {
+                scope = "email,user_likes";
+            }
+            if(method == "github") {
+                scope = "user,gist";
+            }
+            if(method == "google") {
+                scope = "email";
+            }
+
+            ref.authWithOAuthPopup(method, handleResult, {
+                remember: "sessionOnly",
+                scope: scope
+            });
+        }
     };
 
     $scope.forgotPassword  = function (email) {
@@ -828,7 +866,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
      * a three way binding to the user property
      * @param {Obj} the User object from Firebase authentication
      */
-    $scope.handleUserLogin = function (user, firstLogin) {
+
+    $scope.handleUserLogin = function (userData, firstLogin) {
 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
@@ -847,7 +886,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope','Auth', 'Cache', '$f
                 }
                 else {
 
-                    Auth.bindUser(user).then(function() {
+                    Auth.bindUser(userData).then(function() {
                         // We have the user's ID so we can get the user's object
                         if(firstLogin) {
                             $scope.showProfileSettingsBox();
@@ -933,6 +972,16 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
         // The height of the bottom message input bar
         $scope.inputHeight = 26;
+
+        // When the user value changes update the user interface
+        $scope.$on(bUserValueChangedNotification, function (event, user) {
+            if($scope.room.containsUser(user)) {
+                $timeout(function () {
+                    $scope.$digest();
+                });
+            }
+        });
+
     };
 
     $scope.getZIndex = function () {
@@ -1106,30 +1155,30 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         }
     };
 
-    $scope.getTyping = function () {
-        var i = 0;
-        var name = null;
-        for(var key in $scope.room.typing) {
-            if($scope.room.typing.hasOwnProperty(key)) {
-                if(key == $scope.getUser().meta.uid) {
-                    continue;
-                }
-                name = $scope.room.typing[key];
-                i++;
-            }
-        }
-
-        var typing = null;
-        if (i == 1) {
-            typing = name + "...";
-        }
-        else if (i > 1) {
-            typing = i + "people typing";
-        }
-
-        return typing;
-    };
-
+//    $scope.getTyping = function () {
+//
+//        var i = 0;
+//        var name = null;
+//        for(var key in $scope.room.typing) {
+//            if($scope.room.typing.hasOwnProperty(key)) {
+//                if(key == $scope.getUser().meta.uid) {
+//                    continue;
+//                }
+//                name = $scope.room.typing[key];
+//                i++;
+//            }
+//        }
+//
+//        var typing = null;
+//        if (i == 1) {
+//            typing = name + "...";
+//        }
+//        else if (i > 1) {
+//            typing = i + "people typing";
+//        }
+//
+//        return typing;
+//    };
 
 }]);
 
@@ -1166,7 +1215,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
             }
             // Otherwise sort them by number of users
             else {
-                return b.userCount() - a.userCount();
+                return b.userCount - a.userCount;
             }
         });
 
@@ -1174,13 +1223,6 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
             $scope.$digest();
         });
     };
-
-//    $scope.superGetRooms = $scope.getRooms;
-//    $scope.getRooms = function() {
-//        var rooms = $scope.superGetRooms(false);
-//
-//        return rooms;
-//    };
 
     $scope.roomClicked = function(room) {
 
@@ -1237,7 +1279,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
 
 }]);
 
-myApp.controller('CreateRoomController', ['$scope', 'Auth', 'Room', function($scope, Auth, Room) {
+myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', function($scope, $timeout, Auth, Room) {
 
     $scope.init = function () {
         $scope.clearForm();
@@ -1245,6 +1287,14 @@ myApp.controller('CreateRoomController', ['$scope', 'Auth', 'Room', function($sc
         $scope.$on(bShowCreateChatBox, function () {
             $scope.focusName = true;
         });
+
+        $scope.$on(bChatUpdatedNotification, function (event, room) {
+            if(room == $scope.room) {
+                $timeout(function(){
+                    $scope.$digest();
+                });
+            }
+        })
     };
 
     $scope.createRoom  = function () {

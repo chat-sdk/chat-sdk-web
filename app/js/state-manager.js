@@ -29,7 +29,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
             publicRoomsRef.on('child_added', (function (snapshot) {
 
-                var rid = snapshot.name();
+                var rid = snapshot.key();
                 if(rid) {
                     var room = Room.getOrCreateRoomWithID(rid);
                     //Cache.addPublicRoom(room);
@@ -46,7 +46,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
             publicRoomsRef.on('child_removed', (function (snapshot) {
 
-                Cache.removePublicRoomWithID(snapshot.name());
+                Cache.removePublicRoomWithID(snapshot.key());
 
             }).bind(this));
 
@@ -67,6 +67,9 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
                     var user = User.getOrCreateUserWithID(uid);
 
                     Cache.addOnlineUser(user);
+
+                    // Update the user's rooms
+                    $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
                 }
 
             }).bind(this));
@@ -81,6 +84,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
                 if (user) {
                     Cache.removeOnlineUser(user);
                 }
+
+                $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
 
             }).bind(this));
 
@@ -334,7 +339,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
         },
 
         impl_roomRemoved: function (snapshot) {
-            Layout.removeRoomWithID(snapshot.name());
+            Layout.removeRoomWithID(snapshot.key());
         }
 
     };

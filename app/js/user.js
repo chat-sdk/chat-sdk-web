@@ -60,9 +60,11 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                         user.setImage(snapshot.val().image);
                     }
 
-                    $timeout(function(){
-                        $rootScope.$digest();
-                    });
+                    // Here we want to update the
+                    // - Main box
+                    // - Every chat room that includes the user
+                    // - User settings popup
+                    $rootScope.$broadcast(bUserValueChangedNotification, user);
 
                 }).bind(this));
 
@@ -111,14 +113,21 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                 });
             };
 
+            user.updateRooms = function () {
+            };
+
             user.thumbnailOff = function () {
                 user.isThumbnailOn = false;
                 var ref = Paths.userThumbnailRef(user.meta.uid);
                 ref.off('value');
             };
 
-            user.setThumbnail = function (imageData, push) {
+            user.setThumbnail = function (imageData, push, isLocal) {
                 var deferred = $q.defer();
+
+                if(imageData != bDefaultProfileImage) {
+                    imageData = 'http://skbb48.cloudimage.io/s/crop/30x30/'+imageData;
+                }
 
                 if(imageData && imageData == user.thumbnail) {
                     deferred.resolve();
@@ -152,6 +161,10 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             };
 
             user.setImage = function (imageData, push) {
+
+                if(imageData != bDefaultProfileImage) {
+                    imageData = 'http://skbb48.cloudimage.io/s/crop/100x100/'+imageData;
+                }
 
                 var deferred = $q.defer();
 

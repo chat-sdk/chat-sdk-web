@@ -13,14 +13,13 @@
     "ng-file-upload": "latest",
     "uikit":"latest",
     "firebase": "latest",
-    "firebase-simple-login": "latest",
     "angularfire": "latest",
     "angular-facebook": "latest",
     "FileSaver": "latest",
     "moment": "latest",
     "jquery-cookie": "latest",
     "angular-sanitize": "latest",
-    "angular-emoji-filter": "latest"
-    
+    "angular-emoji-filter": "latest",
+    "howler": "latest"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "uikit",
-  "version": "2.11.1",
+  "version": "2.12.0",
   "homepage": "http://getuikit.com",
   "main": [
     "css/uikit.min.css",
@@ -17,11 +17,12 @@
     "composer.json",
     "index.html"
   ],
-  "_release": "2.11.1",
+  "private": true,
+  "_release": "2.12.0",
   "_resolution": {
     "type": "version",
-    "tag": "2.11.1",
-    "commit": "a53ed8d6e77bad865435810abbf2dcc9c38a5702"
+    "tag": "2.12.0",
+    "commit": "f310ea1941810a6672364dedc8bb1efd200bc0ad"
   },
   "_source": "git://github.com/uikit/bower-uikit.git",
   "_target": "*",

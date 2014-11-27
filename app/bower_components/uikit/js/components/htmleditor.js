@@ -1,4 +1,4 @@
-/*! UIkit 2.11.1 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(addon) {
 
     var component;
@@ -14,6 +14,8 @@
     }
 
 })(function($, UI) {
+
+    "use strict";
 
     var editors = [];
 
@@ -140,7 +142,7 @@
 
             this.debouncedRedraw = UI.Utils.debounce(function () { $this.redraw(); }, 5);
 
-            this.on('init', function() {
+            this.on('uk.component.init', function() {
                 $this.redraw();
             });
 
@@ -600,8 +602,9 @@
     });
 
     // init code
-    $(function() {
-        $('textarea[data-uk-htmleditor]').each(function() {
+    UI.ready(function(context) {
+
+        $('textarea[data-uk-htmleditor]', context).each(function() {
             var editor = $(this), obj;
 
             if (!editor.data('htmleditor')) {
