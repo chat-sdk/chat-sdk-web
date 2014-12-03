@@ -10,7 +10,8 @@ var myApp = angular.module('myApp', [
   'myApp.room',
   'myApp.user',
   'myApp.message',
-  'myApp.stateManager'
+  'myApp.stateManager',
+  'myApp.cache'
 
 ]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([

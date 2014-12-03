@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Layout', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Layout, Presence, CookieTin, Room, Config, Parse) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Rooms', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Rooms, Presence, CookieTin, Room, Config, Parse) {
 
     $scope.totalUserCount = 0;
 
@@ -61,9 +61,6 @@ myApp.controller('AppController', [
 
         // Set the config object that contains settings for the chat
         Config.setConfig(Config.setByInclude, CC_OPTIONS);
-        $rootScope.getConfig = function() {
-            return Config;
-        }
 
         $scope.setupImages();
 
@@ -157,20 +154,20 @@ myApp.controller('AppController', [
      * Return a list of all the user's current
      * rooms active or not
      */
-    $scope.getAllRooms = function () {
-        return Layout.getAllRooms();
-    };
+//    $scope.getAllRooms = function () {
+//        return Layout.getAllRooms();
+//    };
 
     /**
      * Get a list of the user's rooms filtered
      * by whether they're active
      */
-    $scope.getRooms = function (active) {
-        return Layout.getRooms(active);
-    };
+//    $scope.getRooms = function (active) {
+//        return Layout.getRooms(active);
+//    };
 
     $scope.saveRoomSlotToUser = function (room) {
-        $scope.getUser().updateRoomSlot(room, room.slot());
+        $scope.getUser().updateRoomSlot(room, room.slot);
     };
 
     /**
@@ -179,8 +176,7 @@ myApp.controller('AppController', [
      */
     // TODO: Why does it make a warning?
     $scope.showRoomListBox = function () {
-        var showListBox = ($scope.getRooms(false).length > 0);
-        return showListBox;
+        return Rooms.inactiveRooms().length > 0;
     };
 
     /**
@@ -519,13 +515,35 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('ChatBarController', ['$scope', '$timeout', function($scope, $timeout) {
+myApp.controller('ChatBarController', ['$scope', '$timeout', 'Rooms', 'RoomPositionManager', function($scope, $timeout, Rooms, RoomPositionManager) {
+
+    $scope.rooms = [];
 
     $scope.init = function () {
+
         $scope.$on(bRoomAddedNotification, function (event, room) {
+            $scope.updateList();
+        });
+
+        $scope.$on(bRoomRemovedNotification, function (event, room) {
+            $scope.updateList();
+        });
+
+        $scope.$on(bUpdateRoomActiveStatusNotification, function (event, room) {
             $timeout(function () {
                 $scope.$digest();
             });
+        });
+
+    };
+
+    $scope.updateList = function () {
+
+        // Only include rooms that are active
+        $scope.rooms = Rooms.activeRooms();
+
+        $timeout(function () {
+            $scope.$digest();
         });
     };
 
@@ -533,7 +551,7 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', function($scope, $t
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', function($scope, $timeout, Auth, Cache, Utilities, Config) {
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', function($scope, $timeout, Auth, Cache, Utilities, Config, Screen) {
 
     $scope.init = function () {
 
@@ -559,11 +577,25 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
                 $scope.$digest();
             });
         });
+
+        $scope.updateMainBoxSize();
+        $scope.$on(bScreenSizeChangedNotification, function () {
+            $scope.updateMainBoxSize();
+        });
+
+    };
+
+    $scope.updateMainBoxSize = function () {
+        $scope.mainBoxHeight = Math.max(Screen.screenHeight * 0.5, bMainBoxHeight);
+        $scope.mainBoxWidth = bMainBoxWidth;
+        $timeout(function () {
+            $scope.$digest();
+        });
     };
 
     $scope.profileBoxDisabled = function () {
         return Config.disableProfileBox;
-    }
+    };
 
     $scope.showOverlay = function (message) {
         $scope.notification.show = true;
@@ -608,8 +640,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn', 'Rooms',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, Rooms) {
 
     /**
      * Initialize the login controller
@@ -729,6 +761,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         // Clear the cache down
         Cache.clear();
+        Rooms.clear();
 
         // Allow the user to log back in
         $scope.showLoginBox();
@@ -960,7 +993,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', function($scope, $timeout, Auth, Layout) {
+myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'RoomPositionManager', function($scope, $timeout, Auth, Screen, RoomPositionManager) {
 
     $scope.init = function (room) {
         $scope.input = {};
@@ -973,12 +1006,28 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         // The height of the bottom message input bar
         $scope.inputHeight = 26;
 
+        var digest = function () {
+            $timeout(function () {
+                $scope.$digest();
+            });
+        };
+
         // When the user value changes update the user interface
         $scope.$on(bUserValueChangedNotification, function (event, user) {
             if($scope.room.containsUser(user)) {
-                $timeout(function () {
-                    $scope.$digest();
-                });
+                digest();
+            }
+        });
+
+        $scope.$on(bRoomPositionUpdatedNotification, function(event, room) {
+            if($scope.room == room) {
+                // Update the room's active status
+                digest();
+            }
+        });
+        $scope.$on(bRoomSizeUpdatedNotification, function(event, room) {
+            if($scope.room == room) {
+                digest();
             }
         });
 
@@ -986,7 +1035,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
     $scope.getZIndex = function () {
        // Make sure windows further to the right have a higher index
-       var z =  $scope.room.zIndex ? $scope.room.zIndex :  100 * (1 - $scope.room.offset/$scope.screenWidth);
+       var z =  $scope.room.zIndex ? $scope.room.zIndex :  100 * (1 - $scope.room.offset/Screen.screenWidth);
        return parseInt(z);
     };
 
@@ -1034,7 +1083,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
         var x = $scope.room.offset + $scope.room.width;
 
         var facesLeft = true;
-        if ($scope.room.offset + bProfileBoxWidth + $scope.room.width > $scope.screenWidth) {
+        if ($scope.room.offset + bProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
             facesLeft = false;
             x = $scope.room.offset - bProfileBoxWidth;
         }
@@ -1057,7 +1106,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     $scope.setMinimized = function (minimized) {
         $scope.room.minimized = minimized;
         $scope.chatBoxStyle = minimized ? {height: 0} : {};
-        Layout.updateRoomPositions();
+        RoomPositionManager.updateRoomPositions($scope.room);
     };
 
     $scope.startDrag = function () {
@@ -1068,51 +1117,9 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     $scope.wasDragged = function () {
         // We don't want the chat crossing the min point
         if($scope.room.offset < $scope.mainBoxWidth + bChatRoomSpacing) {
-            $scope.room.offset = $scope.mainBoxWidth + bChatRoomSpacing;
+            $scope.room.setOffset($scope.mainBoxWidth + bChatRoomSpacing);
         }
         $scope.boxWasDragged = true;
-    };
-
-    $scope.stopDrag = function () {
-    };
-
-    $scope.wasResized = function () {
-        // Constrain the chat window
-        $scope.room.width = Math.max(bChatRoomWidth, $scope.room.width);
-
-        var screenWidth = Layout.showRoomListBox() ? $scope.screenWidth - bRoomListBoxWidth - bChatRoomSpacing : $scope.screenWidth;
-
-        if($scope.room.width + $scope.room.offset >= screenWidth) {
-            $scope.room.width = screenWidth - $scope.room.offset;
-        }
-
-        $scope.room.height = Math.max(bChatRoomHeight, $scope.room.height);
-
-        if($scope.room.height > $scope.screenHeight - bChatRoomTopMargin) {
-            $scope.room.height = $scope.screenHeight - bChatRoomTopMargin;
-        }
-    };
-
-    $scope.nearestSlotToRoom = function (room) {
-        return Layout.nearestSlotToRoom(room);
-    };
-
-    $scope.roomAtSlot = function (slot) {
-
-        var rooms = Layout.roomsSortedByOffset();
-        for(var i in rooms) {
-            if(rooms.hasOwnProperty(i)) {
-                // TODO: Workout exactly what this line does...
-                // if I remove it, it stops working but I forget
-                // why it's needed
-                if(rooms[i] != $scope.room) {
-                    if(slot == $scope.nearestSlotToOffset(rooms[i].offset)) {
-                        return rooms[i];
-                    }
-                }
-            }
-        }
-        return null;
     };
 
     $scope.getUsers = function () {
@@ -1142,9 +1149,9 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
     };
 
     // Get the nearest allowable position for a chat room
-    $scope.nearestSlotToOffset = function (x) {
-        return Layout.nearestSlotToOffset(x);
-    };
+//    $scope.nearestSlotToOffset = function (x) {
+//        return Layout.nearestSlotToOffset(x);
+//    };
 
     $scope.setTyping = function (typing) {
         if(typing) {
@@ -1182,7 +1189,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Layout', funct
 
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout', 'CookieTin', function($scope, $timeout, Auth, Layout, CookieTin) {
+myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Rooms', 'CookieTin', 'RoomPositionManager',
+    function($scope, $timeout, Auth, Rooms, CookieTin, RoomPositionManager) {
 
     $scope.rooms = [];
 
@@ -1201,7 +1209,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
 
     $scope.updateList = function () {
 
-        $scope.rooms = Layout.getRooms(false);
+        $scope.rooms = Rooms.inactiveRooms();
 
         // Sort rooms by the number of unread messages
         $scope.rooms.sort(function (a, b) {
@@ -1227,7 +1235,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
     $scope.roomClicked = function(room) {
 
         // Get the left most room
-        var rooms = Layout.roomsSortedByOffset();
+        var rooms = RoomPositionManager.getRooms();
 
         // Get the last box that's active
         for(var i = rooms.length - 1; i >= 0; i--) {
@@ -1239,14 +1247,14 @@ myApp.controller('RoomListBoxController', ['$scope', '$timeout', 'Auth', 'Layout
                 var height = rooms[i].height;
 
                 // Update the old room with the position of the new room
-                rooms[i].offset = room.offset;
+                rooms[i].setOffset(room.offset);
                 rooms[i].width = room.width;
                 rooms[i].height = room.height;
                 //rooms[i].active = false;
                 rooms[i].setActive(false);
 
                 // Update the new room
-                room.offset = offset;
+                room.setOffset(offset);
                 room.width = width;
                 room.height = height;
                 room.setActive(true);
@@ -1341,17 +1349,67 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Cache', 'U
     $scope.rooms = [];
 
     $scope.init = function () {
-        $scope.$on(bPublicRoomAddedNotification, $scope.updateList);
-        $scope.$on(bPublicRoomRemovedNotification, $scope.updateList);
-        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+
+        $scope.$on(bPublicRoomAddedNotification, (function (event, room) {
+
+            // Add the room and sort the list
+            if(!CCArray.contains($scope.rooms, room)) {
+                $scope.rooms.push(room);
+            }
+            $scope.updateList();
+
+        }).bind(this));
+
+        $scope.$on(bPublicRoomRemovedNotification, function (event, room) {
+
+            CCArray.remove($scope.rooms, room);
+            $scope.updateList();
+
+        });
+
         $scope.$watchCollection('search', $scope.updateList);
     };
 
+
     $scope.updateList = function () {
-        Cache.sortPublicRooms();
-        $scope.rooms = CCArray.filterByKey(Cache.publicRooms, $scope.search[$scope.activeTab], function (room) {
+
+        $scope.rooms.sort(function(a, b) {
+
+            var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
+            var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+
+            if(au != bu) {
+                return au ? 1 : -1;
+            }
+
+            // Weight
+            var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
+            var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
+
+            if(aw != bw) {
+                return aw - bw;
+            }
+            else {
+
+                var ac = a.onlineUserCount();
+                var bc = b.onlineUserCount();
+
+                //console.log("1: " + ac + ", 2: " + bc);
+
+                if(ac != bc) {
+                    return bc - ac;
+                }
+                else {
+                    return a.name < b.name ? -1 : 1;
+                }
+            }
+
+        });
+
+        $scope.rooms = CCArray.filterByKey($scope.rooms, $scope.search[$scope.activeTab], function (room) {
             return room.meta.name;
         });
+
         $timeout(function(){
             $scope.$digest();
         });

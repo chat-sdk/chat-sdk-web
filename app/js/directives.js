@@ -78,9 +78,47 @@ myApp.directive('scrollGlue', function(){
             },
             $viewValue: initValue
         };
-    }});
+    }
+});
 
-myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($rootScope, $document, Layout) {
+myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', function ($timeout, RoomPositionManager) {
+    return function (scope, elm, attrs) {
+
+        scope.$on(bAnimateRoomNotification, (function (event, args) {
+            if(args.room == scope.room) {
+
+                if(scope.room.slot == args.slot && !unORNull(args.slot)) {
+                    return;
+                }
+                if(!unORNull(args.slot)) {
+                    scope.room.slot = args.slot;
+                }
+
+                // Get the final offset
+                var toOffset = RoomPositionManager.offsetForSlot(scope.room.slot);
+
+                // Stop the previous animation
+                elm.stop(true, false);
+
+                // Animate the chat room into position
+                elm.animate({right: toOffset}, args.duration ? args.duration : 300, function () {
+
+                    scope.room.setOffset(toOffset);
+
+                    scope.room.zIndex = null;
+
+                    RoomPositionManager.updateAllRoomActiveStatus();
+
+                    $timeout(function () {
+                        scope.$digest();
+                    });
+                });
+            }
+        }).bind(this));
+    };
+}]);
+
+myApp.directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', function ($rootScope, $timeout, $document, Screen, RoomPositionManager) {
     return function (scope, elm, attrs) {
 
         var lastClientX = 0;
@@ -98,39 +136,42 @@ myApp.directive('resizeRoom',['$rootScope', '$document', 'Layout', function ($ro
 
                 stopDefault(e);
 
-                // Modify the chat's offset
+                // Min width
                 scope.room.width += lastClientX - e.clientX;
                 scope.room.width = Math.max(scope.room.width, bChatRoomWidth);
+                scope.room.width = Math.min(scope.room.width, RoomPositionManager.effectiveScreenWidth() - scope.room.offset - bChatRoomSpacing);
 
                 lastClientX = e.clientX;
 
+                // Min height
                 scope.room.height += lastClientY - e.clientY;
+                scope.room.height = Math.max(scope.room.height, bChatRoomHeight);
+                scope.room.height = Math.min(scope.room.height, Screen.screenHeight - bChatRoomTopMargin);
+
                 lastClientY = e.clientY;
 
-                try {
-                    scope.wasResized();
-                }
-                catch (error) {}
+                // Update the room's scope
+                $timeout(function () {
+                    scope.$digest();
+                });
 
-                var rooms = Layout.roomsSortedByOffset();
+                // We've changed the room's size so we need to re-calculate
+                RoomPositionManager.setDirty();
+
+                // Update the rooms to the left
+                var rooms = RoomPositionManager.getRooms();
 
                 // Only loop from this room's position onwards
+                var room;
                 for(var i = rooms.indexOf(scope.room); i < rooms.length; i++) {
-                    if(rooms[i] != scope.room) {
-                        rooms[i].offset = Layout.offsetForSlot(i);
+                    room = rooms[i];
+                    if(room != scope.room) {
+                        room.setOffset(RoomPositionManager.offsetForSlot(i));
+                        $rootScope.$broadcast(bRoomPositionUpdatedNotification, room);
+                        RoomPositionManager.updateAllRoomActiveStatus();
                     }
                 }
 
-                // Apply the change
-                Layout.updateRoomSize(scope.room);
-
-                $rootScope.$digest();
-
-
-
-                //scope.$apply();
-
-                //scope.$digest();
                 return false;
             }
         }).bind(this));
@@ -154,14 +195,12 @@ function stopDefault(e) {
     return false;
 }
 
-myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function ($rootScope, $document, Layout) {
+myApp.directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPositionManager', 'Screen', function ($rootScope, $document, $timeout, RoomPositionManager, Screen) {
 
     return function (scope, elm, attrs) {
 
         var lastClientX = 0;
         var emptySlot = 0;
-        var startingSlotOffset = 0;
-        var pastHalfWay = false;
 
         // Set the room as draggable - this will interact
         // with the layout manager i.e. draggable rooms
@@ -187,14 +226,10 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
             elm.stop(true, false);
 
             scope.startDrag();
+
             scope.dragging = true;
             lastClientX = e.clientX;
 
-            // Mark the slot we're leaving
-            emptySlot = scope.nearestSlotToRoom(scope.room);
-            startingSlotOffset = Layout.offsetForSlot(emptySlot);
-
-            // #55 Stop background from being highlighted on drag
             return false;
         }).bind(this));
 
@@ -206,78 +241,29 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
                 var dx = lastClientX - e.clientX;
 
-                // Modify the chat's offset
-                scope.room.offset += dx;
-                lastClientX = e.clientX;
-
                 // We must be moving in either a positive direction
                 if(dx === 0) {
                     return false;
                 }
 
-                // Which side of our starting point are we?
-                // Left is +ve right is -ve
-                var displacement = scope.room.offset - startingSlotOffset;
+                // Modify the chat's offset
+                scope.room.dragDirection = dx;
+                scope.room.setOffset(scope.room.offset + dx);
 
-                // Identify the slot we're moving towards
-                var nextSlot = emptySlot;
+                lastClientX = e.clientX;
 
-                // The displacement + direction tells us which slot we're heading
-                // towards
-                if(displacement > 0) {
-                    if(dx > 0) {
-                        nextSlot = emptySlot + 1;
-                    }
-                }
-                else {
-                    if(dx < 0) {
-                        nextSlot = emptySlot - 1;
-                    }
-                }
+                // Apply constraints
+                scope.room.offset = Math.max(scope.room.offset, bMainBoxWidth + bChatRoomSpacing);
+                scope.room.offset = Math.min(scope.room.offset, RoomPositionManager.effectiveScreenWidth() - scope.room.width - bChatRoomSpacing);
 
-                // If we're moving towards a new slot
-                if(nextSlot != emptySlot) {
-
-                    // Which slot are we closer to?
-                    var nextSlotOffset = Layout.offsetForSlot(nextSlot);
-
-                    pastHalfWay = false;
-                    if(displacement > 0) {
-                        pastHalfWay = scope.room.offset > (startingSlotOffset + nextSlotOffset)/2;
-                    }
-                    else {
-                        pastHalfWay = scope.room.offset < (startingSlotOffset + nextSlotOffset)/2;
-                    }
-
-                    // If we've past half way then the
-                    // next window needs to move into our
-                    // old position
-                    if(pastHalfWay) {
-
-                        // Animate the room at the next offset to the empty slot
-                        var nextRoom = scope.roomAtSlot(nextSlot);
-                        if(nextRoom && nextRoom != scope.room) {
-
-                            nextRoom.targetSlot = emptySlot;
-
-                            $rootScope.$broadcast('animateRoom', {
-                                room: nextRoom
-                            });
-
-                            // Reset the empty slot to be this slot
-                            emptySlot = nextSlot;
-                            startingSlotOffset = Layout.offsetForSlot(emptySlot);
-                        }
-                    }
-                }
-
-                if(DEBUG) console.log("Empty slot: " + emptySlot);
-
-                // Notify the controller
                 scope.wasDragged();
 
+                RoomPositionManager.roomDragged(scope.room);
+
                 // Apply the change
-                scope.$digest();
+                $timeout(function () {
+                    scope.$digest();
+                });
 
                 return false;
             }
@@ -285,114 +271,30 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', 'Layout', function 
 
         $document.mouseup((function (e) {
             if(scope.dragging) {
-                scope.stopDrag();
+
                 scope.dragging = false;
 
-                // Get the nearest slot to the chat room
-                var nearestSlot = scope.nearestSlotToOffset(scope.room.offset);
-
-                // #129 - Can place chat room in incorrect slot
-                nearestSlot = Math.min(nearestSlot, Layout.getActiveRooms().length - 1);
-
-                // Check to see if the slot is already
-                var roomAtNearestSlot = Layout.roomAtSlot(nearestSlot);
-
-                if(DEBUG) console.log("This room - " + scope.room.meta.name + ", room at nearest slot: " + roomAtNearestSlot.meta.name);
-
-                // This logic stops rooms being placed on top of each other
-                if(roomAtNearestSlot && roomAtNearestSlot != scope.room && nearestSlot != emptySlot) {
-
-                    // Move the room to the nearest slot
-                    // If the room's stopped animating or it's heading towards our target
-                    // slot send it to the empty slot
-                    if(!roomAtNearestSlot.targetSlot || roomAtNearestSlot.targetSlot == nearestSlot) {
-                        roomAtNearestSlot.targetSlot = emptySlot;
-
-                        $rootScope.$broadcast('animateRoom', {
-                            room: roomAtNearestSlot
-                        });
-                    }
-                }
-
-                scope.room.targetSlot = nearestSlot;
-
-                $rootScope.$broadcast('animateRoom', {
+                $rootScope.$broadcast(bAnimateRoomNotification, {
                     room: scope.room
                 });
 
-                // Update all other rooms too
-                // this fixes an issue where if you move the room backwards and forwards
-                // a lot the rooms get clumped together
-                // This function makes sure that on a mouse-up event all the rooms are
-                // layed out properly
-                var r = null;
-                var sortedRooms =  Layout.roomsSortedByOffset();
-                for(var i = 0; i < sortedRooms.length; i++) {
-                    r = sortedRooms[i];
-                    if(r != scope.room && r != roomAtNearestSlot) {
-                        r.targetSlot = i;
-                        $rootScope.$broadcast('animateRoom', {
-                            room: r
-                        });
-                    }
-                }
-
-
-            }
-        }).bind(this));
-
-        scope.$on('animateRoom', (function (event, args) {
-            if(args.room == scope.room) {
-
-                var offset = Layout.offsetForSlot(args.room.targetSlot);
-
-                // If the offset is same as the target offset then we don't do anything
-                if(offset == scope.room.offset) {
-                    return;
-                }
-
-                if(DEBUG) console.log(args.room.meta.name + " -> " + args.room.targetSlot);
-
-                // Stop the previous animation
-                elm.stop(true, false);
-
-                // Animate the chat room into position
-                elm.animate({right: offset}, args.duration ? args.duration : 300, function () {
-
-                    scope.room.offset = offset;
-                    scope.room.targetSlot = null;
-
-                    scope.room.zIndex = null;
-
-                    scope.saveRoomSlotToUser(scope.room);
-
-                    scope.$digest();
-
-                    try {
-                        args.finished();
-                    }
-                    catch (e) {
-
-                    }
-
-                });
             }
         }).bind(this));
     };
 }]);
 
-myApp.directive('centerMouseY', ['$document', function ($document) {
+myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
     return function (scope, elm, attrs) {
         $document.mousemove((function (e) {
             if(scope.currentUser && !elm.is(":hover")) {
                 // Keep the center of this box level with the mouse y
-                elm.css({bottom: scope.screenHeight - e.clientY - elm.height()/2});
+                elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
             }
         }).bind(this));
     };
 }]);
 
-myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope, $document) {
+myApp.directive('draggableUser', ['$rootScope','$document', 'Screen', function ($rootScope, $document, Screen) {
     return function (scope, elm, attrs) {
 
         $rootScope.userDrag = {};
@@ -427,10 +329,10 @@ myApp.directive('draggableUser', ['$rootScope','$document', function ($rootScope
                 // for some reason .width() isn't working
                 // Stop the dragged item going off the screen
                 $rootScope.userDrag.x = Math.max($rootScope.userDrag.x, 0);
-                $rootScope.userDrag.x = Math.min($rootScope.userDrag.x, $rootScope.screenWidth - 200);
+                $rootScope.userDrag.x = Math.min($rootScope.userDrag.x, Screen.screenWidth - 200);
 
                 $rootScope.userDrag.y = Math.max($rootScope.userDrag.y, 0);
-                $rootScope.userDrag.y = Math.min($rootScope.userDrag.y, $rootScope.screenHeight - 30);
+                $rootScope.userDrag.y = Math.min($rootScope.userDrag.y, Screen.screenHeight - 30);
 
                 // If we're in the drop loc
                 scope.$apply();

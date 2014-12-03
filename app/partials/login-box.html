@@ -3,7 +3,7 @@
     <div class="uk-vertical-align uk-text-center uk-height-1-1">
         <div class="uk-vertical-align-middle uk-width-1-1" >
 
-            <div class="cc-box-header" ng-style="{background: getConfig().headerColor}">Login or Register</div>
+            <div class="cc-box-header" ng-style="{background: config.headerColor}">Login or Register</div>
 
             <form ng-hide="singleSignOnEnabled" class="uk-panel uk-form cc-inner-margin">
                 <div class="uk-form-row">
@@ -31,13 +31,13 @@
                     <label class="uk-float-left cc-dark"><input type="checkbox" ng-model="rememberMe">&nbsp;Remember Me</label>
                     <a class="uk-float-right uk-link uk-link-muted cc-dark " ng-click="forgotPassword(email)" >Forgot Password?</a>
                 </div>
-                <div class="uk-form-row" ng-show="getConfig().socialLoginEnabled">
+                <div class="uk-form-row" ng-show="config.socialLoginEnabled">
                     <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" ng-click="login('facebook', {'rememberMe': rememberMe})"></a>
                     <a class="uk-width-1-4 uk-icon-button uk-icon-twitter cc-dark" ng-click="login('twitter', {'rememberMe': rememberMe})"></a>
                     <a class="uk-width-1-4 uk-icon-button uk-icon-github cc-dark" ng-click="login('github', {'rememberMe': rememberMe})"></a>
                     <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus cc-dark" ng-click="login('google', {'rememberMe': rememberMe})"></a>
                 </div>
-                <div class="uk-form-row" ng-show="getConfig().anonymousLoginEnabled">
+                <div class="uk-form-row" ng-show="config.anonymousLoginEnabled">
                     <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</button>
                 </div>
             </form>

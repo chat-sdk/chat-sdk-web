@@ -2,7 +2,7 @@
 
 /* Services */
 
-var DEBUG = false;
+var DEBUG = true;
 
 var bGroupChatDefaultName = "Private Chat";
 
@@ -85,13 +85,21 @@ var bPublicRoomAddedNotification = 'bPublicRoomAddedNotification';
 var bPublicRoomRemovedNotification = 'bPublicRoomRemovedNotification';
 
 var bRoomAddedNotification = 'bRoomAddedNotification';
+var bRoomRemovedNotification = 'bRoomRemovedNotification';
+
+var bAnimateRoomNotification = 'bAnimateRoomNotification';
 
 var bRoomUpdatedNotification = 'bRoomUpdatedNotification';
+var bRoomPositionUpdatedNotification = 'bRoomPositionUpdatedNotification';
+var bRoomSizeUpdatedNotification = 'bRoomSizeUpdatedNotification';
+var bUpdateRoomActiveStatusNotification = 'bUpdateRoomActiveStatusNotification';
 
 var bChatUpdatedNotification = 'bChatUpdatedNotification';
 
 var bUserOnlineStateChangedNotification = 'bUserOnlineStateChangedNotification';
 var bUserValueChangedNotification = 'bUserValueChangedNotification';
+
+var bScreenSizeChangedNotification = 'bScreenSizeChangedNotification';
 
 // Chat width
 var bChatRoomWidth = 230;
@@ -215,8 +223,10 @@ var Paths = {
 };
 
 function unORNull (object) {
-    return !object || object === 'undefined' || object == null;
+    return object === 'undefined' || object == null;
 }
+
+
 
 function timeSince (timestamp) {
     if(unORNull(timestamp)) {
@@ -260,6 +270,25 @@ var CCArray = {
         var i = this.indexOf(array, id, getID);
         return array[i];
     },
+
+    contains: function (array, obj) {
+        for(var i = 0; i < array.length; i++) {
+            if(obj == array[i]) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    remove: function (array, obj) {
+        for(var i = 0; i < array.length; i++) {
+            if(obj == array[i]) {
+                array.splice(i, 1);
+                break;
+            }
+        }
+    },
+
 
     filterByKey: function (array, key, getKey) {
         if(!key || key.length == 0 || key === "") {

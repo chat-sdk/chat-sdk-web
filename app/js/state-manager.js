@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', function ($rootScope, Room, User, Cache, Layout) {
+myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', 'RoomPositionManager', function ($rootScope, Room, User, Cache, Rooms, RoomPositionManager) {
     return {
 
         isOn: false,
@@ -36,7 +36,9 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
                     room.on().then(function () {
 
-                        Cache.addPublicRoom(room);
+                        $rootScope.$broadcast(bPublicRoomAddedNotification, room);
+
+                        Cache.addRoom(room);
 
                     });
 
@@ -46,7 +48,9 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
             publicRoomsRef.on('child_removed', (function (snapshot) {
 
-                Cache.removePublicRoomWithID(snapshot.key());
+                var room = Cache.getOrCreateRoomWithID(snapshot.key());
+                $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
+
 
             }).bind(this));
 
@@ -156,22 +160,35 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
             var roomsRef = Paths.userRoomsRef(uid);
 
-            // A new room was added so we should start listening to it
-            roomsRef.on('child_added', (function (snapshot) {
+            // Get the value of the rooms
+            roomsRef.once('value', (function (snapshot) {
 
-                if(snapshot && snapshot.val()) {
-                    this.impl_roomAdded(snapshot);
-                }
+                // Add the rooms
+                console.log("Room");
+
+                this.impl_roomAddInitial(snapshot.val());
+
+                // A new room was added so we should start listening to it
+                roomsRef.on('child_added', (function (snapshot) {
+                    var room = snapshot.val();
+                    if(room) {
+                        this.impl_roomAdded(room.rid, room.invitedBy);
+                    }
+
+                }).bind(this));
+
+                roomsRef.on('child_removed', (function (snapshot) {
+
+                    var room = snapshot.val();
+                    if(room) {
+                        this.impl_roomRemoved(room.rid);
+                    }
+
+                }).bind(this));
+
 
             }).bind(this));
 
-            roomsRef.on('child_removed', (function (snapshot) {
-
-                if(snapshot && snapshot.val()) {
-                    this.impl_roomRemoved(snapshot);
-                }
-
-            }).bind(this));
 
             /**
              * Friends
@@ -278,27 +295,53 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
             Cache.removeFriendWithID(snapshot.val().uid);
         },
 
+        impl_roomAddInitial: function (rooms) {
+            var i = 0;
+
+            var room = null;
+            for(var key in rooms) {
+                if(rooms.hasOwnProperty(key)) {
+                    room = Room.getOrCreateRoomWithID(key);
+
+                    // The user is a member of this room
+                    // We have to call this so the Room position manager can
+                    // calculate the offsets
+                    Rooms.addRoom(room);
+                    RoomPositionManager.setDirty();
+
+                    room.slot = i;
+
+                    // Set the room's slot
+                    room.updateOffsetFromSlot();
+
+                    i++
+                }
+            }
+
+            RoomPositionManager.updateAllRoomActiveStatus();
+        },
+
         /**
          *
          * @param snapshot
          */
-        impl_roomAdded: function (snapshot) {
-
-            // Get the room id
-            var rid = snapshot.val().rid;
-            var invitedBy = snapshot.val().invitedBy;
+        impl_roomAdded: function (rid, invitedBy) {
 
             if (rid) {
 
-                var room = Room.getOrCreateRoomWithID(rid);
-                room.on().then(function () {
+                // Assume the room doesn't exist
+                var exists = false;
 
-                    // Make sure we reset the offset
-                    // this can cause a bug with pu rooms
-                    // because when they're removed they
-                    // aren't necessarily destroyed because
-                    // they stay in the cache
-                    room.offset = 0;
+                // Does the room already exist?
+                var room = Rooms.getRoomWithID(rid);
+                if(room) {
+                    exists = true;
+                }
+                else {
+                    room = Room.getOrCreateRoomWithID(rid);
+                }
+
+                room.on().then(function () {
 
                     if (room) {
 
@@ -325,21 +368,33 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Layout', 
 
                         }
 
-                        var slot = snapshot.val().slot;
+                        // Insert the room
+                        if(exists) {
+                            Rooms.addRoom(room);
+                            RoomPositionManager.setDirty();
 
-                        Layout.insertRoom(room, slot ? slot : 0);
+                            // We need to update:
+                            // - Room list
+                            // - Chat bar
+                            $rootScope.$broadcast(bRoomAddedNotification, room);
+                        }
+                        else {
+                            RoomPositionManager.insertRoom(room, 0, 300);
+                        }
 
+                        room.messagesOn();
                     }
-
-                    room.messagesOn();
-
                 });
             }
-
         },
 
-        impl_roomRemoved: function (snapshot) {
-            Layout.removeRoomWithID(snapshot.key());
+        impl_roomRemoved: function (rid) {
+            var room = Cache.getRoomWithID(rid);
+            Rooms.removeRoom(room);
+            RoomPositionManager.autoPosition(300);
+            RoomPositionManager.updateAllRoomActiveStatus();
+
+            $rootScope.$broadcast(bRoomRemovedNotification, room);
         }
 
     };

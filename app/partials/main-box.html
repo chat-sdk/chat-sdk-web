@@ -1,5 +1,5 @@
 <div ng-controller="MainBoxController" id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': mainBoxWidth, 'height': mainBoxHeight}" >
-    <div class="cc-box-header" ng-style="{background: getConfig().headerColor}">
+    <div class="cc-box-header" ng-style="{background: config.headerColor}">
         {{ title }}
         <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimizeMainBox()">
             <img ng-src="{{ img_30_minimize }}" />
@@ -9,19 +9,19 @@
     <div class="cc-tab-container cc-bottom-shadow" >
         <div class="cc-tab cc-tab-1-3"
              ng-class="{selected: activeTab == 'users'}"
-             ng-style="activeTab == 'users' ? {'border-bottom-color': getConfig().headerColor} : null"
+             ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('users')">
             USERS
         </div>
         <div class="cc-tab cc-tab-1-3"
              ng-class="{selected: activeTab == 'rooms'}"
-             ng-style="activeTab == 'rooms' ? {'border-bottom-color': getConfig().headerColor} : null"
+             ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('rooms')">
             ROOMS
         </div>
         <div class="cc-tab cc-tab-1-3"
              ng-class="{selected: activeTab == 'friends'}"
-             ng-style="activeTab == 'friends' ? {'border-bottom-color': getConfig().headerColor} : null"
+             ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('friends')">
             FRIENDS
         </div>
@@ -30,12 +30,12 @@
     <!--Add the search box-->
     <div class="uk-overflow-container">
         <form class="uk-panel uk-form uk-float-left cc-padded"
-              ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && getConfig().usersCanCreatePublicRooms ? 40 : 10))}">
+              ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10))}">
 
             <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search[activeTab]" placeholder="Search" />
         </form>
         <a class="uk-float-right"
-           ng-show="activeTab == 'rooms' && getConfig().usersCanCreatePublicRooms"
+           ng-show="activeTab == 'rooms' && config.usersCanCreatePublicRooms"
            ng-click="showCreateRoomBox()">
 
             <img class="cc-image-30"  ng-src="{{ img_30_plus }}" />
@@ -61,7 +61,7 @@
             {{ getUser().meta.name }}
         </div>
         <a class="uk-float-right cc-valign-image-fix"
-           ng-hide="getConfig().disableProfileBox"
+           ng-hide="config.disableProfileBox"
            title="Settings"
            ng-click="showProfileSettingsBox()">
             <img class="cc-image-30 cc-right-margin-5" ng-src="{{ img_30_gear }}" />

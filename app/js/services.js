@@ -149,6 +149,8 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
                 $rootScope.$digest();
             });
 
+            $rootScope.config = this;
+
         }
     };
 }]);
@@ -422,6 +424,98 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
         }
     };
 
+}]);
+
+myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cache, CookieTin) {
+
+    var Rooms = {
+
+        rooms: [],
+
+        init: function () {
+
+            var beforeUnloadHandler = (function (e) {
+
+                // Save the rooms to cookies
+                var rooms = this.rooms;
+                for(var i in rooms) {
+                    CookieTin.setRoom(rooms[i]);
+                }
+
+            }).bind(this);
+
+            if ($window.addEventListener) {
+                $window.addEventListener('beforeunload', beforeUnloadHandler);
+            } else {
+                $window.onbeforeunload = beforeUnloadHandler;
+            }
+
+            return this;
+        },
+
+        addRoom: function (room) {
+
+            Cache.addRoom(room);
+
+            if(!CCArray.contains(this.rooms, room)) {
+                this.rooms.push(room);
+            }
+        },
+
+        getRoomWithID: function (rid) {
+            return CCArray.getItem(this.rooms, rid, function (room) {
+                return room.meta.rid;
+            });
+        },
+
+        removeRoom: function (room) {
+            CCArray.remove(this.rooms, room);
+        },
+
+        activeRooms: function () {
+            var ar = [];
+            for(var i =0; i < this.rooms.length; i++) {
+                if(this.rooms[i].active) {
+                    ar.push(this.rooms[i]);
+                }
+            }
+            return ar;
+        },
+
+        inactiveRooms: function () {
+            var ar = [];
+            for(var i =0; i < this.rooms.length; i++) {
+                if(!this.rooms[i].active) {
+                    ar.push(this.rooms[i]);
+                }
+            }
+            return ar;
+        },
+
+        getRoomWithOtherUser: function (user) {
+            var room;
+            var rooms = this.rooms;
+
+            for(var i = 0; i < rooms.length; i++) {
+                room = rooms[i];
+
+                // Only look at rooms that are private chats
+                // between only two people
+                if(room.userCount == 2) {
+                    if(room.users[user.meta.uid]) {
+                        return room;
+                    }
+                }
+            }
+            return null;
+        },
+
+        clear: function () {
+            this.rooms = [];
+        }
+    };
+
+    return Rooms.init();
 }]);
 
 /**
@@ -722,11 +816,256 @@ myApp.factory('Utilities', ['$q', function ($q) {
     };
 }]);
 
-myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', function ($rootScope, $timeout, $document, $window, CookieTin) {
+/**
+ * This service keeps track of the slot positions
+ * while the rooms are moving around
+ */
+myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', 'Rooms', 'Screen', function ($rootScope, $timeout, $document, $window, CookieTin, Rooms, Screen) {
 
-    var layout = {
+    var rpm = {
 
         rooms: [],
+        slotPositions: [],
+        dirty: true,
+
+        init: function () {
+
+            this.updateAllRoomActiveStatus();
+            $rootScope.$on(bScreenSizeChangedNotification, (function () {
+                this.updateAllRoomActiveStatus();
+            }).bind(this));
+
+            return this;
+        },
+
+        roomDragged: function (room) {
+
+            this.calculateSlotPositions();
+
+            // Right to left
+            var nextSlot = room.slot;
+            var nextRoom = null;
+
+            if(room.dragDirection > 0) {
+                nextSlot++;
+                if(this.rooms.length > nextSlot) {
+
+                    nextRoom = this.rooms[nextSlot];
+
+                    // If the room is covering over half of the next room
+                    if(room.offset + room.width > this.slotPositions[nextSlot] + nextRoom.width/2) {
+                        this.setDirty();
+                        room.slot = nextSlot;
+                        $rootScope.$broadcast(bAnimateRoomNotification, {
+                            room: nextRoom,
+                            slot: nextSlot - 1
+                        });
+                    }
+                }
+            }
+            // Left to right
+            else {
+                nextSlot--;
+                if(nextSlot >= 0) {
+
+                    nextRoom = this.rooms[nextSlot];
+
+                    // If the room is covering over half of the next room
+                    if(room.offset < this.slotPositions[nextSlot] + nextRoom.width / 2) {
+                        this.setDirty();
+                        room.slot = nextSlot;
+                        $rootScope.$broadcast(bAnimateRoomNotification, {
+                            room: nextRoom,
+                            slot: nextSlot + 1
+                        });
+                    }
+                }
+            }
+            return;
+        },
+
+        insertRoom: function (room, slot, duration) {
+
+            // Update the rooms from the cache
+            this.updateRoomsList();
+
+            // Move the rooms left
+            for(var i = slot; i < this.rooms.length; i++) {
+                this.rooms[i].slot++;
+            }
+
+            // Add the room
+            Rooms.addRoom(room);
+
+            room.slot = slot;
+
+
+            // Flag as dirty since we've added a room
+            this.setDirty();
+
+            // Recalculate
+            this.calculateSlotPositions();
+
+            $rootScope.$broadcast(bRoomPositionUpdatedNotification, room);
+
+            for(var i = slot; i < this.rooms.length; i++) {
+                $rootScope.$broadcast(bAnimateRoomNotification, {
+                    room: this.rooms[i],
+                    duration: duration
+                });
+            }
+
+            room.updateOffsetFromSlot();
+            $rootScope.$broadcast(bRoomAddedNotification, room);
+
+            this.updateAllRoomActiveStatus();
+
+        },
+
+        autoPosition: function (duration) {
+
+            this.calculateSlotPositions(true);
+
+            // Animate all rooms into position
+            for(var i = 0; i < this.rooms.length; i++) {
+                $rootScope.$broadcast(bAnimateRoomNotification, {
+                    room: this.rooms[i],
+                    duration: duration,
+                    slot: i
+                });
+            }
+        },
+
+        updateAllRoomActiveStatus: function () {
+
+            if(this.rooms.length === 0) {
+                return;
+            }
+
+            this.calculateSlotPositions();
+
+            var effectiveScreenWidth = this.effectiveScreenWidth();
+
+            // Get the index of the current room
+            for(var i = 0; i < this.rooms.length; i++) {
+                if((this.rooms[i].offset + this.rooms[i].width) < effectiveScreenWidth) {
+                    this.rooms[i].setActive(true);
+                }
+                else {
+                    this.rooms[i].setActive(false);
+                }
+                $rootScope.$broadcast(bUpdateRoomActiveStatusNotification, this.rooms[i]);
+            }
+        },
+
+        updateRoomPositions: function (room) {
+
+            this.updateRoomsList();
+
+            if(this.rooms.length) {
+                for(var i = this.rooms.indexOf(room); i < this.rooms.length; i++) {
+                    $rootScope.$broadcast(bAnimateRoomNotification, {
+                        room: this.rooms[i]
+                    });
+                }
+            }
+        },
+
+        /**
+         * Returns the width of the screen -
+         * if the room list is showing then it subtracts it's width
+         * @returns {Usable screen width}
+         */
+        effectiveScreenWidth: function () {
+
+            this.updateRoomsList();
+
+            var width = Screen.screenWidth;
+
+            if(!this.rooms.length) {
+                return width;
+            }
+
+            // Check the last box to see if it's off the end of the
+            // screen
+            var lastRoom = this.rooms[this.rooms.length - 1];
+
+            // If we can fit the last room in then
+            // the rooms list will be hidden which will
+            // give us extra space
+            if(lastRoom.width + lastRoom.offset > Screen.screenWidth) {
+                width -= bRoomListBoxWidth;
+            }
+
+            return width;
+        },
+
+        getRooms: function () {
+            this.calculateSlotPositions();
+            return this.rooms;
+        },
+
+        updateRoomsList: function () {
+            this.rooms = Rooms.rooms;
+
+            // Sort the rooms by slot
+            this.rooms.sort(function (a, b) {
+                return a.slot - b.slot;
+            });
+        },
+
+        setDirty: function () {
+            this.dirty = true;
+        },
+
+        calculateSlotPositions: function (force) {
+            if(force) {
+                this.setDirty();
+            }
+            if(!this.dirty) {
+                return;
+            }
+
+            this.dirty = false;
+
+            this.updateRoomsList();
+
+            this.slotPositions = [];
+
+            // Work out the positions
+            var p = bMainBoxWidth + bChatRoomSpacing;
+            for(var i = 0; i < this.rooms.length; i++) {
+
+                this.slotPositions.push(p);
+
+                p += this.rooms[i].minimized ? bChatRoomWidth : this.rooms[i].width;
+                p += bChatRoomSpacing;
+            }
+
+            //for(var i in this.slotPositions) {
+            //    console.log("Slot: " + i + " - " + this.slotPositions[i]);
+            //}
+
+        },
+
+        offsetForSlot: function (slot) {
+            this.calculateSlotPositions();
+            return this.slotPositions[slot];
+        }
+
+    }
+
+    return rpm.init();
+
+}]);
+
+myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', function ($rootScope, $timeout, $document, $window, CookieTin) {
+
+    var screen = {
+
+        //rooms: [],
+        screenWidth: 0,
+        screenHeight: 0,
 
         init: function () {
 
@@ -738,632 +1077,22 @@ myApp.factory('Layout', ['$rootScope', '$timeout', '$document', '$window', 'Cook
                 this.updateScreenSize();
             }).bind(this));
 
+            return this;
         },
 
         updateScreenSize: function () {
-            $rootScope.screenWidth = $document.width();
-            $rootScope.screenHeight = $window.innerHeight;
+            this.screenWidth = $document.width();
+            this.screenHeight = $window.innerHeight;
 
-            // Update the main box i.e. it's always 50% of the total screen height
-            this.resizeMainBox();
-            this.updateRoomSize();
-        },
-
-        resizeMainBox: function () {
-            $rootScope.mainBoxHeight = Math.max($rootScope.screenHeight * 0.5, bMainBoxHeight);
-            $rootScope.mainBoxWidth = bMainBoxWidth;
-        },
-
-        /**
-         * Returns the width of the screen -
-         * if the room list is showing then it subtracts it's width
-         * @returns {Usable screen width}
-         */
-        effectiveScreenWidth: function () {
-
-            var width = $rootScope.screenWidth;
-
-            var rooms = this.roomsSortedByOffset();
-
-            // Check the last box to see if it's off the end of the
-            // screen
-            var lastRoom = rooms[rooms.length - 1];
-
-            // If we can fit the last room in then
-            // the rooms list will be hidden which will
-            // give us extra space
-            if(lastRoom.width + lastRoom.offset > $rootScope.screenWidth) {
-                width -= bRoomListBoxWidth;
-            }
-
-            return width;
-        },
-
-        /**
-         * Should we show the room list
-         * @returns {boolean}
-         */
-        showRoomListBox: function () {
-            var showListBox = (this.getRooms(false).length > 0);
-            return showListBox;
-        },
-
-        /**
-         * Get a list of the user's rooms filtered
-         * by whether they're active
-         */
-        getRooms: function (active) {
-            var rooms = [];
-            var allRooms = this.getAllRooms();
-
-            for(var i in allRooms) {
-                if(allRooms.hasOwnProperty(i)) {
-                    var room = this.getAllRooms()[i];
-                    if(room.active == active) {
-                        rooms.push(room);
-                    }
-                }
-            }
-            return rooms;
-        },
-
-        /**
-         * @returns {all rooms}
-         */
-        getAllRooms: function () {
-            return this.rooms;
-        },
-
-        roomAtSlot: function (slot) {
-            var rooms = this.roomsSortedByOffset();
-            if(rooms && rooms.length > 0) {
-                return rooms[slot];
-            }
-            return null;
-        },
-
-        /**
-         * Insert a room at a particular slot
-         * @param room
-         * @param slot
-         */
-        insertRoom: function(room, index) {
-
-            // If the room is a valid variable
-            if(room && room.meta && room.meta.rid) {
-
-                // Set the room's target position
-                room.targetSlot = index;
-
-                // Add the room
-                this.rooms.push(room);
-
-                // Get a list of rooms sorted by offset
-                var rooms = this.roomsSortedByOffset();
-
-                if(rooms.length > 0) {
-
-                    // Loop over the rooms
-                    var r = null;
-
-                    // Loop over the existing rooms and move each room one
-                    // to the left of the new room to the left by one
-                    for(var i = index + 1; i < rooms.length; i++) {
-
-                        r = rooms[i];
-
-                        // Budge all the other rooms up
-                        r.targetSlot = this.nearestSlotToOffset(r.offset) + 1;
-
-                        if(r.draggable) {
-                            $rootScope.$broadcast('animateRoom', {
-                                room: r,
-                                finished: (function() {
-                                    this.updateRoomSize();
-                                }).bind(this)
-                            });
-                        }
-                    }
-                }
-
-                // Set the initial position of the first room
-                room.offset = this.offsetForSlot(room.targetSlot);
-
-                // Update the room's slot
-                $rootScope.user.updateRoomSlot(room, room.targetSlot);
-
-                this.updateRoomSize();
-
-                // We need to update:
-                // - Room list
-                // - Chat bar
-                $rootScope.$broadcast(bRoomAddedNotification, room);
-            }
-        },
-
-        getRoomWithID: function (rid) {
-            for(var i in this.rooms) {
-                if(this.rooms.hasOwnProperty(i)) {
-                    if(this.rooms[i].meta.rid == rid) {
-                        return this.rooms[i];
-                    }
-                }
-            }
-            return null;
-        },
-
-        getActiveRooms: function () {
-            var ar = [];
-            for(var i in this.rooms) {
-                if(this.rooms.hasOwnProperty(i)) {
-                    if(this.rooms[i].active) {
-                        ar.push(this.rooms[i]);
-                    }
-                }
-            }
-            return ar;
-        },
-
-        updateRoomSize: function (room) {
-
-            var rooms = this.roomsSortedByOffset();
-
-            if(rooms.length === 0) {
-                return;
-            }
-
-            var effectiveScreenWidth = this.effectiveScreenWidth();
-
-            // Get the index of the current room
-
-
-            for(var i in rooms) {
-                if(rooms.hasOwnProperty(i)) {
-                    if((rooms[i].offset + rooms[i].width) < effectiveScreenWidth) {
-                        rooms[i].setActive(true);
-                    }
-                    else {
-                        rooms[i].setActive(false);
-                    }
-                }
-            }
-
-            this.digest();
-        },
-
-        removeRoom: function (room) {
-            if(room && room.meta.rid) {
-                this.removeRoomWithID(room.meta.rid);
-            }
-        },
-
-        removeRoomWithID: function (rid) {
-            for(var i in this.rooms) {
-                if(this.rooms.hasOwnProperty(i)) {
-                    if(this.rooms[i].meta.rid == rid) {
-                        this.rooms.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-            this.updateRoomPositions();
-        },
-
-        updateRoomPositions: function (duration) {
-            var i = 0;
-            var rooms = this.roomsSortedByOffset();
-            for(var key in rooms) {
-                if(rooms.hasOwnProperty(key)) {
-                    var room = rooms[key];
-                    room.targetSlot = i++;
-                    $rootScope.$broadcast('animateRoom', {
-                        room: room,
-                        duration: duration,
-                        finished: (function () {
-                            //$rootScope.$broadcast('updateRoomSize');
-                            this.updateRoomSize();
-                        }).bind(this)
-                    });
-                }
-            }
-        },
-
-        //
-        nearestSlotToRoom: function (room) {
-            return this.nearestSlotToOffset(room.offset);
-        },
-
-        // Get the nearest allowable position for a chat room
-        nearestSlotToOffset: function (x) {
-
-            // The distance between the slot and the position
-            var d0 = 999999;
-            var d1 = 0;
-
-            var i = 0;
-
-            // The best slot we've found so far
-            var slot = 0;
-
-            var allRooms = this.getAllRooms();
-
-            for(var key in allRooms) {
-                if(allRooms.hasOwnProperty(key)) {
-                    var slotX = this.offsetForSlot(i);
-                    d1 = Math.abs(x - slotX);
-
-                    // If this slot is closer that the
-                    // last one record the slot
-                    if(d1 < d0) {
-                        slot = i;
-                    }
-                    // TODO: Could have an efficiency saving by checking
-                    // if the distance is getting bigger
-
-                    d0 = d1;
-                    i++;
-                }
-            }
-            return slot;
-        },
-
-        sortRooms: function () {
-
-            var i = 0;
-            var room = null;
-            for(var key in this.rooms) {
-                if(this.rooms.hasOwnProperty(key)) {
-                    room = this.rooms[key];
-                    room.offset = this.offsetForSlot(room.targetSlot);
-                    room.targetSlot = null;
-                }
-            }
-        },
-
-        offsetForSlot: function (slot) {
-            var pos = $rootScope.mainBoxWidth + bChatRoomSpacing;
-            var rooms = this.roomsSortedByOffset();
-
-            for(var i = 0; i < slot; i++) {
-                // If the room isn't active then use the default width
-                try {
-                    pos += (rooms[i].minimized ? bChatRoomWidth : rooms[i].width) + bChatRoomSpacing;
-                }
-                catch (e) {
-                    // It may be that we're not adding the rooms
-                    // in the correct order - in that case
-                    // assume default width for the room
-                    pos += bChatRoomWidth + bChatRoomSpacing;
-                }
-            }
-
-            return pos;
-        },
-
-        roomsSortedByOffset: function () {
-            var arr = [];
-
-            var withTarget = [];
-
-            for (var key in this.rooms) {
-                if(this.rooms.hasOwnProperty(key)) {
-                    var room = this.rooms[key];
-
-                    if (room.targetSlot) {
-                        withTarget.push(room);
-                        //roomWithTarget = room;
-                    }
-                    else {
-                        arr.push(room);
-                    }
-                }
-            }
-            arr.sort(function (a, b) {
-                return a.offset - b.offset;
-            });
-            withTarget.sort(function(a, b) {
-                return a.targetSlot - b.targetSlot;
-            });
-
-            // Now insert the rooms with a target set
-            // Sometimes we direct a room to a new slot
-            // for it to know the correct offset, we
-            // need to calculate the offsets for the
-            // room in it's new position before it gets
-            // there - using the target slot allows us
-            // to calculate offsets in advance of the
-            // animation being completed
-            for(var i = 0; i < withTarget.length; i++) {
-                arr.splice(withTarget[i].targetSlot,  0, withTarget[i]);
-            }
-
-            return arr;
-        },
-
-        digest: function () {
-            $timeout(function() {
-                $rootScope.$digest();
-            });
+            $rootScope.$broadcast(bScreenSizeChangedNotification);
         }
+
     };
-    layout.init();
-    return layout;
+    return screen.init();
 }]);
 
-myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'Layout', 'CookieTin', function ($rootScope, $timeout, $window, Layout, CookieTin) {
-    var Cache = {
-
-        // Dict
-        users: {},
-        onlineUsers: {},
-        publicRooms: [],
-        friends: {},
-        blockedUsers: {},
-
-        init: function () {
-
-            var beforeUnloadHandler = (function (e) {
-
-                // Save the rooms to cookies
-                var rooms = Layout.getAllRooms();
-                for(var i in rooms) {
-                    CookieTin.setRoom(rooms[i]);
-                }
-
-            }).bind(this);
-
-            if ($window.addEventListener) {
-                $window.addEventListener('beforeunload', beforeUnloadHandler);
-            } else {
-                $window.onbeforeunload = beforeUnloadHandler;
-            }
-
-        },
-
-        // A cache of all users
-        addUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.users[user.meta.uid] = user;
-            }
-        },
-
-        removeUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeUserWithID(user.meta.uid);
-            }
-        },
-
-        removeUserWithID: function (uid) {
-            if(uid) {
-                delete this.users[uid];
-                this.digest();
-            }
-        },
-
-        addFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.friends[user.meta.uid] = user;
-                user.friend = true;
-            }
-        },
-
-        removeFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeFriendWithID(user.meta.uid);
-            }
-        },
-
-        removeFriendWithID: function (uid) {
-            if(uid) {
-                var user = this.friends[uid];
-                if(user) {
-                    user.friend = false;
-                    delete this.friends[uid];
-                    this.digest();
-                }
-            }
-        },
-
-        isFriend: function(uid) {
-            return !unORNull(this.friends[uid]);
-        },
-
-        addBlockedUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.blockedUsers[user.meta.uid] = user;
-                user.blocked = true;
-            }
-        },
-
-//        removeBlockedUser: function (user) {
-//            if(user && user.meta && user.meta.uid) {
-//                this.removeBlockedUserWithID(user.meta.uid);
-//            }
-//        },
-
-        isBlockedUser: function(uid) {
-            return !unORNull(this.blockedUsers[uid]);
-        },
-
-        removeBlockedUserWithID: function (uid) {
-            if(uid) {
-                var user = this.blockedUsers[uid];
-                if(user) {
-                    user.blocked = false;
-                    delete this.blockedUsers[uid];
-                    this.digest();
-                }
-            }
-        },
-
-        addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid && user.meta.uid != $rootScope.user.meta.uid) {
-                user.online = true;
-                this.onlineUsers[user.meta.uid] = user;
-                this.digest();
-            }
-        },
-
-        getOnlineUsers: function () {
-            // Return the online users who aren't
-            // blocking us
-
-            var ou = {};
-
-            var user;
-            for(var key in this.onlineUsers) {
-                if(this.onlineUsers.hasOwnProperty(key)) {
-                    ou[key] = this.onlineUsers[key];
-                }
-            }
-            return ou;
-        },
-
-        getUserWithID: function (uid) {
-           var user = this.users[uid];
-           if(!user) {
-               user = this.onlineUsers[uid];
-           }
-            if(!user) {
-                user = this.friends[uid];
-            }
-            if(!user) {
-                user = this.blockedUsers[uid];
-            }
-           return user;
-        },
-
-        removeOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeOnlineUserWithID(user.meta.uid);
-            }
-        },
-
-        removeOnlineUserWithID: function (uid) {
-            if(uid) {
-                var user = this.onlineUsers[uid];
-                if(user) {
-                    user.online = false;
-                    delete this.onlineUsers[uid];
-                    this.digest();
-                }
-            }
-        },
-
-        addPublicRoom: function (room) {
-            if(room && room.meta.rid) {
-                this.publicRooms.push(room);
-
-                $rootScope.$broadcast(bPublicRoomAddedNotification);
-            }
-        },
-
-        removePublicRoomWithID: function (rid) {
-            if(rid) {
-                CCArray.removeItem(this.publicRooms, rid, function (room) {
-                    return room.meta.rid;
-                });
-
-                $rootScope.$broadcast(bPublicRoomRemovedNotification);
-
-            }
-        },
-
-//        getPublicRoomWithID: function (rid) {
-//            return CCArray.getItem(this.publicRooms, rid, function (room) {
-//                return room.meta.rid;
-//            });
-//        },
-
-        sortPublicRooms: function () {
-            this.publicRooms.sort(function(a, b) {
-
-                var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
-                var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
-
-                if(au != bu) {
-                    return au ? 1 : -1;
-                }
-
-                // Weight
-                var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
-                var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
-
-                if(aw != bw) {
-                    return aw - bw;
-                }
-                else {
-
-                    var ac = a.onlineUserCount();
-                    var bc = b.onlineUserCount();
-
-                    //console.log("1: " + ac + ", 2: " + bc);
-
-                    if(ac != bc) {
-                        return bc - ac;
-                    }
-                    else {
-                        return a.name < b.name ? -1 : 1;
-                    }
-                }
-
-            });
-        },
-
-        getRoomWithID: function (rid) {
-
-            var room = CCArray.getItem(this.publicRooms, rid, function (r) {
-               return r.meta.rid;
-            });
-
-            //var room = this.publicRooms[rid];
-
-            if(!room) {
-                room = Layout.getRoomWithID(rid);
-            }
-
-            return room;
-        },
-
-        getRoomWithOtherUser: function (user) {
-            var room;
-            var rooms = Layout.getAllRooms();
-
-            for(var i = 0; i < rooms.length; i++) {
-                room = rooms[i];
-
-                // Only look at rooms that are private chats
-                // between only two people
-                if(room.userCount == 2) {
-                    if(room.users[user.meta.uid]) {
-                        return room;
-                    }
-                }
-            }
-            return null;
-        },
-
-        digest: function () {
-            $timeout(function() {
-                $rootScope.$digest();
-            });
-        },
-
-        clear: function () {
-            this.users = {};
-            this.onlineUsers = {};
-            this.digest();
-            Layout.rooms = [];
-        }
-    };
-
-    Cache.init();
-
-    return Cache;
-}]);
-
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'Cache', 'User', 'Room', 'Layout', 'Utilities', 'Presence', 'API', 'StateManager',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, Cache, User, Room, Layout, Utilities, Presence, API, StateManager) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'User', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, User, Room, Utilities, Presence, API, StateManager) {
 
     var Auth = {
 

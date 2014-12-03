@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User','Layout', 'Presence', 'CookieTin',
-    function ($rootScope, $timeout, $q, Config, Message, Cache, User, Layout, Presence, CookieTin) {
+myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User', 'Presence', 'CookieTin', 'Rooms', 'RoomPositionManager',
+    function ($rootScope, $timeout, $q, Config, Message, Cache, User, Presence, CookieTin, Rooms, RoomPositionManager) {
         return {
 
             getOrCreateRoomWithID: function (rid) {
@@ -14,7 +14,19 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                 if(!room) {
                     room = this.buildRoomWithID(rid);
+                    Cache.addRoom(room);
                 }
+
+                return room;
+            },
+
+            buildRoomWithID: function (rid) {
+
+                var room = this.newRoom();
+                room.meta.rid = rid;
+
+                // Update the room from the saved state
+                CookieTin.getRoom(room);
 
                 return room;
             },
@@ -22,6 +34,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             newRoom: function (name, invitesEnabled, description, userCreated, isPublic, weight) {
 
                 var room = {
+
+                    // Enums
+                    room_state_none: 0,
+                    room_state_lifted: 1,
+                    room_state_animating: 2,
+
                     meta: {
                         name: name,
                         invitesEnabled: invitesEnabled,
@@ -36,17 +54,24 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     messages: [],
                     allMessages: [],
                     typing: {},
-                    offset: 0,
-                    targetSlot: null,
+                    typingMessage: null,
+                    badge: 0,
+
+                    // Layout
+                    offset: 0, // The x offset
+                    dragDirection: 0, // drag direction +ve / -ve
+
                     width: bChatRoomWidth,
                     height: bChatRoomHeight,
                     zIndex: null,
-                    active: true,
-                    minimized: false,
-                    typingMessage: null,
-                    badge: 0
+                    active: true, // in side list or not
+                    minimized: false
 
                 };
+
+                /***********************************
+                 * GETTERS AND SETTERS
+                 */
 
                 room.setRID = function (rid) {
                     room.meta.rid = rid;
@@ -59,6 +84,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 room.getUserCreated = function () {
                     return room.meta.userCreated;
                 };
+
+                /***********************************
+                 * UPDATE METHOD
+                 */
 
                 room.update = function () {
                     room.updateName();
@@ -91,6 +120,53 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     room.typingMessage = typing;
                 };
 
+                room.updateOnlineUserCount = function () {
+                    room.userCount = room.onlineUserCount();
+                };
+
+                room.updateName = function () {
+
+                    if(room.meta && room.meta.name) {
+                        room.name = room.meta.name;
+                        return;
+                    }
+
+                    // How many users are there?
+                    var i = 0;
+                    for(var key in room.users) {
+                        if(room.users.hasOwnProperty(key)) {
+                            i++;
+                        }
+                    }
+                    // TODO: Do this better
+                    if(i == 2) {
+                        for(key in room.users) {
+                            if(room.users.hasOwnProperty(key)) {
+                                var user = room.users[key];
+
+                                // We only want to use the name of a user
+                                // who isn't the current user
+                                if(Cache.onlineUsers[user.meta.uid]) {
+                                    if(user.meta.name) {
+                                        room.name = user.meta.name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Private chat x users
+                    // Ben Smiley
+                    if(!room.name) {
+                        room.name = bGroupChatDefaultName;
+                    }
+
+                };
+
+                /***********************************
+                 * LIFECYCLE
+                 */
+
                 room.create = function (users) {
 
                     var deferred = $q.defer();
@@ -98,7 +174,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     // Check to see if there's already a room between us and the
                     // other user
                     if(users && users.length == 1) {
-                        var r = Cache.getRoomWithOtherUser(users[0]);
+                        var r = Rooms.getRoomWithOtherUser(users[0]);
                         var user = users[0];
                         if(r && user) {
 
@@ -176,9 +252,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     room.leave();
 
                     // Remove the room from the cache
-                    Layout.removeRoom(room);
+                    Rooms.removeRoom(room);
 
-                }
+                };
 
                 room.delete = function () {
 
@@ -219,22 +295,79 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     }
                 };
 
-                room.updateOnlineUserCount = function () {
-                    room.userCount = room.onlineUserCount();
+                room.canInviteUser = function () {
+
+                    // Is this room an invite only room?
+                    if(room.meta.invitesEnabled) {
+                        return true;
+                    }
+                    else {
+                        // Are we the owner?
+                        var owner = room.getOwner();
+                        if(owner && owner.meta) {
+                            return owner.meta.uid == $rootScope.user.meta.uid;
+                        }
+                        else {
+                            return false;
+                        }
+                    }
                 };
 
-                room.onlineUserCount = function () {
-                    var user;
-                    var i = 0;
-                    for(var key in room.usersMeta) {
+                room.setActive = function (active) {
+                    if(active) {
+                        room.markRead();
+                    }
+                    room.active = active;
+                    $rootScope.$broadcast(bRoomUpdatedNotification);
+                };
+
+                /***********************************
+                 * USERS
+                 */
+
+                room.getUserInfo = function (user) {
+                    // This could be called from the UI so it's important
+                    // to wait until users has been populated
+                    if(room.usersMeta) {
+                        return room.usersMeta[user.meta.uid];
+                    }
+                    return null;
+                };
+
+                room.getUserStatus = function (user) {
+                    var info = room.getUserInfo(user);
+                    return info ? info.status : null;
+                };
+
+                room.getUsers = function () {
+                    var users = {};
+                    for(var key in room.users) {
                         if(room.users.hasOwnProperty(key)) {
-                            user = room.usersMeta[key];
-                            if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
-                                i++;
+                            var user = room.users[key];
+                            if(user.meta.uid != $rootScope.user.meta.uid && room.getUserStatus(user) != bUserStatusClosed) {
+                                users[user.meta.uid] = user;
                             }
                         }
                     }
-                    return i;
+                    return users;
+                };
+
+                room.getOwner = function () {
+                    // get the owner's ID
+                    var data = null;
+
+                    for(var key in room.usersMeta) {
+                        if(room.usersMeta.hasOwnProperty(key)) {
+                            data = room.usersMeta[key];
+                            if(data.status == bUserStatusOwner) {
+                                break;
+                            }
+                        }
+                    }
+                    if(data) {
+                        return User.getOrCreateUserWithID(data.uid);
+                    }
+                    return null;
                 };
 
                 room.containsUser = function (user) {
@@ -270,24 +403,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     }
                 };
 
-                room.canInviteUser = function () {
-
-                    // Is this room an invite only room?
-                    if(room.meta.invitesEnabled) {
-                        return true;
-                    }
-                    else {
-                        // Are we the owner?
-                        var owner = room.getOwner();
-                        if(owner && owner.meta) {
-                            return owner.meta.uid == $rootScope.user.meta.uid;
-                        }
-                        else {
-                            return false;
-                        }
-                    }
-                };
-
                 room.setStatusForUser = function(user, status) {
 
                     var deferred = $q.defer();
@@ -308,61 +423,22 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     return deferred.promise;
                 };
 
-                room.getOwner = function () {
-                    // get the owner's ID
-                    var data = null;
+                /***********************************
+                 * ROOM INFORMATION
+                 */
 
-                    for(var key in room.usersMeta) {
-                        if(room.usersMeta.hasOwnProperty(key)) {
-                            data = room.usersMeta[key];
-                            if(data.status == bUserStatusOwner) {
-                                break;
-                            }
-                        }
-                    }
-                    if(data) {
-                        return User.getOrCreateUserWithID(data.uid);
-                    }
-                    return null;
-                };
-
-                room.updateName = function () {
-
-                    if(room.meta && room.meta.name) {
-                        room.name = room.meta.name;
-                        return;
-                    }
-
-                    // How many users are there?
+                room.onlineUserCount = function () {
+                    var user;
                     var i = 0;
-                    for(var key in room.users) {
+                    for(var key in room.usersMeta) {
                         if(room.users.hasOwnProperty(key)) {
-                            i++;
-                        }
-                    }
-                    // TODO: Do this better
-                    if(i == 2) {
-                        for(key in room.users) {
-                            if(room.users.hasOwnProperty(key)) {
-                                var user = room.users[key];
-
-                                // We only want to use the name of a user
-                                // who isn't the current user
-                                if(Cache.onlineUsers[user.meta.uid]) {
-                                    if(user.meta.name) {
-                                        room.name = user.meta.name;
-                                    }
-                                }
+                            user = room.usersMeta[key];
+                            if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
+                                i++;
                             }
                         }
                     }
-
-                    // Private chat x users
-                    // Ben Smiley
-                    if(!room.name) {
-                        room.name = bGroupChatDefaultName;
-                    }
-
+                    return i;
                 };
 
                 /**
@@ -438,38 +514,54 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         }
                     }
                     return false;
-                },
-
-                room.slot = function () {
-                    return Layout.nearestSlotToOffset(room.offset);
                 };
 
-                room.getUserInfo = function (user) {
-                    // This could be called from the UI so it's important
-                    // to wait until users has been populated
-                    if(room.usersMeta) {
-                        return room.usersMeta[user.meta.uid];
+                /***********************************
+                 * LAYOUT
+                 */
+
+//                room.slot = function () {
+//                    return Layout.nearestSlotToOffset(room.offset);
+//                };
+
+                // If the room is animating then
+                // return the destination
+                room.getOffset = function () {
+                    if(room.roomState == room.room_state_animating) {
+                        return room.destinationOffset;
                     }
-                    return null;
-                };
-
-                room.getUserStatus = function (user) {
-                    var info = room.getUserInfo(user);
-                    return info ? info.status : null;
-                };
-
-                room.getUsers = function () {
-                    var users = {};
-                    for(var key in room.users) {
-                        if(room.users.hasOwnProperty(key)) {
-                            var user = room.users[key];
-                            if(user.meta.uid != $rootScope.user.meta.uid && room.getUserStatus(user) != bUserStatusClosed) {
-                                users[user.meta.uid] = user;
-                            }
-                        }
+                    else {
+                        return room.offset;
                     }
-                    return users;
                 };
+
+                room.getCenterX = function () {
+                    return room.getOffset() + room.width / 2;
+                };
+
+                room.getMinX = function () {
+                    return room.getOffset();
+                };
+
+                room.getMaxX = function () {
+                    return room.getOffset() + room.width;
+                };
+
+                room.updateOffsetFromSlot = function () {
+                    room.setOffset(RoomPositionManager.offsetForSlot(room.slot));
+                };
+
+                room.setOffset = function(offset) {
+                    room.offset = offset;
+                };
+
+                room.setSlot = function (slot) {
+                    room.slot = slot;
+                };
+
+                /***********************************
+                 * MESSAGES
+                 */
 
                 room.sendMessage = function (text, user) {
 
@@ -505,6 +597,36 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                 };
 
+                room.sortMessages = function () {
+                    // Now we should sort all messages
+                    room.allMessages.sort(function (a, b) {
+                        return a.meta.time - b.meta.time;
+                    });
+                    room.messages.sort(function (a, b) {
+                        return a.meta.time - b.meta.time;
+                    });
+                };
+
+                room.markRead = function () {
+
+                    var messages = room.unreadMessages;
+
+                    if(messages && messages.length > 0) {
+
+                        for(var i in messages) {
+                            if(messages.hasOwnProperty(i)) {
+                                messages[i].markRead();
+                            }
+                        }
+
+                        // Clear the messages array
+                        while(messages.length > 0) {
+                            messages.pop();
+                        }
+                    }
+                    room.badge = null;
+                };
+
                 room.transcript = function () {
 
                     var transcript = "";
@@ -522,6 +644,29 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                     return transcript;
                 };
+
+                /***********************************
+                 * TYPING INDICATOR
+                 */
+
+                room.startTyping = function (user) {
+                    // The user is typing...
+                    var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
+                    ref.set({name: user.meta.name});
+
+                    // If the user disconnects, tidy up by removing the typing
+                    // inidcator
+                    ref.onDisconnect().remove();
+                };
+
+                room.finishTyping = function (user) {
+                    var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
+                    ref.remove();
+                };
+
+                /***********************************
+                 * FIREBASE
+                 */
 
                 /**
                  * Start listening to updates in the
@@ -735,17 +880,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         room.update();
 
                     });
-                }
-
-                room.sortMessages = function () {
-                    // Now we should sort all messages
-                    room.allMessages.sort(function (a, b) {
-                        return a.meta.time - b.meta.time;
-                    });
-                    room.messages.sort(function (a, b) {
-                        return a.meta.time - b.meta.time;
-                    });
-                }
+                };
 
                 room.messagesOff = function () {
 
@@ -755,21 +890,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     if(room.meta && room.meta.rid) {
                         Paths.roomMessagesRef(room.meta.rid).off();
                     }
-                };
-
-                room.startTyping = function (user) {
-                    // The user is typing...
-                    var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
-                    ref.set({name: user.meta.name});
-
-                    // If the user disconnects, tidy up by removing the typing
-                    // inidcator
-                    ref.onDisconnect().remove();
-                };
-
-                room.finishTyping = function (user) {
-                    var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
-                    ref.remove();
                 };
 
                 room.off = function () {
@@ -787,38 +907,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     Paths.roomUsersRef(room.meta.rid).off();
                     Paths.roomTypingRef(room.meta.rid).off();
                 };
-
-                room.markRead = function () {
-
-                    var messages = room.unreadMessages;
-
-                    if(messages && messages.length > 0) {
-
-                        for(var i in messages) {
-                            if(messages.hasOwnProperty(i)) {
-                                messages[i].markRead();
-                            }
-                        }
-
-                        // Clear the messages array
-                        while(messages.length > 0) {
-                            messages.pop();
-                        }
-                    }
-                    room.badge = null;
-                };
-
-//                room.activate = function () {
-//                    room.setActive(true);
-//                };
-
-                room.setActive = function (active) {
-                    if(active) {
-                        room.markRead();
-                    }
-                    room.active = active;
-                    $rootScope.$broadcast(bRoomUpdatedNotification);
-                }
 
                 /**
                  * If this public room doesn't already exist
@@ -871,17 +959,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                     return deferred.promise;
                 };
-
-                return room;
-            },
-
-            buildRoomWithID: function (rid) {
-
-                var room = this.newRoom();
-                room.meta.rid = rid;
-
-                // Update the room from the saved state
-                CookieTin.getRoom(room);
 
                 return room;
             }
