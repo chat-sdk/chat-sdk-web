@@ -1,0 +1,5 @@
+<div ng-controller="EmojiController" >
+    <div ng-repeat="e in emojis">
+        <a style="float: left" ng-bind-html="::e | emoji" ng-click="addEmoji(e)"></a>
+    </div>
+</div>

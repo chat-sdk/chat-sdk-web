@@ -2,7 +2,7 @@
     <div class="cc-box-header" ng-style="{background: config.headerColor}">
         {{ title }}
         <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimizeMainBox()">
-            <img ng-src="{{ img_30_minimize }}" />
+            <img ng-src="{{ ::img_30_minimize }}" />
         </a>
     </div>
 
@@ -38,7 +38,7 @@
            ng-show="activeTab == 'rooms' && config.usersCanCreatePublicRooms"
            ng-click="showCreateRoomBox()">
 
-            <img class="cc-image-30"  ng-src="{{ img_30_plus }}" />
+            <img class="cc-image-30"  ng-src="{{ ::img_30_plus }}" />
         </a>
     </div>
 
@@ -64,7 +64,7 @@
            ng-hide="config.disableProfileBox"
            title="Settings"
            ng-click="showProfileSettingsBox()">
-            <img class="cc-image-30 cc-right-margin-5" ng-src="{{ img_30_gear }}" />
+            <img class="cc-image-30 cc-right-margin-5" ng-src="{{ ::img_30_gear }}" />
         </a>
         <!--</span>-->
     </div>

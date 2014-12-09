@@ -1,3 +1,4 @@
+
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight" >
 
         <div ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
@@ -15,6 +16,9 @@
                         <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
                             <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
                         </a>
+                        <a ng-show="mainBoxMinimized">
+                            <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_maximize }}" disable-drag/>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -29,7 +33,9 @@
 
                 <div ng-controller="ChatBarController" >
                     <div ng-repeat="(id, room) in rooms">
-                        <ng-include ng-controller="ChatController" ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
+                        <div ng-controller="ChatController">
+                            <ng-include ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
+                        </div>
                     </div>
                 </div>
 

@@ -7,7 +7,7 @@
                 <!-- Line height is a fix to stop icon being too low down -->
                 <div class="uk-float-left cc-valign-image-fix" >
                     <a class="cc-thumbnail-20" ng-show="canDeleteRoom" ng-click="deleteRoom(room)">
-                        <img ng-src="{{ img_20_cross }}" />
+                        <img ng-src="{{ ::img_20_cross }}" />
                     </a>
                 </div>
                 <div class="uk-float-left uk-text-bold" ng-style="{'max-width': boxWidth - 85 }">
@@ -20,7 +20,7 @@
                     <div class="cc-badge uk-float-right" ng-show="room.badge" >
                         {{ room.badge }}
                     </div>
-                    <img class="uk-float-right"  ng-src="{{ img_20_user }}" />
+                    <img class="uk-float-right"  ng-src="{{ ::img_20_user }}" />
                     <div class="uk-float-right"> {{ room.userCount }}</div>
                 </div>
             </div>

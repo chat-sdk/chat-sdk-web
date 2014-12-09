@@ -1,8 +1,14 @@
 <div ng-controller="ProfileSettingsController" id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" >
 
+    <div class="cc-sound-icon">
+        <button ng-click="toggleMuted()">
+            <img ng-src="{{ img_30_sound_on }}" ng-show="!muted" />
+            <img ng-src="{{ img_30_sound_off }}" ng-show="muted" />
+        </button>
+    </div>
+
     <div class="uk-vertical-align uk-text-center uk-height-1-1 cc-inner-margin">
         <div class="uk-vertical-align-middle">
-
             <form class="uk-panel uk-form">
                 <div class="uk-form-row">
                         <div class="uk-container-center cc-thumbnail-100"
