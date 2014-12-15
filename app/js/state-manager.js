@@ -32,6 +32,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                 var rid = snapshot.key();
                 if(rid) {
                     var room = Room.getOrCreateRoomWithID(rid);
+                    room.newPanel = snapshot.val().newPanel;
                     //Cache.addPublicRoom(room);
 
                     room.on().then(function () {
@@ -59,7 +60,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
              */
 
             var onlineUsersRef = Paths.onlineUsersRef();
-
 
             onlineUsersRef.on("child_added", (function (snapshot) {
 
@@ -329,17 +329,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             if (rid) {
 
-                // Assume the room doesn't exist
-                var exists = false;
-
                 // Does the room already exist?
-                var room = Rooms.getRoomWithID(rid);
-                if(room) {
-                    exists = true;
-                }
-                else {
-                    room = Room.getOrCreateRoomWithID(rid);
-                }
+                var room = Room.getOrCreateRoomWithID(rid);
 
                 room.on().then(function () {
 
@@ -353,6 +344,12 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                             }
 
                             if(Cache.isBlockedUser(invitedBy)) {
+                                room.leave();
+                                return;
+                            }
+
+                            if(!$rootScope.user.canBeInvitedByUser(room.invitedBy)) {
+                                room.leave();
                                 return;
                             }
 
@@ -365,11 +362,10 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                                 // Join the room
                                 room.join(bUserStatusInvited);
                             }
-
                         }
 
                         // Insert the room
-                        if(exists) {
+                        if(Rooms.exists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
                             Rooms.addRoom(room);
                             RoomPositionManager.setDirty();
 
@@ -389,8 +385,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
         },
 
         impl_roomRemoved: function (rid) {
-            var room = Cache.getRoomWithID(rid);
-            Rooms.removeRoom(room);
+            var room = Rooms.getRoomWithID(rid);
+            RoomPositionManager.removeRoom(room);
             RoomPositionManager.autoPosition(300);
             RoomPositionManager.updateAllRoomActiveStatus();
 

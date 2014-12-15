@@ -79,6 +79,28 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', 
                 return deferred.promise;
             };
 
+            message.serialize = function () {
+                return message.meta;
+            };
+
+            message.deserialize = function (sm) {
+                message.meta = sm;
+            };
+
+            message.shouldHideUser = function (nextMessage) {
+                return message.meta.uid == nextMessage.meta.uid;
+            };
+
+            message.shouldHideDate = function (nextMessage) {
+                // Last message date
+                var lastDate = new Date(nextMessage.meta.time);
+                var newDate = new Date(message.meta.time);
+
+                // If messages have the same day, hour and minute
+                // hide the time
+                return lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+            };
+
             message.readBy = function (uid) {
 
                 if(!uid) {
@@ -96,9 +118,6 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', 
             return message;
         }
 
-//        parseText: function (text) {
-//
-//        }
 
     };
     return message;

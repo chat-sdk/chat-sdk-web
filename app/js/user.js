@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootScope, $timeout, $q, Cache) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', function ($rootScope, $timeout, $q, Cache, CookieTin) {
     return {
 
         getOrCreateUserWithID: function(uid) {
@@ -32,6 +32,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     image: bDefaultProfileImage
                 }
             };
+            CookieTin.updateUserFromCookies(user);
             return user;
         },
 
@@ -110,6 +111,9 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                     if(snapshot && snapshot.val()) {
                         user.setThumbnail(snapshot.val()[bThumbnailKey]);
                     }
+                    else {
+                        user.setThumbnail(bDefaultProfileImage);
+                    }
                 });
             };
 
@@ -122,10 +126,10 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                 ref.off('value');
             };
 
-            user.setThumbnail = function (imageData, push, isLocal) {
+            user.setThumbnail = function (imageData, push, isData) {
                 var deferred = $q.defer();
 
-                if(imageData != bDefaultProfileImage) {
+                if(imageData != bDefaultProfileImage && !isData) {
                     imageData = 'http://skbb48.cloudimage.io/s/crop/30x30/'+imageData;
                 }
 
@@ -160,9 +164,29 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
                 return deferred.promise;
             };
 
-            user.setImage = function (imageData, push) {
+            user.canBeInvitedByUser = function (invitingUser) {
 
-                if(imageData != bDefaultProfileImage) {
+                // This function should only ever be called on the root user
+                if(user != $rootScope.user) {
+                    console.log("Can be invited should only be called on the root user");
+                    return false;
+                }
+
+                var allowInvites = user.meta.allowInvites;
+                if(unORNull(allowInvites) || allowInvites == 'Everyone') {
+                    return true;
+                }
+                else if (allowInvites == 'Friends') {
+                    return Cache.isFriend(invitingUser.meta.uid);
+                }
+                else {
+                    return false;
+                }
+            };
+
+            user.setImage = function (imageData, push, isData) {
+
+                if(imageData != bDefaultProfileImage && !isData) {
                     imageData = 'http://skbb48.cloudimage.io/s/crop/100x100/'+imageData;
                 }
 
@@ -289,6 +313,14 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', function ($rootS
             user.updateRoomSlot = function (room, slot) {
                 var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
                 ref.update({slot: slot});
+            };
+
+            user.serialize = function () {
+                return user.meta;
+            };
+
+            user.deserialize = function (su) {
+                user.meta = su;
             };
 
             return user;

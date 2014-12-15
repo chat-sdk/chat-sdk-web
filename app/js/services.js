@@ -13,6 +13,72 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
+myApp.factory('SoundEffects', ['CookieTin', function (CookieTin) {
+    return {
+
+        messageRecievedSoundNumber: 1,
+        muted: CookieTin.isMuted(),
+
+        messageReceived: function () {
+            if(this.muted) {
+                return;
+            }
+            if(this.messageRecievedSoundNumber == 1) {
+                this.alert1();
+            }
+        },
+
+        alert1: function () {
+            var sound = new Howl({
+                urls: [bAudioURL + 'alert_1.mp3']
+            });
+            sound.play();
+        },
+
+        toggleMuted: function () {
+            this.muted = !this.muted;
+            CookieTin.setMuted(this.muted);
+            return this.muted;
+        }
+    };
+}]);
+
+myApp.factory('Log', [function () {
+    return {
+        notification: function (notification, context) {
+            if(DEBUG) {
+                if(!context)
+                    context = "";
+                else
+                    context = ", context: " + context;
+                console.log("Notification: " + notification + context);
+            }
+        }
+    };
+}]);
+
+myApp.factory('Partials', ['$http', '$templateCache', function ($http, $templateCache) {
+    return {
+        load: function (baseURL) {
+            $http.get(bPartialURL + 'chat-room.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'chat-settings.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'countries-select.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'create-room-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'emojis.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'login-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'main-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'notification.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'profile-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'profile-settings-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'room-description.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'room-list.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'room-list-box.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'user-list.html', {cache:$templateCache});
+            $http.get(bPartialURL + 'year-of-birth-select.html', {cache:$templateCache});
+        }
+    };
+}]);
+
 myApp.factory('Parse', ['$http', function ($http) {
 
     return {
@@ -52,7 +118,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
         setByFirebase: setByFirebase,
 
         // How many historic messages to set by default
-        maxHistoricMessages: 20,
+        maxHistoricMessages: 50,
         maxHistoricMessagesSet: setByDefault,
 
         // Stop the user from changing their name
@@ -155,27 +221,39 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
     };
 }]);
 
-myApp.service('Visibility', ['$rootScope', '$window', '$document', function ($rootScope, $window, $document) {
+myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
 
-    document.addEventListener("visibilitychange",changed);
-    document.addEventListener("webkitvisibilitychange", changed);
-    document.addEventListener("mozvisibilitychange", changed);
-    document.addEventListener("msvisibilitychange", changed);
+    var Visibility = {
 
-//    $window.focus(function (e) {
-//        console.log('Focus');
-//    });
-//    $window.blur(function (e) {
-//        console.log('Blur');
-//    });
+        isHidden: false,
+        uid: "Test",
 
-    function changed() {
-        $rootScope.$broadcast(bVisibilityChangedNotification, document.hidden || document.webkitHidden || document.mozHidden || document.msHidden);
-    }
+        init: function () {
+            document.addEventListener("visibilitychange", (this.changed).bind(this));
+            document.addEventListener("webkitvisibilitychange", (this.changed).bind(this));
+            document.addEventListener("mozvisibilitychange", (this.changed).bind(this));
+            document.addEventListener("msvisibilitychange", (this.changed).bind(this));
+
+            this.uid = new Date().getTime();
+
+            return this;
+        },
+
+        changed: function (event) {
+            this.isHidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
+            $rootScope.$broadcast(bVisibilityChangedNotification, this.isHidden);
+        },
+
+        getIsHidden: function () {
+            return this.isHidden;
+        }
+    };
+
+    return Visibility.init();
 }]);
 
 myApp.factory('CookieTin', function () {
-    return {
+    var CookieTin = {
 
         roomMinimizedKey: 'cc_room_minimized_',
         roomWidthKey: 'cc_room_width_',
@@ -192,58 +270,95 @@ myApp.factory('CookieTin', function () {
         // API Details
         apiDetailsKey: 'cc_api_details',
 
-        isOffline: function () {
-            var cookie = jQuery.cookie()['cc_offline'];
-            if(cookie) {
-                return eval(cookie);
+        rooms: {},
+        users: {},
+
+        init: function () {
+            var rooms = this.getProperty('cc_rooms');
+            if(rooms && rooms.length) {
+                var room = null;
+                for(var i = 0; i < rooms.length; i++) {
+                    room = rooms[i];
+                    this.rooms[room.meta.rid] = room;
+                }
             }
-            return false;
+
+            var users = this.getProperty('cc_users');
+            if(users && users.length) {
+                var user = null;
+
+                for(i = 0; i < users.length; i++) {
+                    user = users[i];
+                    this.users[user.uid] = user;
+                }
+            }
+
+            return this;
+        },
+
+        isOffline: function () {
+            return this.getProperty('cc_offline');
         },
 
         setOffline: function (offline) {
-            var result = jQuery.cookie('cc_offline', offline, {domain: '', path: '/'});
-            console.log(result);
+            this.setProperty(offline, 'cc_offline');
         },
 
-        // Persist Room details
-        setRoom: function (room) {
-
-            if(!room || !room.meta || !room.meta.rid) {
-                return;
-            }
-
-            // Save room minimization state
-            this.setProperty(room.minimized, this.roomMinimizedKey, room.meta.rid);
-            this.setProperty(room.width, this.roomWidthKey, room.meta.rid);
-            this.setProperty(room.height, this.roomHeightKey, room.meta.rid);
-
+        isMuted: function () {
+            return this.getProperty('cc_muted');
         },
 
-        getRoom: function (room) {
+        setMuted: function (muted) {
+            this.setProperty(muted, 'cc_muted');
+        },
 
-            if(!room || !room.meta || !room.meta.rid) {
-                return;
+        storeRooms: function (rooms) {
+            var room;
+            var sr = [];
+            for(var i = 0; i < rooms.length; i++) {
+                room = rooms[i];
+                sr.push(room.serialize());
             }
+            this.setProperty(JSON.stringify(sr), 'cc_rooms');
+        },
 
-            var minimized = this.getProperty(this.roomMinimizedKey, room.meta.rid);
-            if(!unORNull(minimized)) {
-                room.minimized = minimized;
+        storeUsers: function (users) {
+            var user;
+            var su = [];
+            for(var key in users) {
+                if(users.hasOwnProperty(key)) {
+                    user = users[key];
+                    su.push(user.serialize());
+                }
             }
-            var width = this.getProperty(this.roomWidthKey, room.meta.rid);
-            if(!unORNull(width)) {
-                room.width = width;
+            this.setProperty(JSON.stringify(su), 'cc_users');
+        },
+
+        updateRoomFromCookies: function (room) {
+            var sr = this.rooms[room.meta.rid];
+            if(sr) {
+                room.deserialize(sr);
             }
-            var height = this.getProperty(this.roomHeightKey, room.meta.rid);
-            if(!unORNull(height)) {
-                room.height = height;
+        },
+
+        updateUserFromCookies: function (user) {
+            var su = this.users[user.meta.uid];
+            if(su) {
+                user.deserialize(su);
             }
         },
 
         setProperty: function(value, root, id) {
+            if(!id) {
+                id = "";
+            }
             jQuery.cookie(root + id, value, {domain: '', path: '/'});
         },
 
         getProperty: function (root, id) {
+            if(!id) {
+                id = "";
+            }
             var c = jQuery.cookie(root + id);
             if(!unORNull(c)) {
                 var e;
@@ -261,9 +376,11 @@ myApp.factory('CookieTin', function () {
         },
 
         removeProperty: function (root, id) {
-            jQuery.cookie(root + id, null, {domain: '', path: '/'})
+            this.setProperty(null, root, id);
+            //jQuery.cookie(root + id, null, {domain: '', path: '/'})
         }
     };
+    return CookieTin.init();
 });
 
 myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin', function ($rootScope, $q, $http, Config, CookieTin) {
@@ -280,6 +397,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
     return {
 
         defaultError: "Unable to reach server",
+        busy: false,
 
         getAPILevel: function () {
             if(unORNull(CC_OPTIONS.singleSignOnAPILevel)) {
@@ -297,6 +415,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
         },
 
         authenticate: function (url) {
+            this.busy = true;
             switch (this.getAPILevel()) {
                 case 0:
                     return this.authenticateLevel0(url);
@@ -317,21 +436,25 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                     action: 'cc_auth'
                 },
                 url: url
-            }).then(function (data) {
+            }).then((function (data) {
 
                 // Update the config object with options that are set
                 // These will be overridden by options which are set on the
                 // config tab of the user's Firebase install
                 Config.setConfig(Config.setBySingleSignOn, data);
 
+                this.busy = false;
                 deferred.resolve(data);
 
-            }, deferred.reject);
+            }).bind(this), (function (error) {
+                this.busy = false;
+                deferred.reject(error);
+            }).bind(this));
 
             return deferred.promise;
         },
 
-        authenticateLevel1: function (url) {
+        authenticateLevel1: function (url, force) {
 
             //this.invalidate();
 
@@ -348,14 +471,17 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                 var uid = CookieTin.getProperty(CookieTin.UIDKey);
 
                 // If any value isn't set or if the token is expired get a new token
-                if(!unORNull(token) && !unORNull(expiry) && !unORNull(uid)) {
+                if(!unORNull(token) && !unORNull(expiry) && !unORNull(uid) && !force) {
                     // Time since token was refreshed...
                     var timeSince = new Date().getTime() - expiry;
                     // Longer than 20 days
                     if(timeSince < 60 * 60 * 24 * 20 && uid == currentUID) {
-                        deferred.resolve({
-                            token: token
-                        });
+
+                        Config.setConfig(Config.setBySingleSignOn, response);
+
+                        this.busy = false;
+                        response['token'] = token;
+                        deferred.resolve(response);
                         return deferred.promise;
                     }
                 }
@@ -366,7 +492,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                         action: 'cc_get_token'
                     },
                     url: url
-                }).then(function (data) {
+                }).then((function (data) {
 
                     // Cache the token and the user's current ID
                     CookieTin.setProperty(data.token, CookieTin.tokenKey);
@@ -378,9 +504,13 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                     // config tab of the user's Firebase install
                     Config.setConfig(Config.setBySingleSignOn, data);
 
+                    this.busy = false;
                     deferred.resolve(data);
 
-                }, deferred.reject);
+                }).bind(this), (function (error) {
+                    this.busy = false;
+                    deferred.reject(error);
+                }.bind(this)));
 
             }).bind(this), deferred.reject);
 
@@ -437,10 +567,13 @@ myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cach
             var beforeUnloadHandler = (function (e) {
 
                 // Save the rooms to cookies
-                var rooms = this.rooms;
-                for(var i in rooms) {
-                    CookieTin.setRoom(rooms[i]);
-                }
+//                var rooms = this.rooms;
+//                for(var i in rooms) {
+//                    CookieTin.setRoom(rooms[i]);
+//                }
+
+                CookieTin.storeRooms(this.rooms);
+
 
             }).bind(this);
 
@@ -463,9 +596,18 @@ myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cach
         },
 
         getRoomWithID: function (rid) {
-            return CCArray.getItem(this.rooms, rid, function (room) {
-                return room.meta.rid;
-            });
+
+            var room = Cache.getRoomWithID(rid);
+            if(!room) {
+                room = CCArray.getItem(this.rooms, rid, function (room) {
+                    return room.meta.rid;
+                });
+            }
+            return room;
+        },
+
+        exists: function (room) {
+            return CCArray.contains(this.rooms, room);
         },
 
         removeRoom: function (room) {
@@ -501,7 +643,7 @@ myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cach
 
                 // Only look at rooms that are private chats
                 // between only two people
-                if(room.userCount == 2) {
+                if(room.userCount == 2 && !room.meta.isPublic) {
                     if(room.users[user.meta.uid]) {
                         return room;
                     }
@@ -538,6 +680,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
             this.goOnline();
 
             $rootScope.$on(bVisibilityChangedNotification, (function (event, hidden) {
+
 
                 if(this.inactiveTimerPromise) {
                     $timeout.cancel(this.inactiveTimerPromise);
@@ -592,21 +735,22 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
     };
 }]);
 
-myApp.factory('API', ['$q', '$http', '$window', 'Config', 'CookieTin', function ($q, $http, $window, Config, CookieTin) {
+myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'CookieTin', function ($q, $http, $window, $timeout, Config, CookieTin) {
     return {
 
         meta: {},
+        timeout: null,
 
         saveAPIDetails: function (details) {
             details.time = new Date().getTime();
             CookieTin.setProperty(JSON.stringify(details), CookieTin.apiDetailsKey);
         },
 
-        loadAPIDetails: function () {
+        loadAPIDetails: function (override) {
             var details = CookieTin.getProperty(CookieTin.apiDetailsKey);
             if(details) {
                 details = JSON.parse(details);
-                if((new Date().getTime() - details.time)/1000 < 30 * 60) {
+                if((new Date().getTime() - details.time)/1000 < 24 * 60 * 60) {
                     return details;
                 }
             }
@@ -663,6 +807,8 @@ myApp.factory('API', ['$q', '$http', '$window', 'Config', 'CookieTin', function 
 
                         // Here we should have the groups
                         if(r2.data.code == 200) {
+
+
 
                             // Sort the rooms
                             var rooms = [];
@@ -922,17 +1068,47 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
         },
 
+        removeRoom: function (room) {
+
+            Rooms.removeRoom(room);
+
+            // Update the slot positions
+            this.autoSetSlots();
+            this.setDirty();
+
+        },
+
+        autoSetSlots: function () {
+            for(var i = 0; i < this.rooms.length; i++) {
+                this.rooms[i].slot = i;
+            }
+        },
+
         autoPosition: function (duration) {
 
             this.calculateSlotPositions(true);
+            this.autoSetSlots();
+
+            // Are there any inactive rooms?
+            // We do this becuase we can't animate rooms that
+            // are inactive
+            if(Rooms.inactiveRooms().length) {
+                duration = 0;
+            }
 
             // Animate all rooms into position
             for(var i = 0; i < this.rooms.length; i++) {
-                $rootScope.$broadcast(bAnimateRoomNotification, {
-                    room: this.rooms[i],
-                    duration: duration,
-                    slot: i
-                });
+                if(this.rooms[i].active && duration > 0) {
+                    $rootScope.$broadcast(bAnimateRoomNotification, {
+                        room: this.rooms[i],
+                        duration: duration
+                    });
+                }
+                // We need this because if a room isn't active then it's
+                // HTML and therefore controller won't exist
+                else {
+                    this.rooms[i].updateOffsetFromSlot();
+                }
             }
         },
 
@@ -942,31 +1118,44 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
                 return;
             }
 
-            this.calculateSlotPositions();
+            this.calculateSlotPositions(true);
 
             var effectiveScreenWidth = this.effectiveScreenWidth();
 
             // Get the index of the current room
+            // If any room has gone changed their active status then digest
+            var digest;
+
             for(var i = 0; i < this.rooms.length; i++) {
-                if((this.rooms[i].offset + this.rooms[i].width) < effectiveScreenWidth) {
+                if((this.slotPositions[i] + this.rooms[i].width) < effectiveScreenWidth) {
+                    digest = digest || this.rooms[i].active == false;
                     this.rooms[i].setActive(true);
                 }
                 else {
+                    digest = digest || this.rooms[i].active == true;
                     this.rooms[i].setActive(false);
                 }
-                $rootScope.$broadcast(bUpdateRoomActiveStatusNotification, this.rooms[i]);
+            }
+            if(digest) {
+                $rootScope.$broadcast(bUpdateRoomActiveStatusNotification);
             }
         },
 
-        updateRoomPositions: function (room) {
+        updateRoomPositions: function (room, duration) {
 
-            this.updateRoomsList();
+            this.calculateSlotPositions();
 
             if(this.rooms.length) {
-                for(var i = this.rooms.indexOf(room); i < this.rooms.length; i++) {
-                    $rootScope.$broadcast(bAnimateRoomNotification, {
-                        room: this.rooms[i]
-                    });
+                for(var i = Math.max(this.rooms.indexOf(room), 0); i < this.rooms.length; i++) {
+                    if(this.rooms[i].active && duration > 0) {
+                        $rootScope.$broadcast(bAnimateRoomNotification, {
+                            room: this.rooms[i],
+                            duration: duration
+                        });
+                    }
+                    else {
+                        this.rooms[i].updateOffsetFromSlot();
+                    }
                 }
             }
         },
@@ -978,7 +1167,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
          */
         effectiveScreenWidth: function () {
 
-            this.updateRoomsList();
+            this.calculateSlotPositions();
 
             var width = Screen.screenWidth;
 
@@ -993,7 +1182,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             // If we can fit the last room in then
             // the rooms list will be hidden which will
             // give us extra space
-            if(lastRoom.width + lastRoom.offset > Screen.screenWidth) {
+            if(lastRoom.width + this.slotPositions[lastRoom.slot] > Screen.screenWidth) {
                 width -= bRoomListBoxWidth;
             }
 
@@ -1042,9 +1231,15 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
                 p += bChatRoomSpacing;
             }
 
-            //for(var i in this.slotPositions) {
-            //    console.log("Slot: " + i + " - " + this.slotPositions[i]);
-            //}
+//            for(var i in this.slotPositions) {
+//                console.log("Slot: " + i + " - " + this.slotPositions[i]);
+//            }
+//            for(i = 0; i < this.rooms.length; i++) {
+//                console.log("Room "+i+": " + this.rooms[i].slot);
+//                if(i != this.rooms[i].slot) {
+//                    console.log("ERRR");
+//                }
+//            }
 
         },
 
@@ -1113,8 +1308,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 var user = $rootScope.user;
 
-                var setUserProperty = function (property, value) {
-                    if((!user.meta[property] || user.meta[property].length == 0) && value && value.length > 0) {
+                var setUserProperty = function (property, value, force) {
+                    if((!user.meta[property] || user.meta[property].length == 0 || force) && value && value.length > 0) {
                         user.meta[property] = value;
                     }
                 };
@@ -1183,10 +1378,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     setUserProperty("gender", userData.gender);
                     setUserProperty("country", userData.countryCode);
                     setUserProperty("yearOfBirth", userData.yearOfBirth);
-                    setUserProperty("homePageLink", userData.homePageLink);
+                    setUserProperty("homepageLink", userData.homepageLink, true);
+                    setUserProperty("homepageText", userData.homepageText, true);
 
                     if(userData.profileHTML && userData.profileHTML.length > 0) {
-                        setUserProperty("profileHTML", userData.profileHTML);
+                        setUserProperty("profileHTML", userData.profileHTML, true);
                     }
                     else {
                         user.meta.profileHTML = "";
@@ -1199,9 +1395,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 // If they don't have a profile picture load it from the social network
                 if((!user.hasImage()) && imageURL) {
-                    if(imageURL) {
-                        user.setImage(imageURL, true);
-                        user.setThumbnail(imageURL, true);
+
+                    user.setImage(imageURL, true);
+                    user.setThumbnail(imageURL, true);
 
 //                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
 //
@@ -1212,11 +1408,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 //                        user.setImage();
 //                    });
 
-                    }
-                    else {
-                        user.setImage(bDefaultProfileImage, true);
-                        user.setThumbnail(bDefaultProfileImage, true);
-                    }
+                }
+                else {
+                    user.setImage(bDefaultProfileImage, true);
+                    user.setThumbnail(bDefaultProfileImage, true);
                 }
 
                 /** LOCATION **/
@@ -1405,9 +1600,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                             // Get the room
                             var room = Room.getOrCreateRoomWithID(rid);
 
+                            // Get the online
+
                             // TODO: this is a workout around until we remove the Anuj code
                             // Is this a newPanel room
-                            if(!room.meta.newPanel) {
+                            if(!room.newPanel) {
                                 // Remove the room from the public list and delete the room
                                 //room.delete();
                                 room.removeFromPublicRooms();

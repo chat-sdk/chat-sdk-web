@@ -16,8 +16,8 @@
             </div>
             <div class="uk-text-small cc-margin-5 uk-align-right"
                  style="margin-right: 10px"
-                 ng-show="user.meta.homepageLink && user.meta.homepageLink.length">
-                <a ng-href="{{ user.meta.homepageLink }}" target="_blank">Homepage</a>
+                 ng-show="currentUser.meta.homepageLink && currentUser.meta.homepageLink.length">
+                <a ng-href="{{ currentUser.meta.homepageLink }}">{{ currentUser.meta.homepageText }}</a>
             </div>
         </div>
     </div>

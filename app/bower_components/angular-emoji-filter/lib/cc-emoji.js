@@ -167,7 +167,25 @@
         ],
         rEmojis = new RegExp(":(" + emojis.join("|") + "):", "g");
 
-    angular.module("emoji", []).filter("emoji", function () {
+    var module = angular.module("emoji", []);
+
+    module.factory('Emojis', [function () {
+        return {
+
+            store: [],
+
+            getEmojis: function () {
+                if(!this.store.length) {
+                    for(var i = 0; i < 50; i++) {
+                        this.store.push(":" + emojis[i] + ":");
+                    }
+                }
+                return this.store;
+            }
+        };
+    }]);
+
+    module.filter("emoji", function () {
         return function (input) {
             if(input == ':)' || input == ':-)') {
                 input = ':smile:';

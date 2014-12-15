@@ -2,7 +2,7 @@
 
 /* Services */
 
-var DEBUG = true;
+var DEBUG = false;
 
 var bGroupChatDefaultName = "Private Chat";
 
@@ -39,6 +39,7 @@ else {
 var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
 
 var bImagesURL = bRootURL + 'img/';
+var bAudioURL = bRootURL + 'audio/';
 var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
 
 var bPullURL = "//chat.deluge.co/server/pull.php";
@@ -94,12 +95,16 @@ var bRoomPositionUpdatedNotification = 'bRoomPositionUpdatedNotification';
 var bRoomSizeUpdatedNotification = 'bRoomSizeUpdatedNotification';
 var bUpdateRoomActiveStatusNotification = 'bUpdateRoomActiveStatusNotification';
 
+var bLazyLoadedMessagesNotification = 'bLazyLoadedMessagesNotification';
+
 var bChatUpdatedNotification = 'bChatUpdatedNotification';
 
 var bUserOnlineStateChangedNotification = 'bUserOnlineStateChangedNotification';
 var bUserValueChangedNotification = 'bUserValueChangedNotification';
 
 var bScreenSizeChangedNotification = 'bScreenSizeChangedNotification';
+
+var bLogoutNotification = 'bLogoutNotification';
 
 // Chat width
 var bChatRoomWidth = 230;

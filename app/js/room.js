@@ -4,18 +4,20 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','User', 'Presence', 'CookieTin', 'Rooms', 'RoomPositionManager',
-    function ($rootScope, $timeout, $q, Config, Message, Cache, User, Presence, CookieTin, Rooms, RoomPositionManager) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache','User', 'Presence', 'CookieTin', 'Rooms', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, User, Presence, CookieTin, Rooms, RoomPositionManager, SoundEffects, Visibility, Log) {
         return {
 
             getOrCreateRoomWithID: function (rid) {
 
-                var room = Cache.getRoomWithID(rid);
+                var room = Rooms.getRoomWithID(rid);
 
                 if(!room) {
                     room = this.buildRoomWithID(rid);
                     Cache.addRoom(room);
                 }
+                room.height = bChatRoomHeight;
+                room.width = bChatRoomWidth;
 
                 return room;
             },
@@ -26,7 +28,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 room.meta.rid = rid;
 
                 // Update the room from the saved state
-                CookieTin.getRoom(room);
+                CookieTin.updateRoomFromCookies(room);
 
                 return room;
             },
@@ -34,11 +36,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
             newRoom: function (name, invitesEnabled, description, userCreated, isPublic, weight) {
 
                 var room = {
-
-                    // Enums
-                    room_state_none: 0,
-                    room_state_lifted: 1,
-                    room_state_animating: 2,
 
                     meta: {
                         name: name,
@@ -52,7 +49,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     usersMeta: {},
                     userCount: 0,
                     messages: [],
-                    allMessages: [],
                     typing: {},
                     typingMessage: null,
                     badge: 0,
@@ -65,7 +61,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     height: bChatRoomHeight,
                     zIndex: null,
                     active: true, // in side list or not
-                    minimized: false
+                    minimized: false,
+                    loadingMoreMessages: false,
+                    loadingTimer: null,
+                    muted: false
 
                 };
 
@@ -252,7 +251,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     room.leave();
 
                     // Remove the room from the cache
-                    Rooms.removeRoom(room);
+                    RoomPositionManager.removeRoom(room);
 
                 };
 
@@ -318,7 +317,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         room.markRead();
                     }
                     room.active = active;
-                    $rootScope.$broadcast(bRoomUpdatedNotification);
                 };
 
                 /***********************************
@@ -328,7 +326,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                 room.getUserInfo = function (user) {
                     // This could be called from the UI so it's important
                     // to wait until users has been populated
-                    if(room.usersMeta) {
+                    if(room.usersMeta && user && user.meta) {
                         return room.usersMeta[user.meta.uid];
                     }
                     return null;
@@ -344,8 +342,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     for(var key in room.users) {
                         if(room.users.hasOwnProperty(key)) {
                             var user = room.users[key];
-                            if(user.meta.uid != $rootScope.user.meta.uid && room.getUserStatus(user) != bUserStatusClosed) {
-                                users[user.meta.uid] = user;
+                            if(user.meta && $rootScope.user && $rootScope.user.meta) {
+                                if(user.meta.uid != $rootScope.user.meta.uid && room.getUserStatus(user) != bUserStatusClosed) {
+                                    users[user.meta.uid] = user;
+                                }
                             }
                         }
                     }
@@ -433,8 +433,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     for(var key in room.usersMeta) {
                         if(room.users.hasOwnProperty(key)) {
                             user = room.usersMeta[key];
-                            if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
-                                i++;
+                            if($rootScope.user && $rootScope.user.meta) {
+                                if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
+                                    i++;
+                                }
                             }
                         }
                     }
@@ -597,12 +599,86 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                 };
 
+                room.loadMoreMessages = function (callback, numberOfMessages) {
+
+                    if(!numberOfMessages) {
+                        numberOfMessages = 10;
+                    }
+
+                    if(room.loadingMoreMessages) {
+                        return;
+                    }
+
+                    // If we already have a message then only listen for new
+                    // messages
+                    if(room.messages.length && room.lastMessage.meta.time) {
+
+                        room.loadingMoreMessages = true;
+
+                        // Also get the messages from the room
+                        var ref = Paths.roomMessagesRef(room.meta.rid).orderByPriority();
+
+                        ref = ref.endAt(room.messages[0].meta.time);
+                        ref = ref.limitToLast(numberOfMessages);
+
+                        // Store the messages locally
+                        var messages = [];
+
+                        var finishQuery = (function () {
+
+                            $timeout.cancel(this.loadingTimer);
+
+                            // Stop listening to reference
+                            ref.off();
+
+                            // Add messages to front of global list
+                            // Ignore the last message - it's a duplicate
+                            var lastMessage = null;
+                            for(var i = messages.length - 2; i >= 0; i--) {
+                                if(this.messages.length > 0) {
+                                    lastMessage = this.messages[0];
+                                }
+                                this.messages.unshift(messages[i]);
+                                if(lastMessage) {
+                                    lastMessage.hideName = lastMessage.shouldHideUser(messages[i]);
+                                    lastMessage.hideTime = lastMessage.shouldHideDate(messages[i]);
+                                }
+                            }
+
+                            room.loadingMoreMessages = false;
+
+                            $rootScope.$broadcast(bLazyLoadedMessagesNotification, room, callback);
+
+
+
+                        }).bind(this);
+
+                        // Set a timeout for the query - if it's not finished
+                        // after 1 second finish it manually
+                        this.loadingTimer = $timeout(function () {
+                            finishQuery();
+                        }, 1000);
+
+                        ref.on('child_added', (function (snapshot) {
+                            var val = snapshot.val();
+                            if(val) {
+                                var message = Message.buildMessage(snapshot.key(), val);
+                                messages.push(message);
+                                if(messages.length == numberOfMessages) {
+                                    finishQuery();
+                                }
+                            }
+                        }).bind(this));
+                    }
+                };
+
                 room.sortMessages = function () {
                     // Now we should sort all messages
-                    room.allMessages.sort(function (a, b) {
-                        return a.meta.time - b.meta.time;
-                    });
-                    room.messages.sort(function (a, b) {
+                    this.sortMessageArray(this.messages);
+                };
+
+                room.sortMessageArray = function (messages) {
+                    messages.sort(function (a, b) {
                         return a.meta.time - b.meta.time;
                     });
                 };
@@ -655,13 +731,55 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     ref.set({name: user.meta.name});
 
                     // If the user disconnects, tidy up by removing the typing
-                    // inidcator
+                    // indicator
                     ref.onDisconnect().remove();
                 };
 
                 room.finishTyping = function (user) {
                     var ref = Paths.roomTypingRef(room.meta.rid).child(user.meta.uid);
                     ref.remove();
+                };
+
+                /***********************************
+                 * SERIALIZATION
+                 */
+
+                room.serialize = function () {
+                    //var m = [];
+                    //for(var i = 0; i < room.messages; i++) {
+                    //    m.push(room.messages[i].serialize());
+                    //}
+                    var sr = {
+                        minimized: room.minimized,
+                        width: room.width,
+                        height: room.height,
+                        //offset: room.offset,
+                        //messages: m,
+                        meta: room.meta,
+                        //usersMeta: room.usersMeta
+                    };
+
+                    if(DEBUG) console.log("Serialize: Offet: " + room.offset);
+
+                    return sr;
+                };
+
+                room.deserialize = function (sr) {
+
+                    room.minimized = sr.minimized;
+                    room.width = sr.width;
+                    room.height = sr.height;
+                    room.meta = sr.meta;
+                    //room.usersMeta = sr.usersMeta;
+                    //room.offset = sr.offset;
+
+                    //for(var i = 0; i < sr.messages.length; i++) {
+                    //    var message = Message.buildRoomWithID(room.meta.rid);
+                    //    message.deserialize(sr.messages[i]);
+                    //    room.messages.push(message);
+                    //}
+
+                    if(DEBUG) console.log("Deserialize: Offet: " + room.offset);
                 };
 
                 /***********************************
@@ -683,6 +801,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                     room.isOn = true;
 
                     room.userOnlineStateChangedNotificationOff = $rootScope.$on(bUserOnlineStateChangedNotification, function (event, user) {
+                        Log.notification(bUserOnlineStateChangedNotification, 'Room');
+
                         // If the user is a member of this room, update the room
                         room.update();
                     });
@@ -785,11 +905,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         ref = ref.startAt(room.lastMessage.meta.time);
                     }
                     else {
-                        ref = ref.endAt();
+                        ref = ref.limitToLast(Config.maxHistoricMessages);
                     }
 
                     // Add listen to messages added to this thread
-                    ref.limit(Config.maxHistoricMessages).on('child_added', function (snapshot) {
+                    ref.on('child_added', function (snapshot) {
 
                         // Get the snapshot value
                         var val = snapshot.val();
@@ -809,6 +929,17 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                         // Create the message object
                         var message = Message.buildMessage(snapshot.key(), val);
 
+                        // Is the window visible?
+                        // Play the sound
+                        if(!room.muted) {
+                            if(Visibility.getIsHidden()) {
+                                SoundEffects.messageReceived();
+                            }
+                        }
+
+                        // Change the page title
+                        $window.document.title = message.meta.text + "...";
+
                         // Add the message to this room
                         if(message) {
 
@@ -824,17 +955,19 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                                 // same message as this message i.e.
                                 // - User 1 (name hidden)
                                 // - User 1
-                                lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
+                                lastMessage.hideName = lastMessage.shouldHideUser(message);
+                                //lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
 
                                 // Last message date
-                                var lastDate = new Date(lastMessage.meta.time);
-
-                                var newDate = new Date(message.meta.time);
+                                //var lastDate = new Date(lastMessage.meta.time);
+                                //var newDate = new Date(message.meta.time);
 
                                 // If messages have the same day, hour and minute
                                 // hide the time
 
-                                lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+                                //lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+
+                                lastMessage.hideTime = lastMessage.shouldHideDate(message);
 
                                 // Add a pointer to the lastMessage
                                 message.lastMessage = lastMessage;
@@ -845,7 +978,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
                             message.hideTime = true;
 
                             room.messages.push(message);
-                            room.allMessages.push(message);
 
                             room.sortMessages();
 
@@ -959,6 +1091,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q','Config','Message','Cache','
 
                     return deferred.promise;
                 };
+
+
+
 
                 return room;
             }

@@ -81,15 +81,18 @@ myApp.directive('scrollGlue', function(){
     }
 });
 
-myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', function ($timeout, RoomPositionManager) {
+myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', function ($timeout, RoomPositionManager, Log) {
     return function (scope, elm, attrs) {
 
         scope.$on(bAnimateRoomNotification, (function (event, args) {
+
+            Log.notification(bAnimateRoomNotification, 'animateRoom');
+
             if(args.room == scope.room) {
 
-                if(scope.room.slot == args.slot && !unORNull(args.slot)) {
-                    return;
-                }
+//                if(scope.room.slot == args.slot && !unORNull(args.slot)) {
+//                    return;
+//                }
                 if(!unORNull(args.slot)) {
                     scope.room.slot = args.slot;
                 }
@@ -100,9 +103,7 @@ myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', function ($ti
                 // Stop the previous animation
                 elm.stop(true, false);
 
-                // Animate the chat room into position
-                elm.animate({right: toOffset}, args.duration ? args.duration : 300, function () {
-
+                var completion = function () {
                     scope.room.setOffset(toOffset);
 
                     scope.room.zIndex = null;
@@ -112,7 +113,17 @@ myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', function ($ti
                     $timeout(function () {
                         scope.$digest();
                     });
-                });
+                };
+
+                if(!unORNull(args.duration) && args.duration == 0) {
+                    completion();
+                }
+                else {
+                    // Animate the chat room into position
+                    elm.animate({right: toOffset}, !unORNull(args.duration) ? args.duration : 300, function () {
+                        completion();
+                    });
+                }
             }
         }).bind(this));
     };
@@ -294,7 +305,7 @@ myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Scr
     };
 }]);
 
-myApp.directive('draggableUser', ['$rootScope','$document', 'Screen', function ($rootScope, $document, Screen) {
+myApp.directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', function ($rootScope, $document, $timeout, Screen) {
     return function (scope, elm, attrs) {
 
         $rootScope.userDrag = {};
@@ -335,7 +346,9 @@ myApp.directive('draggableUser', ['$rootScope','$document', 'Screen', function (
                 $rootScope.userDrag.y = Math.min($rootScope.userDrag.y, Screen.screenHeight - 30);
 
                 // If we're in the drop loc
-                scope.$apply();
+                $timeout(function () {
+                    scope.$apply();
+                });
             }
 
         }).bind(this));
@@ -344,7 +357,10 @@ myApp.directive('draggableUser', ['$rootScope','$document', 'Screen', function (
             if($rootScope.userDrag.dragging) {
                 $rootScope.userDrag.dragging = false;
                 $rootScope.userDrag.visible = false;
-                scope.$apply();
+
+                $timeout(function () {
+                    scope.$apply();
+                });
             }
         }).bind(this));
     };
@@ -517,45 +533,72 @@ myApp.directive('ccUncloak', function () {
     };
 });
 
+//myApp.directive('infiniteScroll', [
+//    '$rootScope', '$window', '$timeout', function($rootScope, $window, $timeout) {
+//        return {
+//
+//            scope: {
+//                callback: '&infiniteScroll'
+//            },
+//
+//            link: function(scope, elem, attrs) {
+//
+//                var handler = function () {
+//
+//                    var scrollHeight = elem.prop('scrollHeight');
+//                    var scrollTop = elem.scrollTop();
+//                    var height = elem.height();
+//
+//                    var top = scrollTop;
+//                    var bottom = scrollHeight - scrollTop - height;
+//
+//                    // If we're within a given number of pixels of the top
+//
+//                    if(top < 1) {
+//                        scope.callback();
+//                    }
+//
+//                };
+//
+//                elem.on('scroll', handler);
+//
+//                scope.$on('$destroy', function() {
+//                    return elem.off('scroll', handler);
+//                });
+//
+//            }
+//        };
+//    }
+//]);
+
 myApp.directive('infiniteScroll', [
     '$rootScope', '$window', '$timeout', function($rootScope, $window, $timeout) {
-        return {
 
+        return function(scope, elem, attrs) {
 
+            var handler = (function () {
 
-            scope: {
-                callback: '&infiniteScroll'
-            },
+                var scrollHeight = elem.prop('scrollHeight');
+                var scrollTop = elem.scrollTop();
+                var height = elem.height();
 
-            link: function(scope, elem, attrs) {
+                var top = scrollTop;
+                var bottom = scrollHeight - scrollTop - height;
 
-                var handler = function () {
-
-                    var scrollHeight = elem.prop('scrollHeight');
-                    var scrollTop = elem.scrollTop();
-                    var height = elem.height();
-
-                    var top = scrollTop;
-                    var bottom = scrollHeight - scrollTop - height;
-
-                    console.log("Top " + top + " Bottom " + bottom);
-
-                    // If we're within a given number of pixels of the top
-
-                    if(top < 10) {
-                        scope.callback();
-                    }
-
+                if(top < 1) {
+                    scope.room.loadMoreMessages(function () {
+                        // Set the bottom distance based on the new height
+                        elem.scrollTop(elem.prop('scrollHeight') - height - bottom);
+                    });
                 }
+            }).bind(this);
 
-                elem.on('scroll', handler);
+            elem.on('scroll', handler);
 
-                scope.$on('$destroy', function() {
-                    return elem.off('scroll', handler);
-                });
-
-            }
-        };
+            scope.$on('$destroy', function() {
+                return elem.off('scroll', handler);
+            });
+        }
     }
 ]);
 

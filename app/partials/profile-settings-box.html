@@ -28,13 +28,15 @@
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1 "
+                    <input ng-show="!config.disableUserNameChange"
+                           class="uk-width-1-1 "
                            type="text"
                            placeholder="Display name *"
-                           ng-model="user.meta.name"
-                           ng-readonly="disableUserNameChange()"
-                           ng-disabled="disableUserNameChange()"
+                           ng-model="user[config.disableUserNameChange ? 'dummyName' : 'meta'].name"
+                           ng-readonly="config.disableUserNameChange"
+                           ng-disabled="config.disableUserNameChange"
                            ng-class="validation.name.valid ? '' : 'uk-form-danger'"/>
+                    <span ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.meta.name }}</span>
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1"
@@ -65,6 +67,17 @@
                 </div>
                 <div class="uk-form-row">
                     <ng-include src=" baseURL + 'countries-select.html'"></ng-include>
+                </div>
+                <div class="uk-form-row">
+                    <div class="uk-width-1-2 uk-float-left uk-text-left" >Allow invites from</div>
+                    <select class="uk-width-2-5 uk-float-right"
+                            ng-model="user.meta.allowInvites" required>
+
+                        <option value="Everyone">Everyone</option>
+                        <option value="Friends">Friends</option>
+                        <option value="Nobody">Nobody</option>
+
+                    </select>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
