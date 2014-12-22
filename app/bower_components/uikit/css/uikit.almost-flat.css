@@ -1,4 +1,4 @@
-/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.15.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 /* ========================================================================
    Component: Base
  ========================================================================== */
@@ -397,21 +397,16 @@ iframe {
    Component: Grid
  ========================================================================== */
 /*
- * Micro clearfix
- */
-.uk-grid:before,
-.uk-grid:after {
-  content: " ";
-  display: table;
-}
-.uk-grid:after {
-  clear: both;
-}
-/*
  * 1. Needed for the gutter
  * 2. Makes grid more robust so that it can be used with other block elements like lists
  */
 .uk-grid {
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
   /* 1 */
   margin: 0 0 0 -25px;
   /* 2 */
@@ -419,17 +414,36 @@ iframe {
   list-style: none;
 }
 /*
+ * DEPRECATED
+ * Micro clearfix
+ * Can't use `table` because it creates a 1px gap when it becomes a flex item, only in Webkit
+ */
+.uk-grid:before,
+.uk-grid:after {
+  content: "";
+  display: block;
+  overflow: hidden;
+}
+.uk-grid:after {
+  clear: both;
+}
+/*
  * Grid cell
- * 1. Makes grid more robust so that it can be used with other block elements
- * 2. Create horizontal gutter
- * 3. `float` is set by default so columns always behave the same and create a new block format context
+ * 1. Space is allocated solely based on content dimensions
+ * 2. Makes grid more robust so that it can be used with other block elements
+ * 3. Create horizontal gutter
+ * 4. DEPRECATED Using `float` to support IE9
  */
 .uk-grid > * {
   /* 1 */
-  margin: 0;
+  -ms-flex: none;
+  -webkit-flex: none;
+  flex: none;
   /* 2 */
-  padding-left: 25px;
+  margin: 0;
   /* 3 */
+  padding-left: 25px;
+  /* 4 */
   float: left;
 }
 /*
@@ -564,6 +578,25 @@ iframe {
   margin-top: 25px;
   margin-bottom: 25px;
   border-top: 1px solid #dddddd;
+}
+/* Match panels in grids
+ ========================================================================== */
+.uk-grid-match > * {
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+/*
+ * 1. Behave like a block element
+ */
+.uk-grid-match > * > * {
+  -ms-flex: none;
+  -webkit-flex: none;
+  flex: none;
+  /* 1 */
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
 }
 /* Even grid cell widths
  ========================================================================== */
@@ -1102,11 +1135,19 @@ iframe {
   position: relative;
 }
 /*
+ * Allow panels to be anchors
+ */
+.uk-panel,
+a.uk-panel:hover {
+  color: inherit;
+  text-decoration: none;
+}
+/*
  * Micro clearfix to make panels more robust
  */
 .uk-panel:before,
 .uk-panel:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-panel:after {
@@ -1146,6 +1187,9 @@ iframe {
   border: 1px solid #dddddd;
   border-radius: 4px;
 }
+a.uk-panel-box:hover {
+  color: #444444;
+}
 .uk-panel-box .uk-panel-title {
   color: #444444;
 }
@@ -1170,6 +1214,9 @@ iframe {
   color: #2d7091;
   border-color: rgba(45, 112, 145, 0.3);
 }
+a.uk-panel-box-primary:hover {
+  color: #2d7091;
+}
 .uk-panel-box-primary .uk-panel-title {
   color: #2d7091;
 }
@@ -1180,8 +1227,30 @@ iframe {
   background-color: #ffffff;
   color: #444444;
 }
+a.uk-panel-box-secondary:hover {
+  color: #444444;
+}
 .uk-panel-box-secondary .uk-panel-title {
   color: #444444;
+}
+/* Modifier: `uk-panel-hover`
+ ========================================================================== */
+.uk-panel-hover {
+  padding: 15px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.uk-panel-hover:hover {
+  background: #fafafa;
+  color: #444444;
+  border-color: #dddddd;
+}
+.uk-panel-hover .uk-panel-badge {
+  top: 10px;
+  right: 10px;
+}
+.uk-panel-hover .uk-panel-teaser {
+  margin: -16px -16px 15px -16px;
 }
 /* Modifier: `uk-panel-header`
  ========================================================================== */
@@ -1222,9 +1291,10 @@ iframe {
     top: -35px;
   }
 }
-.uk-panel-box .uk-panel-teaser > * {
+.uk-panel-box .uk-panel-teaser {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
+  overflow: hidden;
 }
 /* ========================================================================
    Component: Article
@@ -1234,7 +1304,7 @@ iframe {
  */
 .uk-article:before,
 .uk-article:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-article:after {
@@ -1309,7 +1379,7 @@ iframe {
  */
 .uk-comment-header:before,
 .uk-comment-header:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-comment-header:after {
@@ -1679,7 +1749,7 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
  */
 .uk-navbar:before,
 .uk-navbar:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-navbar:after {
@@ -2076,7 +2146,7 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
  */
 .uk-pagination:before,
 .uk-pagination:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-pagination:after {
@@ -2192,7 +2262,7 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
  */
 .uk-tab:before,
 .uk-tab:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-tab:after {
@@ -2293,7 +2363,7 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
 }
 .uk-tab-center:before,
 .uk-tab-center:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-tab-center:after {
@@ -2489,7 +2559,7 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
  */
 .uk-list > li:before,
 .uk-list > li:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-list > li:after {
@@ -2907,11 +2977,15 @@ html:not(.uk-touch) .uk-nav-offcanvas ul a:hover {
   font-size: 18px;
   line-height: 30px;
 }
-/* 4 */
+/*
+ * 1. Fixes IE9
+ */
 .uk-form legend:after {
   content: "";
   display: block;
   border-bottom: 1px solid #dddddd;
+  /* 1 */
+  width: 100%;
 }
 /* Size modifiers
  * Higher specificity needed to override defaults
@@ -3003,7 +3077,7 @@ select.uk-form-width-mini {
  */
 .uk-form-row:before,
 .uk-form-row:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-form-row:after {
@@ -5432,7 +5506,8 @@ a.uk-thumbnail:focus {
 .uk-overlay-area-content a:not([class]):hover {
   color: inherit;
 }
-/* DEPRECATED Sub-object `uk-overlay-caption`
+/* DEPRECATED
+ * Sub-object `uk-overlay-caption`
  ========================================================================== */
 /*
  * 1. Set position
@@ -5987,7 +6062,7 @@ a.uk-thumbnail:focus {
   }
 }
 /* Keyframes: Rotate
- * Used by icon and search component
+ * Used by icon component
  ========================================================================== */
 @-webkit-keyframes uk-rotate {
   0% {
@@ -6360,8 +6435,9 @@ a.uk-thumbnail:focus {
 /*
  * 1. Create position context for `uk-modal-dialog-frameless`
  * 2. Set box sizing
- * 3. Set style
- * 4. Slide-in transition
+ * 3. Min-height needed for initial loading and spinner
+ * 4. Set style
+ * 5. Slide-in transition
  */
 .uk-modal-dialog {
   /* 1 */
@@ -6375,8 +6451,10 @@ a.uk-thumbnail:focus {
   max-width: 100%;
   max-width: calc(100% - 20px);
   /* 3 */
-  background: #ffffff;
+  min-height: 200px;
   /* 4 */
+  background: #ffffff;
+  /* 5 */
   opacity: 0;
   -webkit-transform: translateY(-100px);
   transform: translateY(-100px);
@@ -6407,7 +6485,7 @@ a.uk-thumbnail:focus {
 /*
  * Remove margin from the last-child
  */
-.uk-modal-dialog > :last-child {
+.uk-modal-dialog > :not([class*='uk-modal-']):last-child {
   margin-bottom: 0;
 }
 /* Close in modal
@@ -6419,7 +6497,7 @@ a.uk-thumbnail:focus {
 /*
  * Remove margin from adjacent element
  */
-.uk-modal-dialog > .uk-close:first-child + * {
+.uk-modal-dialog > .uk-close:first-child + *:not([class*='uk-modal-']) {
   margin-top: 0;
 }
 /* Modifier: `uk-modal-dialog-frameless`
@@ -6457,6 +6535,58 @@ a.uk-thumbnail:focus {
   .uk-modal-dialog-large {
     width: 1130px;
   }
+}
+/* Sub-Object: `uk-modal-header`
+ ========================================================================== */
+.uk-modal-header {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 24px;
+  line-height: 30px;
+  margin: -20px -20px 15px -20px;
+  padding: 20px;
+  border-bottom: 1px solid #dddddd;
+  border-radius: 4px 4px 0 0;
+  background: #fafafa;
+}
+/* Sub-Object: `uk-modal-footer`
+ ========================================================================== */
+.uk-modal-footer {
+  margin-top: 15px;
+  text-align: right;
+  margin: 15px -20px -20px -20px;
+  padding: 20px;
+  border-top: 1px solid #dddddd;
+  border-radius: 0 0 4px 4px;
+  background: #fafafa;
+}
+/* Sub-Object: `uk-modal-caption`
+ ========================================================================== */
+.uk-modal-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  margin-bottom: -10px;
+  color: #ffffff;
+  text-align: center;
+}
+/* Sub-Object: `uk-modal-spinner`
+ ========================================================================== */
+.uk-modal-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  font-size: 25px;
+  color: #ddd;
+}
+.uk-modal-spinner:after {
+  content: "\f110";
+  font-family: FontAwesome;
+  -webkit-animation: uk-rotate 2s infinite linear;
+  animation: uk-rotate 2s infinite linear;
 }
 /* ========================================================================
    Component: Off-canvas
@@ -6747,6 +6877,9 @@ a.uk-thumbnail:focus {
 .uk-text-danger {
   color: #d85030 !important;
 }
+.uk-text-contrast {
+  color: #ffffff !important;
+}
 /* Alignment modifiers
  ========================================================================== */
 .uk-text-left {
@@ -6831,7 +6964,7 @@ a.uk-thumbnail:focus {
  */
 .uk-container:before,
 .uk-container:after {
-  content: " ";
+  content: "";
   display: table;
 }
 .uk-container:after {
@@ -6848,13 +6981,17 @@ a.uk-thumbnail:focus {
  ========================================================================== */
 /*
  * Micro clearfix
+* `table-cell` is used with `:before` because `table` creates a 1px gap when it becomes a flex item, only in Webkit
+ * `table` is used again with `:after` because `clear` only works with block elements.
+ * Note: `display: block` with `overflow: hidden` is currently not working in the latest Safari
  */
-.uk-clearfix:before,
-.uk-clearfix:after {
-  content: " ";
-  display: table;
+.uk-clearfix:before {
+  content: "";
+  display: table-cell;
 }
 .uk-clearfix:after {
+  content: "";
+  display: table;
   clear: both;
 }
 /*
@@ -6986,9 +7123,10 @@ a.uk-thumbnail:focus {
 }
 /*
  * Responsiveness: Sets a maximum width relative to the parent and auto scales the height
+ * `important` needed to override `uk-img-preserve img`
  */
 .uk-responsive-width {
-  max-width: 100%;
+  max-width: 100% !important;
   height: auto;
 }
 /*
@@ -7159,11 +7297,16 @@ a.uk-thumbnail:focus {
 }
 /* Position
  ========================================================================== */
-.uk-position-absolute {
+.uk-position-top,
+.uk-position-bottom {
   position: absolute !important;
+  width: 100%;
 }
-.uk-position-relative {
-  position: relative !important;
+.uk-position-top {
+  top: 0;
+}
+.uk-position-bottom {
+  bottom: 0;
 }
 .uk-position-cover {
   position: absolute;
@@ -7171,6 +7314,9 @@ a.uk-thumbnail:focus {
   bottom: 0;
   left: 0;
   right: 0;
+}
+.uk-position-relative {
+  position: relative !important;
 }
 /* Display
  ========================================================================== */
@@ -7245,6 +7391,11 @@ a.uk-thumbnail:focus {
 .uk-visible-hover-inline:hover .uk-invisible {
   display: inline-block !important;
   visibility: visible !important;
+}
+/* Hide on touch */
+.uk-touch .uk-hidden-touch,
+.uk-notouch .uk-hidden-notouch {
+  display: none;
 }
 /* ========================================================================
    Component: Print

@@ -1,4 +1,4 @@
-/*! @license Firebase v2.0.4 - License: https://www.firebase.com/terms/terms-of-service.html */ var CLOSURE_NO_DEPS = true; var COMPILED = false;
+/*! @license Firebase v2.0.6 - License: https://www.firebase.com/terms/terms-of-service.html */ var CLOSURE_NO_DEPS = true; var COMPILED = false;
 var goog = goog || {};
 goog.global = this;
 goog.global.CLOSURE_UNCOMPILED_DEFINES;
@@ -8518,7 +8518,11 @@ fb.login.AuthenticationManager.prototype.createUser = function(params, opt_onCom
   var requestInfo = fb.login.RequestInfo.fromParams(params);
   requestInfo.serverParams["_method"] = "POST";
   this.requestWithCredential(path, requestInfo, function(err, res) {
-    fb.core.util.callUserCallback(opt_onComplete, err);
+    if (err) {
+      fb.core.util.callUserCallback(opt_onComplete, err);
+    } else {
+      fb.core.util.callUserCallback(opt_onComplete, err, res);
+    }
   });
 };
 fb.login.AuthenticationManager.prototype.removeUser = function(params, opt_onComplete) {
@@ -10279,26 +10283,11 @@ fb.core.WriteTree.prototype.calcEventCacheAfterServerOverwrite = function(treePa
     if (subtree.isEmpty()) {
       return existingServerSnap.getChild(childPath);
     } else {
-      var changed;
-      if (existingEventSnap) {
-        changed = false;
-        subtree.foreach(function(setPath, setSnap) {
-          if (!changed && !existingEventSnap.getChild(setPath).equals(setSnap)) {
-            changed = true;
-          }
-        });
-      } else {
-        changed = true;
-      }
-      if (changed) {
-        var newEventSnap = existingServerSnap.getChild(childPath);
-        subtree.foreach(function(setPath, setSnap) {
-          newEventSnap = newEventSnap.updateChild(setPath, setSnap);
-        });
-        return newEventSnap;
-      } else {
-        return null;
-      }
+      var newEventSnap = existingServerSnap.getChild(childPath);
+      subtree.foreach(function(setPath, setSnap) {
+        newEventSnap = newEventSnap.updateChild(setPath, setSnap);
+      });
+      return newEventSnap;
     }
   }
 };
@@ -12171,4 +12160,4 @@ Firebase.SDK_VERSION = CLIENT_VERSION;
 Firebase.INTERNAL = fb.api.INTERNAL;
 Firebase.Context = fb.core.RepoManager;
 Firebase.TEST_ACCESS = fb.api.TEST_ACCESS;
-; Firebase.SDK_VERSION='2.0.4';
+; Firebase.SDK_VERSION='2.0.6';

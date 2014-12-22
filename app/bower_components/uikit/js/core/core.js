@@ -1,10 +1,10 @@
-/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.15.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(core) {
 
     if (typeof define == "function" && define.amd) { // AMD
         define("uikit", function(){
 
-            var uikit = core(window, window.jQuery, window.document);
+            var uikit = window.UIkit || core(window, window.jQuery, window.document);
 
             uikit.load = function(res, req, onload, config) {
 
@@ -41,16 +41,71 @@
 
     "use strict";
 
-    var UI = $.UIkit || {}, $html = $("html"), $win = $(window), $doc = $(document);
+    var UI = {}, _UI = window.UIkit;
 
-    if (UI.fn) {
+    UI.version = '2.15.0';
+    UI._prefix = 'uk';
+
+    UI.noConflict = function(prefix) {
+        // resore UIkit version
+        if (_UI) {
+            window.UIkit = _UI;
+            $.UIkit      = _UI;
+            $.fn.uk      = _UI.fn;
+        }
+        if (prefix) {} UI._prefix = prefix;
         return UI;
-    }
+    };
 
-    UI.version = '2.12.0';
-    UI.$doc    = $doc;
-    UI.$win    = $win;
-    UI.$html   = $html;
+    UI.prefix = function(str) {
+        return typeof(str)=='string' ? str.replace(/@/g, UI._prefix) : str;
+    };
+
+    // wrap jQuery to auto prefix string arguments
+    UI.$ = function() {
+
+        if (arguments[0] && typeof(arguments[0])=='string') {
+            arguments[0] = UI.prefix(arguments[0]);
+        }
+
+        var obj = $.apply($, arguments), i;
+
+        if (!obj.length) {
+            return obj;
+        }
+
+        [
+            'find', 'filter', 'closest',
+            'attr', 'parent', 'parents', 'children',
+            'addClass', 'removeClass', 'toggleClass', 'hasClass',
+            'is',
+            'on', 'one'
+        ].forEach(function(m){
+
+            var method = obj[m], result, collections = ['find','filter','parent', 'parents', 'children', 'closest'];
+
+            obj[m] = function() {
+
+                for (i=0;i<arguments.length;i++) {
+
+                    if (typeof(arguments[i])=='string') {
+                        arguments[i] = UI.prefix(arguments[i]);
+                    }
+                }
+
+                result = method.apply(this, arguments);
+
+                return (collections.indexOf(m) > -1) ? UI.$(result) : result;
+            };
+            return obj;
+        });
+
+        return obj;
+    };
+
+    UI.$doc  = UI.$(document);
+    UI.$win  = UI.$(window);
+    UI.$html = UI.$('html');
 
     UI.fn = function(command, options) {
 
@@ -68,7 +123,6 @@
         });
     };
 
-
     UI.support = {};
     UI.support.transition = (function() {
 
@@ -76,10 +130,10 @@
 
             var element = doc.body || doc.documentElement,
                 transEndEventNames = {
-                    WebkitTransition: 'webkitTransitionEnd',
-                    MozTransition: 'transitionend',
-                    OTransition: 'oTransitionEnd otransitionend',
-                    transition: 'transitionend'
+                    WebkitTransition : 'webkitTransitionEnd',
+                    MozTransition    : 'transitionend',
+                    OTransition      : 'oTransitionEnd otransitionend',
+                    transition       : 'transitionend'
                 }, name;
 
             for (name in transEndEventNames) {
@@ -96,10 +150,10 @@
 
             var element = doc.body || doc.documentElement,
                 animEndEventNames = {
-                    WebkitAnimation: 'webkitAnimationEnd',
-                    MozAnimation: 'animationend',
-                    OAnimation: 'oAnimationEnd oanimationend',
-                    animation: 'animationend'
+                    WebkitAnimation : 'webkitAnimationEnd',
+                    MozAnimation    : 'animationend',
+                    OAnimation      : 'oAnimationEnd oanimationend',
+                    animation       : 'animationend'
                 }, name;
 
             for (name in animEndEventNames) {
@@ -114,13 +168,27 @@
     UI.support.touch                 = (
         ('ontouchstart' in window && navigator.userAgent.toLowerCase().match(/mobile|tablet/)) ||
         (global.DocumentTouch && document instanceof global.DocumentTouch)  ||
-        (global.navigator['msPointerEnabled'] && global.navigator['msMaxTouchPoints'] > 0) || //IE 10
-        (global.navigator['pointerEnabled'] && global.navigator['maxTouchPoints'] > 0) || //IE >=11
+        (global.navigator.msPointerEnabled && global.navigator.msMaxTouchPoints > 0) || //IE 10
+        (global.navigator.pointerEnabled && global.navigator.maxTouchPoints > 0) || //IE >=11
         false
     );
     UI.support.mutationobserver = (global.MutationObserver || global.WebKitMutationObserver || null);
 
     UI.Utils = {};
+
+    UI.Utils.str2json = function(str) {
+        return str
+        // wrap keys without quote with valid double quote
+        .replace(/([\$\w]+)\s*:/g, function(_, $1){return '"'+$1+'":';})
+        // replacing single quote wrapped ones to double quote
+        .replace(/'([^']+)'/g, function(_, $1){return '"'+$1+'"';});
+
+        /* old method:
+            try {
+                return (new Function("", "var json = " + str + "; return JSON.parse(JSON.stringify(json));"))();
+            } catch(e) { return false; }
+        */
+    };
 
     UI.Utils.debounce = function(func, wait, immediate) {
         var timeout;
@@ -170,12 +238,12 @@
             return false;
         }
 
-        var window_left = $win.scrollLeft(), window_top = $win.scrollTop(), offset = $element.offset(), left = offset.left, top = offset.top;
+        var window_left = UI.$win.scrollLeft(), window_top = UI.$win.scrollTop(), offset = $element.offset(), left = offset.left, top = offset.top;
 
         options = $.extend({topoffset:0, leftoffset:0}, options);
 
-        if (top + $element.height() >= window_top && top - options.topoffset <= window_top + $win.height() &&
-            left + $element.width() >= window_left && left - options.leftoffset <= window_left + $win.width()) {
+        if (top + $element.height() >= window_top && top - options.topoffset <= window_top + UI.$win.height() &&
+            left + $element.width() >= window_left && left - options.leftoffset <= window_left + UI.$win.width()) {
           return true;
         } else {
           return false;
@@ -184,24 +252,24 @@
 
     UI.Utils.checkDisplay = function(context, initanimation) {
 
-        var elements = $('[data-uk-margin], [data-uk-grid-match], [data-uk-grid-margin], [data-uk-check-display]', context || document), animated;
+        var elements = UI.$('[data-@-margin], [data-@-grid-match], [data-@-grid-margin], [data-@-check-display]', context || document), animated;
 
         if (context && !elements.length) {
             elements = $(context);
         }
 
-        elements.trigger('uk.check.display');
+        elements.trigger('display.uk.check');
 
         // fix firefox / IE animations
         if (initanimation) {
 
             if (typeof(initanimation)!='string') {
-                initanimation = '[class*="uk-animation-"]';
+                initanimation = UI.prefix('[class*="@-animation-"]');
             }
 
             elements.find(initanimation).each(function(){
 
-                var ele  = $(this),
+                var ele  = UI.$(this),
                     cls  = ele.attr('class'),
                     anim = cls.match(/uk\-animation\-(.+)/);
 
@@ -222,7 +290,7 @@
 
         if (start != -1) {
             try {
-                options = (new Function("", "var json = " + string.substr(start) + "; return JSON.parse(JSON.stringify(json));"))();
+                options = JSON.parse(UI.Utils.str2json(string.substr(start)));
             } catch (e) {}
         }
 
@@ -233,7 +301,8 @@
 
         var d = $.Deferred();
 
-        element = $(element);
+        element = UI.$(element);
+        cls     = UI.prefix(cls);
 
         element.css('display', 'none').addClass(cls).one(UI.support.animation.end, function() {
             element.removeClass(cls);
@@ -243,6 +312,10 @@
         element.css('display', '');
 
         return d.promise();
+    };
+
+    UI.Utils.uid = function(prefix) {
+        return (prefix || 'id') + (new Date().getTime())+"RAND"+(Math.ceil(Math.random() * 100000));
     };
 
     UI.Utils.template = function(str, data) {
@@ -294,26 +367,26 @@
             i = i + 1;
         }
 
-        fn  = [
+        fn  = new Function('$data', [
             'var __ret = [];',
             'try {',
             'with($data){', (!openblocks ? output.join('') : '__ret = ["Not all blocks are closed correctly."]'), '};',
             '}catch(e){__ret = [e.message];}',
             'return __ret.join("").replace(/\\n\\n/g, "\\n");',
             "function escape(html) { return String(html).replace(/&/g, '&amp;').replace(/\"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');}"
-        ].join("\n");
+        ].join("\n"));
 
-        var func = new Function('$data', fn);
-        return data ? func(data) : func;
+        return data ? fn(data) : fn;
     };
 
     UI.Utils.events       = {};
     UI.Utils.events.click = UI.support.touch ? 'tap' : 'click';
 
-    $.UIkit = UI;
-    $.fn.uk = UI.fn;
+    window.UIkit = UI;
+    $.UIkit      = UI;
+    $.fn.uk      = UI.fn;
 
-    $.UIkit.langdirection = $html.attr("dir") == "rtl" ? "right" : "left";
+    UI.langdirection = UI.$html.attr("dir") == "rtl" ? "right" : "left";
 
     UI.components = {};
 
@@ -323,7 +396,8 @@
 
             var $this = this;
 
-            this.element = element ? $(element) : null;
+            this.UIkit   = UI;
+            this.element = element ? UI.$(element) : null;
             this.options = $.extend(true, {}, this.defaults, options);
             this.plugins = {};
 
@@ -342,7 +416,9 @@
 
             });
 
-            this.trigger('uk.component.init', [name, this]);
+            this.trigger('init.uk.component', [name, this]);
+
+            return this;
         };
 
         fn.plugins = {};
@@ -351,26 +427,27 @@
 
             defaults : {plugins: []},
 
+            boot: function(){},
             init: function(){},
 
-            on: function(){
-                return $(this.element || this).on.apply(this.element || this, arguments);
+            on: function(a1,a2,a3){
+                return UI.$(this.element || this).on(a1,a2,a3);
             },
 
-            one: function(){
-                return $(this.element || this).one.apply(this.element || this, arguments);
+            one: function(a1,a2,a3){
+                return UI.$(this.element || this).one(a1,a2,a3);
             },
 
             off: function(evt){
-                return $(this.element || this).off(evt);
+                return UI.$(this.element || this).off(evt);
             },
 
             trigger: function(evt, params) {
-                return $(this.element || this).trigger(evt, params);
+                return UI.$(this.element || this).trigger(evt, params);
             },
 
             find: function(selector) {
-                return this.element ? this.element.find(selector) : $([]);
+                return UI.$(this.element ? this.element: []).find(selector);
             },
 
             proxy: function(obj, methods) {
@@ -399,7 +476,8 @@
 
             var element, options;
 
-            if(arguments.length) {
+            if (arguments.length) {
+
                 switch(arguments.length) {
                     case 1:
 
@@ -425,11 +503,30 @@
             return (new UI.components[name](element, options));
         };
 
+        if (UI.domready) {
+            UI.component.boot(name);
+        }
+
         return fn;
     };
 
     UI.plugin = function(component, name, def) {
         this.components[component].plugins[name] = def;
+    };
+
+    UI.component.boot = function(name) {
+
+        if (UI.components[name].prototype && UI.components[name].prototype.boot && !UI.components[name].booted) {
+            UI.components[name].prototype.boot.apply(UI, []);
+            UI.components[name].booted = true;
+        }
+    };
+
+    UI.component.bootComponents = function() {
+
+        for (var component in UI.components) {
+            UI.component.boot(component);
+        }
     };
 
 
@@ -447,27 +544,27 @@
         }
     };
 
-    UI.on = function(){
+    UI.on = function(a1,a2,a3){
 
-        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
-            arguments[1].apply($doc);
+        if (a1 && a1.indexOf('ready.uk.dom') > -1 && UI.domready) {
+            a2.apply(UI.$doc);
         }
 
-        return $doc.on.apply($doc, arguments);
+        return UI.$doc.on(a1,a2,a3);
     };
 
-    UI.one = function(){
+    UI.one = function(a1,a2,a3){
 
-        if (arguments.length == 2 && arguments[0].indexOf('uk.domready')===0 && UI.domready) {
-            arguments[1].apply($doc);
-            return $doc;
+        if (a1 && a1.indexOf('ready.uk.dom') > -1 && UI.domready) {
+            a2.apply(UI.$doc);
+            return UI.$doc;
         }
 
-        return $doc.one.apply($doc, arguments);
+        return UI.$doc.one(a1,a2,a3);
     };
 
     UI.trigger = function(evt, params) {
-        return $doc.trigger(evt, params);
+        return UI.$doc.trigger(evt, params);
     };
 
     UI.domObserve = function(selector, fn) {
@@ -476,10 +573,10 @@
 
         fn = fn || function() {};
 
-        $(selector).each(function() {
+        UI.$(selector).each(function() {
 
             var element  = this,
-                $element = $(element);
+                $element = UI.$(element);
 
             if ($element.data('observer')) {
                 return;
@@ -489,7 +586,7 @@
 
                 var observer = new UI.support.mutationobserver(UI.Utils.debounce(function(mutations) {
                     fn.apply(element, []);
-                    $element.trigger('uk.dom.changed');
+                    $element.trigger('changed.uk.dom');
                 }, 50));
 
                 // pass in the target node, as well as the observer options
@@ -501,60 +598,74 @@
         });
     };
 
-    UI.ready(function(context){
-        UI.domObserve($('[data-uk-observe]', context || document));
-    });
-
-    UI.on('uk.domready', function(){
-
-        UI.domObservers.forEach(function(fn){
-            fn(document);
-        });
-
-        if (UI.domready) UI.Utils.checkDisplay(document);
-    });
-
-    UI.on('uk.dom.changed', function(e) {
-
-        var ele = e.target;
-
-        UI.domObservers.forEach(function(fn){
-            fn(ele);
-        });
-
-        UI.Utils.checkDisplay(ele);
-    });
-
 
     $(function(){
 
-        UI.trigger('uk.domready.before');
+        UI.$body = UI.$('body');
+
+        UI.ready(function(context){
+            UI.domObserve('[data-@-observe]');
+        });
+
+        UI.on('ready.uk.dom', function(){
+
+            UI.domObservers.forEach(function(fn){
+                fn(document);
+            });
+
+            if (UI.domready) UI.Utils.checkDisplay(document);
+        });
+
+
+        UI.on('changed.uk.dom', function(e) {
+
+            var ele = e.target;
+
+            UI.domObservers.forEach(function(fn){
+                fn(ele);
+            });
+
+            UI.Utils.checkDisplay(ele);
+        });
+
+        UI.trigger('beforeready.uk.dom');
+
+        UI.component.bootComponents();
 
         // custom scroll observer
         setInterval((function(){
 
-            var memory = {x: window.pageXOffset, y:window.pageYOffset};
+            var memory = {x: window.pageXOffset, y:window.pageYOffset}, dir;
 
             var fn = function(){
 
                 if (memory.x != window.pageXOffset || memory.y != window.pageYOffset) {
-                    memory = {x: window.pageXOffset, y:window.pageYOffset};
-                    $doc.trigger('uk-scroll', [memory]);
+
+                    dir = {x: 0 , y: 0};
+
+                    if (window.pageXOffset != memory.x) dir.x = window.pageXOffset > memory.x ? 1:-1;
+                    if (window.pageYOffset != memory.y) dir.y = window.pageYOffset > memory.y ? 1:-1;
+
+                    memory = {
+                        "dir": dir, "x": window.pageXOffset, "y": window.pageYOffset
+                    };
+
+                    UI.$doc.trigger('scrolling.uk.document', [memory]);
                 }
             };
 
-            if ($.UIkit.support.touch) {
-                $doc.on('touchmove touchend MSPointerMove MSPointerUp', fn);
+            if (UI.support.touch) {
+                UI.$html.on('touchmove touchend MSPointerMove MSPointerUp pointermove pointerup', fn);
             }
 
-            if(memory.x || memory.y) fn();
+            if (memory.x || memory.y) fn();
 
             return fn;
 
         })(), 15);
 
         // run component init functions on dom
-        UI.trigger('uk.domready');
+        UI.trigger('ready.uk.dom');
 
         if (UI.support.touch) {
 
@@ -567,7 +678,7 @@
                 UI.$win.on('load orientationchange resize', UI.Utils.debounce((function(){
 
                     var fn = function() {
-                        $('.uk-height-viewport').css('height', window.innerHeight);
+                        $(UI.prefix('.@-height-viewport')).css('height', window.innerHeight);
                         return fn;
                     };
 
@@ -577,31 +688,31 @@
             }
         }
 
-        UI.trigger('uk.domready.after');
+        UI.trigger('afterready.uk.dom');
 
         // mark that domready is left behind
         UI.domready = true;
     });
 
     // add touch identifier class
-    $html.addClass(UI.support.touch ? "uk-touch" : "uk-notouch");
+    UI.$html.addClass(UI.support.touch ? "@-touch" : "@-notouch");
 
     // add uk-hover class on tap to support overlays on touch devices
     if (UI.support.touch) {
 
-        var hoverset = false, selector = '.uk-overlay, .uk-overlay-toggle, .uk-caption-toggle, .uk-animation-hover, .uk-has-hover', exclude;
+        var hoverset = false, exclude, selector = '.@-overlay, .@-overlay-toggle, .@-caption-toggle, .@-animation-hover, .@-has-hover';
 
-        $html.on('touchstart MSPointerDown pointerdown', selector, function() {
+        UI.$html.on('touchstart MSPointerDown pointerdown', selector, function() {
 
-            if (hoverset) $('.uk-hover').removeClass('uk-hover');
+            if (hoverset) UI.$('.@-hover').removeClass('@-hover');
 
-            hoverset = $(this).addClass('uk-hover');
+            hoverset = UI.$(this).addClass('@-hover');
 
         }).on('touchend MSPointerUp pointerup', function(e) {
 
-            exclude = $(e.target).parents(selector);
+            exclude = UI.$(e.target).parents(selector);
 
-            if (hoverset) hoverset.not(exclude).removeClass('uk-hover');
+            if (hoverset) hoverset.not(exclude).removeClass('@-hover');
         });
     }
 

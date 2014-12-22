@@ -20,6 +20,7 @@
     "jquery-cookie": "latest",
     "angular-sanitize": "latest",
     "angular-emoji-filter": "latest",
-    "howler": "latest"
+    "howler": "latest",
+    "ngstorage": "latest"
   }
 }

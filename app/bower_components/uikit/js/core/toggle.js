@@ -1,4 +1,4 @@
-/*! UIkit 2.12.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+/*! UIkit 2.15.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
 (function(global, $, UI){
 
     "use strict";
@@ -9,9 +9,32 @@
 
         defaults: {
             target    : false,
-            cls       : 'uk-hidden',
+            cls       : '@-hidden',
             animation : false,
             duration  : 200
+        },
+
+        boot: function(){
+
+            // init code
+            UI.ready(function(context) {
+
+                UI.$("[data-@-toggle]", context).each(function() {
+                    var ele = UI.$(this);
+
+                    if (!ele.data("toggle")) {
+                        var obj = UI.toggle(ele, UI.Utils.options(ele.attr("data-@-toggle")));
+                    }
+                });
+
+                setTimeout(function(){
+
+                    togglers.forEach(function(toggler){
+                        toggler.getTogglers();
+                    });
+
+                }, 0);
+            });
         },
 
         init: function() {
@@ -32,9 +55,9 @@
 
             if(!this.totoggle.length) return;
 
-            if (this.options.animation) {
+            if (this.options.animation && UI.support.animation) {
 
-                var $this = this, animations = this.options.animation.split(',');
+                var $this = this, animations = UI.prefix(this.options.animation).split(',');
 
                 if (animations.length == 1) {
                     animations[1] = animations[0];
@@ -59,8 +82,8 @@
                 } else {
 
                     this.totoggle.each(function(){
-                        UI.Utils.animate(this, animations[1]+' uk-animation-reverse').then(function(){
-                            $(this).toggleClass($this.options.cls).css('animation-duration', '');
+                        UI.Utils.animate(this, animations[1]+' @-animation-reverse').then(function(){
+                            UI.$(this).toggleClass($this.options.cls).css('animation-duration', '');
                             UI.Utils.checkDisplay(this);
                         }.bind(this));
                     });
@@ -73,30 +96,8 @@
         },
 
         getTogglers: function() {
-            this.totoggle = this.options.target ? $(this.options.target):[];
+            this.totoggle = this.options.target ? UI.$(this.options.target):[];
         }
     });
 
-    // init code
-    UI.ready(function(context) {
-
-        $("[data-uk-toggle]", context).each(function() {
-            var ele = $(this);
-
-            if (!ele.data("toggle")) {
-               var obj = UI.toggle(ele, UI.Utils.options(ele.attr("data-uk-toggle")));
-            }
-        });
-
-        setTimeout(function(){
-
-            togglers.forEach(function(toggler){
-                toggler.getTogglers();
-            });
-
-        }, 0);
-    });
-
-
-
-})(this, jQuery, jQuery.UIkit);
+})(this, jQuery, UIkit);
