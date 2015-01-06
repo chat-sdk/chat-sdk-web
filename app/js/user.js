@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', function ($rootScope, $timeout, $q, Cache, CookieTin) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'LocalStorage', 'Entity', function ($rootScope, $timeout, $q, Cache, LocalStorage, Entity) {
     return {
 
         getOrCreateUserWithID: function(uid) {
@@ -14,40 +14,87 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', fun
                 Cache.addUser(user);
             }
             user.on();
-            user.thumbnailOn();
             return user;
         },
 
         // Create a new template object
         // This is mainly useful to have the data
         // structure clearly defined
-        newUser: function () {
-            var user = {
-                meta: {
-                    uid: null,
-                    name: null,
-                    description: null,
-                    city: null,
-                    country: null,
-                    image: bDefaultProfileImage
-                }
+        newUser: function (uid) {
+
+            var user = Entity.newEntity(bUsersPath, uid);
+
+            user.meta =  {
+                uid: uid,
+                name: null,
+                description: null,
+                city: null,
+                country: null,
+                image: bDefaultProfileImage
             };
-            CookieTin.updateUserFromCookies(user);
+
+            user.serialize = function () {
+                return user.meta;
+            };
+
+            user.deserialize = function (su) {
+                user.meta = su;
+            };
+
+            LocalStorage.updateUserFromCookies(user);
+
             return user;
         },
 
         buildUserWithID: function (uid) {
 
-            var user = this.newUser();
-            user.meta.uid = uid;
+            var user = this.newUser(uid);
 
             // Start listening to the Firebase location
             user.on = (function () {
+
+                user.pathOn(bMetaKey, function (val) {
+                    if(val) {
+
+                        // TODO: iss201 - Shim while we're moving user image
+                        if(val.image) {
+                            user.setImage(val.image);
+                        }
+
+                        // Here we want to update the
+                        // - Main box
+                        // - Every chat room that includes the user
+                        // - User settings popup
+                        $rootScope.$broadcast(bUserValueChangedNotification, user);
+                    }
+                });
+
+                user.pathOn(bThumbnailKey, function (val) {
+                    if(val) {
+                        user.setThumbnail(val[bThumbnailKey]);
+                    }
+                    else {
+                        user.setThumbnail(bDefaultProfileImage);
+                    }
+                });
+//
+                return;
 
                 if(user.isOn) {
                     return;
                 }
                 user.isOn = true;
+
+                user.metaOn();
+                //user.thumbnailOn();
+
+            }).bind(this);
+
+            user.metaOn = function () {
+                if(user.isMetaOn) {
+                    return;
+                }
+                user.isMetaOn = true;
 
                 var ref = Paths.userMetaRef(uid);
 
@@ -68,14 +115,19 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', fun
                     $rootScope.$broadcast(bUserValueChangedNotification, user);
 
                 }).bind(this));
+            };
 
-            }).bind(this);
+            user.metaOff = function () {
+                user.isMetaOn = false;
+
+                var ref = Paths.userMetaRef(uid);
+                ref.off('value');
+            };
 
             // Stop listening to the Firebase location
             user.off = (function () {
                 user.isOn = false;
-                var ref = Paths.userMetaRef(uid);
-                ref.off('value');
+                user.metaOff();
             }).bind(this);
 
             user.imageOn = function () {
@@ -164,6 +216,23 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', fun
                 return deferred.promise;
             };
 
+            user.pushMeta = function () {
+
+                var deferred = $q.defer();
+
+                var ref = Paths.userMetaRef(user.meta.uid);
+                ref.update(user.meta, function (error) {
+                    if(!error) {
+                        deferred.resolve();
+                    }
+                    else {
+                        deferred.reject(error);
+                    }
+                });
+
+                return deferred.promise;
+            };
+
             user.canBeInvitedByUser = function (invitingUser) {
 
                 // This function should only ever be called on the root user
@@ -177,7 +246,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', fun
                     return true;
                 }
                 else if (allowInvites == 'Friends') {
-                    return Cache.isFriend(invitingUser.meta.uid);
+                    return Cache.isFriend(invitingUser);
                 }
                 else {
                     return false;
@@ -315,13 +384,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'CookieTin', fun
                 ref.update({slot: slot});
             };
 
-            user.serialize = function () {
-                return user.meta;
-            };
-
-            user.deserialize = function (su) {
-                user.meta = su;
-            };
 
             return user;
         }

@@ -13,11 +13,11 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
-myApp.factory('SoundEffects', ['CookieTin', function (CookieTin) {
+myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
     return {
 
         messageRecievedSoundNumber: 1,
-        muted: CookieTin.isMuted(),
+        muted: LocalStorage.isMuted(),
 
         messageReceived: function () {
             if(this.muted) {
@@ -37,8 +37,92 @@ myApp.factory('SoundEffects', ['CookieTin', function (CookieTin) {
 
         toggleMuted: function () {
             this.muted = !this.muted;
-            CookieTin.setMuted(this.muted);
+            LocalStorage.setMuted(this.muted);
             return this.muted;
+        }
+    };
+}]);
+
+myApp.factory('Entity', ['$q', function ($q) {
+    return {
+        newEntity: function (path, id) {
+
+            var entity = {
+                _path: path,
+                _id: id,
+                pathIsOn: {}
+            };
+
+            /**
+             * Start listening to a path
+             * This method first adds a listener to the state ref. It then only
+             * adds a listener to the data path if the saved state is out of date
+             *
+             * @param key - the data key i.e. meta, blocked, friends, messages etc...
+             * @returns promise - the promise will ONLY be resolved if the local value is
+             *                    updated from Firebase. Reject will be called if the value
+             *                    is up to date or if the path is already on
+             */
+            entity.pathOn = function (key, callback) {
+
+                // Check to see if this path has already
+                // been turned on
+                if(entity.pathIsOn[key]) {
+                    return;
+                }
+                entity.pathIsOn[key] = true;
+
+                // Start listening to the state
+                var stateRef = entity.stateRef(key);
+
+                stateRef.on('value', (function (snapshot) {
+
+                    // If the state isn't set either locally or remotely
+                    // or if it is set but the timestamp is lower than the remove value
+                    // add a listener to the value
+                    if((!snapshot.val() || !entity.state) || (snapshot.val() && snapshot.val() > entity.state[key])) {
+
+                        // Get the ref
+                        var ref = entity.pathRef(key);
+
+                        // Make sure the listener isn't added twice
+                        ref.off('value');
+
+                        // Add the value listener
+                        ref.on('value', (function (snapshot) {
+                            if(snapshot.val()) {
+                                entity[key] = snapshot.val();
+                                if(callback) {
+                                    callback(snapshot.val());
+                                }
+                            }
+                        }).bind(this));
+                    }
+                }).bind(this));
+            };
+
+            entity.pathOff = function (key) {
+
+                entity.pathIsOn[key] = false;
+
+                entity.stateRef(key).off('value');
+                entity.pathRef(key).off('value');
+            };
+
+            entity.ref = function () {
+                return Paths.firebase().child(entity._path).child(entity._id);
+            };
+
+            entity.pathRef = function (path) {
+                return entity.ref().child(path);
+            };
+
+            entity.stateRef = function (key) {
+                return entity.ref().child(bStatePath).child(key);
+            };
+
+            return entity;
+
         }
     };
 }]);
@@ -252,138 +336,7 @@ myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
     return Visibility.init();
 }]);
 
-myApp.factory('CookieTin', function () {
-    var CookieTin = {
-
-        roomMinimizedKey: 'cc_room_minimized_',
-        roomWidthKey: 'cc_room_width_',
-        roomHeightKey: 'cc_room_height_',
-
-        mainMinimizedKey: 'cc_main_minimized',
-        moreMinimizedKey: 'cc_more_minimized',
-
-        // Tokens
-        tokenKey: 'cc_token',
-        UIDKey: 'cc_uid',
-        tokenExpiryKey: 'cc_token_expiry',
-
-        // API Details
-        apiDetailsKey: 'cc_api_details',
-
-        rooms: {},
-        users: {},
-
-        init: function () {
-            var rooms = this.getProperty('cc_rooms');
-            if(rooms && rooms.length) {
-                var room = null;
-                for(var i = 0; i < rooms.length; i++) {
-                    room = rooms[i];
-                    this.rooms[room.meta.rid] = room;
-                }
-            }
-
-            var users = this.getProperty('cc_users');
-            if(users && users.length) {
-                var user = null;
-
-                for(i = 0; i < users.length; i++) {
-                    user = users[i];
-                    this.users[user.uid] = user;
-                }
-            }
-
-            return this;
-        },
-
-        isOffline: function () {
-            return this.getProperty('cc_offline');
-        },
-
-        setOffline: function (offline) {
-            this.setProperty(offline, 'cc_offline');
-        },
-
-        isMuted: function () {
-            return this.getProperty('cc_muted');
-        },
-
-        setMuted: function (muted) {
-            this.setProperty(muted, 'cc_muted');
-        },
-
-        storeRooms: function (rooms) {
-            var room;
-            var sr = [];
-            for(var i = 0; i < rooms.length; i++) {
-                room = rooms[i];
-                sr.push(room.serialize());
-            }
-            this.setProperty(JSON.stringify(sr), 'cc_rooms');
-        },
-
-        storeUsers: function (users) {
-            var user;
-            var su = [];
-            for(var key in users) {
-                if(users.hasOwnProperty(key)) {
-                    user = users[key];
-                    su.push(user.serialize());
-                }
-            }
-            this.setProperty(JSON.stringify(su), 'cc_users');
-        },
-
-        updateRoomFromCookies: function (room) {
-            var sr = this.rooms[room.meta.rid];
-            if(sr) {
-                room.deserialize(sr);
-            }
-        },
-
-        updateUserFromCookies: function (user) {
-            var su = this.users[user.meta.uid];
-            if(su) {
-                user.deserialize(su);
-            }
-        },
-
-        setProperty: function(value, root, id) {
-            if(!id) {
-                id = "";
-            }
-            jQuery.cookie(root + id, value, {domain: '', path: '/'});
-        },
-
-        getProperty: function (root, id) {
-            if(!id) {
-                id = "";
-            }
-            var c = jQuery.cookie(root + id);
-            if(!unORNull(c)) {
-                var e;
-                try {
-                    e = eval(c);
-                }
-                catch (error) {
-                    e = c;
-                }
-                return e;
-            }
-            else {
-                return null;
-            }
-        },
-
-        removeProperty: function (root, id) {
-            this.setProperty(null, root, id);
-            //jQuery.cookie(root + id, null, {domain: '', path: '/'})
-        }
-    };
-    return CookieTin.init();
-});
-
-myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin', function ($rootScope, $q, $http, Config, CookieTin) {
+myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStorage', function ($rootScope, $q, $http, Config, LocalStorage) {
 
     // API Levels
 
@@ -409,9 +362,9 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
         },
 
         invalidate: function () {
-            CookieTin.removeProperty(CookieTin.tokenKey);
-            CookieTin.removeProperty(CookieTin.tokenExpiryKey);
-            CookieTin.removeProperty(CookieTin.UIDKey);
+            LocalStorage.removeProperty(LocalStorage.tokenKey);
+            LocalStorage.removeProperty(LocalStorage.tokenExpiryKey);
+            LocalStorage.removeProperty(LocalStorage.UIDKey);
         },
 
         authenticate: function (url) {
@@ -466,9 +419,9 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                 var currentUID = response.uid;
 
                 // Check to see if we have a token cached
-                var token = CookieTin.getProperty(CookieTin.tokenKey);
-                var expiry = CookieTin.getProperty(CookieTin.tokenExpiryKey);
-                var uid = CookieTin.getProperty(CookieTin.UIDKey);
+                var token = LocalStorage.getProperty(LocalStorage.tokenKey);
+                var expiry = LocalStorage.getProperty(LocalStorage.tokenExpiryKey);
+                var uid = LocalStorage.getProperty(LocalStorage.UIDKey);
 
                 // If any value isn't set or if the token is expired get a new token
                 if(!unORNull(token) && !unORNull(expiry) && !unORNull(uid) && !force) {
@@ -495,9 +448,9 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                 }).then((function (data) {
 
                     // Cache the token and the user's current ID
-                    CookieTin.setProperty(data.token, CookieTin.tokenKey);
-                    CookieTin.setProperty(currentUID, CookieTin.UIDKey);
-                    CookieTin.setProperty(new Date().getTime(), CookieTin.tokenExpiryKey);
+                    LocalStorage.setProperty(data.token, LocalStorage.tokenKey);
+                    LocalStorage.setProperty(currentUID, LocalStorage.UIDKey);
+                    LocalStorage.setProperty(new Date().getTime(), LocalStorage.tokenExpiryKey);
 
                     // Update the config object with options that are set
                     // These will be overridden by options which are set on the
@@ -540,14 +493,14 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
                         deferred.resolve(r.data);
                     }
                     else {
-                        deferred.reject(r.data.error ? r.data.error : defaultError);
+                        deferred.reject(r.data.error ? r.data.error : this.defaultError);
                     }
                 }
                 else {
                     deferred.reject(this.defaultError);
                 }
             }).bind(this), function (error) {
-                deferred.reject(error.message ? error.message : defaultError);
+                deferred.reject(error.message ? error.message : this.defaultError);
             });
 
             return deferred.promise;
@@ -556,7 +509,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'CookieTin
 
 }]);
 
-myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cache, CookieTin) {
+myApp.factory('Rooms', ['$window', 'Cache', 'LocalStorage', function ($window, Cache, LocalStorage) {
 
     var Rooms = {
 
@@ -569,10 +522,10 @@ myApp.factory('Rooms', ['$window', 'Cache', 'CookieTin', function ($window, Cach
                 // Save the rooms to cookies
 //                var rooms = this.rooms;
 //                for(var i in rooms) {
-//                    CookieTin.setRoom(rooms[i]);
+//                    LocalStorage.setRoom(rooms[i]);
 //                }
 
-                CookieTin.storeRooms(this.rooms);
+                LocalStorage.storeRooms(this.rooms);
 
 
             }).bind(this);
@@ -735,7 +688,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
     };
 }]);
 
-myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'CookieTin', function ($q, $http, $window, $timeout, Config, CookieTin) {
+myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', function ($q, $http, $window, $timeout, Config, LocalStorage) {
     return {
 
         meta: {},
@@ -743,11 +696,11 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'CookieTin
 
         saveAPIDetails: function (details) {
             details.time = new Date().getTime();
-            CookieTin.setProperty(JSON.stringify(details), CookieTin.apiDetailsKey);
+            LocalStorage.setProperty(JSON.stringify(details), LocalStorage.apiDetailsKey);
         },
 
         loadAPIDetails: function (override) {
-            var details = CookieTin.getProperty(CookieTin.apiDetailsKey);
+            var details = LocalStorage.getProperty(LocalStorage.apiDetailsKey);
             if(details) {
                 details = JSON.parse(details);
                 if((new Date().getTime() - details.time)/1000 < 24 * 60 * 60) {
@@ -966,7 +919,7 @@ myApp.factory('Utilities', ['$q', function ($q) {
  * This service keeps track of the slot positions
  * while the rooms are moving around
  */
-myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', 'Rooms', 'Screen', function ($rootScope, $timeout, $document, $window, CookieTin, Rooms, Screen) {
+myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Rooms', 'Screen', function ($rootScope, $timeout, $document, $window, LocalStorage, Rooms, Screen) {
 
     var rpm = {
 
@@ -1254,7 +1207,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
 }]);
 
-myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'CookieTin', function ($rootScope, $timeout, $document, $window, CookieTin) {
+myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', function ($rootScope, $timeout, $document, $window, LocalStorage) {
 
     var screen = {
 
@@ -1482,7 +1435,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             //$rootScope.user.on();
 
             // Bind the user to the user variable
-            $userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
+            //$userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
 
                 // If the user hasn't got a name yet don't throw an error
                 if (!$rootScope.user.meta.name) {
@@ -1491,21 +1444,21 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 Presence.start($rootScope.user);
 
-                $rootScope.unbindUser = (function () {
-                    unbind();
-
-                    // Clear the data
-                    $rootScope.user = null;
-                }).bind(this);
+//                $rootScope.unbindUser = (function () {
+//                    unbind();
+//
+//                    // Clear the data
+//                    $rootScope.user = null;
+//                }).bind(this);
 
                 // Mark the user as online
                 if(DEBUG) console.log("Did bind user to scope " + uid);
 
                 deferred.resolve();
 
-            }).bind(this), function (error) {
-                deferred.reject(error);
-            });
+            //}).bind(this), function (error) {
+            //    deferred.reject(error);
+            //});
 
             return deferred.promise;
         },

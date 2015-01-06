@@ -4,60 +4,10 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', 'RoomPositionManager', function ($rootScope, Room, User, Cache, Rooms, RoomPositionManager) {
+myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($rootScope, User, Cache) {
     return {
 
-        isOn: false,
-        onUserID: null,
-
-        /**
-         * Add universal listeners to Firebase
-         * these listeners are not specific to an individual user
-         */
         on: function () {
-
-            if(this.isOn) {
-                return;
-            }
-            this.isOn = true;
-
-            /**
-             * Public rooms ref
-             */
-
-            var publicRoomsRef = Paths.publicRoomsRef();
-
-            publicRoomsRef.on('child_added', (function (snapshot) {
-
-                var rid = snapshot.key();
-                if(rid) {
-                    var room = Room.getOrCreateRoomWithID(rid);
-                    room.newPanel = snapshot.val().newPanel;
-                    //Cache.addPublicRoom(room);
-
-                    room.on().then(function () {
-
-                        $rootScope.$broadcast(bPublicRoomAddedNotification, room);
-
-                        Cache.addRoom(room);
-
-                    });
-
-                }
-
-            }).bind(this));
-
-            publicRoomsRef.on('child_removed', (function (snapshot) {
-
-                var room = Cache.getOrCreateRoomWithID(snapshot.key());
-                $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
-
-
-            }).bind(this));
-
-            /**
-             * Online users ref
-             */
 
             var onlineUsersRef = Paths.onlineUsersRef();
 
@@ -92,6 +42,87 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                 $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
 
             }).bind(this));
+        },
+
+        off: function () {
+            var onlineUsersRef = Paths.onlineUsersRef();
+
+            onlineUsersRef.off('child_added');
+            onlineUsersRef.off('child_removed');
+        }
+
+    }
+}]);
+
+myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function ($rootScope, Room, Cache) {
+    return {
+        on: function () {
+            var publicRoomsRef = Paths.publicRoomsRef();
+
+            publicRoomsRef.on('child_added', (function (snapshot) {
+
+                var rid = snapshot.key();
+                if(rid) {
+                    var room = Room.getOrCreateRoomWithID(rid);
+                    room.newPanel = snapshot.val().newPanel;
+                    //Cache.addPublicRoom(room);
+
+                    room.on().then(function () {
+
+                        $rootScope.$broadcast(bPublicRoomAddedNotification, room);
+
+                        Cache.addRoom(room);
+
+                    });
+
+                }
+
+            }).bind(this));
+
+            publicRoomsRef.on('child_removed', (function (snapshot) {
+
+                var room = Cache.getOrCreateRoomWithID(snapshot.key());
+                $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
+
+
+            }).bind(this));
+        },
+
+        off: function () {
+            var publicRoomsRef = Paths.publicRoomsRef();
+
+            publicRoomsRef.off('child_added');
+            publicRoomsRef.off('child_removed');
+        }
+    }
+}]);
+
+myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', function ($rootScope, Room, User, Cache, Rooms, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
+    return {
+
+        isOn: false,
+        onUserID: null,
+
+        /**
+         * Add universal listeners to Firebase
+         * these listeners are not specific to an individual user
+         */
+        on: function () {
+
+            if(this.isOn) {
+                return;
+            }
+            this.isOn = true;
+
+            /**
+             * Public rooms ref
+             */
+            PublicRoomsConnector.on();
+
+            /**
+             * Online users ref
+             */
+            OnlineConnector.on();
 
         },
 
@@ -102,15 +133,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             this.isOn = false;
 
-            var publicRoomsRef = Paths.publicRoomsRef();
-
-            publicRoomsRef.off('child_added');
-            publicRoomsRef.off('child_removed');
-
-            var onlineUsersRef = Paths.onlineUsersRef();
-
-            onlineUsersRef.off('child_added');
-            onlineUsersRef.off('child_removed');
+            PublicRoomsConnector.off();
+            OnlineConnector.off();
 
         },
 
@@ -354,7 +378,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                             }
 
                             // If the user is a friend
-                            if(Cache.isFriend(invitedBy)) {
+                            if(Cache.isFriendUID(invitedBy)) {
                                 // Set the user to member
                                 room.setStatusForUser($rootScope.user, bUserStatusMember);
                             }

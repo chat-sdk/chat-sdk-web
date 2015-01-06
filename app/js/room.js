@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache','User', 'Presence', 'CookieTin', 'Rooms', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, User, Presence, CookieTin, Rooms, RoomPositionManager, SoundEffects, Visibility, Log) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache','User', 'Presence', 'LocalStorage', 'Rooms', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, User, Presence, LocalStorage, Rooms, RoomPositionManager, SoundEffects, Visibility, Log) {
         return {
 
             getOrCreateRoomWithID: function (rid) {
@@ -28,7 +28,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 room.meta.rid = rid;
 
                 // Update the room from the saved state
-                CookieTin.updateRoomFromCookies(room);
+                LocalStorage.updateRoomFromCookies(room);
 
                 return room;
             },
@@ -209,6 +209,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                             }
                         }
                         else {
+
                             // Add the room to Firebase
                             roomMetaRef.set(room.meta, (function (error) {
 
@@ -232,6 +233,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                                     if(room.meta.isPublic) {
                                         room.addToPublicRooms();
                                     }
+
+                                    // Update the state
+                                    room.updateState(bMetaKey);
 
                                     deferred.resolve();
                                 }
@@ -594,6 +598,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         lastMessage: lastMessageMeta
                     });
 
+                    room.updateState(bMessagesPath);
+
                     // Update the user's presence state
                     Presence.update();
 
@@ -745,18 +751,18 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  */
 
                 room.serialize = function () {
-                    //var m = [];
-                    //for(var i = 0; i < room.messages; i++) {
-                    //    m.push(room.messages[i].serialize());
-                    //}
+                    var m = [];
+                    for(var i = 0; i < room.messages; i++) {
+                        m.push(room.messages[i].serialize());
+                    }
                     var sr = {
                         minimized: room.minimized,
                         width: room.width,
                         height: room.height,
                         //offset: room.offset,
-                        //messages: m,
+                        messages: m,
                         meta: room.meta,
-                        //usersMeta: room.usersMeta
+                        usersMeta: room.usersMeta
                     };
 
                     if(DEBUG) console.log("Serialize: Offet: " + room.offset);
@@ -770,14 +776,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     room.width = sr.width;
                     room.height = sr.height;
                     room.meta = sr.meta;
-                    //room.usersMeta = sr.usersMeta;
+                    room.usersMeta = sr.usersMeta;
                     //room.offset = sr.offset;
 
-                    //for(var i = 0; i < sr.messages.length; i++) {
-                    //    var message = Message.buildRoomWithID(room.meta.rid);
-                    //    message.deserialize(sr.messages[i]);
-                    //    room.messages.push(message);
-                    //}
+                    for(var i = 0; i < sr.messages.length; i++) {
+                        var message = Message.buildRoomWithID(room.meta.rid);
+                        message.deserialize(sr.messages[i]);
+                        room.messages.push(message);
+                    }
 
                     if(DEBUG) console.log("Deserialize: Offet: " + room.offset);
                 };
@@ -1092,8 +1098,28 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     return deferred.promise;
                 };
 
+                /***********************************
+                 * ROOM STATE
+                 */
 
+                room.updateState = function (key) {
 
+                    var deferred = $q.defer();
+
+                    var ref = Paths.roomStateRef(room.meta.rid);
+
+                    var data = {}; data[key] = Firebase.ServerValue.TIMESTAMP;
+
+                    ref.update(data, function (error) {
+                        if(!error) {
+                            deferred.resolve();
+                        }
+                        else {
+                            deferred.reject(error);
+                        }
+                    });
+                    return deferred.promise;
+                };
 
                 return room;
             }

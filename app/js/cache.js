@@ -3,21 +3,38 @@
  */
 var myApp = angular.module('myApp.cache', []);
 
-myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'CookieTin', function ($rootScope, $timeout, $window, CookieTin) {
+myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', function ($rootScope, $timeout, $window, LocalStorage) {
     var Cache = {
 
-        // Dict
+        // These are universal stores
+        //
         users: {},
+        rooms: {},
+
+        // These are user specific stores
         onlineUsers: {},
         friends: {},
         blockedUsers: {},
-        rooms: {},
 
         init: function () {
 
+            // Populate the cache from the local storage
+            var serializedUsers = LocalStorage.users;
+            var su = null;
+            var user = null;
+
+            for(var uid in serializedUsers) {
+                if(serializedUsers.hasOwnProperty(uid)) {
+                    su = serializedUsers[uid];
+                    user = User.newUser()
+                }
+            }
+
+            this.users = LocalStorage.users;
+
             var beforeUnloadHandler = (function (e) {
 
-                CookieTin.storeUsers(this.users);
+                LocalStorage.storeUsers(this.users);
 
             }).bind(this);
 
@@ -58,10 +75,14 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'CookieTin', functi
         },
 
         isFriend: function (user) {
-            if(user) {
-                return !unORNull(Cache.friends[user.meta.uid]);
+            if(user && user.meta) {
+                return this.isFriendUID(user.meta.uid);
             }
             return false;
+        },
+
+        isFriendUID: function(uid) {
+            return !unORNull(this.friends[uid]);
         },
 
         removeFriend: function (user) {
@@ -81,9 +102,6 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'CookieTin', functi
             }
         },
 
-        isFriend: function(uid) {
-            return !unORNull(this.friends[uid]);
-        },
 
         addBlockedUser: function (user) {
             if(user && user.meta && user.meta.uid) {

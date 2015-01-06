@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Rooms', 'Presence', 'CookieTin', 'Room', 'Config', 'Parse', 'Log', 'Partials',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Rooms, Presence, CookieTin, Room, Config, Parse, Log, Partials) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Rooms', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Rooms, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
 
     $scope.totalUserCount = 0;
 
@@ -19,7 +19,7 @@ myApp.controller('AppController', [
             show: false
         };
 
-        if(CookieTin.isOffline()) {
+        if(LocalStorage.isOffline()) {
             $scope.on = false;
             Presence.goOffline();
         }
@@ -65,7 +65,7 @@ myApp.controller('AppController', [
 
         $scope.setupImages();
 
-        $scope.setMainBoxMinimized(CookieTin.getProperty(CookieTin.mainMinimizedKey));
+        $scope.setMainBoxMinimized(LocalStorage.getProperty(LocalStorage.mainMinimizedKey));
 
         $scope.$on(bUserOnlineStateChangedNotification, function () {
             Log.notification(bUserOnlineStateChangedNotification, "AppController");
@@ -149,7 +149,7 @@ myApp.controller('AppController', [
 
     $scope.setMainBoxMinimized = function (minimized) {
         $scope.mainBoxMinimized = minimized;
-        CookieTin.setProperty(minimized, CookieTin.mainMinimizedKey);
+        LocalStorage.setProperty(minimized, LocalStorage.mainMinimizedKey);
     };
 
     $scope.saveRoomSlotToUser = function (room) {
@@ -315,12 +315,12 @@ myApp.controller('AppController', [
 
         $scope.on = !$scope.on;
         if($scope.on) {
-            CookieTin.setOffline(false);
+            LocalStorage.setOffline(false);
             Presence.goOnline();
         }
         else {
             Presence.goOffline();
-            CookieTin.setOffline(true);
+            LocalStorage.setOffline(true);
         }
     };
 
@@ -732,11 +732,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         // Try to unbind the user - we should have setup
         // this function when the user was created
-        try {
-            $scope.unbindUser();
-        }
-        catch (err) {
-        }
+//        try {
+//            $scope.unbindUser();
+//        }
+//        catch (err) {
+//        }
 
         // Now we need to
         Presence.goOffline();
@@ -1176,8 +1176,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
 
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Rooms', 'CookieTin', 'RoomPositionManager', 'Log',
-    function($scope, $rootScope, $timeout, Auth, Rooms, CookieTin, RoomPositionManager, Log) {
+myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Rooms', 'LocalStorage', 'RoomPositionManager', 'Log',
+    function($scope, $rootScope, $timeout, Auth, Rooms, LocalStorage, RoomPositionManager, Log) {
 
     $scope.rooms = [];
     $scope.moreChatsMinimized = true;
@@ -1188,7 +1188,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
         $scope.canDeleteRoom = true;
 
         // Is the more box minimized?
-        $scope.setMoreBoxMinimized(CookieTin.getProperty(CookieTin.moreMinimizedKey));
+        $scope.setMoreBoxMinimized(LocalStorage.getProperty(LocalStorage.moreMinimizedKey));
 
         // Update the list when a room changes
         $scope.$on(bUpdateRoomActiveStatusNotification, $scope.updateList);
@@ -1274,7 +1274,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 
     $scope.setMoreBoxMinimized = function (minimized) {
         $scope.hideRoomList = minimized;
-        CookieTin.setProperty(minimized, CookieTin.moreMinimizedKey);
+        LocalStorage.setProperty(minimized, LocalStorage.moreMinimizedKey);
     }
 
     $scope.deleteRoom = function(room) {
@@ -1482,6 +1482,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
     $scope.ref = null;
     $scope.muted = false;
     $scope.nameChangeDummy = null;
+    $scope.dirty = false;
 
     $scope.init = function () {
 
@@ -1500,6 +1501,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
                 valid: true
             }
         };
+
+        $scope.$watchCollection('user.meta', function () {
+            $scope.dirty = true;
+        });
 
         // When the box will be opened we need to add a listener to the
         // user
@@ -1560,6 +1565,13 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
             $scope.showMainBox();
             $scope.ref.off('value');
             $scope.ref = null;
+
+            // Did the user update any values?
+            if($scope.dirty) {
+                $scope.user.pushMeta();
+                $scope.dirty = false;
+            }
+
         }
         else {
             if(!$scope.validation.name.valid) {

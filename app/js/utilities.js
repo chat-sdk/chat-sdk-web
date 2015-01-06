@@ -54,7 +54,7 @@ var bMessagesPath = 'messages';
 var bTypingPath = 'typing';
 var bFriendsPath = 'friends';
 var bBlockedPath = 'blocked';
-
+var bStatePath = 'state';
 
 var bReadKey = 'read';
 
@@ -162,16 +162,20 @@ var Paths = {
         return this.userRef(fid).child(bImageKey);
     },
 
+    userStateRef: function (fid) {
+        return this.userRef(fid).child(bStatePath);
+    },
+
     userThumbnailRef: function (fid) {
         return this.userRef(fid).child(bThumbnailKey);
     },
 
     userFriendsRef: function (fid) {
-        return this.userMetaRef(fid).child(bFriendsPath);
+        return this.userRef(fid).child(bFriendsPath);
     },
 
     userBlockedRef: function (fid) {
-        return this.userMetaRef(fid).child(bBlockedPath);
+        return this.userRef(fid).child(bBlockedPath);
     },
 
     onlineUsersRef: function () {
@@ -200,6 +204,10 @@ var Paths = {
 
     roomMetaRef: function (fid) {
         return this.roomRef(fid).child(bMetaKey);
+    },
+
+    roomStateRef: function (fid) {
+        return this.roomRef(fid).child(bStatePath);
     },
 
     roomMessagesRef: function (fid) {
