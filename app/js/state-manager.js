@@ -18,7 +18,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($root
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
-                    var user = User.getOrCreateUserWithID(uid);
+                    var user = Cache.getOrCreateUserWithID(uid);
 
                     Cache.addOnlineUser(user);
 
@@ -30,7 +30,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($root
 
             onlineUsersRef.on("child_removed", (function (snapshot) {
 
-                var user = User.getOrCreateUserWithID(snapshot.val().uid);
+                var user = Cache.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
                 user.thumbnailOff();
@@ -284,7 +284,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = User.getOrCreateUserWithID(uid);
+                var user = Cache.getOrCreateUserWithID(uid);
 
                 user.unblock = function () {
                     snapshot.ref().remove();
@@ -305,7 +305,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = User.getOrCreateUserWithID(uid);
+                var user = Cache.getOrCreateUserWithID(uid);
 
                 user.removeFriend = function () {
                     snapshot.ref().remove();
@@ -364,7 +364,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                         if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
 
                             if(invitedBy) {
-                                room.invitedBy = User.getOrCreateUserWithID(invitedBy);
+                                room.invitedBy = Cache.getOrCreateUserWithID(invitedBy);
                             }
 
                             if(Cache.isBlockedUser(invitedBy)) {

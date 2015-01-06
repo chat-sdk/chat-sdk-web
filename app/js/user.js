@@ -4,23 +4,48 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'LocalStorage', 'Entity', function ($rootScope, $timeout, $q, Cache, LocalStorage, Entity) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', function ($rootScope, $timeout, $q, Entity) {
     return {
 
-        getOrCreateUserWithID: function(uid) {
-            var user = Cache.getUserWithID(uid);
-            if(!user) {
-                user = this.buildUserWithID(uid);
-                Cache.addUser(user);
-            }
-            user.on();
-            return user;
-        },
+//        getOrCreateUserWithID: function(uid) {
+//            var user = Cache.getUserWithID(uid);
+//            if(!user) {
+//                user = this.buildUserWithID(uid);
+//                Cache.addUser(user);
+//            }
+//            user.on();
+//            return user;
+//        },
 
         // Create a new template object
         // This is mainly useful to have the data
         // structure clearly defined
-        newUser: function (uid) {
+//        newUser: function (uid) {
+//
+//            var user = Entity.newEntity(bUsersPath, uid);
+//
+//            user.meta =  {
+//                uid: uid,
+//                name: null,
+//                description: null,
+//                city: null,
+//                country: null,
+//                image: bDefaultProfileImage
+//            };
+//
+//            user.serialize = function () {
+//                return user.meta;
+//            };
+//
+//            user.deserialize = function (su) {
+//                user.meta = su;
+//            };
+//
+//
+//            return user;
+//        },
+
+        buildUserWithID: function (uid) {
 
             var user = Entity.newEntity(bUsersPath, uid);
 
@@ -32,23 +57,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'LocalStorage', 
                 country: null,
                 image: bDefaultProfileImage
             };
-
-            user.serialize = function () {
-                return user.meta;
-            };
-
-            user.deserialize = function (su) {
-                user.meta = su;
-            };
-
-            LocalStorage.updateUserFromCookies(user);
-
-            return user;
-        },
-
-        buildUserWithID: function (uid) {
-
-            var user = this.newUser(uid);
 
             // Start listening to the Firebase location
             user.on = (function () {
@@ -384,6 +392,13 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Cache', 'LocalStorage', 
                 ref.update({slot: slot});
             };
 
+            user.serialize = function () {
+                return user.meta;
+            };
+
+            user.deserialize = function (su) {
+                user.meta = su;
+            };
 
             return user;
         }

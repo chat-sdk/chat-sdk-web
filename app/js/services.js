@@ -1239,8 +1239,8 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'User', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, User, Room, Utilities, Presence, API, StateManager) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'Cache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, Cache, Room, Utilities, Presence, API, StateManager) {
 
     var Auth = {
 
@@ -1430,7 +1430,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            $rootScope.user = User.getOrCreateUserWithID(uid);
+            $rootScope.user = Cache.getOrCreateUserWithID(uid);
             //$rootScope.user = User.buildUserWithID(uid);
             //$rootScope.user.on();
 

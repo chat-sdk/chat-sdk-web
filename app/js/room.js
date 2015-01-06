@@ -369,7 +369,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                     }
                     if(data) {
-                        return User.getOrCreateUserWithID(data.uid);
+                        return Cache.getOrCreateUserWithID(data.uid);
                     }
                     return null;
                 };
@@ -835,7 +835,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                             var uid = snapshot.val().uid;
 
-                            var user = User.getOrCreateUserWithID(uid);
+                            var user = Cache.getOrCreateUserWithID(uid);
 
                             room.users[user.meta.uid] = user;
 

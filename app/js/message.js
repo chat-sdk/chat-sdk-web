@@ -41,7 +41,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', 
                     message.user = $rootScope.user;
                 }
                 else {
-                    message.user = User.getOrCreateUserWithID(message.meta.uid);
+                    message.user = Cache.getOrCreateUserWithID(message.meta.uid);
                 }
             }
 

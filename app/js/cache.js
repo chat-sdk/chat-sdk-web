@@ -3,7 +3,7 @@
  */
 var myApp = angular.module('myApp.cache', []);
 
-myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', function ($rootScope, $timeout, $window, LocalStorage) {
+myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'User', function ($rootScope, $timeout, $window, LocalStorage, User) {
     var Cache = {
 
         // These are universal stores
@@ -26,11 +26,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
             for(var uid in serializedUsers) {
                 if(serializedUsers.hasOwnProperty(uid)) {
                     su = serializedUsers[uid];
-                    user = User.newUser()
+                    //user = User.newUser()
                 }
             }
-
-            this.users = LocalStorage.users;
 
             var beforeUnloadHandler = (function (e) {
 
@@ -45,6 +43,22 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
             }
 
             return this;
+        },
+
+        getOrCreateUserWithID: function(uid) {
+            var user = this.getUserWithID(uid);
+            if(!user) {
+                user = this.buildUserWithID(uid);
+                this.addUser(user);
+            }
+            user.on();
+            return user;
+        },
+
+        buildUserWithID: function (uid) {
+            var user = User.buildUserWithID(uid);
+            LocalStorage.updateUserFromCookies(user);
+            return user;
         },
 
         // A cache of all users
