@@ -97,6 +97,9 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', functi
     }
 }]);
 
+/**
+ * This should really be called the CurrentUserConnector
+ */
 myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache', 'UserCache', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector',
     function ($rootScope, Room, User, Cache, RoomCache, UserCache, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
     return {

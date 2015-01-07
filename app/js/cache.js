@@ -3,7 +3,53 @@
  */
 var myApp = angular.module('myApp.cache', []);
 
-myApp.factory('UserCache', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'User', function ($rootScope, $timeout, $window, LocalStorage, User) {
+myApp.factory('BeforeUnload', ['$window', function ($window) {
+    var BeforeUnload = {
+
+        listeners: [],
+
+        init: function () {
+
+            var beforeUnloadHandler = (function (e) {
+                var listener = null;
+                for(var i = 0; i < this.listeners.length; i++) {
+                    listener = this.listeners[i];
+                    try {
+                        listener.beforeUnload();
+                    }
+                    catch (e) {
+
+                    }
+                }
+            }).bind(this);
+
+            if ($window.addEventListener) {
+                $window.addEventListener('beforeunload', beforeUnloadHandler);
+            } else {
+                $window.onbeforeunload = beforeUnloadHandler;
+            }
+            return this;
+        },
+
+        addListener: function (object) {
+            if(this.listeners.indexOf(object) == -1 && object.beforeUnload) {
+                this.listeners.push(object);
+            }
+        },
+
+        removeListener: function (object) {
+            var index = this.listeners.indexOf(object);
+            if(index >= 0) {
+                this.listeners.splice(index, 1);
+            }
+        }
+
+    };
+    return BeforeUnload.init();
+}]);
+
+myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'BeforeUnload',
+    function ($rootScope, $timeout, LocalStorage, User, BeforeUnload) {
     var UserCache = {
 
         users: {},
@@ -17,24 +63,18 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 
             for(var uid in serializedUsers) {
                 if(serializedUsers.hasOwnProperty(uid)) {
-                    su = serializedUsers[uid];
-                    //user = User.newUser()
+                    user = this.buildUserWithID(uid);
+                    this.addUser(user);
                 }
             }
 
-            var beforeUnloadHandler = (function (e) {
-
-                LocalStorage.storeUsers(this.users);
-
-            }).bind(this);
-
-            if ($window.addEventListener) {
-                $window.addEventListener('beforeunload', beforeUnloadHandler);
-            } else {
-                $window.onbeforeunload = beforeUnloadHandler;
-            }
+            BeforeUnload.addListener(this);
 
             return this;
+        },
+
+        beforeUnload: function () {
+            LocalStorage.storeUsers(this.users);
         },
 
         getOrCreateUserWithID: function(uid) {

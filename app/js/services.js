@@ -59,16 +59,18 @@ myApp.factory('Entity', ['$q', function ($q) {
              * adds a listener to the data path if the saved state is out of date
              *
              * @param key - the data key i.e. meta, blocked, friends, messages etc...
-             * @returns promise - the promise will ONLY be resolved if the local value is
-             *                    updated from Firebase. Reject will be called if the value
-             *                    is up to date or if the path is already on
+             * @returns promise - the promise is resolved when the it's confirmed that
+             *                    the state of the local data is up to date
              */
             entity.pathOn = function (key, callback) {
+
+                var deferred = $q.defer();
 
                 // Check to see if this path has already
                 // been turned on
                 if(entity.pathIsOn[key]) {
-                    return;
+                    deferred.resolve();
+                    return deferred.promise;
                 }
                 entity.pathIsOn[key] = true;
 
@@ -95,10 +97,16 @@ myApp.factory('Entity', ['$q', function ($q) {
                                 if(callback) {
                                     callback(snapshot.val());
                                 }
+                                deferred.resolve();
                             }
                         }).bind(this));
                     }
+                    else {
+                        deferred.resolve();
+                    }
                 }).bind(this));
+
+                return deferred.promise;
             };
 
             entity.pathOff = function (key) {
@@ -119,6 +127,11 @@ myApp.factory('Entity', ['$q', function ($q) {
 
             entity.stateRef = function (key) {
                 return entity.ref().child(bStatePath).child(key);
+            };
+
+            entity.updateState = function (key) {
+                var ref = entity.stateRef(key);
+                ref.set(Firebase.ServerValue.TIMESTAMP);
             };
 
             return entity;
@@ -1299,12 +1312,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 /** Create static rooms **/
                 this.addStaticRooms();
 
-
+                // Start listening to online user list and public rooms list
                 StateManager.on();
-                StateManager.userOn(authUser.uid);
 
-                // Add listeners to the user
-                //this.addListenersToUser(authUser.uid);
+                // Start listening to user
+                StateManager.userOn(authUser.uid);
 
                 deferred.resolve();
 
@@ -1319,43 +1331,20 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
             var deferred = $q.defer();
 
-            // Get a ref to the user
-            var userMetaRef = Paths.userMetaRef(uid);
-
-            // Create an angular binding ref
-            var $userMetaRef = $firebase(userMetaRef);
-
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            $rootScope.user = UserCache.getOrCreateUserWithID(uid);
-            //$rootScope.user = User.buildUserWithID(uid);
-            //$rootScope.user.on();
+            var userPromise = $rootScope.user = UserCache.getOrCreateUserWithID(uid);
+            var imagePromise = $rootScope.user.imageOn();
 
-            // Bind the user to the user variable
-            //$userMetaRef.$asObject().$bindTo($rootScope, "user.meta").then((function (unbind) {
-
-                // If the user hasn't got a name yet don't throw an error
+            $q.all([userPromise, imagePromise]).then(function () {
                 if (!$rootScope.user.meta.name) {
                     $rootScope.user.meta.name = "";
                 }
 
                 Presence.start($rootScope.user);
 
-//                $rootScope.unbindUser = (function () {
-//                    unbind();
-//
-//                    // Clear the data
-//                    $rootScope.user = null;
-//                }).bind(this);
-
-                // Mark the user as online
-                if(DEBUG) console.log("Did bind user to scope " + uid);
-
                 deferred.resolve();
-
-            //}).bind(this), function (error) {
-            //    deferred.reject(error);
-            //});
+            });
 
             return deferred.promise;
         },

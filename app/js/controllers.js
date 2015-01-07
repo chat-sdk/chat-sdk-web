@@ -152,9 +152,9 @@ myApp.controller('AppController', [
         LocalStorage.setProperty(minimized, LocalStorage.mainMinimizedKey);
     };
 
-    $scope.saveRoomSlotToUser = function (room) {
-        $scope.getUser().updateRoomSlot(room, room.slot);
-    };
+//    $scope.saveRoomSlotToUser = function (room) {
+//        $scope.getUser().updateRoomSlot(room, room.slot);
+//    };
 
     /**
      * Show the floating profile box
