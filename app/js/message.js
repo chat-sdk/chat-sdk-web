@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.message', ['firebase']);
 
-myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', function ($rootScope, $q, $sce, Cache, User, Config) {
+myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Config', function ($rootScope, $q, $sce, UserCache, User, Config) {
     var message = {
 
         newMessage: function (rid, uid, text) {
@@ -41,7 +41,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','Cache', 'User', 'Config', 
                     message.user = $rootScope.user;
                 }
                 else {
-                    message.user = Cache.getOrCreateUserWithID(message.meta.uid);
+                    message.user = UserCache.getOrCreateUserWithID(message.meta.uid);
                 }
             }
 

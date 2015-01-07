@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache','$document','Rooms', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, $document, Rooms, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserCache','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserCache, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
 
     $scope.totalUserCount = 0;
 
@@ -187,7 +187,7 @@ myApp.controller('AppController', [
         }
         else {
             $scope.cancelTimer();
-            $scope.currentUser = Cache.getUserWithID(uid);
+            $scope.currentUser = UserCache.getUserWithID(uid);
             var profileHTML = $scope.currentUser.meta.profileHTML;
             $scope.currentUserHTML = !profileHTML ? null : $sce.trustAsHtml(profileHTML);
         }
@@ -492,7 +492,7 @@ myApp.controller('AppController', [
 
 }]);
 
-myApp.controller('ChatBarController', ['$scope', '$timeout', 'Rooms', 'Log', function($scope, $timeout, Rooms, Log) {
+myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', function($scope, $timeout, Cache, Log) {
 
     $scope.rooms = [];
 
@@ -515,7 +515,7 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Rooms', 'Log', fun
         Log.notification(bRoomAddedNotification + "/" + bRoomRemovedNotification, 'ChatBarController');
 
         // Only include rooms that are active
-        $scope.rooms = Rooms.activeRooms();
+        $scope.rooms = Cache.activeRooms();
 
         $timeout(function () {
             $scope.$digest();
@@ -617,8 +617,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn', 'Rooms',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, Rooms) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn) {
 
     /**
      * Initialize the login controller
@@ -749,7 +749,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         // Clear the cache down
         Cache.clear();
-        Rooms.clear();
 
         // Allow the user to log back in
         $scope.showLoginBox();
@@ -1176,8 +1175,8 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
 
 }]);
 
-myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Rooms', 'LocalStorage', 'RoomPositionManager', 'Log',
-    function($scope, $rootScope, $timeout, Auth, Rooms, LocalStorage, RoomPositionManager, Log) {
+myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'LocalStorage', 'RoomPositionManager', 'Log',
+    function($scope, $rootScope, $timeout, Auth, Cache, LocalStorage, RoomPositionManager, Log) {
 
     $scope.rooms = [];
     $scope.moreChatsMinimized = true;
@@ -1200,7 +1199,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 
         Log.notification(bUpdateRoomActiveStatusNotification, 'RoomListBoxController');
 
-        $scope.rooms = Rooms.inactiveRooms();
+        $scope.rooms = Cache.inactiveRooms();
 
         // Sort rooms by the number of unread messages
         $scope.rooms.sort(function (a, b) {

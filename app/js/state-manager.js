@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($rootScope, User, Cache) {
+myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', function ($rootScope, User, Cache, UserCache) {
     return {
 
         on: function () {
@@ -18,7 +18,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($root
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
-                    var user = Cache.getOrCreateUserWithID(uid);
+                    var user = UserCache.getOrCreateUserWithID(uid);
 
                     Cache.addOnlineUser(user);
 
@@ -30,7 +30,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($root
 
             onlineUsersRef.on("child_removed", (function (snapshot) {
 
-                var user = Cache.getOrCreateUserWithID(snapshot.val().uid);
+                var user = UserCache.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
                 user.thumbnailOff();
@@ -54,7 +54,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', function ($root
     }
 }]);
 
-myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function ($rootScope, Room, Cache) {
+myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', function ($rootScope, Room, RoomCache) {
     return {
         on: function () {
             var publicRoomsRef = Paths.publicRoomsRef();
@@ -63,7 +63,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function (
 
                 var rid = snapshot.key();
                 if(rid) {
-                    var room = Room.getOrCreateRoomWithID(rid);
+                    var room = RoomCache.getOrCreateRoomWithID(rid);
                     room.newPanel = snapshot.val().newPanel;
                     //Cache.addPublicRoom(room);
 
@@ -71,7 +71,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function (
 
                         $rootScope.$broadcast(bPublicRoomAddedNotification, room);
 
-                        Cache.addRoom(room);
+                        RoomCache.addRoom(room);
 
                     });
 
@@ -81,7 +81,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function (
 
             publicRoomsRef.on('child_removed', (function (snapshot) {
 
-                var room = Cache.getOrCreateRoomWithID(snapshot.key());
+                var room = RoomCache.getOrCreateRoomWithID(snapshot.key());
                 $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
 
 
@@ -97,7 +97,8 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'Cache', function (
     }
 }]);
 
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', function ($rootScope, Room, User, Cache, Rooms, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
+myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache', 'UserCache', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector',
+    function ($rootScope, Room, User, Cache, RoomCache, UserCache, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
     return {
 
         isOn: false,
@@ -284,7 +285,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = Cache.getOrCreateUserWithID(uid);
+                var user = UserCache.getOrCreateUserWithID(uid);
 
                 user.unblock = function () {
                     snapshot.ref().remove();
@@ -305,7 +306,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = Cache.getOrCreateUserWithID(uid);
+                var user = UserCache.getOrCreateUserWithID(uid);
 
                 user.removeFriend = function () {
                     snapshot.ref().remove();
@@ -325,12 +326,12 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
             var room = null;
             for(var key in rooms) {
                 if(rooms.hasOwnProperty(key)) {
-                    room = Room.getOrCreateRoomWithID(key);
+                    room = RoomCache.getOrCreateRoomWithID(key);
 
                     // The user is a member of this room
                     // We have to call this so the Room position manager can
                     // calculate the offsets
-                    Rooms.addRoom(room);
+                    Cache.addRoom(room);
                     RoomPositionManager.setDirty();
 
                     room.slot = i;
@@ -354,7 +355,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
             if (rid) {
 
                 // Does the room already exist?
-                var room = Room.getOrCreateRoomWithID(rid);
+                var room = RoomCache.getOrCreateRoomWithID(rid);
 
                 room.on().then(function () {
 
@@ -364,7 +365,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                         if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
 
                             if(invitedBy) {
-                                room.invitedBy = Cache.getOrCreateUserWithID(invitedBy);
+                                room.invitedBy = UserCache.getOrCreateUserWithID(invitedBy);
                             }
 
                             if(Cache.isBlockedUser(invitedBy)) {
@@ -389,8 +390,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
                         }
 
                         // Insert the room
-                        if(Rooms.exists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
-                            Rooms.addRoom(room);
+                        if(Cache.roomExists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
+                            Cache.addRoom(room);
                             RoomPositionManager.setDirty();
 
                             // We need to update:
@@ -409,7 +410,9 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'Rooms', '
         },
 
         impl_roomRemoved: function (rid) {
-            var room = Rooms.getRoomWithID(rid);
+
+            var room = RoomCache.getRoomWithID(rid);
+
             RoomPositionManager.removeRoom(room);
             RoomPositionManager.autoPosition(300);
             RoomPositionManager.updateAllRoomActiveStatus();

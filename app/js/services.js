@@ -509,110 +509,6 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
 
 }]);
 
-myApp.factory('Rooms', ['$window', 'Cache', 'LocalStorage', function ($window, Cache, LocalStorage) {
-
-    var Rooms = {
-
-        rooms: [],
-
-        init: function () {
-
-            var beforeUnloadHandler = (function (e) {
-
-                // Save the rooms to cookies
-//                var rooms = this.rooms;
-//                for(var i in rooms) {
-//                    LocalStorage.setRoom(rooms[i]);
-//                }
-
-                LocalStorage.storeRooms(this.rooms);
-
-
-            }).bind(this);
-
-            if ($window.addEventListener) {
-                $window.addEventListener('beforeunload', beforeUnloadHandler);
-            } else {
-                $window.onbeforeunload = beforeUnloadHandler;
-            }
-
-            return this;
-        },
-
-        addRoom: function (room) {
-
-            Cache.addRoom(room);
-
-            if(!CCArray.contains(this.rooms, room)) {
-                this.rooms.push(room);
-            }
-        },
-
-        getRoomWithID: function (rid) {
-
-            var room = Cache.getRoomWithID(rid);
-            if(!room) {
-                room = CCArray.getItem(this.rooms, rid, function (room) {
-                    return room.meta.rid;
-                });
-            }
-            return room;
-        },
-
-        exists: function (room) {
-            return CCArray.contains(this.rooms, room);
-        },
-
-        removeRoom: function (room) {
-            CCArray.remove(this.rooms, room);
-        },
-
-        activeRooms: function () {
-            var ar = [];
-            for(var i =0; i < this.rooms.length; i++) {
-                if(this.rooms[i].active) {
-                    ar.push(this.rooms[i]);
-                }
-            }
-            return ar;
-        },
-
-        inactiveRooms: function () {
-            var ar = [];
-            for(var i =0; i < this.rooms.length; i++) {
-                if(!this.rooms[i].active) {
-                    ar.push(this.rooms[i]);
-                }
-            }
-            return ar;
-        },
-
-        getRoomWithOtherUser: function (user) {
-            var room;
-            var rooms = this.rooms;
-
-            for(var i = 0; i < rooms.length; i++) {
-                room = rooms[i];
-
-                // Only look at rooms that are private chats
-                // between only two people
-                if(room.userCount == 2 && !room.meta.isPublic) {
-                    if(room.users[user.meta.uid]) {
-                        return room;
-                    }
-                }
-            }
-            return null;
-        },
-
-        clear: function () {
-            this.rooms = [];
-        }
-    };
-
-    return Rooms.init();
-}]);
-
 /**
  * The presence service handles the user's online / offline
  * status
@@ -919,7 +815,8 @@ myApp.factory('Utilities', ['$q', function ($q) {
  * This service keeps track of the slot positions
  * while the rooms are moving around
  */
-myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Rooms', 'Screen', function ($rootScope, $timeout, $document, $window, LocalStorage, Rooms, Screen) {
+myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen',
+    function ($rootScope, $timeout, $document, $window, LocalStorage, Cache, Screen) {
 
     var rpm = {
 
@@ -994,7 +891,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             }
 
             // Add the room
-            Rooms.addRoom(room);
+            Cache.addRoom(room);
 
             room.slot = slot;
 
@@ -1023,7 +920,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
         removeRoom: function (room) {
 
-            Rooms.removeRoom(room);
+            Cache.removeRoom(room);
 
             // Update the slot positions
             this.autoSetSlots();
@@ -1043,9 +940,9 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             this.autoSetSlots();
 
             // Are there any inactive rooms?
-            // We do this becuase we can't animate rooms that
+            // We do this because we can't animate rooms that
             // are inactive
-            if(Rooms.inactiveRooms().length) {
+            if(Cache.inactiveRooms().length) {
                 duration = 0;
             }
 
@@ -1148,7 +1045,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
         },
 
         updateRoomsList: function () {
-            this.rooms = Rooms.rooms;
+            this.rooms = Cache.rooms;
 
             // Sort the rooms by slot
             this.rooms.sort(function (a, b) {
@@ -1239,8 +1136,8 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'Cache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, Cache, Room, Utilities, Presence, API, StateManager) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomCache', 'UserCache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomCache, UserCache, Room, Utilities, Presence, API, StateManager) {
 
     var Auth = {
 
@@ -1430,7 +1327,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            $rootScope.user = Cache.getOrCreateUserWithID(uid);
+            $rootScope.user = UserCache.getOrCreateUserWithID(uid);
             //$rootScope.user = User.buildUserWithID(uid);
             //$rootScope.user.on();
 
@@ -1551,7 +1448,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                         // Is this room included in the list of rooms we made?
                         if(!staticRooms[rid]) {
                             // Get the room
-                            var room = Room.getOrCreateRoomWithID(rid);
+                            var room = RoomCache.getOrCreateRoomWithID(rid);
 
                             // Get the online
 

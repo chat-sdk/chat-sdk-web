@@ -4,34 +4,34 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache','User', 'Presence', 'LocalStorage', 'Rooms', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, User, Presence, LocalStorage, Rooms, RoomPositionManager, SoundEffects, Visibility, Log) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'LocalStorage', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, LocalStorage, RoomPositionManager, SoundEffects, Visibility, Log) {
         return {
 
-            getOrCreateRoomWithID: function (rid) {
-
-                var room = Rooms.getRoomWithID(rid);
-
-                if(!room) {
-                    room = this.buildRoomWithID(rid);
-                    Cache.addRoom(room);
-                }
-                room.height = bChatRoomHeight;
-                room.width = bChatRoomWidth;
-
-                return room;
-            },
-
-            buildRoomWithID: function (rid) {
-
-                var room = this.newRoom();
-                room.meta.rid = rid;
-
-                // Update the room from the saved state
-                LocalStorage.updateRoomFromCookies(room);
-
-                return room;
-            },
+//            getOrCreateRoomWithID: function (rid) {
+//
+//                var room = Rooms.getRoomWithID(rid);
+//
+//                if(!room) {
+//                    room = this.buildRoomWithID(rid);
+//                    Cache.addRoom(room);
+//                }
+//                room.height = bChatRoomHeight;
+//                room.width = bChatRoomWidth;
+//
+//                return room;
+//            },
+//
+//            buildRoomWithID: function (rid) {
+//
+//                var room = this.newRoom();
+//                room.meta.rid = rid;
+//
+//                // Update the room from the saved state
+//                LocalStorage.updateRoomFromCookies(room);
+//
+//                return room;
+//            },
 
             newRoom: function (name, invitesEnabled, description, userCreated, isPublic, weight) {
 
@@ -173,7 +173,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     // Check to see if there's already a room between us and the
                     // other user
                     if(users && users.length == 1) {
-                        var r = Rooms.getRoomWithOtherUser(users[0]);
+                        var r = Cache.getRoomWithOtherUser(users[0]);
                         var user = users[0];
                         if(r && user) {
 
@@ -369,7 +369,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                     }
                     if(data) {
-                        return Cache.getOrCreateUserWithID(data.uid);
+                        return UserCache.getOrCreateUserWithID(data.uid);
                     }
                     return null;
                 };
@@ -835,7 +835,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                             var uid = snapshot.val().uid;
 
-                            var user = Cache.getOrCreateUserWithID(uid);
+                            var user = UserCache.getOrCreateUserWithID(uid);
 
                             room.users[user.meta.uid] = user;
 
