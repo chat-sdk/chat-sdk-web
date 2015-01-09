@@ -56,29 +56,10 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
 
         init: function () {
 
-            // This will happen lazily when a new user is requested
-
-//            //Populate the cache from the local storage
-//            var serializedUsers = LocalStorage.users;
-//            var su = null;
-//            var user = null;
-//
-//            for(var uid in serializedUsers) {
-//                if(serializedUsers.hasOwnProperty(uid)) {
-//                    user = this.buildUserWithID(uid);
-//                    this.addUser(user);
-//                }
-//            }
-
             BeforeUnload.addListener(this);
 
             return this;
         },
-
-        // This doesn't work because the
-        // $localStorage function also uses beforeunload
-        // adding it here adds it after local storage has
-        // already stored the data!
 
         beforeUnload: function () {
             this.sync();
@@ -108,17 +89,7 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
         },
 
         getUserWithID: function (uid) {
-            var user = this.users[uid];
-//            if(!user) {
-//                user = this.onlineUsers[uid];
-//            }
-//            if(!user) {
-//                user = this.friends[uid];
-//            }
-//            if(!user) {
-//                user = this.blockedUsers[uid];
-//            }
-            return user;
+            return this.users[uid];
         },
 
         // A cache of all users
@@ -149,13 +120,26 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
     return UserCache.init();
 }]);
 
-myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', function ($rootScope, $timeout, $window, LocalStorage, Room) {
+myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload',
+    function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload) {
     var RoomCache = {
 
         rooms: {},
 
         init: function () {
+
+            BeforeUnload.addListener(this);
+
             return this;
+        },
+
+        beforeUnload: function () {
+            this.sync();
+        },
+
+        sync: function () {
+            LocalStorage.storeRooms(this.rooms);
+            LocalStorage.sync();
         },
 
         getOrCreateRoomWithID: function (rid) {
@@ -166,16 +150,16 @@ myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
                 room = this.buildRoomWithID(rid);
                 this.addRoom(room);
             }
-            room.height = bChatRoomHeight;
-            room.width = bChatRoomWidth;
 
             return room;
         },
 
         buildRoomWithID: function (rid) {
 
-            var room = Room.newRoom();
-            room.meta.rid = rid;
+            var room = Room.newRoom(rid);
+
+//            room.height = bChatRoomHeight;
+//            room.width = bChatRoomWidth;
 
             // Update the room from the saved state
             LocalStorage.updateRoomFromStore(room);
@@ -221,26 +205,6 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
         blockedUsers: {},
 
         init: function () {
-
-            var beforeUnloadHandler = (function (e) {
-
-                // Save the rooms to cookies
-//                var rooms = this.rooms;
-//                for(var i in rooms) {
-//                    LocalStorage.setRoom(rooms[i]);
-//                }
-
-                LocalStorage.storeRooms(this.rooms);
-
-            }).bind(this);
-
-            if ($window.addEventListener) {
-                $window.addEventListener('beforeunload', beforeUnloadHandler);
-            } else {
-                $window.onbeforeunload = beforeUnloadHandler;
-            }
-
-
             return this;
         },
 

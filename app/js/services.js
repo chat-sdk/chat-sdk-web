@@ -1418,9 +1418,15 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     roomDef.weight = 100;
                 }
 
-                var room = Room.newRoom(roomDef.name, true, roomDef.description, false, true, roomDef.weight);
-                room.setRID(roomDef.rid);
-                room.create();
+                Room.createRoomWithRID(
+                    roomDef.rid,
+                    roomDef.name,
+                    roomDef.description,
+                    true,
+                    true,
+                    false,
+                    roomDef.weight
+                );
 
             }).bind(this);
 

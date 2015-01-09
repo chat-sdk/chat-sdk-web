@@ -282,15 +282,10 @@ myApp.controller('AppController', [
             $scope.getUser().unblockUser(user);
         }
         else if (user.online) {
-            var room = Room.newRoom(null, true, null, true);
-
-            room.create([user]).then(function () {
-                if (DEBUG) console.log("Room Created: " + room.meta.name);
-            });
-
+            Room.createPrivateRoom([user]);
         }
-        else if(user.blockingMe) {
-        }
+        //else if(user.blockingMe) {
+        //}
     };
 
 
@@ -1308,20 +1303,18 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
         // Is this a public room?
         if($scope.public) {
 
-            var room = Room.newRoom($scope.room.name, true, $scope.room.description, true, true);
-            room.create();
-
+            Room.createPublicRoom(
+                $scope.room.name,
+                $scope.room.description
+            );
         }
         else {
-            var room = Room.newRoom(
+            Room.createPublicRoom(
                 $scope.room.name,
-                $scope.room.invitesEnabled,
                 $scope.room.description,
-                true
+                $scope.room.invitesEnabled,
+                false
             );
-            room.create();
-
-
         }
         $scope.back();
     };

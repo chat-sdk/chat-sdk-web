@@ -4,44 +4,156 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'LocalStorage', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, LocalStorage, RoomPositionManager, SoundEffects, Visibility, Log, Time) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity) {
         return {
 
-            newRoom: function (name, invitesEnabled, description, userCreated, isPublic, weight) {
+            createRoom: function (name, description, invitesEnabled, isPublic, weight) {
+                return this.createRoomWithRID(null, name, description, invitesEnabled, isPublic, true, weight);
+            },
 
-                var room = {
+            createRoomWithRID: function (rid, name, description, invitesEnabled, isPublic, userCreated, weight) {
 
-                    meta: {
-                        name: name,
-                        invitesEnabled: invitesEnabled,
-                        description: description,
-                        userCreated: !unORNull(userCreated) ? userCreated : true,
-                        isPublic: !unORNull(isPublic) ? isPublic : false,
-                        created: Firebase.ServerValue.TIMESTAMP
-                    },
-                    users: {},
-                    usersMeta: {},
-                    userCount: 0,
-                    messages: [],
-                    typing: {},
-                    typingMessage: null,
-                    badge: 0,
+                var deferred = $q.defer();
 
-                    // Layout
-                    offset: 0, // The x offset
-                    dragDirection: 0, // drag direction +ve / -ve
+                if(!rid) {
+                    rid = Paths.roomsRef().push().key();
+                }
+                var roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, isPublic, weight);
 
-                    width: bChatRoomWidth,
-                    height: bChatRoomHeight,
-                    zIndex: null,
-                    active: true, // in side list or not
-                    minimized: false,
-                    loadingMoreMessages: false,
-                    loadingTimer: null,
-                    muted: false
+                var roomMetaRef = Paths.roomMetaRef(rid);
 
-                };
+                // Add the room to Firebase
+                roomMetaRef.set(roomMeta, (function (error) {
+
+                    if(error) {
+                        deferred.reject(error);
+                    }
+                    else {
+
+                        this.addUserToRoom(rid, $rootScope.user, bUserStatusOwner);
+
+                        if(isPublic) {
+                            var ref = Paths.publicRoomRef(rid);
+
+                            ref.set({
+                                rid: rid,
+                                created: Firebase.ServerValue.TIMESTAMP,
+                                userCreated: true
+                            }, (function (error) {
+                                if(!error) {
+                                    deferred.resolve(rid);
+                                }
+                                else {
+                                    deferred.reject(error);
+                                }
+                            }).bind(this));
+                        }
+                        else {
+                            deferred.resolve(rid);
+                        }
+                    }
+
+                }).bind(this));
+
+                return deferred.promise;
+            },
+
+            createPublicRoom: function (name, description, weight) {
+                return this.createRoom(name, description, true, true, weight);
+            },
+
+            createPrivateRoom: function (users) {
+
+                var deferred = $q.defer();
+
+                // Check to see if there's already a room between us and the
+                // other user
+                if(users && users.length == 1) {
+                    var r = Cache.getRoomWithOtherUser(users[0]);
+                    var user = users[0];
+                    if(r && user) {
+
+                        return $q.all([
+                            r.addUser(user, bUserStatusInvited),
+                            user.addRoom(r)
+                        ]);
+                    }
+                }
+
+                this.createRoom(null, null, true, false).then((function (rid) {
+                    for (var i = 0; i < users.length; i++) {
+                        this.addUserToRoom(rid, users[i], bUserStatusInvited);
+                    }
+                    deferred.resolve();
+                }).bind(this), deferred.reject());
+
+                return deferred.promise;
+            },
+
+            addUserToRoom: function (rid, user, status) {
+
+                var deferred = $q.defer();
+
+                var ref = Paths.roomUsersRef(rid);
+                ref.child(user.meta.uid).update({
+                    status: status,
+                    uid: user.meta.uid,
+                    time: Firebase.ServerValue.TIMESTAMP
+                }, function (error) {
+                    if(!error) {
+                        user.addRoomWithRID(rid);
+                        deferred.resolve();
+                    }
+                    else {
+                        deferred.reject(error);
+                    }
+                });
+
+                return deferred.promise;
+            },
+
+            roomMeta: function (rid, name, description, userCreated, invitesEnabled, isPublic, weight) {
+                return {
+                    rid: rid ? rid : null,
+                    name: name ? name : null,
+                    invitesEnabled: invitesEnabled ? invitesEnabled : true,
+                    description: description ? description : null,
+                    userCreated: !unORNull(userCreated) ? userCreated : true,
+                    isPublic: !unORNull(isPublic) ? isPublic : false,
+                    created: Firebase.ServerValue.TIMESTAMP,
+                    weight: weight ? weight : 0
+                }
+            },
+
+            newRoom: function (rid, name, invitesEnabled, description, userCreated, isPublic, weight) {
+
+                var room = Entity.newEntity(bRoomsPath, rid);
+
+                room.meta = this.roomMeta(rid, name, description, userCreated, invitesEnabled, isPublic);
+                room.meta.rid = rid;
+
+                room.users = {};
+                room.usersMeta = {};
+                room.userCount = 0;
+
+                room.messages = [];
+                room.typing = {};
+                room.typingMessage = null;
+                room.badge = 0;
+
+                // Layout
+                room.offset = 0; // The x offset
+                room.dragDirection = 0; // drag direction +ve / -ve
+
+                room.width = bChatRoomWidth;
+                room.height = bChatRoomHeight;
+                room.zIndex = null;
+                room.active = true; // in side list or not
+                room.minimized = false;
+                room.loadingMoreMessages = false;
+                room.loadingTimer = null;
+                room.muted = false;
 
                 /***********************************
                  * GETTERS AND SETTERS
@@ -141,87 +253,87 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * LIFECYCLE
                  */
 
-                room.create = function (users) {
-
-                    var deferred = $q.defer();
-
-                    // Check to see if there's already a room between us and the
-                    // other user
-                    if(users && users.length == 1) {
-                        var r = Cache.getRoomWithOtherUser(users[0]);
-                        var user = users[0];
-                        if(r && user) {
-
-                            return $q.all([
-                                r.addUser(user, bUserStatusInvited),
-                                user.addRoom(r)
-                            ]);
-                        }
-                    }
-
-                    var ref = Paths.roomsRef();
-
-                    // Create a new child ref
-                    var roomRef = null;
-                    if(room.meta.rid) {
-                        roomRef = ref.child(room.meta.rid);
-                    }
-                    else {
-                        roomRef = ref.push();
-                        room.meta.rid = roomRef.key();
-                    }
-
-                    var roomMetaRef = Paths.roomMetaRef(roomRef.key());
-
-                    // Does the room already exist?
-                    roomMetaRef.once('value', function (snapshot) {
-
-                        if(snapshot && snapshot.val()) {
-                            // If this is a public room then add it to the list of
-                            // public rooms
-                            if(room.meta.isPublic) {
-                                return room.addToPublicRooms();
-                            }
-                        }
-                        else {
-
-                            // Add the room to Firebase
-                            roomMetaRef.set(room.meta, (function (error) {
-
-                                if(error) {
-                                    deferred.reject(error);
-                                }
-                                else {
-
-                                    // Add the users
-                                    this.join(bUserStatusOwner);
-
-                                    for (var i in users) {
-                                        if(users.hasOwnProperty(i)) {
-                                            room.addUser(users[i], bUserStatusInvited);
-                                            users[i].addRoom(room);
-                                        }
-                                    }
-
-                                    // If this is a public room then add it to the list of
-                                    // public rooms
-                                    if(room.meta.isPublic) {
-                                        room.addToPublicRooms();
-                                    }
-
-                                    // Update the state
-                                    room.updateState(bMetaKey);
-
-                                    deferred.resolve();
-                                }
-
-                            }).bind(room));
-                        }
-                    });
-
-                    return deferred.promise;
-
-                };
+//                room.create = function (users) {
+//
+//                    var deferred = $q.defer();
+//
+//                    // Check to see if there's already a room between us and the
+//                    // other user
+//                    if(users && users.length == 1) {
+//                        var r = Cache.getRoomWithOtherUser(users[0]);
+//                        var user = users[0];
+//                        if(r && user) {
+//
+//                            return $q.all([
+//                                r.addUser(user, bUserStatusInvited),
+//                                user.addRoom(r)
+//                            ]);
+//                        }
+//                    }
+//
+//                    var ref = Paths.roomsRef();
+//
+//                    // Create a new child ref
+//                    var roomRef = null;
+//                    if(room.meta.rid) {
+//                        roomRef = ref.child(room.meta.rid);
+//                    }
+//                    else {
+//                        roomRef = ref.push();
+//                        room.meta.rid = roomRef.key();
+//                    }
+//
+//                    var roomMetaRef = Paths.roomMetaRef(roomRef.key());
+//
+//                    // Does the room already exist?
+//                    roomMetaRef.once('value', function (snapshot) {
+//
+//                        if(snapshot && snapshot.val()) {
+//                            // If this is a public room then add it to the list of
+//                            // public rooms
+//                            if(room.meta.isPublic) {
+//                                return room.addToPublicRooms();
+//                            }
+//                        }
+//                        else {
+//
+//                            // Add the room to Firebase
+//                            roomMetaRef.set(room.meta, (function (error) {
+//
+//                                if(error) {
+//                                    deferred.reject(error);
+//                                }
+//                                else {
+//
+//                                    // Add the users
+//                                    this.join(bUserStatusOwner);
+//
+//                                    for (var i in users) {
+//                                        if(users.hasOwnProperty(i)) {
+//                                            room.addUser(users[i], bUserStatusInvited);
+//                                            users[i].addRoom(room);
+//                                        }
+//                                    }
+//
+//                                    // If this is a public room then add it to the list of
+//                                    // public rooms
+//                                    if(room.meta.isPublic) {
+//                                        room.addToPublicRooms();
+//                                    }
+//
+//                                    // Update the state
+//                                    room.updateState(bMetaKey);
+//
+//                                    deferred.resolve();
+//                                }
+//
+//                            }).bind(room));
+//                        }
+//                    });
+//
+//                    return deferred.promise;
+//
+//                };
 
                 room.remove = function () {
                     // TODO: Don't listen to hundres of rooms
@@ -384,10 +496,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 };
 
                 room.containsUser = function (user) {
-                    if(room.users[user.meta.uid]) {
-                        return true;
-                    }
-                    return false;
+                    return room.users[user.meta.uid] != null;
                 };
 
                 room.addUser = function (user, status) {
@@ -396,7 +505,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     // Are we able to invite the user?
                     // If the user is us or if the room is public then we can
-                    if(user == $rootScope.user) {//} || Cache.getPublicRoomWithID(room.meta.rid)) {
+                    if(user == $rootScope.user) {
 
                     }
                     else if(!room.canInviteUser() && status != bUserStatusOwner) {
@@ -498,7 +607,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         return time * 1000;
                     }
 
-                },
+                };
 
                 /**
                  * Checks the rooms meta data to see if it
@@ -553,10 +662,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 /***********************************
                  * LAYOUT
                  */
-
-//                room.slot = function () {
-//                    return Layout.nearestSlotToOffset(room.offset);
-//                };
 
                 // If the room is animating then
                 // return the destination
@@ -784,7 +889,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 room.serialize = function () {
                     var m = [];
-                    for(var i = 0; i < room.messages; i++) {
+                    for(var i = 0; i < room.messages.length; i++) {
                         m.push(room.messages[i].serialize());
                     }
                     var sr = {
@@ -796,8 +901,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         meta: room.meta,
                         usersMeta: room.usersMeta
                     };
-
-                    if(DEBUG) console.log("Serialize: Offet: " + room.offset);
 
                     return sr;
                 };
@@ -812,7 +915,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     //room.offset = sr.offset;
 
                     for(var i = 0; i < sr.messages.length; i++) {
-                        var message = Message.buildRoomWithID(room.meta.rid);
+                        var message = Message.newMessage();
                         message.deserialize(sr.messages[i]);
                         room.messages.push(message);
                     }

@@ -240,13 +240,17 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 }
             };
 
-            user.addRoom = function (room) {
-                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
+            user.addRoomWithRID = function (rid) {
+                var ref = Paths.userRoomsRef(user.meta.uid).child(rid);
                 ref.update({
-                    rid: room.meta.rid,
+                    rid: rid,
                     invitedBy: $rootScope.user.meta.uid
                 });
                 user.updateState(bRoomsPath);
+            };
+
+            user.addRoom = function (room) {
+                this.addRoomWithRID(room.meta.rid);
             };
 
             user.removeRoom = function (room) {
