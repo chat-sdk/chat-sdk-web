@@ -18,12 +18,14 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
+                    console.log("UID: " + uid);
+
                     var user = UserCache.getOrCreateUserWithID(uid);
 
-                    Cache.addOnlineUser(user);
-
-                    // Update the user's rooms
-                    $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
+                    if(Cache.addOnlineUser(user)) {
+                        // Update the user's rooms
+                        $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
+                    }
                 }
 
             }).bind(this));
@@ -33,7 +35,6 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
                 var user = UserCache.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
-                user.thumbnailOff();
 
                 if (user) {
                     Cache.removeOnlineUser(user);

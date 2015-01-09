@@ -4,34 +4,9 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'LocalStorage', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, LocalStorage, RoomPositionManager, SoundEffects, Visibility, Log) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'LocalStorage', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, LocalStorage, RoomPositionManager, SoundEffects, Visibility, Log, Time) {
         return {
-
-//            getOrCreateRoomWithID: function (rid) {
-//
-//                var room = Rooms.getRoomWithID(rid);
-//
-//                if(!room) {
-//                    room = this.buildRoomWithID(rid);
-//                    Cache.addRoom(room);
-//                }
-//                room.height = bChatRoomHeight;
-//                room.width = bChatRoomWidth;
-//
-//                return room;
-//            },
-//
-//            buildRoomWithID: function (rid) {
-//
-//                var room = this.newRoom();
-//                room.meta.rid = rid;
-//
-//                // Update the room from the saved state
-//                LocalStorage.updateRoomFromCookies(room);
-//
-//                return room;
-//            },
 
             newRoom: function (name, invitesEnabled, description, userCreated, isPublic, weight) {
 
@@ -289,13 +264,24 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 room.leave = function () {
                     if(room) {
-                        // Remove the user from the room
-                        //room.removeUser($rootScope.user);
-                        room.setStatusForUser($rootScope.user, bUserStatusClosed);
+                        // If this is a private room we want to set the status to closed
+                        // this means that if we re-click the user, we wouldn't make a new
+                        // room
+                        if(!room.meta.isPublic) {
+                            room.setStatusForUser($rootScope.user, bUserStatusClosed);
+                        }
+                        else {
+                            room.removeUser($rootScope.user);
+                        }
 
                         // Remove the room from the user's list
                         $rootScope.user.removeRoom(room);
                     }
+                };
+
+                room.removeUser = function (user) {
+                    var ref = Paths.roomUsersRef(room.meta.rid);
+                    ref.child(user.meta.uid).remove();
                 };
 
                 room.canInviteUser = function () {
@@ -327,17 +313,26 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * USERS
                  */
 
+                room.getUserInfoWithUID = function (uid) {
+                    // This could be called from the UI so it's important
+                    // to wait until users has been populated
+                    if(room.usersMeta) {
+                        return room.usersMeta[uid];
+                    }
+                    return null;
+                };
+
                 room.getUserInfo = function (user) {
                     // This could be called from the UI so it's important
                     // to wait until users has been populated
-                    if(room.usersMeta && user && user.meta) {
-                        return room.usersMeta[user.meta.uid];
+                    if(user && user.meta) {
+                        return this.getUserInfoWithUID(user.meta.uid);
                     }
                     return null;
                 };
 
                 room.getUserStatus = function (user) {
-                    var info = room.getUserInfo(user);
+                    var info = room.getUserInfoWithUID(user);
                     return info ? info.status : null;
                 };
 
@@ -347,13 +342,27 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         if(room.users.hasOwnProperty(key)) {
                             var user = room.users[key];
                             if(user.meta && $rootScope.user && $rootScope.user.meta) {
-                                if(user.meta.uid != $rootScope.user.meta.uid && room.getUserStatus(user) != bUserStatusClosed) {
+                                if(user.meta.uid != $rootScope.user.meta.uid && room.userIsActiveWithUID(user.meta.uid)) {
                                     users[user.meta.uid] = user;
                                 }
                             }
                         }
                     }
                     return users;
+                };
+
+                room.userIsActiveWithInfo = function (info) {
+                    if(info && info.status && info.time) {
+                        if(info.status != bUserStatusClosed) {
+                            return Time.secondsSince(info.time) < 60 * 60 * 24;
+                        }
+                    }
+                    return false;
+                };
+
+                room.userIsActiveWithUID = function (uid) {
+                    var info = room.getUserInfo(uid);
+                    return room.userIsActiveWithInfo(info);
                 };
 
                 room.getOwner = function () {
@@ -414,7 +423,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     var ref = Paths.roomUsersRef(room.meta.rid);
                     ref.child(user.meta.uid).update({
                         status: status,
-                        uid: user.meta.uid
+                        uid: user.meta.uid,
+                        time: Firebase.ServerValue.TIMESTAMP
                     }, function (error) {
                         if(!error) {
                             deferred.resolve();
@@ -424,6 +434,25 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                     });
 
+                    return deferred.promise;
+                };
+
+                // Update the timestamp on the user status
+                room.updateUserStatusTime = function (user) {
+
+                    var deferred = $q.defer();
+
+                    var ref = Paths.roomUsersRef(room.meta.rid);
+                    ref.child(user.meta.uid).update({
+                        time: Firebase.ServerValue.TIMESTAMP
+                    }, function (error) {
+                        if(!error) {
+                            deferred.resolve();
+                        }
+                        else {
+                            deferred.reject(error);
+                        }
+                    });
                     return deferred.promise;
                 };
 
@@ -438,7 +467,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         if(room.users.hasOwnProperty(key)) {
                             user = room.usersMeta[key];
                             if($rootScope.user && $rootScope.user.meta) {
-                                if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && user.status != bUserStatusClosed) {
+                                if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && room.userIsActiveWithUID(user.uid)) {
                                     i++;
                                 }
                             }
@@ -455,7 +484,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 room.timeSinceLastMessage = function () {
 
                     if(unORNull(room.meta.lastUpdated)) {
-
                         return 60 * 60 * 24 * 10;
                     }
                     else {
@@ -597,6 +625,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         lastUpdated: Firebase.ServerValue.TIMESTAMP,
                         lastMessage: lastMessageMeta
                     });
+
+                    // The user's been active so update their status
+                    // with the current time
+                    room.updateUserStatusTime(user);
 
                     room.updateState(bMessagesPath);
 
@@ -822,7 +854,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         // Update the room's meta data
                         room.update();
 
-
                         deferred.resolve();
 
                     }).bind(this));
@@ -835,13 +866,15 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                             var uid = snapshot.val().uid;
 
-                            var user = UserCache.getOrCreateUserWithID(uid);
 
-                            room.users[user.meta.uid] = user;
+                            if(room.userIsActiveWithInfo(snapshot.val())) {
+                                var user = UserCache.getOrCreateUserWithID(uid);
 
-                            // Update the room's meta data
-                            room.update();
+                                room.users[user.meta.uid] = user;
 
+                                // Update the room's meta data
+                                room.update();
+                            }
                         }
                     });
 

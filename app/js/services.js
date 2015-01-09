@@ -43,14 +43,15 @@ myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
     };
 }]);
 
-myApp.factory('Entity', ['$q', function ($q) {
+myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
     return {
         newEntity: function (path, id) {
 
             var entity = {
                 _path: path,
                 _id: id,
-                pathIsOn: {}
+                pathIsOn: {},
+                state: {}
             };
 
             /**
@@ -77,28 +78,55 @@ myApp.factory('Entity', ['$q', function ($q) {
                 // Start listening to the state
                 var stateRef = entity.stateRef(key);
 
+
+                stateRef.off('value');
+
+                // TODO: There seems to be a bug with Firebase
+                // when we call push this method is called twice
                 stateRef.on('value', (function (snapshot) {
+
+                    var time = snapshot.val();
+
+                    console.log('Entity ID: ' + entity._id + ' Key: ' + key);
+                    console.log('Time: ' + time + ' State time: ' + entity.state[key]);
+
+                    if(entity._id == "2222222222222222222222222222222222222222:2") {
+                        console.log("Test");
+                    }
 
                     // If the state isn't set either locally or remotely
                     // or if it is set but the timestamp is lower than the remove value
                     // add a listener to the value
-                    if((!snapshot.val() || !entity.state) || (snapshot.val() && snapshot.val() > entity.state[key])) {
+                    if((!time || !entity.state[key]) || (time && time > entity.state[key])) {
+
+                        console.log("LOAD");
+
+
+                        // Assume that the we will be able to get
+                        // the latest version of the data so prevent any
+                        // new requests
+                        var oldTime = entity.state[key];
+                        entity.state[key] = time;
 
                         // Get the ref
                         var ref = entity.pathRef(key);
 
                         // Make sure the listener isn't added twice
-                        ref.off('value');
+                        //ref.off('value');
 
                         // Add the value listener
-                        ref.on('value', (function (snapshot) {
+                        ref.once('value', (function (snapshot) {
                             if(snapshot.val()) {
-                                entity[key] = snapshot.val();
                                 if(callback) {
                                     callback(snapshot.val());
                                 }
-                                deferred.resolve();
                             }
+                            else {
+                                // If the call failed we need to do it again
+                                entity.state[key] = oldTime;
+                            }
+                            deferred.resolve();
+
                         }).bind(this));
                     }
                     else {
@@ -132,6 +160,22 @@ myApp.factory('Entity', ['$q', function ($q) {
             entity.updateState = function (key) {
                 var ref = entity.stateRef(key);
                 ref.set(Firebase.ServerValue.TIMESTAMP);
+            };
+
+            entity.serialize = function () {
+                return {
+                    _path: entity._path,
+                    _id: entity._id,
+                    state: entity.state
+                }
+            };
+
+            entity.deserialize = function (se) {
+                if(se) {
+                    entity._path = se._path;
+                    entity._id = se._id;
+                    entity.state = se.state ? se.state : {};
+                }
             };
 
             return entity;
@@ -461,9 +505,9 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
                 }).then((function (data) {
 
                     // Cache the token and the user's current ID
-                    LocalStorage.setProperty(data.token, LocalStorage.tokenKey);
-                    LocalStorage.setProperty(currentUID, LocalStorage.UIDKey);
-                    LocalStorage.setProperty(new Date().getTime(), LocalStorage.tokenExpiryKey);
+                    LocalStorage.setProperty(LocalStorage.tokenKey, data.token);
+                    LocalStorage.setProperty(LocalStorage.UIDKey, currentUID);
+                    LocalStorage.setProperty(LocalStorage.tokenExpiryKey, new Date().getTime());
 
                     // Update the config object with options that are set
                     // These will be overridden by options which are set on the
@@ -605,7 +649,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
 
         saveAPIDetails: function (details) {
             details.time = new Date().getTime();
-            LocalStorage.setProperty(JSON.stringify(details), LocalStorage.apiDetailsKey);
+            LocalStorage.setProperty(LocalStorage.apiDetailsKey, JSON.stringify(details));
         },
 
         loadAPIDetails: function (override) {
@@ -1149,8 +1193,8 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomCache', 'UserCache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomCache, UserCache, Room, Utilities, Presence, API, StateManager) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomCache', 'UserCache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomCache, UserCache, Room, Utilities, Presence, API, StateManager, Time) {
 
     var Auth = {
 
@@ -1171,11 +1215,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 var user = $rootScope.user;
 
-                var setUserProperty = function (property, value, force) {
+                var oldMeta = user.meta;
+
+                var setUserProperty = (function (property, value, force) {
                     if((!user.meta[property] || user.meta[property].length == 0 || force) && value && value.length > 0) {
                         user.meta[property] = value;
                     }
-                };
+                }).bind(this);
 
                 // Get the third party data
                 var userData = null;
@@ -1257,10 +1303,13 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if((!user.hasImage()) && imageURL) {
+                user.setImage(imageURL, true);
+                user.setThumbnail(imageURL, true);
 
-                    user.setImage(imageURL, true);
-                    user.setThumbnail(imageURL, true);
+//                if((!user.hasImage()) && imageURL) {
+//
+//                    user.setImage(imageURL, true);
+//                    user.setThumbnail(imageURL, true);
 
 //                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
 //
@@ -1271,11 +1320,11 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 //                        user.setImage();
 //                    });
 
-                }
-                else {
-                    user.setImage(bDefaultProfileImage, true);
-                    user.setThumbnail(bDefaultProfileImage, true);
-                }
+//                }
+//                else {
+//                    user.setImage(bDefaultProfileImage, true);
+//                    user.setThumbnail(bDefaultProfileImage, true);
+//                }
 
                 /** LOCATION **/
                 // Get the user's city and country from their IP
@@ -1285,12 +1334,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                         // The first time the user logs on
                         // try to guess which city and country they're from
-                        if(!user.meta.city) {
-                            user.meta.city = r.data.city;
-                        }
-                        if(!user.meta.country) {
-                            user.meta.country = r.data.countryCode;
-                        }
+                        setUserProperty('city', r.data.city);
+                        setUserProperty('country', r.data.countryCode);
 
                         // Digest to update the interface
                         $timeout(function() {
@@ -1301,7 +1346,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     }).bind(this), function (error) {
 
                     });
+                }
 
+                if(!angular.equals(user.meta, oldMeta)) {
+                    user.pushMeta();
                 }
 
                 /** GRAVATAR **/
@@ -1333,10 +1381,12 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
             // Create the user
             // TODO: if we do this we'll also be listening for meta updates...
-            var userPromise = $rootScope.user = UserCache.getOrCreateUserWithID(uid);
+            $rootScope.user = UserCache.getOrCreateUserWithID(uid, true);
+            var userPromise = $rootScope.user.on();
             var imagePromise = $rootScope.user.imageOn();
+            var timePromise = Time.start(uid);
 
-            $q.all([userPromise, imagePromise]).then(function () {
+            $q.all([userPromise, imagePromise, timePromise]).then(function () {
                 if (!$rootScope.user.meta.name) {
                     $rootScope.user.meta.name = "";
                 }

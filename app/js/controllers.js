@@ -149,7 +149,7 @@ myApp.controller('AppController', [
 
     $scope.setMainBoxMinimized = function (minimized) {
         $scope.mainBoxMinimized = minimized;
-        LocalStorage.setProperty(minimized, LocalStorage.mainMinimizedKey);
+        LocalStorage.setProperty(LocalStorage.mainMinimizedKey, minimized);
     };
 
 //    $scope.saveRoomSlotToUser = function (room) {
@@ -1137,7 +1137,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
         $scope.boxWasDragged = true;
     };
 
-    // TODO: Ned to refactor this!
+    // TODO: Need to refactor this!
     $scope.getUsers = function () {
 
         var users = $scope.room.getUsers();
@@ -1273,7 +1273,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 
     $scope.setMoreBoxMinimized = function (minimized) {
         $scope.hideRoomList = minimized;
-        LocalStorage.setProperty(minimized, LocalStorage.moreMinimizedKey);
+        LocalStorage.setProperty(LocalStorage.moreMinimizedKey, minimized);
     }
 
     $scope.deleteRoom = function(room) {

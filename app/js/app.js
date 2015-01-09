@@ -13,6 +13,7 @@ var myApp = angular.module('myApp', [
   'myApp.stateManager',
   'myApp.cache',
   'myApp.localStorage',
+  'myApp.time',
   'ngStorage'
 
 ]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {

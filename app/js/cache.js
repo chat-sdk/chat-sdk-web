@@ -56,40 +56,54 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
 
         init: function () {
 
-            // Populate the cache from the local storage
-            var serializedUsers = LocalStorage.users;
-            var su = null;
-            var user = null;
+            // This will happen lazily when a new user is requested
 
-            for(var uid in serializedUsers) {
-                if(serializedUsers.hasOwnProperty(uid)) {
-                    user = this.buildUserWithID(uid);
-                    this.addUser(user);
-                }
-            }
+//            //Populate the cache from the local storage
+//            var serializedUsers = LocalStorage.users;
+//            var su = null;
+//            var user = null;
+//
+//            for(var uid in serializedUsers) {
+//                if(serializedUsers.hasOwnProperty(uid)) {
+//                    user = this.buildUserWithID(uid);
+//                    this.addUser(user);
+//                }
+//            }
 
             BeforeUnload.addListener(this);
 
             return this;
         },
 
+        // This doesn't work because the
+        // $localStorage function also uses beforeunload
+        // adding it here adds it after local storage has
+        // already stored the data!
+
         beforeUnload: function () {
-            LocalStorage.storeUsers(this.users);
+            this.sync();
         },
 
-        getOrCreateUserWithID: function(uid) {
+        sync: function () {
+            LocalStorage.storeUsers(this.users);
+            LocalStorage.sync();
+        },
+
+        getOrCreateUserWithID: function(uid, cancelOn) {
             var user = this.getUserWithID(uid);
             if(!user) {
                 user = this.buildUserWithID(uid);
                 this.addUser(user);
             }
-            user.on();
+            if(!cancelOn)
+                user.on();
+
             return user;
         },
 
         buildUserWithID: function (uid) {
             var user = User.buildUserWithID(uid);
-            LocalStorage.updateUserFromCookies(user);
+            LocalStorage.updateUserFromStore(user);
             return user;
         },
 
@@ -164,7 +178,7 @@ myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
             room.meta.rid = rid;
 
             // Update the room from the saved state
-            LocalStorage.updateRoomFromCookies(room);
+            LocalStorage.updateRoomFromStore(room);
 
             return room;
         },
@@ -360,7 +374,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
                 user.online = true;
                 this.onlineUsers[user.meta.uid] = user;
                 this.digest();
+                return true;
             }
+            return false;
         },
 
         removeOnlineUser: function (user) {
