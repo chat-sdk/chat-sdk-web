@@ -259,11 +259,28 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 user.updateState(bRoomsPath);
             };
 
-            user.addFriend = function (friend) {
+            user.addFriendWithUID = function (uid) {
+                var deferred = $q.defer();
+
                 var ref = Paths.userFriendsRef(user.meta.uid);
-                ref = ref.push();
-                ref.set({uid: friend.meta.uid});
+                var data = {};
+                data[uid] = {uid: uid};
+                ref.update(data, (function (error) {
+                    if(error) {
+                        deferred.reject(error);
+                    }
+                    else {
+                        deferred.resolve();
+                    }
+                }).bind(this));
                 user.updateState(bFriendsPath);
+                return deferred.promise;
+            };
+
+            user.addFriend = function (friend) {
+                if(friend && friend.meta && friend.meta.uid) {
+                    user.addFriendWithUID(friend.meta.uid);
+                }
             };
 
             user.removeFriend = function (friend) {
@@ -274,13 +291,28 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 user.updateState(bFriendsPath);
             };
 
-            user.blockUser = function (block) {
-                var ref = Paths.userBlockedRef(user.meta.uid);
+            user.blockUserWithUID = function (uid) {
+                var deferred = $q.defer();
 
+                var ref = Paths.userBlockedRef(user.meta.uid);
                 var data = {};
-                data[block.meta.uid] = {uid: block.meta.uid};
-                ref.set(data);
+                data[uid] = {uid: uid};
+                ref.update(data, (function (error) {
+                    if(error) {
+                        deferred.reject(error);
+                    }
+                    else {
+                        deferred.resolve();
+                    }
+                }).bind(this));
                 user.updateState(bBlockedPath);
+                return deferred.promise;
+            };
+
+            user.blockUser = function (block) {
+                if(block && block.meta && block.meta.uid) {
+                    user.blockUserWithUID(block.meta.uid);
+                }
             };
 
             user.unblockUser = function (block) {

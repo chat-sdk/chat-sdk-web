@@ -4,7 +4,8 @@
 
 var myApp = angular.module('myApp.message', ['firebase']);
 
-myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Config', function ($rootScope, $q, $sce, UserCache, User, Config) {
+myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Config', 'Time',
+    function ($rootScope, $q, $sce, UserCache, User, Config, Time) {
     var message = {
 
         newMessage: function (rid, uid, text) {
@@ -26,22 +27,23 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
                 mid: mid
             };
 
-            if(Config.clockType == '24hour') {
-                message.timeString = moment(meta.time).format('HH:mm');
-            }
-            else {
-                message.timeString = moment(meta.time).format('h:mm a');
-            }
+            if(meta) {
+                // Our messages are on the right - other user's messages are
+                // on the left
+                message.side = message.meta.uid == $rootScope.user.meta.uid ? 'right' : 'left';
 
-            // Set the user
-            if(message.meta.uid) {
+                message.timeString = Time.formatTimestamp(meta.time, Config.clockType);
 
-                // We need to set the user here
-                if(message.meta.uid == $rootScope.user.meta.uid) {
-                    message.user = $rootScope.user;
-                }
-                else {
-                    message.user = UserCache.getOrCreateUserWithID(message.meta.uid);
+                // Set the user
+                if(message.meta.uid) {
+
+                    // We need to set the user here
+                    if(message.meta.uid == $rootScope.user.meta.uid) {
+                        message.user = $rootScope.user;
+                    }
+                    else {
+                        message.user = UserCache.getOrCreateUserWithID(message.meta.uid);
+                    }
                 }
             }
 
@@ -80,11 +82,15 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
             };
 
             message.serialize = function () {
-                return message.meta;
+                return {
+                    meta: message.meta,
+                    mid: message.mid
+                }
             };
 
             message.deserialize = function (sm) {
-                message.meta = sm;
+                message.mid = sm.mid;
+                message.meta = sm.meta;
             };
 
             message.shouldHideUser = function (nextMessage) {
@@ -110,10 +116,6 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
                 return !unORNull(message.meta.users) && !unORNull(message.meta.users[uid]) && !unORNull(message.meta.users[uid][bReadKey]);
 
             };
-
-            // Our messages are on the right - other user's messages are
-            // on the left
-            message.side = message.meta.uid == $rootScope.user.meta.uid ? 'right' : 'left';
 
             return message;
         }

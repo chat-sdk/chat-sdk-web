@@ -54,6 +54,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                     }
 
+                    Entity.updateState(bRoomsPath, rid, bMetaKey);
+
                 }).bind(this));
 
                 return deferred.promise;
@@ -103,6 +105,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }, function (error) {
                     if(!error) {
                         user.addRoomWithRID(rid);
+                        Entity.updateState(bRoomsPath, rid, bUsersMetaPath);
                         deferred.resolve();
                     }
                     else {
@@ -117,7 +120,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 return {
                     rid: rid ? rid : null,
                     name: name ? name : null,
-                    invitesEnabled: invitesEnabled ? invitesEnabled : true,
+                    invitesEnabled: !unORNull(invitesEnabled) ? invitesEnabled : true,
                     description: description ? description : null,
                     userCreated: !unORNull(userCreated) ? userCreated : true,
                     isPublic: !unORNull(isPublic) ? isPublic : false,
@@ -384,6 +387,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                         else {
                             room.removeUser($rootScope.user);
+                            room.updateState(bUsersMetaPath);
                         }
 
                         // Remove the room from the user's list
@@ -394,6 +398,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 room.removeUser = function (user) {
                     var ref = Paths.roomUsersRef(room.meta.rid);
                     ref.child(user.meta.uid).remove();
+                    room.updateState(bUsersMetaPath);
                 };
 
                 room.canInviteUser = function () {
@@ -444,7 +449,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 };
 
                 room.getUserStatus = function (user) {
-                    var info = room.getUserInfoWithUID(user);
+                    var info = room.getUserInfo(user);
                     return info ? info.status : null;
                 };
 
@@ -464,12 +469,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 };
 
                 room.userIsActiveWithInfo = function (info) {
+                    // TODO: For the time being assume that users that
+                    // don't have this information are active
                     if(info && info.status && info.time) {
                         if(info.status != bUserStatusClosed) {
                             return Time.secondsSince(info.time) < 60 * 60 * 24;
                         }
                     }
-                    return false;
+                    return true;
                 };
 
                 room.userIsActiveWithUID = function (uid) {
@@ -536,6 +543,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         time: Firebase.ServerValue.TIMESTAMP
                     }, function (error) {
                         if(!error) {
+                            room.updateState(bUsersMetaPath);
                             deferred.resolve();
                         }
                         else {
@@ -792,8 +800,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                             $rootScope.$broadcast(bLazyLoadedMessagesNotification, room, callback);
 
-
-
                         }).bind(this);
 
                         // Set a timeout for the query - if it's not finished
@@ -857,7 +863,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     for(var i in messages) {
                         if(messages.hasOwnProperty(i)) {
                             m = messages[i];
-                            transcript += moment(m.meta.time).format('HH:mm:ss') + " " + m.user.meta.name + ": " + m.meta.text + "\n";
+                            transcript += Time.formatTimestamp(m.meta.time) + " " + m.user.meta.name + ": " + m.meta.text + "\n";
                         }
                     }
 
@@ -887,12 +893,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * SERIALIZATION
                  */
 
+                var _superS = room.serialize;
                 room.serialize = function () {
                     var m = [];
                     for(var i = 0; i < room.messages.length; i++) {
                         m.push(room.messages[i].serialize());
                     }
                     var sr = {
+                        _super: _superS(),
                         minimized: room.minimized,
                         width: room.width,
                         height: room.height,
@@ -905,22 +913,23 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     return sr;
                 };
 
+                var _superD = room.deserialize;
                 room.deserialize = function (sr) {
+                    if(sr) {
+                        _superD(sr._super);
+                        room.minimized = sr.minimized;
+                        room.width = sr.width;
+                        room.height = sr.height;
+                        room.meta = sr.meta;
 
-                    room.minimized = sr.minimized;
-                    room.width = sr.width;
-                    room.height = sr.height;
-                    room.meta = sr.meta;
-                    room.usersMeta = sr.usersMeta;
-                    //room.offset = sr.offset;
+                        room.setUsersMeta(sr.usersMeta);
 
-                    for(var i = 0; i < sr.messages.length; i++) {
-                        var message = Message.newMessage();
-                        message.deserialize(sr.messages[i]);
-                        room.messages.push(message);
+                        //room.offset = sr.offset;
+
+                        for(var i = 0; i < sr.messages.length; i++) {
+                            room.addMessageMeta(sr.messages[i].mid, sr.messages[i].meta);
+                        }
                     }
-
-                    if(DEBUG) console.log("Deserialize: Offet: " + room.offset);
                 };
 
                 /***********************************
@@ -931,105 +940,229 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * Start listening to updates in the
                  * room meta data
                  */
+                room.metaOn = function () {
+                    return room.pathOn(bMetaKey, function (val) {
+                        if(val) {
+                            room.meta = val;
+                            room.update();
+                        }
+                    });
+                };
+
+                room.metaOff = function () {
+                    room.pathOff(bMetaKey);
+                };
+
+                room.setUsersMeta = function (val) {
+
+                    var updateUser = (function (uid, userMeta) {
+                        // If the user doesn't already exist add it
+                        if(!room.usersMeta[uid]) {
+                            // Add the user
+                            addUser(uid, userMeta);
+                        }
+                        else {
+                            // Has the value changed?
+                            if(userMeta.time != room.usersMeta[uid].time) {
+                                // If the status is closed
+                                if(userMeta.status == bUserStatusClosed) {
+                                    // Remove the user from the user list
+                                    removeUser(uid, userMeta);
+                                }
+                                else {
+                                    addUser(uid, userMeta);
+                                }
+                            }
+                        }
+
+                    }).bind(this);
+
+                    var addUser = (function (uid, userMeta) {
+                        if(room.userIsActiveWithInfo(userMeta)) {
+                            var user = UserCache.getOrCreateUserWithID(uid);
+                            room.users[user.meta.uid] = user;
+                        }
+                    }).bind(this);
+
+                    var removeUser = (function (uid, meta) {
+                        delete room.users[uid];
+                    }).bind(this);
+
+                    if(val) {
+                        // Loop over the users and see if they're changed
+                        for(var uid in val) {
+                            if(val.hasOwnProperty(uid)) {
+                                updateUser(uid, val[uid]);
+                            }
+                        }
+                        room.usersMeta = val;
+                        room.update();
+                    }
+                    else {
+                        for(var uid in room.usersMeta) {
+                            if(room.usersMeta.hasOwnProperty(uid)) {
+                                removeUser(uid, room.usersMeta[uid]);
+                            }
+                        }
+                        room.usersMeta = {};
+                        room.update();
+                    }
+                };
+
+                room.usersMetaOn = function () {
+                    return room.pathOn(bUsersMetaPath, (function (val) {
+                        room.setUsersMeta(val);
+                    }).bind(this));
+                };
+
+                room.usersMetaOff = function () {
+                    room.pathOff(bUsersMetaPath);
+                };
+
                 room.on = function () {
 
                     var deferred = $q.defer();
 
-                    if(room.isOn || !room.meta || !room.meta.rid) {
-                        deferred.resolve();
-                        return deferred.promise;
+                    if(!room.isOn && room.meta && room.meta.rid) {
+                        room.isOn = true;
+
+                        room.userOnlineStateChangedNotificationOff = $rootScope.$on(bUserOnlineStateChangedNotification, function (event, user) {
+                            Log.notification(bUserOnlineStateChangedNotification, 'Room');
+
+                            // If the user is a member of this room, update the room
+                            room.update();
+                        });
+
+                        // Handle typing
+                        var ref = Paths.roomTypingRef(room.meta.rid);
+
+                        ref.on('child_added', function (snapshot) {
+                            room.typing[snapshot.key()] = snapshot.val().name;
+
+                            room.updateTyping();
+
+                            // Send a notification to the chat room
+                            $rootScope.$broadcast(bChatUpdatedNotification, room);
+                        });
+
+                        ref.on('child_removed', function (snapshot) {
+                            delete room.typing[snapshot.key()];
+
+                            room.updateTyping();
+
+                            // Send a notification to the chat room
+                            $rootScope.$broadcast(bChatUpdatedNotification, room);
+                        });
+
+                        // Do we really need to use a promise here?
+                        // We do because we need to have the users meta
+                        // to know whether we're invited or a member
+                        // This should work anyway because the user status is pulled
+                        // dynamically
+                        room.metaOn();
+                        room.usersMetaOn();
                     }
-                    room.isOn = true;
 
-                    room.userOnlineStateChangedNotificationOff = $rootScope.$on(bUserOnlineStateChangedNotification, function (event, user) {
-                        Log.notification(bUserOnlineStateChangedNotification, 'Room');
-
-                        // If the user is a member of this room, update the room
-                        room.update();
-                    });
-
-                    // Get the room meta data
-                    var ref = Paths.roomMetaRef(room.meta.rid);
-
-                    ref.on('value', (function(snapshot) {
-                        room.meta = snapshot.val();
-
-                        // Update the room's meta data
-                        room.update();
-
-                        deferred.resolve();
-
-                    }).bind(this));
-
-                    // Listen to users being added to the thread
-                    ref = Paths.roomUsersRef(room.meta.rid);
-                    ref.on('child_added', function (snapshot) {
-                        // Get the user
-                        if(snapshot.val()) {
-
-                            var uid = snapshot.val().uid;
-
-
-                            if(room.userIsActiveWithInfo(snapshot.val())) {
-                                var user = UserCache.getOrCreateUserWithID(uid);
-
-                                room.users[user.meta.uid] = user;
-
-                                // Update the room's meta data
-                                room.update();
-                            }
-                        }
-                    });
-
-                    ref.on('child_removed', function (snapshot) {
-                        if(snapshot.val()) {
-
-                            var uid = snapshot.val().uid;
-
-                            delete room.users[uid];
-
-                            // Update the room's meta data
-                            room.update();
-
-                        }
-                    });
-
-                    ref.on('value', function (snapshot) {
-                        if(snapshot && snapshot.val()) {
-                            room.usersMeta = snapshot.val();
-
-                            // Update the room's meta data
-                            room.update();
-                        }
-                    });
-
-                    // Handle typing
-                    ref = Paths.roomTypingRef(room.meta.rid);
-
-                    ref.on('child_added', function (snapshot) {
-                        room.typing[snapshot.key()] = snapshot.val().name;
-
-                        room.updateTyping();
-
-                        // Send a notification to the chat room
-                        $rootScope.$broadcast(bChatUpdatedNotification, room);
-                    });
-
-                    ref.on('child_removed', function (snapshot) {
-                        delete room.typing[snapshot.key()];
-
-                        room.updateTyping();
-
-                        // Send a notification to the chat room
-                        $rootScope.$broadcast(bChatUpdatedNotification, room);
-                    });
-
+                    deferred.resolve();
                     return deferred.promise;
                 };
 
                 /**
                  * Start listening to messages being added
                  */
+
+                room.addMessageMeta = function (mid, val) {
+
+                    if(!val || !val.text || val.text.length === 0) {
+                        return;
+                    }
+
+                    if(room.lastMessage) {
+                        // Sometimes we get double messages
+                        // check that this message hasn't been added already
+                        if(room.lastMessage.mid == mid) {
+                            return;
+                        }
+                    }
+
+                    // Create the message object
+                    var message = Message.buildMessage(mid, val);
+
+                    // Change the page title
+                    $window.document.title = message.meta.text + "...";
+
+                    // Add the message to this room
+                    if(message) {
+
+                        // This logic handles whether the date and name should be
+                        // show
+
+                        // Get the previous message if it exists
+                        if(room.lastMessage) {
+
+                            var lastMessage = room.lastMessage;
+
+                            // We hide the name on the last message if it is sent by the
+                            // same message as this message i.e.
+                            // - User 1 (name hidden)
+                            // - User 1
+                            lastMessage.hideName = lastMessage.shouldHideUser(message);
+                            //lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
+
+                            // Last message date
+                            //var lastDate = new Date(lastMessage.meta.time);
+                            //var newDate = new Date(message.meta.time);
+
+                            // If messages have the same day, hour and minute
+                            // hide the time
+
+                            //lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+
+                            lastMessage.hideTime = lastMessage.shouldHideDate(message);
+
+                            // Add a pointer to the lastMessage
+                            message.lastMessage = lastMessage;
+
+                        }
+
+                        // We always hide the time for the latest message
+                        message.hideTime = true;
+
+                        room.messages.push(message);
+
+                        room.sortMessages();
+
+                        room.lastMessage = message;
+                        room.messagesDirty = true;
+                    }
+
+                    // If the room is inactive or minimized increase the badge
+                    if((!room.active || room.minimized) && !message.readBy()) {
+
+                        if(!room.unreadMessages) {
+                            room.unreadMessages  = [];
+                        }
+
+                        room.unreadMessages.push(message);
+
+                        // If this is the first badge then room.badge will
+                        // undefined - so set it to one
+                        if(!room.badge) {
+                            room.badge = 1;
+                        }
+                        else {
+                            room.badge = Math.min(room.badge + 1, 99);
+                        }
+                    }
+                    else {
+                        // Is the room active? If it is then mark the message
+                        // as seen
+                        message.markRead();
+                    }
+
+                    room.update();
+                };
+
                 room.messagesOn = function () {
 
                     // Make sure the room is valid
@@ -1044,116 +1177,34 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     // If we already have a message then only listen for new
                     // messages
                     if(room.lastMessage && room.lastMessage.meta.time) {
-                        ref = ref.startAt(room.lastMessage.meta.time);
+                        // Start 1 thousandth of a second after the last message
+                        // so we don't get a duplicate
+                        ref = ref.startAt(room.lastMessage.meta.time + 1);
                     }
                     else {
                         ref = ref.limitToLast(Config.maxHistoricMessages);
                     }
 
                     // Add listen to messages added to this thread
-                    ref.on('child_added', function (snapshot) {
-
-                        // Get the snapshot value
-                        var val = snapshot.val();
-
-                        if(!val || !val.text || val.text.length === 0) {
-                            return;
-                        }
-
-                        if(room.lastMessage) {
-                            // Sometimes we get double messages
-                            // check that this message hasn't been added already
-                            if(room.lastMessage.mid == snapshot.key()) {
-                                return;
-                            }
-                        }
-
-                        // Create the message object
-                        var message = Message.buildMessage(snapshot.key(), val);
+                    ref.on('child_added', (function (snapshot) {
+                        this.addMessageMeta(snapshot.key(), snapshot.val());
 
                         // Is the window visible?
                         // Play the sound
                         if(!room.muted) {
                             if(Visibility.getIsHidden()) {
-                                SoundEffects.messageReceived();
+                                // Only make a sound for messages that were recieved less than
+                                // 30 seconds ago
+                                if(DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val().time);
+                                if(DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
+                                if(Math.abs(Time.now() - snapshot.val().time)/1000 < 30) {
+                                    SoundEffects.messageReceived();
+                                }
                             }
                         }
 
-                        // Change the page title
-                        $window.document.title = message.meta.text + "...";
-
-                        // Add the message to this room
-                        if(message) {
-
-                            // This logic handles whether the date and name should be
-                            // show
-
-                            // Get the previous message if it exists
-                            if(room.lastMessage) {
-
-                                var lastMessage = room.lastMessage;
-
-                                // We hide the name on the last message if it is sent by the
-                                // same message as this message i.e.
-                                // - User 1 (name hidden)
-                                // - User 1
-                                lastMessage.hideName = lastMessage.shouldHideUser(message);
-                                //lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
-
-                                // Last message date
-                                //var lastDate = new Date(lastMessage.meta.time);
-                                //var newDate = new Date(message.meta.time);
-
-                                // If messages have the same day, hour and minute
-                                // hide the time
-
-                                //lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
-
-                                lastMessage.hideTime = lastMessage.shouldHideDate(message);
-
-                                // Add a pointer to the lastMessage
-                                message.lastMessage = lastMessage;
-
-                            }
-
-                            // We always hide the time for the latest message
-                            message.hideTime = true;
-
-                            room.messages.push(message);
-
-                            room.sortMessages();
-
-                            room.lastMessage = message;
-                            room.messagesDirty = true;
-                        }
-
-                        // If the room is inactive or minimized increase the badge
-                        if((!room.active || room.minimized) && !message.readBy()) {
-
-                            if(!room.unreadMessages) {
-                                room.unreadMessages  = [];
-                            }
-
-                            room.unreadMessages.push(message);
-
-                            // If this is the first badge then room.badge will
-                            // undefined - so set it to one
-                            if(!room.badge) {
-                                room.badge = 1;
-                            }
-                            else {
-                                room.badge = Math.min(room.badge + 1, 99);
-                            }
-                        }
-                        else {
-                            // Is the room active? If it is then mark the message
-                            // as seen
-                            message.markRead();
-                        }
-
-                        room.update();
-
-                    });
+                        console.log('Message child added');
+                    }).bind(this));
                 };
 
                 room.messagesOff = function () {
@@ -1176,9 +1227,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     room.messagesOff();
 
+                    room.metaOff();
+                    room.usersMetaOff();
+
                     // Get the room meta data
-                    Paths.roomMetaRef(room.meta.rid).off();
-                    Paths.roomUsersRef(room.meta.rid).off();
+//                    Paths.roomMetaRef(room.meta.rid).off();
+//                    Paths.roomUsersRef(room.meta.rid).off();
                     Paths.roomTypingRef(room.meta.rid).off();
                 };
 

@@ -17,10 +17,8 @@
     "angular-facebook": "latest",
     "FileSaver": "latest",
     "moment": "latest",
-    "jquery-cookie": "latest",
     "angular-sanitize": "latest",
     "angular-emoji-filter": "latest",
-    "howler": "latest",
-    "ngstorage": "latest"
+    "howler": "latest"
   }
 }

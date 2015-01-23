@@ -1,5 +1,12 @@
 <div ng-controller="ProfileSettingsController" id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" >
 
+    <div class="cc-clear-cache-icon" title="Clear cache">
+        <button ng-click="clearCache()" >
+            <img ng-src="{{ img_30_clear_cache }}" ng-show="!cacheCleared" />
+            <img ng-src="{{ img_30_cache_cleared }}" ng-show="cacheCleared" />
+        </button>
+    </div>
+
     <div class="cc-sound-icon">
         <button ng-click="toggleMuted()">
             <img ng-src="{{ img_30_sound_on }}" ng-show="!muted" />

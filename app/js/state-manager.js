@@ -18,8 +18,6 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
-                    console.log("UID: " + uid);
-
                     var user = UserCache.getOrCreateUserWithID(uid);
 
                     if(Cache.addOnlineUser(user)) {
@@ -191,9 +189,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
             // Get the value of the rooms
             roomsRef.once('value', (function (snapshot) {
-
-                // Add the rooms
-                console.log("Room");
 
                 this.impl_roomAddInitial(snapshot.val());
 

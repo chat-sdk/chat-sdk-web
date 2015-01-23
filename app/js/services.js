@@ -45,6 +45,7 @@ myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
 
 myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
     return {
+
         newEntity: function (path, id) {
 
             var entity = {
@@ -81,31 +82,39 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
 
                 stateRef.off('value');
 
+                //if(entity._path == bRoomsPath) {
+                //    console.log('Entity ID: ' + entity._id + ' Key: ' + key);
+                //    console.log('Ref: ' + stateRef.toString());
+                //}
+
                 // TODO: There seems to be a bug with Firebase
                 // when we call push this method is called twice
                 stateRef.on('value', (function (snapshot) {
 
                     var time = snapshot.val();
 
-                    console.log('Entity ID: ' + entity._id + ' Key: ' + key);
-                    console.log('Time: ' + time + ' State time: ' + entity.state[key]);
+//                     if(entity._path == bRoomsPath) {
+                        if(DEBUG) console.log('Entity ID: ' + entity._id + ' Key: ' + key);
+                        if(DEBUG) console.log('Time: ' + time + ' State time: ' + entity.state[key]);
+//                    }
 
-                    if(entity._id == "2222222222222222222222222222222222222222:2") {
-                        console.log("Test");
-                    }
+//                    if(entity._id == "2222222222222222222222222222222222222222:2") {
+//                        console.log("Test");
+//                    }
 
                     // If the state isn't set either locally or remotely
                     // or if it is set but the timestamp is lower than the remove value
                     // add a listener to the value
                     if((!time || !entity.state[key]) || (time && time > entity.state[key])) {
 
-                        console.log("LOAD");
-
+                        //if(entity._path == bRoomsPath) {
+                        if(DEBUG) console.log("LOAD");
+                        //}
 
                         // Assume that the we will be able to get
                         // the latest version of the data so prevent any
                         // new requests
-                        var oldTime = entity.state[key];
+                        //var oldTime = entity.state[key];
                         entity.state[key] = time;
 
                         // Get the ref
@@ -116,15 +125,15 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
 
                         // Add the value listener
                         ref.once('value', (function (snapshot) {
-                            if(snapshot.val()) {
+                            //if(snapshot.val()) {
                                 if(callback) {
                                     callback(snapshot.val());
                                 }
-                            }
-                            else {
+                            //}
+                            //else {
                                 // If the call failed we need to do it again
-                                entity.state[key] = oldTime;
-                            }
+                            //    entity.state[key] = oldTime;
+                            //}
                             deferred.resolve();
 
                         }).bind(this));
@@ -179,9 +188,35 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
             };
 
             return entity;
+        },
 
+        ref: function (path, id) {
+            return Paths.firebase().child(path).child(id);
+        },
+
+        stateRef: function (path, id, key) {
+            return this.ref(path, id).child(bStatePath).child(key);
+        },
+
+        updateState: function (path, id, key) {
+
+            var deferred = $q.defer();
+
+            var ref = this.stateRef(path, id, key);
+            ref.set(Firebase.ServerValue.TIMESTAMP, (function (error) {
+                if(!error) {
+                    deferred.resolve();
+                }
+                else {
+                    deferred.reject();
+                }
+            }).bind(this));
+
+            return deferred.promise;
         }
     };
+
+
 }]);
 
 myApp.factory('Log', [function () {
@@ -1193,8 +1228,8 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomCache', 'UserCache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomCache, UserCache, Room, Utilities, Presence, API, StateManager, Time) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomCache', 'UserCache', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomCache, UserCache, Room, Utilities, Presence, API, StateManager, Time, Upgrade) {
 
     var Auth = {
 
@@ -1215,12 +1250,17 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 var user = $rootScope.user;
 
-                var oldMeta = user.meta;
+                // Run the upgrade script
+                Upgrade.update_user_to_1_0_5(user);
+
+                var oldMeta = angular.copy(user.meta);
 
                 var setUserProperty = (function (property, value, force) {
                     if((!user.meta[property] || user.meta[property].length == 0 || force) && value && value.length > 0) {
                         user.meta[property] = value;
+                        return true;
                     }
+                    return false;
                 }).bind(this);
 
                 // Get the third party data
@@ -1332,16 +1372,22 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                     $http.post('http://ip-api.com/json').then((function (r) {
 
+                        var changed = false;
+
                         // The first time the user logs on
                         // try to guess which city and country they're from
-                        setUserProperty('city', r.data.city);
-                        setUserProperty('country', r.data.countryCode);
+                        changed = setUserProperty('city', r.data.city);
+                        changed = changed || setUserProperty('country', r.data.countryCode);
 
-                        // Digest to update the interface
-                        $timeout(function() {
-                            $rootScope.$digest();
-                        });
+                        if(changed) {
+                            user.pushMeta();
 
+                            // Digest to update the interface
+                            // TODO: Don't do a root digest
+                            $timeout(function() {
+                                $rootScope.$digest();
+                            });
+                        }
 
                     }).bind(this), function (error) {
 
@@ -1355,7 +1401,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 /** GRAVATAR **/
 
                 /** Tidy up existing rooms **/
-
 
                 /** Create static rooms **/
                 this.addStaticRooms();

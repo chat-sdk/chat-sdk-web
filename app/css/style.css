@@ -1067,3 +1067,10 @@ div#cc-app .cc-sound-icon {
     right: 4px;
     z-index: 200;
 }
+
+div#cc-app .cc-clear-cache-icon {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    z-index: 200;
+}

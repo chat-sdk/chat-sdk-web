@@ -366,7 +366,7 @@ myApp.directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen'
     };
 }]);
 
-myApp.directive('userDropLocation', ['$rootScope', function ($rootScope) {
+myApp.directive('userDropLocation', ['$rootScope', 'Room', function ($rootScope, Room) {
     return function (scope, elm, attrs) {
 
         elm.mouseenter(function(e) {
@@ -384,8 +384,10 @@ myApp.directive('userDropLocation', ['$rootScope', function ($rootScope) {
         elm.mouseup((function(e) {
             // Add the user to this chat
             if($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                scope.room.addUser($rootScope.userDrag.user, bUserStatusInvited);
-                $rootScope.userDrag.user.addRoom(scope.room);
+                Room.addUserToRoom(scope.room.meta.rid, $rootScope.userDrag.user, bUserStatusInvited);
+//
+                //scope.room.addUser($rootScope.userDrag.user, bUserStatusInvited);
+                //$rootScope.userDrag.user.addRoom(scope.room);
             }
         }).bind(this));
     };

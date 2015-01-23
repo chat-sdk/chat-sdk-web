@@ -100,6 +100,8 @@ myApp.controller('AppController', [
         $rootScope.img_30_maximize = bImagesURL + 'cc-30-maximize.png';
         $rootScope.img_30_sound_on = bImagesURL + 'cc-30-sound-on.png';
         $rootScope.img_30_sound_off = bImagesURL + 'cc-30-sound-off.png';
+        $rootScope.img_30_clear_cache = bImagesURL + 'cc-30-clear-cache.png';
+        $rootScope.img_30_cache_cleared = bImagesURL + 'cc-30-cache-cleared.png';
     }
 
     $scope.getUser = function () {
@@ -636,7 +638,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
             if (authData) {
                 // user authenticated with Firebase
-                console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
+                if(DEBUG) console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
 
                 if($rootScope.singleSignOnEnabled) {
                     if($scope.firstTry) {
@@ -698,8 +700,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                     if(result) {
                         $scope.handleUserLogin($rootScope.auth, false);
 
-                        console.log('Authenticated successfully with payload:', result.auth);
-                        console.log('Auth expires at:', new Date(result.expires * 1000));
+                        if (DEBUG) console.log('Authenticated successfully with payload:', result.auth);
+                        if (DEBUG) console.log('Auth expires at:', new Date(result.expires * 1000));
                     }
                     else {
                         $scope.logout();
@@ -813,6 +815,9 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
             }, handleResult, {
                 remember: $scope.rememberMe ? "default" : "sessionOnly"
             });
+        }
+        else if (method == 'anonymous') {
+            ref.authAnonymously(handleResult);
         }
         else {
 
@@ -1033,6 +1038,12 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
             Log.notification(bLazyLoadedMessagesNotification, 'ChatController');
             if($scope.room == room) {
                 digest(callback);
+            }
+        });
+        $scope.$on(bChatUpdatedNotification, function (event, room) {
+            Log.notification(bChatUpdatedNotification, 'CreateRoomController');
+            if($scope.room == room) {
+                digest();
             }
         });
 
@@ -1289,14 +1300,6 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
             $scope.focusName = true;
         });
 
-        $scope.$on(bChatUpdatedNotification, function (event, room) {
-            Log.notification(bChatUpdatedNotification, 'CreateRoomController');
-            if(room == $scope.room) {
-                $timeout(function(){
-                    $scope.$digest();
-                });
-            }
-        })
     };
 
     $scope.createRoom  = function () {
@@ -1309,7 +1312,7 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
             );
         }
         else {
-            Room.createPublicRoom(
+            Room.createRoom(
                 $scope.room.name,
                 $scope.room.description,
                 $scope.room.invitesEnabled,
@@ -1339,14 +1342,15 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
 myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', function($scope, $timeout, Log) {
 
     $scope.rooms = [];
+    $scope.allRooms = [];
 
     $scope.init = function () {
 
         $scope.$on(bPublicRoomAddedNotification, (function (event, room) {
             Log.notification(bPublicRoomAddedNotification, 'PublicRoomsListController');
             // Add the room and sort the list
-            if(!CCArray.contains($scope.rooms, room)) {
-                $scope.rooms.push(room);
+            if(!CCArray.contains($scope.allRooms, room)) {
+                $scope.allRooms.push(room);
             }
             $scope.updateList();
 
@@ -1355,7 +1359,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
         $scope.$on(bPublicRoomRemovedNotification, function (event, room) {
             Log.notification(bPublicRoomRemovedNotification, 'PublicRoomsListController');
 
-            CCArray.remove($scope.rooms, room);
+            CCArray.remove($scope.allRooms, room);
             $scope.updateList();
 
         });
@@ -1373,7 +1377,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 
         Log.notification(bLogoutNotification, 'PublicRoomsListController');
 
-        $scope.rooms.sort(function(a, b) {
+        $scope.allRooms.sort(function(a, b) {
 
             var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
             var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
@@ -1406,7 +1410,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 
         });
 
-        $scope.rooms = CCArray.filterByKey($scope.rooms, $scope.search[$scope.activeTab], function (room) {
+        $scope.rooms = CCArray.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
             return room.meta.name;
         });
 
@@ -1469,7 +1473,8 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
 
 }]);
 
-myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', function($scope, Auth, Config, SoundEffects, Log) {
+myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', 'LocalStorage',
+    function($scope, Auth, Config, SoundEffects, Log, LocalStorage) {
 
     $scope.ref = null;
     $scope.muted = false;
@@ -1529,7 +1534,14 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
 
     $scope.toggleMuted = function () {
         $scope.muted = SoundEffects.toggleMuted();
-    }
+    };
+
+    $scope.clearCache = function () {
+        if(!$scope.cacheCleared) {
+            LocalStorage.clearCache();
+        }
+        $scope.cacheCleared = true;
+    };
 
     $scope.validate = function () {
 
