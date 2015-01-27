@@ -63,19 +63,20 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
                     deferred.reject();
                 }
                 else {
-                    var ref = Paths.messageUsersRef(message.meta.rid, message.mid).child(uid);
-
-                    var data = {};
-                    data[bReadKey] = true;
-
-                    ref.set(data, function (error) {
-                        if(error) {
-                            deferred.reject(error);
-                        }
-                        else {
-                            deferred.resolve();
-                        }
-                    });
+//                    var ref = Paths.messageUsersRef(message.meta.rid, message.mid).child(uid);
+//
+//                    var data = {};
+//                    data[bReadKey] = true;
+//
+//                    ref.set(data, function (error) {
+//                        if(error) {
+//                            deferred.reject(error);
+//                        }
+//                        else {
+//                            deferred.resolve();
+//                        }
+//                    });
+                    message.read = true;
                 }
 
                 return deferred.promise;
@@ -84,13 +85,15 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
             message.serialize = function () {
                 return {
                     meta: message.meta,
-                    mid: message.mid
+                    mid: message.mid,
+                    read: message.read
                 }
             };
 
             message.deserialize = function (sm) {
                 message.mid = sm.mid;
                 message.meta = sm.meta;
+                message.read = sm.read;
             };
 
             message.shouldHideUser = function (nextMessage) {
@@ -107,14 +110,16 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserCache', 'User', 'Confi
                 return lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
             };
 
-            message.readBy = function (uid) {
+            message.readBy = function () {
 
-                if(!uid) {
-                    uid = $rootScope.user.meta.uid;
+                // TODO: Legacy code - to be removed after update
+                var uid = $rootScope.user.meta.uid;
+                if(message.meta.users) {
+                    !unORNull(message.meta.users[uid]) && !unORNull(message.meta.users[uid][bReadKey]);
                 }
-
-                return !unORNull(message.meta.users) && !unORNull(message.meta.users[uid]) && !unORNull(message.meta.users[uid][bReadKey]);
-
+                else {
+                    return message.read;
+                }
             };
 
             return message;

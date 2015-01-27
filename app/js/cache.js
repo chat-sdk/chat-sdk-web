@@ -360,6 +360,10 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
             }
         },
 
+        isOnlineWithUID: function (uid) {
+            return !unORNull(this.onlineUsers[uid]);
+        },
+
         /**
          * Utility functions
          */

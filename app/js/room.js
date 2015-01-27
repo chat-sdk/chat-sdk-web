@@ -927,7 +927,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         //room.offset = sr.offset;
 
                         for(var i = 0; i < sr.messages.length; i++) {
-                            room.addMessageMeta(sr.messages[i].mid, sr.messages[i].meta);
+                            room.addMessageMeta(sr.messages[i].mid, sr.messages[i].meta, sr.messages[i]);
                         }
                     }
                 };
@@ -977,10 +977,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     }).bind(this);
 
+                    // TODO: Currently if a user goes offline they don't appear in the
+                    // room. They'd have to enter and
                     var addUser = (function (uid, userMeta) {
                         if(room.userIsActiveWithInfo(userMeta)) {
-                            var user = UserCache.getOrCreateUserWithID(uid);
-                            room.users[user.meta.uid] = user;
+                            //if(Cache.isOnlineWithUID(uid) || $rootScope.user.meta.uid == uid) {
+                                var user = UserCache.getOrCreateUserWithID(uid);
+                                room.users[user.meta.uid] = user;
+                            //}
                         }
                     }).bind(this);
 
@@ -1071,7 +1075,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * Start listening to messages being added
                  */
 
-                room.addMessageMeta = function (mid, val) {
+                room.addMessageMeta = function (mid, val, serialization) {
 
                     if(!val || !val.text || val.text.length === 0) {
                         return;
@@ -1087,6 +1091,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     // Create the message object
                     var message = Message.buildMessage(mid, val);
+                    if(serialization) {
+                        message.deserialize(serialization);
+                    }
 
                     // Change the page title
                     $window.document.title = message.meta.text + "...";
@@ -1202,8 +1209,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                                 }
                             }
                         }
-
-                        console.log('Message child added');
                     }).bind(this));
                 };
 

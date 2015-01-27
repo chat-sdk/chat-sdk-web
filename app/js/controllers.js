@@ -258,10 +258,7 @@ myApp.controller('AppController', [
     };
 
     $scope.isOnline = function (user) {
-        if(user) {
-            return !unORNull(Cache.onlineUsers[user.meta.uid]);
-        }
-        return false;
+        Cache.isOnlineWithUID(user.meta.uid);
     };
 
     /**
