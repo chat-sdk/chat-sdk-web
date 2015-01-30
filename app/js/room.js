@@ -31,7 +31,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     }
                     else {
 
-                        this.addUserToRoom(rid, $rootScope.user, bUserStatusOwner);
+                        this.addUserToRoom(rid, $rootScope.user, bUserStatusOwner, isPublic);
 
                         if(isPublic) {
                             var ref = Paths.publicRoomRef(rid);
@@ -93,7 +93,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 return deferred.promise;
             },
 
-            addUserToRoom: function (rid, user, status) {
+            addUserToRoom: function (rid, user, status, isPublic) {
 
                 var deferred = $q.defer();
 
@@ -112,6 +112,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         deferred.reject(error);
                     }
                 });
+
+                // TRAFFIC
+                if(isPublic) {
+                    ref.onDisconnect().remove();
+                }
 
                 return deferred.promise;
             },
@@ -536,8 +541,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     var deferred = $q.defer();
 
-                    var ref = Paths.roomUsersRef(room.meta.rid);
-                    ref.child(user.meta.uid).update({
+                    var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
+                    ref.update({
                         status: status,
                         uid: user.meta.uid,
                         time: Firebase.ServerValue.TIMESTAMP
@@ -550,6 +555,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                             deferred.reject(error);
                         }
                     });
+
+                    // TRAFFIC
+                    if(room.meta.isPublic) {
+                        ref.onDisconnect().remove();
+                    }
 
                     return deferred.promise;
                 };

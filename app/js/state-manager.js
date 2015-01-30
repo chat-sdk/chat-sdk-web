@@ -360,6 +360,10 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
                     if (room) {
 
+                        // TRAFFIC
+                        if(room.meta.isPublic)
+                            room.setStatusForUser($rootScope.user, bUserStatusMember);
+
                         // If we've created this room just return
                         if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
 

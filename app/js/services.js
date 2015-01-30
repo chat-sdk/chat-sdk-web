@@ -606,7 +606,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
  * status
  * We need to call visibility to make sure it's initilized
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', function ($rootScope, $timeout, Visibility, Config) {
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', function ($rootScope, $timeout, Visibility, Config, Cache) {
     return {
 
         user: null,
@@ -670,6 +670,19 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', fun
                             time: Firebase.ServerValue.TIMESTAMP
                         }, this.user.meta.name
                     );
+
+                    // Go online for the public rooms
+                    var rooms = Cache.rooms;
+                    var room;
+                    for(var i = 0; i < rooms.length; i++) {
+                            // TRAFFIC
+                            // If this is a public room we would have removed it when we logged off
+                            // We need to set ourself as a member again
+                            room = rooms[i];
+                            if(room.meta.isPublic)
+                                room.setStatusForUser($rootScope.user, bUserStatusMember);
+
+                    }
                 }
             }
         }
