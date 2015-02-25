@@ -55,6 +55,7 @@ var bTypingPath = 'typing';
 var bFriendsPath = 'friends';
 var bBlockedPath = 'blocked';
 var bStatePath = 'state';
+//var bOnlineUserCountKey = 'onlineCount';
 
 var bReadKey = 'read';
 
@@ -185,6 +186,10 @@ var Paths = {
     onlineUserRef: function (fid) {
         return this.onlineUsersRef().child(fid);
     },
+
+//    onlineUserCountRef: function () {
+//        return this.firebase().child(bOnlineUserCountKey);
+//    },
 
     roomsRef: function () {
         return this.firebase().child(bRoomsPath);

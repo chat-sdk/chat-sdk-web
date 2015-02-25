@@ -79,7 +79,6 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
                 // Start listening to the state
                 var stateRef = entity.stateRef(key);
 
-
                 stateRef.off('value');
 
                 //if(entity._path == bRoomsPath) {
@@ -671,6 +670,15 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                         }, this.user.meta.name
                     );
 
+//                    // Update the user online counter
+//                    var userCountRef = Paths.onlineUserCountRef();
+//                    userCountRef.transaction(function (currentValue) {
+//                        return (currentValue || 0) + 1;
+//                    });
+//                    userCountRef.onDisconnect().transaction(function (currentValue) {
+//                        return Math.max(currentValue - 1, 0);
+//                    });
+
                     // Go online for the public rooms
                     var rooms = Cache.rooms;
                     var room;
@@ -700,7 +708,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             LocalStorage.setProperty(LocalStorage.apiDetailsKey, JSON.stringify(details));
         },
 
-        loadAPIDetails: function (override) {
+        loadAPIDetails: function () {
             var details = LocalStorage.getProperty(LocalStorage.apiDetailsKey);
             if(details) {
                 details = JSON.parse(details);
@@ -719,6 +727,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             var details = this.loadAPIDetails();
             if(details) {
                 this.meta = details;
+                Paths.setCID(this.meta.cid);
                 deferred.resolve(this.meta);
                 return deferred.promise;
             }
@@ -762,8 +771,6 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                         // Here we should have the groups
                         if(r2.data.code == 200) {
 
-
-
                             // Sort the rooms
                             var rooms = [];
 
@@ -784,6 +791,8 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                                 whiteLabel: false,
                                 rooms: rooms
                             };
+
+                            Paths.setCID(this.meta.cid);
 
                             // Save the meta data
                             this.saveAPIDetails(this.meta);

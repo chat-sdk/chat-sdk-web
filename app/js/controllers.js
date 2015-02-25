@@ -611,8 +611,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector) {
 
     /**
      * Initialize the login controller
@@ -620,6 +620,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
      * Setup the auth variable and try to authenticate
      */
     $scope.init = function () {
+
 
         $scope.rememberMe = true;
         $scope.firstTry = true;
@@ -659,8 +660,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 else {
                     $scope.logout();
                 }
-
             }
+
+            // TODO: Enable user count even when user isn't online
+//            API.getAPIDetails().then(function (result) {
+//                OnlineConnector.on();
+//            });
+
         });
     };
 
@@ -752,13 +758,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         $scope.email = "";
         $scope.password = "";
-
-        try {
-            Auth.removeListenersFromUser();
-        }
-        catch (error) {
-
-        }
 
         $rootScope.$broadcast(bLogoutNotification);
 
@@ -898,8 +897,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         API.getAPIDetails().then((function(api) {
-
-            Paths.setCID(api.cid);
 
             // Get the number of chatters that are currently online
             Auth.numberOfChatters().then((function(number) {

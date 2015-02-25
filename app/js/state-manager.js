@@ -7,11 +7,20 @@ var myApp = angular.module('myApp.stateManager', ['firebase']);
 myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', function ($rootScope, User, Cache, UserCache) {
     return {
 
+        isOn: false,
+
         on: function () {
+
+            if(this.isOn) {
+                return;
+            }
+            this.isOn = true;
 
             var onlineUsersRef = Paths.onlineUsersRef();
 
             onlineUsersRef.on("child_added", (function (snapshot) {
+
+                console.log('Online: ' + snapshot.val().uid);
 
                 // Get the UID of the added user
                 var uid = null;
@@ -30,6 +39,8 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
 
             onlineUsersRef.on("child_removed", (function (snapshot) {
 
+                console.log('Offline: ' + snapshot.val().uid);
+
                 var user = UserCache.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
@@ -44,6 +55,9 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
         },
 
         off: function () {
+
+            this.isOn = false;
+
             var onlineUsersRef = Paths.onlineUsersRef();
 
             onlineUsersRef.off('child_added');

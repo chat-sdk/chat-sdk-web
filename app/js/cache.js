@@ -334,11 +334,13 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
          */
 
         addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid && user.meta.uid != $rootScope.user.meta.uid) {
-                user.online = true;
-                this.onlineUsers[user.meta.uid] = user;
-                this.digest();
-                return true;
+            if(user && user.meta && user.meta.uid) {
+                if(!$rootScope.user || user.meta.uid != $rootScope.user.meta.uid) {
+                    user.online = true;
+                    this.onlineUsers[user.meta.uid] = user;
+                    this.digest();
+                    return true;
+                }
             }
             return false;
         },

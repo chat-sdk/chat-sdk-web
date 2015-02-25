@@ -297,7 +297,8 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPo
 myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
     return function (scope, elm, attrs) {
         $document.mousemove((function (e) {
-            if(scope.currentUser && !elm.is(":hover")) {
+            //!elm.is(":hover")
+            if(scope.currentUser && jQuery('#'+elm.attr('id')+':hover').length == 0) {
                 // Keep the center of this box level with the mouse y
                 elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
             }
