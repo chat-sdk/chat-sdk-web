@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', function ($rootScope, $timeout, $q, Entity, Cache) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defines', function ($rootScope, $timeout, $q, Entity, Cache, Defines) {
     return {
 
         buildUserWithID: function (uid) {
@@ -23,9 +23,13 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
             // Start listening to the Firebase location
             user.on = function () {
 
-                var metaPromise = user.pathOn(bMetaKey, function (val) {
+                return user.pathOn(bMetaKey, function (val) {
                     if(val) {
                         user.meta = val;
+
+                        // Update the user's thumbnail
+                        user.setImage(user.meta.image);
+
                         // Here we want to update the
                         // - Main box
                         // - Every chat room that includes the user
@@ -34,83 +38,14 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                     }
                 });
 
-                var thumbnailPromise = user.pathOn(bThumbnailKey, function (val) {
-                    if(val) {
-                        user.setThumbnail(val[bThumbnailKey]);
-                    }
-                    else {
-                        user.setThumbnail(bDefaultProfileImage);
-                    }
-                });
-
-                return $q.all([metaPromise, thumbnailPromise]);
             };
 
             // Stop listening to the Firebase location
             user.off = (function () {
-                user.pathOff(bThumbnailKey);
+                ///user.pathOff(bThumbnailKey);
                 user.pathOff(bMetaKey);
 
             }).bind(this);
-
-            user.imageOn = function () {
-
-                return user.pathOn(bImageKey, function (val) {
-                    if(val) {
-                        user.setImage(val[bImageKey]);
-                    }
-                });
-            };
-
-            user.imageOff = function () {
-                user.pathOff(bImageKey);
-            };
-
-            user.setThumbnail = function (imageData, push, isData) {
-                var deferred = $q.defer();
-
-                if(!imageData) {
-                    imageData = bDefaultProfileImage;
-                }
-
-                if(imageData != bDefaultProfileImage && !isData) {
-                    var prefix = 'http://skbb48.cloudimage.io/s/crop/30x30/';
-                    if(imageData.length < prefix.length || imageData.slice(0, prefix.length) !== prefix) {
-                        imageData = prefix+imageData;
-                    }
-                }
-
-                if(imageData == user.thumbnail) {
-                    deferred.resolve();
-                    return deferred.promise;
-                }
-
-                user.thumbnail = imageData;
-
-                // Don't try to update users are that aren't
-                // the authenticated user
-                if(user != $rootScope.user || !push) {
-                    deferred.resolve();
-                    return deferred.promise;
-                }
-
-                var data = {};
-                data[bThumbnailKey] = user.thumbnail;
-
-                // Set the image on Firebase
-                var ref = Paths.userThumbnailRef(user.meta.uid);
-                ref.set(data, function (error) {
-                    if(!error) {
-                        deferred.resolve();
-                        user.updateState(bThumbnailKey);
-                    }
-                    else {
-                        deferred.reject(error);
-                    }
-                });
-
-                return deferred.promise;
-            };
 
             user.pushMeta = function () {
 
@@ -150,52 +85,48 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 }
             };
 
-            user.setImage = function (imageData, push, isData) {
-
-                if(!imageData) {
-                    imageData = bDefaultProfileImage;
+            user.updateImageURL = function (imageURL) {
+                // Compare to the old URL
+                var imageChanged = imageURL != user.meta.image;
+                if(imageChanged) {
+                    user.meta.image = imageURL;
+                    user.setImage(imageURL, false);
+                    user.pushMeta();
                 }
+            };
 
-                if(imageData != bDefaultProfileImage && !isData) {
-                    var prefix = 'http://skbb48.cloudimage.io/s/crop/100x100/';
-                    if(imageData.length < prefix.length || imageData.slice(0, prefix.length) !== prefix) {
-                        imageData = prefix+imageData;
-                    }
-                }
-
-                var deferred = $q.defer();
-
-                if(imageData == user.image) {
-                    deferred.resolve();
-                    return deferred.promise;
-                }
-
-                user.image = imageData;
-
-                // Set the image on Firebase
-                var ref = Paths.userImageRef(user.meta.uid);
-
-                // Don't try to update users are that aren't
-                // the authenticated user
-                if(user != $rootScope.user || !push) {
-                    deferred.resolve();
-                    return deferred.promise;
-                }
-
-                var data = {};
-                data[bImageKey] = user.image;
-
-                ref.set(data, function (error) {
-                    if(!error) {
-                        deferred.resolve();
-                        user.updateState(bImageKey);
-                    }
-                    else {
-                        deferred.reject(error);
+            user.migrateFromOldImageSystem = function () {
+                var imageRef = Paths.userImageRef(user.meta.uid);
+                imageRef.once('value', function (snapshot) {
+                    if(snapshot.value) {
+                        var imageURL = snapshot.value['image'];
+                        if(imageURL) {
+                            var parts = imageURL.split('http://');
+                            if(parts.length > 1 && parts[1].length) {
+                                user.setImage('http://' + parts[1]);
+                            }
+                            else {
+                                user.setImage(bDefaultProfileImage);
+                            }
+                        }
                     }
                 });
+            };
 
-                return deferred.promise;
+            user.setImage = function (image, isData) {
+                if(!image) {
+                    user.migrateFromOldImageSystem();
+                }
+                else {
+                    if(isData || user.image == bDefaultProfileImage) {
+                        user.image = image;
+                        user.thumbnail = image;
+                    }
+                    else {
+                        user.image = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/100x100/' + image;
+                        user.thumbnail = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/30x30/' + image;
+                    }
+                }
             };
 
             user.isImage = function (src) {
@@ -216,28 +147,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
 
             user.hasImage = function () {
                 return user.image && user.image != bDefaultProfileImage;
-            };
-
-            user.hasThumbnail = function () {
-                return user.thumbnail && user.thumbnail != bDefaultProfileImage;
-            };
-
-            user.getImage = function () {
-                if(user.hasImage()) {
-                    return user.image;
-                }
-                else {
-                    return bDefaultProfileImage;
-                }
-            };
-
-            user.getThumbnail = function () {
-                if(user.hasThumbnail()) {
-                    return user.thumbnail;
-                }
-                else {
-                    return user.getImage();
-                }
             };
 
             user.addRoomWithRID = function (rid) {
@@ -321,18 +230,13 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 user.updateState(bBlockedPath);
             };
 
-//            user.updateRoomSlot = function (room, slot) {
-//                var ref = Paths.userRoomsRef(user.meta.uid).child(room.meta.rid);
-//                ref.update({slot: slot});
-//            };
-
             var _superS = user.serialize;
             user.serialize = function () {
                 return {
                     meta: user.meta ? user.meta : {},
-                    _super: _superS(),
-                    thumbnail: user.thumbnail,
-                    image: user.image
+                    _super: _superS()
+                    //thumbnail: user.thumbnail,
+                    //image: user.image
                 }
             };
 
@@ -341,8 +245,8 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', functi
                 if(su) {
                     _superD(su._super);
                     user.meta = su.meta;
-                    user.setThumbnail(su.thumbnail);
-                    user.setImage(su.image);
+                    //user.setThumbnail(su.thumbnail);
+                    user.setImage(su.meta.image);
                 }
             };
 

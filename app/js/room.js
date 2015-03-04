@@ -382,6 +382,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     }
                 };
 
+                /**
+                 * Leave the room - remove the current user from the room
+                 */
                 room.leave = function () {
                     if(room) {
                         // If this is a private room we want to set the status to closed
@@ -396,6 +399,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
 
                         // Remove the room from the user's list
+                        // We don't want to remove this
                         $rootScope.user.removeRoom(room);
                     }
                 };

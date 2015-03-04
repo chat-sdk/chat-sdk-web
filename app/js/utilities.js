@@ -61,7 +61,6 @@ var bReadKey = 'read';
 
 var bMetaKey = "meta";
 var bImageKey = "image";
-var bThumbnailKey = "thumbnail";
 var bTimeKey = "time";
 
 var bOnlineKey = "online";
@@ -167,9 +166,9 @@ var Paths = {
         return this.userRef(fid).child(bStatePath);
     },
 
-    userThumbnailRef: function (fid) {
-        return this.userRef(fid).child(bThumbnailKey);
-    },
+//    userThumbnailRef: function (fid) {
+//        return this.userRef(fid).child(bThumbnailKey);
+//    },
 
     userFriendsRef: function (fid) {
         return this.userRef(fid).child(bFriendsPath);

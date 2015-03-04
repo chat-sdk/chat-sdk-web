@@ -13,6 +13,17 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
+myApp.factory('Defines', [function (LocalStorage) {
+    return {
+        // Cloud Image
+        cloudImageToken: 'skbb48',
+
+        // Parse
+        parseAPIKey: ''
+
+    };
+}]);
+
 myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
     return {
 
@@ -1313,11 +1324,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
                     if(!user.hasImage()) {
-                        Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=100', function(response) {
-                            user.setImage(response.data.url, true);
-                        });
-                        Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=40', function(response) {
-                            user.setThumbnail(response.data.url, true);
+                        Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=300', function(response) {
+                            user.updateImageURL(response.data.url);
                         });
                     }
                 }
@@ -1365,28 +1373,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 }
 
                 // If they don't have a profile picture load it from the social network
-                user.setImage(imageURL, true);
-                user.setThumbnail(imageURL, true);
-
-//                if((!user.hasImage()) && imageURL) {
-//
-//                    user.setImage(imageURL, true);
-//                    user.setThumbnail(imageURL, true);
-
-//                    Utilities.pullImageFromURL($http, imageURL).then(function(imageData) {
-//
-//                        user.setImage(imageData);
-//                        user.setThumbnail(imageData)
-//
-//                    }, function(error) {
-//                        user.setImage();
-//                    });
-
-//                }
-//                else {
-//                    user.setImage(bDefaultProfileImage, true);
-//                    user.setThumbnail(bDefaultProfileImage, true);
-//                }
+                setUserProperty('image', imageURL);
+                user.setImage(imageURL);
 
                 /** LOCATION **/
                 // Get the user's city and country from their IP
@@ -1450,10 +1438,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             // TODO: if we do this we'll also be listening for meta updates...
             $rootScope.user = UserCache.getOrCreateUserWithID(uid, true);
             var userPromise = $rootScope.user.on();
-            var imagePromise = $rootScope.user.imageOn();
             var timePromise = Time.start(uid);
 
-            $q.all([userPromise, imagePromise, timePromise]).then(function () {
+            $q.all([userPromise, timePromise]).then(function () {
                 if (!$rootScope.user.meta.name) {
                     $rootScope.user.meta.name = "";
                 }

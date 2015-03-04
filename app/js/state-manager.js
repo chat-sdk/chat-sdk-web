@@ -174,28 +174,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
             this.onUserID = uid;
 
             /**
-             * Image
-             */
-
-            var imageRef = Paths.userImageRef(uid);
-            imageRef.once('value', function (snapshot) {
-                if(snapshot && snapshot.val()) {
-                    $rootScope.user.setImage(snapshot.val()[bImageKey]);
-                }
-            });
-
-            /**
-             * Thumbnail
-             */
-
-            var thumbnailRef = Paths.userThumbnailRef(uid);
-            thumbnailRef.once('value', function (snapshot) {
-                if(snapshot && snapshot.val()) {
-                    $rootScope.user.setThumbnail(snapshot.val()[bThumbnailKey]);
-                }
-            });
-
-            /**
              * Rooms
              */
 

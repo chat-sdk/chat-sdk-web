@@ -351,8 +351,7 @@ myApp.controller('AppController', [
 
                 if(r.data && r.data.url) {
 
-                    $scope.getUser().setImage(r.data.url, true);
-                    $scope.getUser().setThumbnail(r.data.url, true);
+                    $scope.getUser().updateImageURL(r.data.url);
                 }
 
             }).bind(this), (function (error) {
@@ -380,8 +379,6 @@ myApp.controller('AppController', [
                     var x = 0;
                     var y = 0;
 
-                    //thumbnailer(canvas, image, 100, 3);
-
                     if (width > height) {
                         x = (width - height)/2;
 
@@ -398,19 +395,9 @@ myApp.controller('AppController', [
 
                     var imageDataURL = canvas.toDataURL('image/jpeg');
 
-                    // Set the user's thumbnail
-                    var thumb_size = 30;
-
-                    canvas.width = thumb_size;
-                    canvas.height = thumb_size;
-                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, thumb_size, thumb_size);
-
-                    var thumbnailDataURL = canvas.toDataURL('image/jpeg');
-
                     // Set the user's image
                     $scope.$apply(function () {
-                        $scope.getUser().setImage(imageDataURL, false, true);
-                        $scope.getUser().setThumbnail(thumbnailDataURL, false, true);
+                        $scope.getUser().setImage(imageDataURL, true);
                     });
 
                 };
@@ -420,54 +407,6 @@ myApp.controller('AppController', [
 
         reader.readAsDataURL(f);
 
-        return;
-
-
-        //$files: an array of files selected, each file has name, size, and type.
-//        for (var i = 0; i < $files.length; i++) {
-//            var file = $files[i];
-//            $scope.upload = $upload.upload({
-//                url: 'server/upload.php', //upload.php script, node.js route, or servlet url
-//                // method: 'POST' or 'PUT',
-//                // headers: {'header-key': 'header-value'},
-//                // withCredentials: true,
-//                //data: {myObj: $scope.myModelObj},
-//                file: file // or list of files: $files for html5 only
-//                /* set the file formData name ('Content-Desposition'). Default is 'file' */
-//                //fileFormDataName: myFile, //or a list of names for multiple files (html5).
-//                /* customize how data is added to formData. See #40#issuecomment-28612000 for sample code */
-//                //formDataAppender: function(formData, key, val){}
-//            }).progress(function(evt) {
-//
-//                if(DEBUG)
-//                    console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-//
-//                $scope.uploadProgress = parseInt(100.0 * evt.loaded / evt.total);
-//
-//                if($scope.uploadProgress == 100) {
-//                    $timeout(function () {
-//                        $scope.uploadingFile = false;
-//                        $scope.uploadProgress = 0;
-//                    }, 1000);
-//                }
-//
-//            }).success(function(data, status, headers, config) {
-//
-//                if(data.fileName) {
-//                    $scope.getUser().setImageName(data.fileName);
-//                }
-//
-//            }).error(function () {
-//                $scope.uploadingFile = false;
-//            });
-//            //.error(...)
-//            //.then(success, error, progress);
-//            //.xhr(function(xhr){xhr.upload.addEventListener(...)})// access and attach any event listener to XMLHttpRequest.
-//        }
-        /* alternative way of uploading, send the file binary with the file's content-type.
-         Could be used to upload files to CouchDB, imgur, etc... html5 FileReader is needed.
-         It could also be used to monitor the progress of a normal http post/put request with large data*/
-        // $scope.upload = $upload.http({...})  see 88#issuecomment-31366487 for sample code.
     };
 
     $scope.hideNotification = function () {
