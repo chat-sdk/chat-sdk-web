@@ -163,6 +163,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 room.loadingTimer = null;
                 room.muted = false;
 
+                room.deleted = false;
+
                 /***********************************
                  * GETTERS AND SETTERS
                  */
@@ -261,116 +263,60 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * LIFECYCLE
                  */
 
-//                room.create = function (users) {
-//
-//                    var deferred = $q.defer();
-//
-//                    // Check to see if there's already a room between us and the
-//                    // other user
-//                    if(users && users.length == 1) {
-//                        var r = Cache.getRoomWithOtherUser(users[0]);
-//                        var user = users[0];
-//                        if(r && user) {
-//
-//                            return $q.all([
-//                                r.addUser(user, bUserStatusInvited),
-//                                user.addRoom(r)
-//                            ]);
-//                        }
-//                    }
-//
-//                    var ref = Paths.roomsRef();
-//
-//                    // Create a new child ref
-//                    var roomRef = null;
-//                    if(room.meta.rid) {
-//                        roomRef = ref.child(room.meta.rid);
-//                    }
-//                    else {
-//                        roomRef = ref.push();
-//                        room.meta.rid = roomRef.key();
-//                    }
-//
-//                    var roomMetaRef = Paths.roomMetaRef(roomRef.key());
-//
-//                    // Does the room already exist?
-//                    roomMetaRef.once('value', function (snapshot) {
-//
-//                        if(snapshot && snapshot.val()) {
-//                            // If this is a public room then add it to the list of
-//                            // public rooms
-//                            if(room.meta.isPublic) {
-//                                return room.addToPublicRooms();
-//                            }
-//                        }
-//                        else {
-//
-//                            // Add the room to Firebase
-//                            roomMetaRef.set(room.meta, (function (error) {
-//
-//                                if(error) {
-//                                    deferred.reject(error);
-//                                }
-//                                else {
-//
-//                                    // Add the users
-//                                    this.join(bUserStatusOwner);
-//
-//                                    for (var i in users) {
-//                                        if(users.hasOwnProperty(i)) {
-//                                            room.addUser(users[i], bUserStatusInvited);
-//                                            users[i].addRoom(room);
-//                                        }
-//                                    }
-//
-//                                    // If this is a public room then add it to the list of
-//                                    // public rooms
-//                                    if(room.meta.isPublic) {
-//                                        room.addToPublicRooms();
-//                                    }
-//
-//                                    // Update the state
-//                                    room.updateState(bMetaKey);
-//
-//                                    deferred.resolve();
-//                                }
-//
-//                            }).bind(room));
-//                        }
-//                    });
-//
-//                    return deferred.promise;
-//
-//                };
+                /**
+                 * Removes the room from the display
+                 * and leaves the room
+                 */
+                room.close = function () {
+                    // TODO: Don't listen to hundreds of rooms
 
-                room.remove = function () {
-                    // TODO: Don't listen to hundres of rooms
-                    room.messagesOff();
+                    // If this is a private room we want to set the status to closed
+                    // this means that if we re-click the user, we wouldn't make a new
+                    // room
+                    if(room.isPublic()) {
+                        room.removeUser($rootScope.user);
+                        room.updateState(bUsersMetaPath);
+                    }
+                    else {
+                        //room.setStatusForUser($rootScope.user, bUserStatusMember);
+                    }
 
-                    room.leave();
+                    //room.leave();
+                    $rootScope.user.removeRoom(room);
 
                     // Remove the room from the cache
                     RoomPositionManager.removeRoom(room);
 
                 };
 
-                room.delete = function () {
-
-                    var deferred = $q.defer();
-
-                    var ref = Paths.roomRef(room.getRID());
-                    ref.remove(function (error) {
-                        if(!error) {
-                            deferred.resolve()
-                        }
-                        else {
-                            deferred.reject(error);
-                        }
-                    });
-
-                    return deferred.promise;
-
+                // We continue
+                room.permanentDelete = function () {
+                    room.off();
+                    room.removeUser($rootScope.user);
+                    room.updateState(bUsersMetaPath);
+                    $rootScope.user.removeRoom(room);
                 };
+
+                room.temporaryDelete = function () {
+                    room.metaOff();
+                    room.deleted = true;
+                };
+
+                /**
+                 * Leave the room - remove the current user from the room
+                 */
+//                room.leave = function () {
+//                    if(room) {
+//
+//
+//                        room.deleted = true;
+//
+//                    }
+//                };
+
+                room.isPublic = function () {
+                    return room.meta.isPublic;
+                }
 
                 room.join = function (status) {
                     if(room) {
@@ -379,28 +325,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                         // Add the room to the user
                         $rootScope.user.addRoom(room);
-                    }
-                };
-
-                /**
-                 * Leave the room - remove the current user from the room
-                 */
-                room.leave = function () {
-                    if(room) {
-                        // If this is a private room we want to set the status to closed
-                        // this means that if we re-click the user, we wouldn't make a new
-                        // room
-                        if(!room.meta.isPublic) {
-                            room.setStatusForUser($rootScope.user, bUserStatusClosed);
-                        }
-                        else {
-                            room.removeUser($rootScope.user);
-                            room.updateState(bUsersMetaPath);
-                        }
-
-                        // Remove the room from the user's list
-                        // We don't want to remove this
-                        $rootScope.user.removeRoom(room);
                     }
                 };
 
@@ -757,7 +681,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     // with the current time
                     room.updateUserStatusTime(user);
 
-                    room.updateState(bMessagesPath);
+                    // Avoid a clash..
+                    room.updateState(bMessagesPath).then(function () {
+                        room.updateState(bMetaKey);
+                    });
 
                     // Update the user's presence state
                     Presence.update();
@@ -1311,24 +1238,24 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                  * ROOM STATE
                  */
 
-                room.updateState = function (key) {
-
-                    var deferred = $q.defer();
-
-                    var ref = Paths.roomStateRef(room.meta.rid);
-
-                    var data = {}; data[key] = Firebase.ServerValue.TIMESTAMP;
-
-                    ref.update(data, function (error) {
-                        if(!error) {
-                            deferred.resolve();
-                        }
-                        else {
-                            deferred.reject(error);
-                        }
-                    });
-                    return deferred.promise;
-                };
+//                room.updateState = function (key) {
+//
+//                    var deferred = $q.defer();
+//
+//                    var ref = Paths.roomStateRef(room.meta.rid);
+//
+//                    var data = {}; data[key] = Firebase.ServerValue.TIMESTAMP;
+//
+//                    ref.update(data, function (error) {
+//                        if(!error) {
+//                            deferred.resolve();
+//                        }
+//                        else {
+//                            deferred.reject(error);
+//                        }
+//                    });
+//                    return deferred.promise;
+//                };
 
                 return room;
             }

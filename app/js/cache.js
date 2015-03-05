@@ -185,6 +185,19 @@ myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 
         clear: function () {
             this.rooms = {};
+        },
+
+        getPrivateRooms: function () {
+            var rooms = [];
+            for(var rid in this.rooms) {
+                if(this.rooms.hasOwnProperty(rid)) {
+                    var room = this.rooms[rid];
+                    if(!room.meta.isPublic) {
+                        rooms.push(this.rooms[rid]);
+                    }
+                }
+            }
+            return rooms;
         }
 
     };
@@ -192,6 +205,9 @@ myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 }]);
 
 
+/**
+ * Temporary cache i.e. current rooms etc...
+ */
 myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', function ($rootScope, $timeout, $window, LocalStorage) {
     var Cache = {
 

@@ -88,6 +88,9 @@ var bPublicRoomRemovedNotification = 'bPublicRoomRemovedNotification';
 var bRoomAddedNotification = 'bRoomAddedNotification';
 var bRoomRemovedNotification = 'bRoomRemovedNotification';
 
+var bRoomOpenedNotification = 'bRoomOpenedNotification';
+var bRoomClosedNotification = 'bRoomClosedNotification';
+
 var bAnimateRoomNotification = 'bAnimateRoomNotification';
 
 var bRoomUpdatedNotification = 'bRoomUpdatedNotification';

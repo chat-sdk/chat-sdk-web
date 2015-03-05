@@ -431,8 +431,8 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
     $scope.init = function () {
 
-        $scope.$on(bRoomAddedNotification, $scope.updateList);
-        $scope.$on(bRoomRemovedNotification, $scope.updateList);
+        $scope.$on(bRoomOpenedNotification, $scope.updateList);
+        $scope.$on(bRoomClosedNotification, $scope.updateList);
 
         $scope.$on(bUpdateRoomActiveStatusNotification, function (event, room) {
             Log.notification(bUpdateRoomActiveStatusNotification, 'ChatBarController');
@@ -445,7 +445,7 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
     $scope.updateList = function () {
 
-        Log.notification(bRoomAddedNotification + "/" + bRoomRemovedNotification, 'ChatBarController');
+        Log.notification(bRoomOpenedNotification + "/" + bRoomClosedNotification, 'ChatBarController');
 
         // Only include rooms that are active
         $scope.rooms = Cache.activeRooms();
@@ -1006,7 +1006,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
     };
 
     $scope.deleteRoom = function(room) {
-        room.remove();
+        room.close();
     };
 
     $scope.chatBoxStyle = function () {
@@ -1216,7 +1216,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
     }
 
     $scope.deleteRoom = function(room) {
-        room.remove();
+        room.close();
     };
 
     $scope.init();
@@ -1356,6 +1356,60 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 //        // Filter rooms by search text
 //        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
 //    };
+
+    $scope.init();
+
+}]);
+
+myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'RoomCache', function($scope, $timeout, Log, RoomCache) {
+
+    $scope.rooms = [];
+    $scope.allRooms = [];
+
+    $scope.init = function () {
+
+        $scope.$on(bRoomAddedNotification, (function (event, room) {
+            Log.notification(bRoomAddedNotification, 'InboxRoomsListController');
+            $scope.updateList();
+
+        }).bind(this));
+
+        $scope.$on(bRoomRemovedNotification, function (event, room) {
+            Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+            $scope.updateList();
+        });
+
+        // Update the list if the user count on a room changes
+        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+
+        $scope.$on(bLogoutNotification, $scope.updateList);
+
+        $scope.$watchCollection('search', $scope.updateList);
+    };
+
+    $scope.updateList = function () {
+
+        Log.notification(bLogoutNotification, 'InboxRoomsListController');
+
+        $scope.allRooms = RoomCache.getPrivateRooms();
+
+        $scope.allRooms.sort(function(a, b) {
+
+            var at = a.meta.lastMessage ? a.meta.lastMessage.time : a.meta.created;
+            var bt = b.meta.lastMessage ? b.meta.lastMessage.time : b.meta.created;
+
+            return bt - at;
+
+        });
+
+        $scope.rooms = CCArray.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
+            return room.meta.name;
+        });
+
+        $timeout(function(){
+            $scope.$digest();
+        });
+    };
 
     $scope.init();
 

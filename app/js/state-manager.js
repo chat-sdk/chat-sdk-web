@@ -179,6 +179,8 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
             var roomsRef = Paths.userRoomsRef(uid);
 
+
+
             // Get the value of the rooms
             roomsRef.once('value', (function (snapshot) {
 
@@ -364,12 +366,12 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
                             }
 
                             if(Cache.isBlockedUser(invitedBy)) {
-                                room.leave();
+                                room.permanentDelete();
                                 return;
                             }
 
                             if(!$rootScope.user.canBeInvitedByUser(room.invitedBy)) {
-                                room.leave();
+                                room.permanentDelete();
                                 return;
                             }
 
@@ -392,7 +394,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
                             // We need to update:
                             // - Room list
                             // - Chat bar
-                            $rootScope.$broadcast(bRoomAddedNotification, room);
+                            $rootScope.$broadcast(bRoomOpenedNotification, room);
                         }
                         else {
                             RoomPositionManager.insertRoom(room, 0, 300);
@@ -412,7 +414,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
             RoomPositionManager.autoPosition(300);
             RoomPositionManager.updateAllRoomActiveStatus();
 
-            $rootScope.$broadcast(bRoomRemovedNotification, room);
+            $rootScope.$broadcast(bRoomClosedNotification, room);
         }
 
     };

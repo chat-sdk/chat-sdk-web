@@ -7,19 +7,25 @@
     </div>
 
     <div class="cc-tab-container cc-bottom-shadow" >
-        <div class="cc-tab cc-tab-1-3"
+        <div class="cc-tab cc-tab-1-4"
              ng-class="{selected: activeTab == 'users'}"
              ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('users')">
             USERS
         </div>
-        <div class="cc-tab cc-tab-1-3"
+        <div class="cc-tab cc-tab-1-4"
              ng-class="{selected: activeTab == 'rooms'}"
              ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('rooms')">
             ROOMS
         </div>
-        <div class="cc-tab cc-tab-1-3"
+        <div class="cc-tab cc-tab-1-4"
+             ng-class="{selected: activeTab == 'inbox'}"
+             ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
+             ng-click="tabClicked('inbox')">
+            INBOX
+        </div>
+        <div class="cc-tab cc-tab-1-4"
              ng-class="{selected: activeTab == 'friends'}"
              ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('friends')">
@@ -48,6 +54,11 @@
 
         <!--Add the list of public chat rooms-->
         <div ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" ng-controller="PublicRoomsListController" >
+            <ng-include src=" baseURL + 'room-list.html'"></ng-include>
+        </div>
+
+        <!--Add the list of public chat rooms-->
+        <div ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x" ng-controller="InboxRoomsListController" >
             <ng-include src=" baseURL + 'room-list.html'"></ng-include>
         </div>
 

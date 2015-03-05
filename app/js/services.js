@@ -59,6 +59,7 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
 
         newEntity: function (path, id) {
 
+
             var entity = {
                 _path: path,
                 _id: id,
@@ -177,8 +178,15 @@ myApp.factory('Entity', ['$q', '$rootScope', function ($q, $rootScope) {
             };
 
             entity.updateState = function (key) {
+
+                var deferred = $q.defer();
+
                 var ref = entity.stateRef(key);
-                ref.set(Firebase.ServerValue.TIMESTAMP);
+                ref.set(Firebase.ServerValue.TIMESTAMP, function (error) {
+                    deferred.resolve();
+                });
+
+                return deferred.promise;
             };
 
             entity.serialize = function () {
@@ -1002,7 +1010,6 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
                     }
                 }
             }
-            return;
         },
 
         insertRoom: function (room, slot, duration) {
@@ -1020,7 +1027,6 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
             room.slot = slot;
 
-
             // Flag as dirty since we've added a room
             this.setDirty();
 
@@ -1037,7 +1043,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             }
 
             room.updateOffsetFromSlot();
-            $rootScope.$broadcast(bRoomAddedNotification, room);
+            $rootScope.$broadcast(bRoomOpenedNotification, room);
 
             this.updateAllRoomActiveStatus();
 
@@ -1051,6 +1057,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             this.autoSetSlots();
             this.setDirty();
 
+            $rootScope.$broadcast(bRoomClosedNotification, room);
         },
 
         autoSetSlots: function () {
