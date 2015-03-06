@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserCache','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserCache, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity) {
         return {
 
             createRoom: function (name, description, invitesEnabled, isPublic, weight) {
@@ -136,7 +136,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             newRoom: function (rid, name, invitesEnabled, description, userCreated, isPublic, weight) {
 
-                var room = Entity.newEntity(bRoomsPath, rid);
+                var room = new Entity(bRoomsPath, rid);
 
                 room.meta = this.roomMeta(rid, name, description, userCreated, invitesEnabled, isPublic);
                 room.meta.rid = rid;
@@ -164,6 +164,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 room.muted = false;
 
                 room.deleted = false;
+                room.invitedBy = null;
+                room.open = false;
+
+                // TODO: Check this
+                room.name = "";
 
                 /***********************************
                  * GETTERS AND SETTERS
@@ -282,10 +287,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     }
 
                     //room.leave();
-                    $rootScope.user.removeRoom(room);
+                    //$rootScope.user.removeRoom(room);
+
+                    RoomPositionManager.closeRoom(room);
 
                     // Remove the room from the cache
-                    RoomPositionManager.removeRoom(room);
+                    //RoomPositionManager.removeRoom(room);
 
                 };
 
@@ -316,7 +323,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 room.isPublic = function () {
                     return room.meta.isPublic;
-                }
+                };
+
+                room.isOpen = function () {
+                    return room.open;
+                };
 
                 room.join = function (status) {
                     if(room) {
@@ -430,7 +441,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         }
                     }
                     if(data) {
-                        return UserCache.getOrCreateUserWithID(data.uid);
+                        return UserStore.getOrCreateUserWithID(data.uid);
                     }
                     return null;
                 };
@@ -654,8 +665,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         return;
 
                     // Make the message
-                    var message = Message.newMessage(room.meta.rid, user.meta.uid, text);
-                    message.user = null;
+                    var message = Message.buildMeta(room.meta.rid, user.meta.uid, text);
 
                     // Get a ref to the room
                     var ref = Paths.roomMessagesRef(room.meta.rid);
@@ -752,7 +762,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         ref.on('child_added', (function (snapshot) {
                             var val = snapshot.val();
                             if(val) {
-                                var message = Message.buildMessage(snapshot.key(), val);
+                                var message = new Message(snapshot.key(), val);
                                 messages.push(message);
                                 if(messages.length == numberOfMessages) {
                                     finishQuery();
@@ -848,7 +858,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         //offset: room.offset,
                         messages: m,
                         meta: room.meta,
-                        usersMeta: room.usersMeta
+                        usersMeta: room.usersMeta,
+                        deleted: room.deleted,
+                        open: room.open
                     };
 
                     return sr;
@@ -862,6 +874,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         room.width = sr.width;
                         room.height = sr.height;
                         room.meta = sr.meta;
+                        room.deleted = sr.deleted;
+                        room.open = sr.open;
 
                         room.setUsersMeta(sr.usersMeta);
 
@@ -923,7 +937,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     var addUser = (function (uid, userMeta) {
                         if(room.userIsActiveWithInfo(userMeta)) {
                             //if(Cache.isOnlineWithUID(uid) || $rootScope.user.meta.uid == uid) {
-                                var user = UserCache.getOrCreateUserWithID(uid);
+                                var user = UserStore.getOrCreateUserWithID(uid);
                                 room.users[user.meta.uid] = user;
                             //}
                         }
@@ -1031,7 +1045,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     }
 
                     // Create the message object
-                    var message = Message.buildMessage(mid, val);
+                    var message = new Message(mid, val);
                     if(serialization) {
                         message.deserialize(serialization);
                     }

@@ -14,7 +14,8 @@ var myApp = angular.module('myApp', [
   'myApp.cache',
   'myApp.localStorage',
   'myApp.time',
-  'myApp.upgrade'
+  'myApp.upgrade',
+  'myApp.entity'
 
 ]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([

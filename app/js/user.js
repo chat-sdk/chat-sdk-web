@@ -5,11 +5,13 @@
 var myApp = angular.module('myApp.user', ['firebase']);
 
 myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defines', function ($rootScope, $timeout, $q, Entity, Cache, Defines) {
+
     return {
+
 
         buildUserWithID: function (uid) {
 
-            var user = Entity.newEntity(bUsersPath, uid);
+            var user = new Entity(bUsersPath, uid);
 
             user.meta =  {
                 uid: uid,

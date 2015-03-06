@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserCache','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserCache, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
 
     $scope.totalUserCount = 0;
 
@@ -189,7 +189,7 @@ myApp.controller('AppController', [
         }
         else {
             $scope.cancelTimer();
-            $scope.currentUser = UserCache.getUserWithID(uid);
+            $scope.currentUser = UserStore.getUserWithID(uid);
             var profileHTML = $scope.currentUser.meta.profileHTML;
             $scope.currentUserHTML = !profileHTML ? null : $sce.trustAsHtml(profileHTML);
         }
@@ -459,7 +459,7 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', 'Log', function($scope, $timeout, Auth, Cache, Utilities, Config, Screen, Log) {
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', 'Log', 'RoomPositionManager', function($scope, $timeout, Auth, Cache, Utilities, Config, Screen, Log, RoomPositionManager) {
 
     $scope.init = function () {
 
@@ -544,7 +544,19 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
 
     $scope.roomClicked = function (room) {
         // Messages on is called by when we add the room to the user
-        room.join(bUserStatusMember);
+        // If the room is already open do nothing!
+        if(room.isOpen()) {
+            return;
+        }
+
+        if(room.isPublic()) {
+            room.join(bUserStatusMember);
+        }
+        else {
+            // We're already a member so just open the room
+            // TODO: Handle case where we've cancelled the room
+            RoomPositionManager.insertRoom(room, 0, 300);
+        }
     };
 
     $scope.init();
@@ -1361,7 +1373,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 
 }]);
 
-myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'RoomCache', function($scope, $timeout, Log, RoomCache) {
+myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'RoomStore', function($scope, $timeout, Log, RoomStore) {
 
     $scope.rooms = [];
     $scope.allRooms = [];
@@ -1391,7 +1403,7 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
 
         Log.notification(bLogoutNotification, 'InboxRoomsListController');
 
-        $scope.allRooms = RoomCache.getPrivateRooms();
+        $scope.allRooms = RoomStore.getPrivateRooms();
 
         $scope.allRooms.sort(function(a, b) {
 

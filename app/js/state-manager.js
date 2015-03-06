@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', function ($rootScope, User, Cache, UserCache) {
+myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', function ($rootScope, User, Cache, UserStore) {
     return {
 
         isOn: false,
@@ -27,7 +27,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
-                    var user = UserCache.getOrCreateUserWithID(uid);
+                    var user = UserStore.getOrCreateUserWithID(uid);
 
                     if(Cache.addOnlineUser(user)) {
                         // Update the user's rooms
@@ -41,7 +41,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
 
                 console.log('Offline: ' + snapshot.val().uid);
 
-                var user = UserCache.getOrCreateUserWithID(snapshot.val().uid);
+                var user = UserStore.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
 
@@ -67,7 +67,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserCache', fu
     }
 }]);
 
-myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', function ($rootScope, Room, RoomCache) {
+myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', function ($rootScope, Room, RoomStore) {
     return {
         on: function () {
             var publicRoomsRef = Paths.publicRoomsRef();
@@ -76,7 +76,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', functi
 
                 var rid = snapshot.key();
                 if(rid) {
-                    var room = RoomCache.getOrCreateRoomWithID(rid);
+                    var room = RoomStore.getOrCreateRoomWithID(rid);
                     room.newPanel = snapshot.val().newPanel;
                     //Cache.addPublicRoom(room);
 
@@ -84,7 +84,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', functi
 
                         $rootScope.$broadcast(bPublicRoomAddedNotification, room);
 
-                        RoomCache.addRoom(room);
+                        RoomStore.addRoom(room);
 
                     });
 
@@ -94,7 +94,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', functi
 
             publicRoomsRef.on('child_removed', (function (snapshot) {
 
-                var room = RoomCache.getOrCreateRoomWithID(snapshot.key());
+                var room = RoomStore.getOrCreateRoomWithID(snapshot.key());
                 $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
 
 
@@ -113,8 +113,8 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomCache', functi
 /**
  * This should really be called the CurrentUserConnector
  */
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache', 'UserCache', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector',
-    function ($rootScope, Room, User, Cache, RoomCache, UserCache, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
+myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector',
+    function ($rootScope, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
     return {
 
         isOn: false,
@@ -179,8 +179,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
             var roomsRef = Paths.userRoomsRef(uid);
 
-
-
             // Get the value of the rooms
             roomsRef.once('value', (function (snapshot) {
 
@@ -203,7 +201,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
                     }
 
                 }).bind(this));
-
 
             }).bind(this));
 
@@ -278,7 +275,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = UserCache.getOrCreateUserWithID(uid);
+                var user = UserStore.getOrCreateUserWithID(uid);
 
                 user.unblock = function () {
                     snapshot.ref().remove();
@@ -299,7 +296,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
 
             var uid = snapshot.val().uid;
             if(uid) {
-                var user = UserCache.getOrCreateUserWithID(uid);
+                var user = UserStore.getOrCreateUserWithID(uid);
 
                 user.removeFriend = function () {
                     snapshot.ref().remove();
@@ -319,20 +316,22 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
             var room = null;
             for(var key in rooms) {
                 if(rooms.hasOwnProperty(key)) {
-                    room = RoomCache.getOrCreateRoomWithID(key);
+                    room = RoomStore.getOrCreateRoomWithID(key);
 
                     // The user is a member of this room
                     // We have to call this so the Room position manager can
                     // calculate the offsets
-                    Cache.addRoom(room);
-                    RoomPositionManager.setDirty();
+                    if(room.open) {
+                        Cache.addRoom(room);
+                        RoomPositionManager.setDirty();
 
-                    room.slot = i;
+                        room.slot = i;
 
-                    // Set the room's slot
-                    room.updateOffsetFromSlot();
+                        // Set the room's slot
+                        room.updateOffsetFromSlot();
 
-                    i++
+                        i++
+                    }
                 }
             }
 
@@ -345,50 +344,39 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
          */
         impl_roomAdded: function (rid, invitedBy) {
 
-            if (rid) {
+            if (rid && invitedBy) {
+
+                // First check if we want to accept the room
+                var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
+
+                if(Cache.isBlockedUser(invitedBy)) {
+                    return;
+                }
+
+                if(!$rootScope.user.canBeInvitedByUser(invitedByUser)) {
+                    return;
+                }
 
                 // Does the room already exist?
-                var room = RoomCache.getOrCreateRoomWithID(rid);
+                var room = RoomStore.getOrCreateRoomWithID(rid);
+
+                room.invitedBy = invitedByUser;
 
                 room.on().then(function () {
 
-                    if (room) {
+                    // Here there are two main options
+                    // 1) We clicked on a room
+                    // 2) We were invited by someone else
 
-                        // TRAFFIC
-                        if(room.meta.isPublic)
+                    // If we clicked on the room then the invited by id is our id
+                    if($rootScope.user.meta.uid == invitedBy) {
+
+                        if(room.isPublic())
                             room.setStatusForUser($rootScope.user, bUserStatusMember);
-
-                        // If we've created this room just return
-                        if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
-
-                            if(invitedBy) {
-                                room.invitedBy = UserCache.getOrCreateUserWithID(invitedBy);
-                            }
-
-                            if(Cache.isBlockedUser(invitedBy)) {
-                                room.permanentDelete();
-                                return;
-                            }
-
-                            if(!$rootScope.user.canBeInvitedByUser(room.invitedBy)) {
-                                room.permanentDelete();
-                                return;
-                            }
-
-                            // If the user is a friend
-                            if(Cache.isFriendUID(invitedBy)) {
-                                // Set the user to member
-                                room.setStatusForUser($rootScope.user, bUserStatusMember);
-                            }
-                            else {
-                                // Join the room
-                                room.join(bUserStatusInvited);
-                            }
-                        }
 
                         // Insert the room
                         if(Cache.roomExists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
-                            Cache.addRoom(room);
+                            //Cache.addRoom(room);
                             RoomPositionManager.setDirty();
 
                             // We need to update:
@@ -397,24 +385,70 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomCache
                             $rootScope.$broadcast(bRoomOpenedNotification, room);
                         }
                         else {
-                            RoomPositionManager.insertRoom(room, 0, 300);
+                            //if(room.open) {
+                                RoomPositionManager.insertRoom(room, 0, 300);
+                            //}
                         }
 
                         room.messagesOn();
+
                     }
+                    else {
+
+                        // If the user is a friend
+                        if(Cache.isFriendUID(invitedBy)) {
+                            // Set the user to member
+                            room.setStatusForUser($rootScope.user, bUserStatusMember);
+                        }
+                        else {
+                            // Join the room
+                            room.join(bUserStatusInvited);
+                        }
+
+                    }
+
+
+
+                    // If we've created this room just return
+//                    if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
+//
+//                        if(invitedBy) {
+//                            room.invitedBy = UserStore.getOrCreateUserWithID(invitedBy);
+//                        }
+//
+//
+//                    }
+
+                    // Insert the room
+//                    if(Cache.roomExists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
+//                        Cache.addRoom(room);
+//                        RoomPositionManager.setDirty();
+//
+//                        // We need to update:
+//                        // - Room list
+//                        // - Chat bar
+//                        $rootScope.$broadcast(bRoomOpenedNotification, room);
+//                    }
+//                    else {
+//                        RoomPositionManager.insertRoom(room, 0, 300);
+//                    }
+
+                    //room.messagesOn();
                 });
             }
         },
 
         impl_roomRemoved: function (rid) {
 
-            var room = RoomCache.getRoomWithID(rid);
+            //var room = RoomCache.getRoomWithID(rid);
 
-            RoomPositionManager.removeRoom(room);
-            RoomPositionManager.autoPosition(300);
-            RoomPositionManager.updateAllRoomActiveStatus();
+            //RoomPositionManager.closeRoom(room);
 
-            $rootScope.$broadcast(bRoomClosedNotification, room);
+//            RoomPositionManager.removeRoom(room);
+//            RoomPositionManager.autoPosition(300);
+//            RoomPositionManager.updateAllRoomActiveStatus();
+//
+//            $rootScope.$broadcast(bRoomClosedNotification, room);
         }
 
     };

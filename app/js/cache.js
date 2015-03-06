@@ -48,9 +48,9 @@ myApp.factory('BeforeUnload', ['$window', function ($window) {
     return BeforeUnload.init();
 }]);
 
-myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'BeforeUnload',
+myApp.factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'BeforeUnload',
     function ($rootScope, $timeout, LocalStorage, User, BeforeUnload) {
-    var UserCache = {
+    var UserStore = {
 
         users: {},
 
@@ -117,12 +117,12 @@ myApp.factory('UserCache', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
         }
 
     };
-    return UserCache.init();
+    return UserStore.init();
 }]);
 
-myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload',
+myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload',
     function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload) {
-    var RoomCache = {
+    var RoomStore = {
 
         rooms: {},
 
@@ -201,7 +201,7 @@ myApp.factory('RoomCache', ['$rootScope', '$timeout', '$window', 'LocalStorage',
         }
 
     };
-    return RoomCache.init();
+    return RoomStore.init();
 }]);
 
 
@@ -230,6 +230,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
 
         addRoom: function (room) {
             if(!CCArray.contains(this.rooms, room)) {
+                room.open = true;
                 this.rooms.push(room);
             }
         },
@@ -239,6 +240,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
         },
 
         removeRoom: function (room) {
+            room.open = false;
             CCArray.remove(this.rooms, room);
         },
 
