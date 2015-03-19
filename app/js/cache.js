@@ -83,7 +83,7 @@ myApp.factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
         },
 
         buildUserWithID: function (uid) {
-            var user = User.buildUserWithID(uid);
+            var user = new User(uid);
             LocalStorage.updateUserFromStore(user);
             return user;
         },
@@ -120,8 +120,8 @@ myApp.factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
     return UserStore.init();
 }]);
 
-myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload',
-    function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload) {
+myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload', 'ArrayUtils',
+    function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload, ArrayUtils) {
     var RoomStore = {
 
         rooms: {},
@@ -131,6 +131,20 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
             BeforeUnload.addListener(this);
 
             return this;
+        },
+
+        /**
+         * Load the private rooms so they're available
+         * to the inbox list
+         */
+        loadPrivateRoomsToMemory: function () {
+            // Load private rooms
+            var rooms = LocalStorage.rooms;
+            for(var key in rooms) {
+                if(rooms.hasOwnProperty(key)) {
+                    this.getOrCreateRoomWithID(key);
+                }
+            }
         },
 
         beforeUnload: function () {
@@ -156,7 +170,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 
         buildRoomWithID: function (rid) {
 
-            var room = Room.newRoom(rid);
+            var room = new Room(rid);
 
 //            room.height = bChatRoomHeight;
 //            room.width = bChatRoomWidth;
@@ -192,12 +206,34 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
             for(var rid in this.rooms) {
                 if(this.rooms.hasOwnProperty(rid)) {
                     var room = this.rooms[rid];
-                    if(!room.meta.isPublic) {
+                    if(!room.isPublic() && !room.deleted) {
                         rooms.push(this.rooms[rid]);
                     }
                 }
             }
             return rooms;
+        },
+
+        getPrivateRoomsWithUsers: function (user1, user2) {
+            var rooms = [];
+            for(var key in this.rooms) {
+                if(this.rooms.hasOwnProperty(key)) {
+                    if(!this.rooms[key].isPublic()) {
+                        rooms.push(this.rooms[key]);
+                    }
+                }
+            }
+            rooms = ArrayUtils.getRoomsWithUsers(rooms, [user1, user2])
+            return ArrayUtils.roomsSortedByMostRecent(rooms);
+        },
+
+        inboxBadgeCount: function () {
+            var count = 0;
+            var rooms = this.getPrivateRooms();
+            for(var i = 0; i < rooms.length; i++) {
+                count += rooms[i].badge;
+            }
+            return count;
         }
 
     };
@@ -208,7 +244,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 /**
  * Temporary cache i.e. current rooms etc...
  */
-myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', function ($rootScope, $timeout, $window, LocalStorage) {
+myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootScope, $timeout, ArrayUtils) {
     var Cache = {
 
         // The user's active rooms
@@ -229,19 +265,19 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
          */
 
         addRoom: function (room) {
-            if(!CCArray.contains(this.rooms, room)) {
+            if(!ArrayUtils.contains(this.rooms, room)) {
                 room.open = true;
                 this.rooms.push(room);
             }
         },
 
         roomExists: function (room) {
-            return CCArray.contains(this.rooms, room);
+            return ArrayUtils.contains(this.rooms, room);
         },
 
         removeRoom: function (room) {
             room.open = false;
-            CCArray.remove(this.rooms, room);
+            ArrayUtils.remove(this.rooms, room);
         },
 
         activeRooms: function () {
@@ -262,24 +298,6 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
                 }
             }
             return ar;
-        },
-
-        getRoomWithOtherUser: function (user) {
-            var room;
-            var rooms = this.rooms;
-
-            for(var i = 0; i < rooms.length; i++) {
-                room = rooms[i];
-
-                // Only look at rooms that are private chats
-                // between only two people
-                if(room.userCount == 2 && !room.meta.isPublic) {
-                    if(room.users[user.meta.uid]) {
-                        return room;
-                    }
-                }
-            }
-            return null;
         },
 
         /**
@@ -401,6 +419,22 @@ myApp.factory('Cache', ['$rootScope', '$timeout', '$window', 'LocalStorage', fun
             $timeout(function() {
                 $rootScope.$digest();
             });
+        },
+
+        getPrivateRoomsWithUsers: function (user1, user2) {
+            var rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2])
+            return ArrayUtils.roomsSortedByMostRecent(rooms);
+        },
+
+        getPrivateRooms: function () {
+            var rooms = [];
+            for(var i = 0; i < this.rooms.length; i++) {
+                var room = this.rooms[i];
+                if(!room.isPublic()) {
+                    rooms.push(room);
+                }
+            }
+            return rooms;
         }
     };
 

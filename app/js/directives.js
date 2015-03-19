@@ -385,7 +385,7 @@ myApp.directive('userDropLocation', ['$rootScope', 'Room', function ($rootScope,
         elm.mouseup((function(e) {
             // Add the user to this chat
             if($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                Room.addUserToRoom(scope.room.meta.rid, $rootScope.userDrag.user, bUserStatusInvited);
+                Room.addUserToRoom(scope.room.meta.rid, $rootScope.userDrag.user, bUserStatusMember);
             }
         }).bind(this));
     };

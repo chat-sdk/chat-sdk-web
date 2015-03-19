@@ -1,12 +1,26 @@
 <div ng-controller="ChatSettingsController">
-    <div class="uk-vertical-align-middle uk-text-center uk-height-1-1 uk-width-1-1">
-        <form class="uk-panel uk-form">
-            <div class="uk-form-row cc-inner-margin">
-                <button class="uk-button" ng-click="saveTranscript()">Save Conversation</button>
-            </div>
-            <div class="uk-form-row cc-inner-margin">
-                <button class="uk-button" ng-click="copyTranscript()">Copy to clipboard</button>
-            </div>
-        </form>
-    </div>
+    <table class="uk-table">
+        <tr>
+            <td>Save conversation
+                <button class="uk-button uk-float-right" ng-click="saveTranscript()">
+                    <img ng-src="{{ ::img_24_save }}">
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>Copy to clipboard
+                <button class="uk-button uk-float-right" ng-click="copyTranscript()">
+                    <img ng-src="{{ ::img_24_copy }}">
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Leave room
+                <button class="uk-button uk-float-right uk-button-danger" ng-click="room.leaveAndClose()">
+                    <img ng-src="{{ ::img_24_cross }}">
+                </button>
+            </td>
+        </tr>
+    </table>
 </div>

@@ -322,15 +322,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                     // We have to call this so the Room position manager can
                     // calculate the offsets
                     if(room.open) {
-                        Cache.addRoom(room);
-                        RoomPositionManager.setDirty();
-
-                        room.slot = i;
-
-                        // Set the room's slot
-                        room.updateOffsetFromSlot();
-
-                        i++
+                        RoomPositionManager.insertRoom(room, i++, 0);
                     }
                 }
             }
@@ -349,6 +341,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                 // First check if we want to accept the room
                 var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
 
+                // This should never happen
                 if(Cache.isBlockedUser(invitedBy)) {
                     return;
                 }
@@ -362,78 +355,37 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
 
                 room.invitedBy = invitedByUser;
 
-                room.on().then(function () {
+                room.userDeletedDate().then(function(timestamp) {
 
-                    // Here there are two main options
-                    // 1) We clicked on a room
-                    // 2) We were invited by someone else
-
-                    // If we clicked on the room then the invited by id is our id
-                    if($rootScope.user.meta.uid == invitedBy) {
-
-                        if(room.isPublic())
-                            room.setStatusForUser($rootScope.user, bUserStatusMember);
-
-                        // Insert the room
-                        if(Cache.roomExists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
-                            //Cache.addRoom(room);
-                            RoomPositionManager.setDirty();
-
-                            // We need to update:
-                            // - Room list
-                            // - Chat bar
-                            $rootScope.$broadcast(bRoomOpenedNotification, room);
-                        }
-                        else {
-                            //if(room.open) {
-                                RoomPositionManager.insertRoom(room, 0, 300);
-                            //}
-                        }
-
-                        room.messagesOn();
-
-                    }
-                    else {
-
-                        // If the user is a friend
-                        if(Cache.isFriendUID(invitedBy)) {
-                            // Set the user to member
-                            room.setStatusForUser($rootScope.user, bUserStatusMember);
-                        }
-                        else {
-                            // Join the room
-                            room.join(bUserStatusInvited);
-                        }
-
+                    if(timestamp) {
+                       room.deleted = true;
                     }
 
+                    room.on().then(function () {
 
+                        // Here there are two main options
+                        // 1) We clicked on a room
+                        // 2) We were invited by someone else
+                        if($rootScope.user.meta.uid != invitedBy) {
 
-                    // If we've created this room just return
-//                    if(invitedBy && invitedBy !== $rootScope.user.meta.uid) {
-//
-//                        if(invitedBy) {
-//                            room.invitedBy = UserStore.getOrCreateUserWithID(invitedBy);
-//                        }
-//
-//
-//                    }
+                            //room.messagesOn();
 
-                    // Insert the room
-//                    if(Cache.roomExists(room) && !unORNull(room.slot) && !unORNull(room.offset)) {
-//                        Cache.addRoom(room);
-//                        RoomPositionManager.setDirty();
-//
-//                        // We need to update:
-//                        // - Room list
-//                        // - Chat bar
-//                        $rootScope.$broadcast(bRoomOpenedNotification, room);
-//                    }
-//                    else {
-//                        RoomPositionManager.insertRoom(room, 0, 300);
-//                    }
+                            // If the user is a friend
+                            if(Cache.isFriendUID(invitedBy)) {
+                                room.join(bUserStatusMember);
+                                // Set the user to member
+                                //room.setStatusForUser($rootScope.user, bUserStatusMember);
+                            }
+                            else {
+                                // Join the room
+                                room.join(bUserStatusMember);
+                            }
+                            // A room has been added
+                            $rootScope.$broadcast(bRoomAddedNotification);
+                        }
 
-                    //room.messagesOn();
+                        room.messagesOn(timestamp);
+                    });
                 });
             }
         },

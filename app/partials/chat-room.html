@@ -2,7 +2,7 @@
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{right: room.offset, height: (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location animate-room>
 
     <div class="cc-chat-box cc-shadow" ng-style="{height: room.height, width: room.width}" ng-hide="room.minimized"  >
-        <div class="cc-box-header cc-pointer" ng-style="{background: config.headerColor}">
+        <div class="cc-box-header cc-pointer" ng-style="{background: headerColor}">
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
                 <img ng-src="{{ ::img_30_minimize }}" />
             </a>
@@ -14,19 +14,19 @@
 
         <div class="cc-tab-container cc-bottom-shadow">
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'messages' ? {'border-bottom-color': config.headerColor} : null"
+                 ng-style="activeTab == 'messages' ? {'border-bottom-color': headerColor} : null"
                  ng-class="{selected: activeTab == 'messages'}"
                  ng-click="tabClicked('messages')">
                 MESSAGES
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
+                 ng-style="activeTab == 'users' ? {'border-bottom-color': headerColor} : null"
                  ng-class="{selected: activeTab == 'users'}"
                  ng-click="tabClicked('users')">
                 USERS
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'settings' ? {'border-bottom-color': config.headerColor} : null"
+                 ng-style="activeTab == 'settings' ? {'border-bottom-color': headerColor} : null"
                  ng-class="{selected: activeTab == 'settings'}"
                  ng-click="tabClicked('settings')">
                 SETTINGS
@@ -91,7 +91,7 @@
         <div class="cc-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
             <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.meta.name }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
-            <a ng-click="deleteRoom(room)" ><img ng-src="{{ ::img_40_cross }}" /></a>
+            <a ng-click="room.close()" ><img ng-src="{{ ::img_40_cross }}" /></a>
             <a ng-click="acceptInvitation()" ><img ng-src="{{ ::img_40_tick }}" /></a>
         </div>
     </div>
@@ -104,13 +104,13 @@
         <div class="cc-base-text">
             <div class="cc-inner">
                 <div class="uk-float-left cc-ellipsis cc-name cc-pointer">{{ room.name }}</div>
-                <a ng-click="deleteRoom(room)">
+                <a ng-click="room.close()">
                     <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_cross }}" disable-drag/>
                 </a>
                 <a ng-show="room.minimized">
                     <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_maximize }}" disable-drag/>
                 </a>
-                <div class="uk-float-right">{{ room.userCount }}</div>
+                <div class="uk-float-right">{{ room.onlineUserCount }}</div>
             </div>
         </div>
     </div>

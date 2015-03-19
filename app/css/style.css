@@ -355,8 +355,9 @@ div#cc-app .cc-room-list div.cc-last-message .cc-title {
     max-width: 30%;
 }
 
-div#cc-app .cc-room-list div.cc-last-message .cc-message {
+div#cc-app .cc-room-list div.cc-last-message span.cc-message {
     font-style: italic;
+    font-size: 0.95em;
 }
 
 div#cc-app .cc-room-list div.cc-badge {
@@ -726,7 +727,7 @@ div#cc-app .cc-bottom-shadow {
 
 div#cc-app .cc-tab-container {
     width: 100%;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
     overflow: hidden;
     background-color: rgba(255,255,255,0.8);
     box-sizing:content-box !important;
@@ -747,6 +748,14 @@ div#cc-app .cc-tab {
     cursor: pointer;
     transition: all 0.2s linear 0s;
     box-sizing: content-box !important;
+}
+
+div#cc-app .cc-tab-indicator {
+    background: #DDD;
+    color: #555;
+    border-radius: 5px;
+    font-size: 11px;
+    padding: 1px 4px 2px 3px;
 }
 
 div#cc-app .cc-tab:hover {

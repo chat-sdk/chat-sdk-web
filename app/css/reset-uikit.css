@@ -5567,3 +5567,78 @@ div#cc-app .uk-visible-hover-inline:hover .uk-invisible {
         page-break-after: avoid;
     }
 }
+
+/* ========================================================================
+   Component: Table
+ ========================================================================== */
+/*
+ * 1. Remove most spacing between table cells.
+ * 2. Block element behavior
+ * 3. Style
+ */
+div#cc-app .uk-table {
+  /* 1 */
+  border-collapse: collapse;
+  border-spacing: 0;
+  /* 2 */
+  width: 100%;
+  /* 3 */
+  margin-bottom: 15px;
+}
+/*
+ * Add margin if adjacent element
+ */
+* + .uk-table {
+  margin-top: 15px;
+}
+div#cc-app .uk-table th,
+div#cc-app .uk-table td {
+  padding: 8px 8px;
+}
+/*
+ * Set alignment
+ */
+div#cc-app .uk-table th {
+  text-align: left;
+}
+/* 
+div#cc-app .uk-table td {
+  vertical-align: top;
+}
+ */
+div#cc-app .uk-table thead th {
+  vertical-align: bottom;
+}
+/*
+ * Caption and footer
+ */
+div#cc-app .uk-table caption,
+div#cc-app .uk-table tfoot {
+  font-size: 12px;
+  font-style: italic;
+}
+div#cc-app .uk-table caption {
+  text-align: left;
+  color: #999999;
+}
+/* Sub-modifier: `uk-table-middle`
+ ========================================================================== */
+div#cc-app .uk-table-middle,
+div#cc-app .uk-table-middle td {
+  vertical-align: middle !important;
+}
+/* Modifier: `uk-table-striped`
+ ========================================================================== */
+div#cc-app .uk-table-striped tbody tr:nth-of-type(odd) {
+  background: #f5f5f5;
+}
+/* Modifier: `uk-table-condensed`
+ ========================================================================== */
+div#cc-app .uk-table-condensed td {
+  padding: 4px 8px;
+}
+/* Modifier: `uk-table-hover`
+ ========================================================================== */
+div#cc-app .uk-table-hover tbody tr:hover {
+  background: #eeeeee;
+}

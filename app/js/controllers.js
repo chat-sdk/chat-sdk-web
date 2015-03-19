@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager) {
 
     $scope.totalUserCount = 0;
 
@@ -102,7 +102,10 @@ myApp.controller('AppController', [
         $rootScope.img_30_sound_off = bImagesURL + 'cc-30-sound-off.png';
         $rootScope.img_30_clear_cache = bImagesURL + 'cc-30-clear-cache.png';
         $rootScope.img_30_cache_cleared = bImagesURL + 'cc-30-cache-cleared.png';
-    }
+        $rootScope.img_24_save = bImagesURL + 'cc-24-save.png';
+        $rootScope.img_24_copy = bImagesURL + 'cc-24-copy.png';
+        $rootScope.img_24_cross = bImagesURL + 'cc-24-cross.png';
+    };
 
     $scope.getUser = function () {
         return $rootScope.user;
@@ -277,16 +280,32 @@ myApp.controller('AppController', [
     $scope.userClicked = function (user) {
 
         // Is the user blocked?
-        if(user.blocked) {
+        if (user.blocked) {
             $scope.getUser().unblockUser(user);
         }
-        else if (user.online) {
-            Room.createPrivateRoom([user]);
+        else {
+            // Check to see if there's an open room with the two users
+            var rooms = Cache.getPrivateRoomsWithUsers($rootScope.user, user);
+            if (rooms.length) {
+                rooms[0].flashHeader();
+                // The room is already open! Do nothing
+                return;
+            }
+            else {
+                rooms = RoomStore.getPrivateRoomsWithUsers($rootScope.user, user);
+                if(rooms.length) {
+                    RoomPositionManager.insertRoom(rooms[0], 0 , 300);
+                    return;
+                }
+            }
+            Room.createPrivateRoom([user]).then(function (rid) {
+                var room = RoomStore.getOrCreateRoomWithID(rid);
+                RoomPositionManager.insertRoom(room, 0, 300);
+            }, function (error) {
+                console.log(error);
+            });
         }
-        //else if(user.blockingMe) {
-        //}
     };
-
 
     /**
      * Log the user out
@@ -459,7 +478,10 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', 'Log', 'RoomPositionManager', function($scope, $timeout, Auth, Cache, Utilities, Config, Screen, Log, RoomPositionManager) {
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', 'Log', 'RoomPositionManager', 'RoomStore',
+    function($scope, $timeout, Auth, Cache, Utilities, Config, Screen, Log, RoomPositionManager, RoomStore) {
+
+    $scope.inboxCount = 0;
 
     $scope.init = function () {
 
@@ -477,7 +499,7 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
         $scope.boxWidth = bMainBoxWidth;
 
         // We don't want people deleting rooms from this view
-        $scope.canDeleteRoom = false;
+        $scope.canCloseRoom = false;
 
         // When the user value changes update the user interface
         $scope.$on(bUserValueChangedNotification, function (user) {
@@ -491,6 +513,15 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
         $scope.$on(bScreenSizeChangedNotification, function () {
             Log.notification(bScreenSizeChangedNotification, "MainBoxController");
             $scope.updateMainBoxSize();
+        });
+
+        $scope.$on(bRoomBadgeChangedNotification, function () {
+            Log.notification(bRoomBadgeChangedNotification, "MainBoxController");
+            // Loop over rooms
+            $scope.inboxCount = RoomStore.inboxBadgeCount();
+            $timeout(function () {
+                $scope.$digest();
+            });
         });
 
     };
@@ -546,14 +577,22 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
         // Messages on is called by when we add the room to the user
         // If the room is already open do nothing!
         if(room.isOpen()) {
+            // Make the room flash
+            room.flashHeader();
             return;
         }
 
         if(room.isPublic()) {
-            room.join(bUserStatusMember);
+            // We always full leave a public room so we need to join again
+            room.join(bUserStatusMember).then((function ()
+            {
+                RoomPositionManager.insertRoom(room, 0, 300);
+
+            }).bind(this));
         }
         else {
-            // We're already a member so just open the room
+            // If the room is in our list then we're already a member
+            // since we never completely delete a room
             // TODO: Handle case where we've cancelled the room
             RoomPositionManager.insertRoom(room, 0, 300);
         }
@@ -869,6 +908,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                             $scope.showMainBox();
                         }
 
+                        $rootScope.$broadcast(bLoginCompleteNotification);
+
                     }, function(error) {
                         $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
                     });
@@ -937,8 +978,10 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'RoomPositionManager', 'Log', function($scope, $timeout, Auth, Screen, RoomPositionManager, Log) {
 
     $scope.showEmojis = false;
+    $scope.headerColor = $scope.config.headerColor;
 
     $scope.init = function (room) {
+
         $scope.input = {};
         $scope.room = room;
 
@@ -992,7 +1035,27 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
             }
         });
 
+        $scope.$on(bRoomFlashHeaderNotification, function (event, room) {
+            Log.notification(bRoomFlashHeaderNotification, 'CreateRoomController');
+            if(room == $scope.room) {
+                $scope.flashHeader();
+            }
+        });
+
     };
+
+    $scope.flashHeader = function () {
+        // Change the header color
+        $scope.headerColor = '#555555';
+        $timeout(function () {
+            $scope.$digest();
+        });
+        // Set another timeout
+        $timeout(function () {
+            $scope.headerColor = $scope.config.headerColor;
+            $scope.$digest();
+        }, 500);
+    }
 
     $scope.getZIndex = function () {
        // Make sure windows further to the right have a higher index
@@ -1015,10 +1078,6 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
 
     $scope.tabClicked = function (tab) {
         $scope.activeTab = tab;
-    };
-
-    $scope.deleteRoom = function(room) {
-        room.close();
     };
 
     $scope.chatBoxStyle = function () {
@@ -1060,7 +1119,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
     };
 
     $scope.acceptInvitation = function () {
-        $scope.room.setStatusForUser($scope.getUser(), bUserStatusMember);
+        $scope.room.acceptInvitation();
     };
 
     $scope.minimize = function () {
@@ -1135,7 +1194,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
     $scope.init = function () {
         $scope.boxWidth = bRoomListBoxWidth;
         $scope.boxHeight = bRoomListBoxHeight;
-        $scope.canDeleteRoom = true;
+        $scope.canCloseRoom = true;
 
         // Is the more box minimized?
         $scope.setMoreBoxMinimized(LocalStorage.getProperty(LocalStorage.moreMinimizedKey));
@@ -1164,7 +1223,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
             }
             // Otherwise sort them by number of users
             else {
-                return b.userCount - a.userCount;
+                return b.onlineUserCount - a.onlineUserCount;
             }
         });
 
@@ -1225,17 +1284,14 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
     $scope.setMoreBoxMinimized = function (minimized) {
         $scope.hideRoomList = minimized;
         LocalStorage.setProperty(LocalStorage.moreMinimizedKey, minimized);
-    }
-
-    $scope.deleteRoom = function(room) {
-        room.close();
     };
 
     $scope.init();
 
 }]);
 
-myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 'Log', function($scope, $timeout, Auth, Room, Log) {
+myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 'Log', 'RoomPositionManager', 'RoomStore',
+    function($scope, $timeout, Auth, Room, Log, RoomPositionManager, RoomStore) {
 
     $scope.init = function () {
         $scope.clearForm();
@@ -1248,22 +1304,31 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
     };
 
     $scope.createRoom  = function () {
+
+        var promise;
+
         // Is this a public room?
         if($scope.public) {
 
-            Room.createPublicRoom(
+            promise = Room.createPublicRoom(
                 $scope.room.name,
                 $scope.room.description
             );
         }
         else {
-            Room.createRoom(
+            promise = Room.createRoom(
                 $scope.room.name,
                 $scope.room.description,
                 $scope.room.invitesEnabled,
                 false
             );
         }
+
+        promise.then(function (rid) {
+            var room = RoomStore.getOrCreateRoomWithID(rid);
+            RoomPositionManager.insertRoom(room, 0, 300);
+        });
+
         $scope.back();
     };
 
@@ -1284,7 +1349,7 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
 
 }]);
 
-myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', function($scope, $timeout, Log) {
+myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', 'ArrayUtils', function($scope, $timeout, Log, ArrayUtils) {
 
     $scope.rooms = [];
     $scope.allRooms = [];
@@ -1294,7 +1359,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
         $scope.$on(bPublicRoomAddedNotification, (function (event, room) {
             Log.notification(bPublicRoomAddedNotification, 'PublicRoomsListController');
             // Add the room and sort the list
-            if(!CCArray.contains($scope.allRooms, room)) {
+            if(!ArrayUtils.contains($scope.allRooms, room)) {
                 $scope.allRooms.push(room);
             }
             $scope.updateList();
@@ -1304,7 +1369,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
         $scope.$on(bPublicRoomRemovedNotification, function (event, room) {
             Log.notification(bPublicRoomRemovedNotification, 'PublicRoomsListController');
 
-            CCArray.remove($scope.allRooms, room);
+            ArrayUtils.remove($scope.allRooms, room);
             $scope.updateList();
 
         });
@@ -1340,8 +1405,8 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
             }
             else {
 
-                var ac = a.onlineUserCount();
-                var bc = b.onlineUserCount();
+                var ac = a.getOnlineUserCount();
+                var bc = b.getOnlineUserCount();
 
                 //console.log("1: " + ac + ", 2: " + bc);
 
@@ -1355,7 +1420,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 
         });
 
-        $scope.rooms = CCArray.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
+        $scope.rooms = ArrayUtils.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
             return room.meta.name;
         });
 
@@ -1373,7 +1438,7 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', func
 
 }]);
 
-myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'RoomStore', function($scope, $timeout, Log, RoomStore) {
+myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'RoomStore', 'ArrayUtils', function($scope, $timeout, Log, RoomStore, ArrayUtils) {
 
     $scope.rooms = [];
     $scope.allRooms = [];
@@ -1391,30 +1456,28 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
             $scope.updateList();
         });
 
+        $scope.$on(bLoginCompleteNotification, function () {
+            Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+            RoomStore.loadPrivateRoomsToMemory();
+            $scope.updateList();
+        });
+
         // Update the list if the user count on a room changes
         $scope.$on(bRoomUpdatedNotification, $scope.updateList);
 
         $scope.$on(bLogoutNotification, $scope.updateList);
 
         $scope.$watchCollection('search', $scope.updateList);
+
     };
 
     $scope.updateList = function () {
 
-        Log.notification(bLogoutNotification, 'InboxRoomsListController');
-
         $scope.allRooms = RoomStore.getPrivateRooms();
 
-        $scope.allRooms.sort(function(a, b) {
+        $scope.allRooms = ArrayUtils.roomsSortedByMostRecent($scope.allRooms);
 
-            var at = a.meta.lastMessage ? a.meta.lastMessage.time : a.meta.created;
-            var bt = b.meta.lastMessage ? b.meta.lastMessage.time : b.meta.created;
-
-            return bt - at;
-
-        });
-
-        $scope.rooms = CCArray.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
+        $scope.rooms = ArrayUtils.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], function (room) {
             return room.meta.name;
         });
 

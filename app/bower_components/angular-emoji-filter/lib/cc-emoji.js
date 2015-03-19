@@ -187,6 +187,11 @@
 
     module.filter("emoji", function () {
         return function (input) {
+
+            if(!input) {
+                input = "";
+            }
+
             if(input == ':)' || input == ':-)') {
                 input = ':smile:';
             }

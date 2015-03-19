@@ -62,13 +62,19 @@ var bReadKey = 'read';
 var bMetaKey = "meta";
 var bImageKey = "image";
 var bTimeKey = "time";
+var bUserCountKey = "user-count";
 
 var bOnlineKey = "online";
 
 var bUserStatusOwner = 'owner';
 var bUserStatusMember = 'member';
-var bUserStatusInvited = 'invited';
+//var bUserStatusInvited = 'invited'; // Depricated
 var bUserStatusClosed = 'closed';
+
+var bRoomType1to1 = '1to1';
+var bRoomTypeGroup = 'group';
+var bRoomTypePublic = 'public';
+var bRoomTypeInvalid = 'invalid';
 
 // Tabs
 var bUsersTab = 'users';
@@ -107,7 +113,11 @@ var bUserValueChangedNotification = 'bUserValueChangedNotification';
 
 var bScreenSizeChangedNotification = 'bScreenSizeChangedNotification';
 
+var bLoginCompleteNotification = 'bLoginCompleteNotification';
 var bLogoutNotification = 'bLogoutNotification';
+
+var bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
+var bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
 
 // Chat width
 var bChatRoomWidth = 230;
@@ -246,8 +256,6 @@ function unORNull (object) {
     return object === 'undefined' || object == null;
 }
 
-
-
 function timeSince (timestamp) {
     if(unORNull(timestamp)) {
         return -1;
@@ -265,70 +273,99 @@ function timeSince (timestamp) {
     }
 }
 
-var CCArray = {
+var myApp = angular.module('myApp.utilities', []);
 
-    indexOf: function (array, id, getID) {
-        for(var i = 0; i < array.length; i++) {
-            if(id == getID(array[i])) {
-                return i;
-            }
-        }
-    },
+myApp.factory('ArrayUtils', [function () {
 
-    removeItem: function (array, id, getID) {
-        if(array.length == 0) {
-            return;
-        }
-        var i = this.indexOf(array, id, getID);
-        array.splice(i, 1);
-    },
+    return {
 
-    getItem: function (array, id, getID) {
-        if(array.length == 0) {
-            return null;
-        }
-        var i = this.indexOf(array, id, getID);
-        return array[i];
-    },
+        getRoomsWithUsers: function (rooms, users) {
 
-    contains: function (array, obj) {
-        for(var i = 0; i < array.length; i++) {
-            if(obj == array[i]) {
-                return true;
-            }
-        }
-        return false;
-    },
-
-    remove: function (array, obj) {
-        for(var i = 0; i < array.length; i++) {
-            if(obj == array[i]) {
-                array.splice(i, 1);
-                break;
-            }
-        }
-    },
-
-
-    filterByKey: function (array, key, getKey) {
-        if(!key || key.length == 0 || key === "") {
-            return array;
-        }
-        else {
-            // Loop over all users
-            var result = [];
-            var elm, t1, t2;
-            for(var i in array) {
-                elm = array[i];
-                // Switch to lower case and remove spaces
-                // to improve search results
-                t1 = key.toLowerCase().replace(/ /g,'');
-                t2 = getKey(elm).toLowerCase().replace(/ /g,'');
-                if(t2.substring(0, t1.length) == t1) {
-                    result.push(elm);
+            var roomsWithUsers = [];
+            for(var i = 0; i < rooms.length; i++) {
+                var room = rooms[i];
+                if(room.containsOnlyUsers(users)) {
+                    roomsWithUsers.push(room);
                 }
             }
-            return result;
+            return roomsWithUsers;
+        },
+
+        roomsSortedByMostRecent: function (rooms) {
+            rooms.sort(function (a, b) {
+                var at = a.meta.lastMessage ? a.meta.lastMessage.time : a.meta.created;
+                var bt = b.meta.lastMessage ? b.meta.lastMessage.time : b.meta.created;
+
+                return bt - at;
+            });
+            return rooms;
+        },
+
+        indexOf: function (array, id, getID) {
+            for(var i = 0; i < array.length; i++) {
+                if(id == getID(array[i])) {
+                    return i;
+                }
+            }
+        },
+
+        removeItem: function (array, id, getID) {
+            if(array.length == 0) {
+                return;
+            }
+            var i = this.indexOf(array, id, getID);
+            array.splice(i, 1);
+        },
+
+        getItem: function (array, id, getID) {
+            if(array.length == 0) {
+                return null;
+            }
+            var i = this.indexOf(array, id, getID);
+            return array[i];
+        },
+
+        contains: function (array, obj) {
+            for(var i = 0; i < array.length; i++) {
+                if(obj == array[i]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        remove: function (array, obj) {
+            for(var i = 0; i < array.length; i++) {
+                if(obj == array[i]) {
+                    array.splice(i, 1);
+                    break;
+                }
+            }
+        },
+
+        filterByKey: function (array, key, getKey) {
+            if(!key || key.length == 0 || key === "") {
+                return array;
+            }
+            else {
+                // Loop over all users
+                var result = [];
+                var elm, t1, t2;
+                for(var i = 0; i < array.length; i++) {
+
+                    elm = array[i];
+                    // Switch to lower case and remove spaces
+                    // to improve search results
+                    t1 = key.toLowerCase().replace(/ /g,'');
+                    t2 = getKey(elm).toLowerCase().replace(/ /g,'');
+                    if(t2.substring(0, t1.length) == t1) {
+                        result.push(elm);
+                    }
+                }
+                return result;
+            }
         }
     }
-};
+}]);
+
+

@@ -23,7 +23,7 @@
              ng-class="{selected: activeTab == 'inbox'}"
              ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('inbox')">
-            INBOX
+            INBOX <span ng-show="inboxCount > 0" class="cc-tab-indicator">{{ inboxCount }}</span>
         </div>
         <div class="cc-tab cc-tab-1-4"
              ng-class="{selected: activeTab == 'friends'}"
