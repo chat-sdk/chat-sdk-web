@@ -81,8 +81,8 @@ myApp.directive('scrollGlue', function(){
     }
 });
 
-myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', function ($timeout, RoomPositionManager, Log) {
-    return function (scope, elm, attrs) {
+myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
+    return function (scope, elm) {
 
         scope.$on(bAnimateRoomNotification, (function (event, args) {
 
@@ -90,10 +90,7 @@ myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', functi
 
             if(args.room == scope.room) {
 
-//                if(scope.room.slot == args.slot && !unORNull(args.slot)) {
-//                    return;
-//                }
-                if(!unORNull(args.slot)) {
+                if(!Utils.unORNull(args.slot)) {
                     scope.room.slot = args.slot;
                 }
 
@@ -115,12 +112,12 @@ myApp.directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', functi
                     });
                 };
 
-                if(!unORNull(args.duration) && args.duration == 0) {
+                if(!Utils.unORNull(args.duration) && args.duration == 0) {
                     completion();
                 }
                 else {
                     // Animate the chat room into position
-                    elm.animate({right: toOffset}, !unORNull(args.duration) ? args.duration : 300, function () {
+                    elm.animate({right: toOffset}, !Utils.unORNull(args.duration) ? args.duration : 300, function () {
                         completion();
                     });
                 }
@@ -385,7 +382,17 @@ myApp.directive('userDropLocation', ['$rootScope', 'Room', function ($rootScope,
         elm.mouseup((function(e) {
             // Add the user to this chat
             if($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                Room.addUserToRoom(scope.room.meta.rid, $rootScope.userDrag.user, bUserStatusMember);
+                // Is the user already a member of this room?
+
+                // This isn't really needed since it's handled with security rules
+                //if(!scope.room.userIsMember($rootScope.userDrag.user)) {
+                    Room.addUserToRoom(scope.room.meta.rid, $rootScope.userDrag.user, bUserStatusMember).then(function () {
+                        // Update the room's type
+                        scope.room.updateType();
+                    }, function (error) {
+                        $rootScope.showNotification(bNotificationTypeAlert, "Error", error.message, "Ok");
+                    });
+                //}
             }
         }).bind(this));
     };
@@ -521,3 +528,32 @@ myApp.directive('infiniteScroll', [
     }
 ]);
 
+myApp.directive('ccFlash', ['$timeout', function ($timeout) {
+    return function (scope, element, attr) {
+
+        var originalColor = element.css('background-color');
+        var originalTag = element.attr('cc-flash');
+        var animating = false;
+
+        scope.$on(bRoomFlashHeaderNotification, function (event, room, color, period, tag) {
+            if(scope.room == room && color && period && !animating) {
+                if(!tag || tag == originalTag) {
+                    animating = true;
+
+                    element.css('background-color', color);
+
+                    $timeout(function () {
+                        scope.$digest();
+                    });
+
+                    // Set another timeout
+                    $timeout(function () {
+                        element.css('background-color', originalColor);
+                        scope.$digest();
+                        animating = false;
+                    }, period);
+                }
+            }
+        });
+    };
+}]);

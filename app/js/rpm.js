@@ -74,7 +74,8 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             insertRoom: function (room, slot, duration) {
 
                 // If the room is already added then return
-                if(ArrayUtils.contains(this.rooms, room)) {
+                if(this.roomIsOpen(room)) {
+                    room.open = true;
                     return;
                 }
 
@@ -132,19 +133,33 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 //            //$rootScope.$broadcast(bRoomClosedNotification, room);
 //        },
 
+            roomIsOpen: function (room) {
+                return ArrayUtils.contains(this.rooms, room);
+            },
+
             closeRoom: function (room) {
 
-                if(!ArrayUtils.contains(this.rooms, room)) {
+                if(!this.roomIsOpen(room)) {
+                    room.open = false;
                     return;
                 }
 
                 Cache.removeRoom(room);
+
+                // Set the room width to default
+                room.setSizeToDefault();
 
                 this.autoPosition(300);
                 this.updateAllRoomActiveStatus();
 
                 $rootScope.$broadcast(bRoomClosedNotification, room);
 
+            },
+
+            closeAllRooms: function () {
+                for(var i = 0; i < this.rooms.length; i++) {
+                    this.closeRoom(this.rooms[i]);
+                }
             },
 
             autoSetSlots: function () {

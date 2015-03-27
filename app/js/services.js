@@ -263,7 +263,7 @@ myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
     return Visibility.init();
 }]);
 
-myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStorage', function ($rootScope, $q, $http, Config, LocalStorage) {
+myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStorage', 'Utils', function ($rootScope, $q, $http, Config, LocalStorage, Utils) {
 
     // API Levels
 
@@ -280,7 +280,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
         busy: false,
 
         getAPILevel: function () {
-            if(unORNull(CC_OPTIONS.singleSignOnAPILevel)) {
+            if(Utils.unORNull(CC_OPTIONS.singleSignOnAPILevel)) {
                 return 0;
             }
             else {
@@ -351,7 +351,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
                 var uid = LocalStorage.getProperty(LocalStorage.UIDKey);
 
                 // If any value isn't set or if the token is expired get a new token
-                if(!unORNull(token) && !unORNull(expiry) && !unORNull(uid) && !force) {
+                if(!Utils.unORNull(token) && !Utils.unORNull(expiry) && !Utils.unORNull(uid) && !force) {
                     // Time since token was refreshed...
                     var timeSince = new Date().getTime() - expiry;
                     // Longer than 20 days
@@ -441,11 +441,29 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
  * status
  * We need to call visibility to make sure it's initilized
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', function ($rootScope, $timeout, Visibility, Config, Cache) {
-    return {
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q', function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
+    var Presence = {
 
         user: null,
         inactiveTimerPromise: null,
+
+        // This gets increased when we log on and decreased when we log off
+        // it's a safeguard to make sure we can't increase the counter by
+        // more than one
+        //onlineCount: 0,
+
+        init: function () {
+            //this.onlineCount = LocalStorage.getProperty(LocalStorage.onlineCountKey);
+
+            //BeforeUnload.addListener(this);
+
+            return this;
+        },
+
+//        beforeUnload: function () {
+//            //LocalStorage.setProperty(LocalStorage.onlineCountKey, this.onlineCount);
+//            this.goOffline();
+//        },
 
         // Initialize the visibility service
         start: function (user) {
@@ -485,10 +503,14 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
 
         goOffline: function () {
             Firebase.goOffline();
+//            this.onlineCounterMinusOne().then(function () {
+//
+//            });
         },
 
         goOnline: function () {
             Firebase.goOnline();
+            //this.onlineCounterPlusOne();
             this.update();
         },
 
@@ -530,10 +552,43 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                 }
             }
         }
+
+//        onlineCounterPlusOne: function () {
+//
+//            var deferred = $q.defer();
+//
+//            if(this.onlineCount == 0) {
+//                var ref = Paths.onlineUserCountRef();
+//                ref.transaction((function(value) {
+//                    deferred.resolve();
+//                    this.onlineCount++;
+//                    return value + 1;
+//                }).bind(this));
+//            }
+//
+//            return deferred.promise;
+//        },
+//
+//        onlineCounterMinusOne: function () {
+//
+//            var deferred = $q.defer();
+//
+//            var ref = Paths.onlineUserCountRef();
+//            ref.transaction((function(value) {
+//                this.onlineCount--;
+//                return Math.max(value - 1, 0);
+//            }).bind(this), function () {
+//                deferred.resolve();
+//            });
+//
+//            return deferred.promise;
+//        }
     };
+
+    return Presence.init();
 }]);
 
-myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', function ($q, $http, $window, $timeout, Config, LocalStorage) {
+myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', function ($q, $http, $window, $timeout, Config, LocalStorage, Paths) {
     return {
 
         meta: {},
@@ -793,10 +848,10 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Utilities, Presence, API, StateManager, Time, Upgrade) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Utilities, Presence, API, StateManager, Time, Upgrade, Utils, Paths) {
 
-    var Auth = {
+    return {
 
         /**
          * Create a new AngularFire simple login object
@@ -904,6 +959,10 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     }
                 }
 
+                if(!imageURL) {
+                    imageURL = bDefaultAvatarProvider + "/" + user.meta.name + ".png";
+                }
+
                 // If they don't have a profile picture load it from the social network
                 setUserProperty('image', imageURL);
                 user.setImage(imageURL);
@@ -989,18 +1048,18 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
             var addRoom = (function (roomDef) {
                 // Validate the room
-                if(unORNull(roomDef.name) || roomDef.name.length === 0) {
+                if(Utils.unORNull(roomDef.name) || roomDef.name.length === 0) {
                     console.log("ERROR: Room name is undefined or of zero length");
                     return;
                 }
-                if(unORNull(roomDef.rid) || roomDef.rid.length === 0) {
+                if(Utils.unORNull(roomDef.rid) || roomDef.rid.length === 0) {
                     console.log("ERROR: Room rid is undefined or of zero length");
                     return;
                 }
-                if(unORNull(roomDef.description) || roomDef.description.length === 0) {
+                if(Utils.unORNull(roomDef.description) || roomDef.description.length === 0) {
                     console.log("WARNING: Room description is undefined or of zero length");
                 }
-                if(unORNull(roomDef.weight)) {
+                if(Utils.unORNull(roomDef.weight)) {
                     roomDef.weight = 100;
                 }
 
@@ -1009,7 +1068,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     roomDef.name,
                     roomDef.description,
                     true,
-                    true,
+                    bRoomTypePublic,
                     false,
                     roomDef.weight
                 );
@@ -1121,7 +1180,4 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             return deferred.promise;
         }
     };
-
-    return Auth;
-
 }]);

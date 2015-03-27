@@ -4,7 +4,10 @@
 
 var DEBUG = false;
 
-var bGroupChatDefaultName = "Private Chat";
+var bRoomDefaultNameEmpty = "Empty Chat";
+var bRoomDefaultName1To1 = "Private Chat";
+var bRoomDefaultNameGroup = "Group Chat";
+var bRoomDefaultNamePublic = "Public Chat";
 
 //
 // Used to load partials
@@ -45,6 +48,8 @@ var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
 var bPullURL = "//chat.deluge.co/server/pull.php";
 //var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
 
+var bDefaultAvatarProvider = "http://flathash.com";
+
 // Paths
 var bUsersPath = "users";
 var bUsersMetaPath = "usersMeta";
@@ -55,7 +60,7 @@ var bTypingPath = 'typing';
 var bFriendsPath = 'friends';
 var bBlockedPath = 'blocked';
 var bStatePath = 'state';
-//var bOnlineUserCountKey = 'onlineCount';
+var bOnlineUserCountKey = 'onlineUserCount';
 
 var bReadKey = 'read';
 
@@ -65,6 +70,7 @@ var bTimeKey = "time";
 var bUserCountKey = "user-count";
 
 var bOnlineKey = "online";
+var bTypeKey = "type";
 
 var bUserStatusOwner = 'owner';
 var bUserStatusMember = 'member';
@@ -76,10 +82,16 @@ var bRoomTypeGroup = 'group';
 var bRoomTypePublic = 'public';
 var bRoomTypeInvalid = 'invalid';
 
+var bUserAllowInvitesEveryone = 'Everyone';
+var bUserAllowInvitesFriends = 'Friends';
+var bUserAllowInvitesNobody = 'Nobody';
+
 // Tabs
 var bUsersTab = 'users';
 var bRoomsTab = 'rooms';
 var bFriendsTab = 'friends';
+
+var bProviderTypeCustom = 'custom';
 
 var bProfileSettingsBox = 'profileSettingsBox';
 
@@ -119,6 +131,15 @@ var bLogoutNotification = 'bLogoutNotification';
 var bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
 var bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
 
+var bOnlineUserAddedNotification = 'bOnlineUserAddedNotification';
+var bOnlineUserRemovedNotification = 'bOnlineUserRemovedNotification';
+
+var bUserBlockedNotification = 'bUserBlockedNotification';
+var bUserUnblockedNotification = 'bUserUnblockedNotification';
+
+var bFriendAddedNotification = 'bFriendAddedNotification';
+var bFriendRemovedNotification = 'bFriendRemovedNotification';
+
 // Chat width
 var bChatRoomWidth = 230;
 var bChatRoomHeight = 300;
@@ -138,142 +159,153 @@ var bMinute = 60;
 var bHour = bMinute * 60;
 var bDay = bHour * 24;
 
-var Paths = {
+var myApp = angular.module('myApp.utilities', []);
 
-    cid: null,
+myApp.factory('Paths', [function () {
 
-    setCID: function (cid) {
-        this.cid = cid;
-    },
+    return {
 
-    firebase: function () {
-        if(this.cid) {
-            return new Firebase(bFirebaseRef + this.cid);
-        }
-        else {
-            return new Firebase(bFirebaseRef);
-        }
-    },
+        cid: null,
 
-    usersRef: function () {
-        return this.firebase().child(bUsersPath);
-    },
+        setCID: function (cid) {
+            this.cid = cid;
+        },
 
-    timeRef: function (uid) {
-        return this.firebase().child(bTimeKey).child(uid);
-    },
+        firebase: function () {
+            if(this.cid) {
+                return new Firebase(bFirebaseRef + this.cid);
+            }
+            else {
+                return new Firebase(bFirebaseRef);
+            }
+        },
 
-    userRef: function (fid) {
-        return this.usersRef().child(fid);
-    },
+        usersRef: function () {
+            return this.firebase().child(bUsersPath);
+        },
 
-    userMetaRef: function (fid) {
-        return this.userRef(fid).child(bMetaKey);
-    },
+        timeRef: function (uid) {
+            return this.firebase().child(bTimeKey).child(uid);
+        },
 
-    userImageRef: function (fid) {
-        return this.userRef(fid).child(bImageKey);
-    },
+        userRef: function (fid) {
+            return this.usersRef().child(fid);
+        },
 
-    userStateRef: function (fid) {
-        return this.userRef(fid).child(bStatePath);
-    },
+        userMetaRef: function (fid) {
+            return this.userRef(fid).child(bMetaKey);
+        },
+
+        userImageRef: function (fid) {
+            return this.userRef(fid).child(bImageKey);
+        },
+
+        userStateRef: function (fid) {
+            return this.userRef(fid).child(bStatePath);
+        },
 
 //    userThumbnailRef: function (fid) {
 //        return this.userRef(fid).child(bThumbnailKey);
 //    },
 
-    userFriendsRef: function (fid) {
-        return this.userRef(fid).child(bFriendsPath);
-    },
+        userFriendsRef: function (fid) {
+            return this.userRef(fid).child(bFriendsPath);
+        },
 
-    userBlockedRef: function (fid) {
-        return this.userRef(fid).child(bBlockedPath);
-    },
+        userBlockedRef: function (fid) {
+            return this.userRef(fid).child(bBlockedPath);
+        },
 
-    onlineUsersRef: function () {
-        return this.firebase().child(bOnlineKey);
-    },
+        onlineUsersRef: function () {
+            return this.firebase().child(bOnlineKey);
+        },
 
-    onlineUserRef: function (fid) {
-        return this.onlineUsersRef().child(fid);
-    },
+        onlineUserRef: function (fid) {
+            return this.onlineUsersRef().child(fid);
+        },
 
-//    onlineUserCountRef: function () {
-//        return this.firebase().child(bOnlineUserCountKey);
-//    },
+        roomsRef: function () {
+            return this.firebase().child(bRoomsPath);
+        },
 
-    roomsRef: function () {
-        return this.firebase().child(bRoomsPath);
-    },
+        publicRoomsRef: function () {
+            return this.firebase().child(bPublicRoomsPath);
+        },
 
-    publicRoomsRef: function () {
-        return this.firebase().child(bPublicRoomsPath);
-    },
+        publicRoomRef: function (rid) {
+            return this.publicRoomsRef().child(rid);
+        },
 
-    publicRoomRef: function (rid) {
-        return this.publicRoomsRef().child(rid);
-    },
+        roomRef: function (fid) {
+            return this.roomsRef().child(fid);
+        },
 
-    roomRef: function (fid) {
-        return this.roomsRef().child(fid);
-    },
+        roomMetaRef: function (fid) {
+            return this.roomRef(fid).child(bMetaKey);
+        },
 
-    roomMetaRef: function (fid) {
-        return this.roomRef(fid).child(bMetaKey);
-    },
+        roomStateRef: function (fid) {
+            return this.roomRef(fid).child(bStatePath);
+        },
 
-    roomStateRef: function (fid) {
-        return this.roomRef(fid).child(bStatePath);
-    },
+        roomMessagesRef: function (fid) {
+            return this.roomRef(fid).child(bMessagesPath);
+        },
 
-    roomMessagesRef: function (fid) {
-        return this.roomRef(fid).child(bMessagesPath);
-    },
+        roomUsersRef: function (fid) {
+            return this.roomRef(fid).child(bUsersMetaPath);
+        },
 
-    roomUsersRef: function (fid) {
-        return this.roomRef(fid).child(bUsersMetaPath);
-    },
+        roomTypingRef: function (fid) {
+            return this.roomMetaRef(fid).child(bTypingPath);
+        },
 
-    roomTypingRef: function (fid) {
-        return this.roomMetaRef(fid).child(bTypingPath);
-    },
+        userRoomsRef: function (fid) {
+            return this.userRef(fid).child(bRoomsPath);
+        },
 
-    userRoomsRef: function (fid) {
-        return this.userRef(fid).child(bRoomsPath);
-    },
+        messageUsersRef: function (rid, mid) {
+            return this.messageRef(rid, mid).child(bUsersPath);
+        },
 
-    messageUsersRef: function (rid, mid) {
-        return this.messageRef(rid, mid).child(bUsersPath);
-    },
+        messageRef: function (rid, mid) {
+            return this.roomMessagesRef(rid).child(mid);
+        },
 
-    messageRef: function (rid, mid) {
-        return this.roomMessagesRef(rid).child(mid);
-    }
-};
-
-function unORNull (object) {
-    return object === 'undefined' || object == null;
-}
-
-function timeSince (timestamp) {
-    if(unORNull(timestamp)) {
-        return -1;
-    }
-    else {
-        var date =  new Date(timestamp);
-        var time = 0;
-        if(!date.now) {
-            time = date.getTime();
+        onlineUserCountRef: function () {
+            return this.firebase().child(bOnlineUserCountKey);
         }
-        else {
-            time = date.now();
-        }
-        return time * 1000;
-    }
-}
 
-var myApp = angular.module('myApp.utilities', []);
+    };
+}]);
+
+myApp.factory('Utils', [function () {
+
+    return {
+
+        unORNull: function (object) {
+            return object === 'undefined' || object == null;
+        },
+
+        timeSince: function (timestamp) {
+            if(this.unORNull(timestamp)) {
+                return -1;
+            }
+            else {
+                var date = new Date(timestamp);
+                var time = 0;
+                if (!date.now) {
+                    time = date.getTime();
+                }
+                else {
+                    time = date.now();
+                }
+                return time * 1000;
+            }
+        }
+    }
+
+}]);
 
 myApp.factory('ArrayUtils', [function () {
 
@@ -285,7 +317,9 @@ myApp.factory('ArrayUtils', [function () {
             for(var i = 0; i < rooms.length; i++) {
                 var room = rooms[i];
                 if(room.containsOnlyUsers(users)) {
-                    roomsWithUsers.push(room);
+                    if((users.length == 2 && room.type() == bRoomType1to1) || (users.length != 2 && room.type() == bRoomTypeGroup)) {
+                        roomsWithUsers.push(room);
+                    }
                 }
             }
             return roomsWithUsers;
@@ -364,6 +398,16 @@ myApp.factory('ArrayUtils', [function () {
                 }
                 return result;
             }
+        },
+
+        objectToArray: function (object) {
+            var array = [];
+            for(var key in object) {
+                if(object.hasOwnProperty(key)) {
+                    array.push(object[key]);
+                }
+            }
+            return array;
         }
     }
 }]);

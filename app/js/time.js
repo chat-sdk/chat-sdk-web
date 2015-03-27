@@ -3,7 +3,7 @@
  */
 var myApp = angular.module('myApp.time', []);
 
-myApp.factory('Time', ['$q', function ($q) {
+myApp.factory('Time', ['$q', 'Paths', function ($q, Paths) {
     return {
 
         localTime: null,

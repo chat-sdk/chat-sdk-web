@@ -99,18 +99,18 @@ myApp.factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
             }
         },
 
-        removeUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeUserWithID(user.meta.uid);
-            }
-        },
-
-        removeUserWithID: function (uid) {
-            if(uid) {
-                delete this.users[uid];
-                this.digest();
-            }
-        },
+//        removeUser: function (user) {
+//            if(user && user.meta && user.meta.uid) {
+//                this.removeUserWithID(user.meta.uid);
+//            }
+//        },
+//
+//        removeUserWithID: function (uid) {
+//            if(uid) {
+//                delete this.users[uid];
+//                this.digest();
+//            }
+//        },
 
         clear: function () {
             this.users = {};
@@ -126,6 +126,8 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 
         rooms: {},
 
+        roomsLoadedFromMemory: false,
+
         init: function () {
 
             BeforeUnload.addListener(this);
@@ -138,6 +140,12 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
          * to the inbox list
          */
         loadPrivateRoomsToMemory: function () {
+
+            if(this.roomsLoadedFromMemory || !$rootScope.user) {
+                return;
+            }
+            this.roomsLoadedFromMemory = true;
+
             // Load private rooms
             var rooms = LocalStorage.rooms;
             for(var key in rooms) {
@@ -171,6 +179,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
         buildRoomWithID: function (rid) {
 
             var room = new Room(rid);
+            room.associatedUserID = $rootScope.user.meta.uid;
 
 //            room.height = bChatRoomHeight;
 //            room.width = bChatRoomWidth;
@@ -202,11 +211,19 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
         },
 
         getPrivateRooms: function () {
+
+            if(!$rootScope.user) {
+                return [];
+            }
+
+            this.loadPrivateRoomsToMemory();
+
             var rooms = [];
             for(var rid in this.rooms) {
                 if(this.rooms.hasOwnProperty(rid)) {
                     var room = this.rooms[rid];
-                    if(!room.isPublic() && !room.deleted) {
+                    // Make sure that we only return private rooms for the current user
+                    if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.meta.uid) {
                         rooms.push(this.rooms[rid]);
                     }
                 }
@@ -244,7 +261,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
 /**
  * Temporary cache i.e. current rooms etc...
  */
-myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootScope, $timeout, ArrayUtils) {
+myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', function ($rootScope, $timeout, ArrayUtils, Utils) {
     var Cache = {
 
         // The user's active rooms
@@ -271,9 +288,9 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
             }
         },
 
-        roomExists: function (room) {
-            return ArrayUtils.contains(this.rooms, room);
-        },
+//        roomExists: function (room) {
+//            return ArrayUtils.contains(this.rooms, room);
+//        },
 
         removeRoom: function (room) {
             room.open = false;
@@ -308,6 +325,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
             if(user && user.meta && user.meta.uid) {
                 this.friends[user.meta.uid] = user;
                 user.friend = true;
+                $rootScope.$broadcast(bFriendAddedNotification);
             }
         },
 
@@ -319,7 +337,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
         },
 
         isFriendUID: function(uid) {
-            return !unORNull(this.friends[uid]);
+            return !Utils.unORNull(this.friends[uid]);
         },
 
         removeFriend: function (user) {
@@ -334,7 +352,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
                 if(user) {
                     user.friend = false;
                     delete this.friends[uid];
-                    this.digest();
+                    $rootScope.$broadcast(bFriendRemovedNotification);
                 }
             }
         },
@@ -347,11 +365,12 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
             if(user && user.meta && user.meta.uid) {
                 this.blockedUsers[user.meta.uid] = user;
                 user.blocked = true;
+                $rootScope.$broadcast(bUserBlockedNotification);
             }
         },
 
         isBlockedUser: function(uid) {
-            return !unORNull(this.blockedUsers[uid]);
+            return !Utils.unORNull(this.blockedUsers[uid]);
         },
 
         removeBlockedUserWithID: function (uid) {
@@ -360,7 +379,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
                 if(user) {
                     user.blocked = false;
                     delete this.blockedUsers[uid];
-                    this.digest();
+                    $rootScope.$broadcast(bUserUnblockedNotification);
                 }
             }
         },
@@ -374,7 +393,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
                 if(!$rootScope.user || user.meta.uid != $rootScope.user.meta.uid) {
                     user.online = true;
                     this.onlineUsers[user.meta.uid] = user;
-                    this.digest();
+                    $rootScope.$broadcast(bOnlineUserAddedNotification);
                     return true;
                 }
             }
@@ -393,13 +412,13 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
                 if(user) {
                     user.online = false;
                     delete this.onlineUsers[uid];
-                    this.digest();
+                    $rootScope.$broadcast(bOnlineUserRemovedNotification);
                 }
             }
         },
 
         isOnlineWithUID: function (uid) {
-            return !unORNull(this.onlineUsers[uid]);
+            return !Utils.unORNull(this.onlineUsers[uid]);
         },
 
         /**
@@ -407,22 +426,30 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', function ($rootS
          */
 
         clear: function () {
-            this.onlineUsers = {};
+
+            //this.onlineUsers = {};
+            // having the user.blocked is useful because it means
+            // that the partials don't have to call a function
+            // however when you logout you want the flags to be reset
+            for(var key in this.onlineUsers) {
+                if(this.onlineUsers.hasOwnProperty(key)) {
+                    this.onlineUsers[key].blocked = false;
+                    this.onlineUsers[key].friend = false;
+                }
+            }
+
             this.blockedUsers = {};
             this.friends = {};
             this.rooms = [];
 
-            this.digest();
-        },
-
-        digest: function () {
             $timeout(function() {
                 $rootScope.$digest();
             });
         },
 
+
         getPrivateRoomsWithUsers: function (user1, user2) {
-            var rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2])
+            var rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2]);
             return ArrayUtils.roomsSortedByMostRecent(rooms);
         },
 

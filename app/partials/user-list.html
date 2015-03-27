@@ -1,13 +1,13 @@
 <table class="uk-table">
     <span class="cc-section-header">{{ sectionHeader }}</span>
-    <tr ng-repeat="(id, aUser) in getUsers()" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
+    <tr ng-repeat="(id, aUser) in users" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
         <td style="position: relative" class="cc-row" ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'" draggable-user="user" ng-click="userClicked(aUser)">
 
             <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}"/>
 
             <div class="uk-float-left cc-user-name cc-user-name" ng-class="aUser.meta.description ? 'cc-show-status' : ''" >
                 <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.meta.name }}</div>
-                <div class="f16 uk-float-left cc-flag"  >
+                <div class="f16 uk-float-left cc-flag" ng-show="aUser.meta.country" >
                     <span class="flag {{ aUser.meta.country | lowercase }}"></span>
                 </div>
             </div>

@@ -1,8 +1,8 @@
 <!--The 30 in the height is to take account for the bottom bar-->
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{right: room.offset, height: (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location animate-room>
 
-    <div class="cc-chat-box cc-shadow" ng-style="{height: room.height, width: room.width}" ng-hide="room.minimized"  >
-        <div class="cc-box-header cc-pointer" ng-style="{background: headerColor}">
+    <div class="cc-chat-box cc-shadow" ng-style="{height: room.height, width: room.width}" ng-hide="room.minimized" >
+        <div class="cc-box-header cc-pointer" ng-style="{background: headerColor}" cc-flash="room-header">
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
                 <img ng-src="{{ ::img_30_minimize }}" />
             </a>
@@ -35,9 +35,8 @@
 
 
         <div ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" ng-style="{'height': room.height - 30 - 30}" stop-shake>
+            <ng-include ng-controller="UserListController" ng-show="activeTab == 'users'" src="baseURL + 'user-list.html'"></ng-include>
             <ng-include ng-show="activeTab == 'settings'" src="baseURL + 'chat-settings.html'"></ng-include>
-
-            <ng-include ng-show="activeTab == 'users'" src="baseURL + 'user-list.html'"></ng-include>
         </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->

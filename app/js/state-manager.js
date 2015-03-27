@@ -4,7 +4,7 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', function ($rootScope, User, Cache, UserStore) {
+myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'Paths', function ($rootScope, User, Cache, UserStore, Paths) {
     return {
 
         isOn: false,
@@ -67,7 +67,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', fu
     }
 }]);
 
-myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', function ($rootScope, Room, RoomStore) {
+myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths', function ($rootScope, Room, RoomStore, Paths) {
     return {
         on: function () {
             var publicRoomsRef = Paths.publicRoomsRef();
@@ -113,8 +113,8 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', functi
 /**
  * This should really be called the CurrentUserConnector
  */
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector',
-    function ($rootScope, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector) {
+myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths',
+    function ($rootScope, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths) {
     return {
 
         isOn: false,
@@ -269,6 +269,12 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
             blockedUsersRef.off('child_added');
             blockedUsersRef.off('child_removed');
 
+            // Switch the rooms off
+            for(var i = 0; i < Cache.rooms.length; i++) {
+                var room = Cache.rooms[i];
+                room.off();
+            }
+
         },
 
         impl_blockedAdded: function (snapshot) {
@@ -326,7 +332,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                     }
                 }
             }
-
+            RoomPositionManager.updateRoomPositions(null, 0);
             RoomPositionManager.updateAllRoomActiveStatus();
         },
 
@@ -337,10 +343,10 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
         impl_roomAdded: function (rid, invitedBy) {
 
             if (rid && invitedBy) {
-
-                // First check if we want to accept the room
                 var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
 
+
+                // First check if we want to accept the room
                 // This should never happen
                 if(Cache.isBlockedUser(invitedBy)) {
                     return;
@@ -352,6 +358,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
 
                 // Does the room already exist?
                 var room = RoomStore.getOrCreateRoomWithID(rid);
+                room.deleted = false;
 
                 room.invitedBy = invitedByUser;
 
@@ -380,8 +387,16 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                                 // Join the room
                                 room.join(bUserStatusMember);
                             }
+
                             // A room has been added
                             $rootScope.$broadcast(bRoomAddedNotification);
+                        }
+
+                        // Maybe we refreshed the page so we were
+                        // automatically removed from the room
+                        // Add us back in
+                        if(room.isPublic()) {
+                            Room.addUserToRoom(room.meta.rid, $rootScope.user, bUserStatusMember, bRoomTypePublic);
                         }
 
                         room.messagesOn(timestamp);

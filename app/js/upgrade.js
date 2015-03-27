@@ -3,7 +3,7 @@
  */
 var myApp = angular.module('myApp.upgrade', []);
 
-myApp.factory('Upgrade', ['$q', function ($q) {
+myApp.factory('Upgrade', ['$q', 'Paths', function ($q, Paths) {
     return {
         // This should be called after the user has selected
         update_user_to_1_0_5: function (user) {

@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths) {
 
     $scope.totalUserCount = 0;
 
@@ -44,7 +44,6 @@ myApp.controller('AppController', [
         if($rootScope.singleSignOnEnabled) {
             Paths.firebase().unauth();
         }
-
 
         var loginURL = CC_OPTIONS.loginURL;
         if(loginURL && loginURL.length > 0) {
@@ -227,7 +226,7 @@ myApp.controller('AppController', [
 
     $scope.isBlocked = function (user) {
         if(user) {
-            return !unORNull(Cache.blockedUsers[user.meta.uid]);
+            return !Utils.unORNull(Cache.blockedUsers[user.meta.uid]);
         }
         return false;
     };
@@ -280,7 +279,7 @@ myApp.controller('AppController', [
     $scope.userClicked = function (user) {
 
         // Is the user blocked?
-        if (user.blocked) {
+        if (Cache.isBlockedUser(user.meta.uid)) {
             $scope.getUser().unblockUser(user);
         }
         else {
@@ -405,7 +404,7 @@ myApp.controller('AppController', [
                         y = (height - width)/2;
                     }
 
-                    var size = width - 2 * x;
+                    //var size = width - 2 * x;
 
                     // First rescale the image to be square
                     canvas.width = max_size;
@@ -453,7 +452,7 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
         $scope.$on(bRoomOpenedNotification, $scope.updateList);
         $scope.$on(bRoomClosedNotification, $scope.updateList);
 
-        $scope.$on(bUpdateRoomActiveStatusNotification, function (event, room) {
+        $scope.$on(bUpdateRoomActiveStatusNotification, function () {
             Log.notification(bUpdateRoomActiveStatusNotification, 'ChatBarController');
             $scope.updateList();
         });
@@ -478,8 +477,8 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'Utilities', 'Config', 'Screen', 'Log', 'RoomPositionManager', 'RoomStore',
-    function($scope, $timeout, Auth, Cache, Utilities, Config, Screen, Log, RoomPositionManager, RoomStore) {
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'ArrayUtils', 'Config', 'Screen', 'Log', 'RoomPositionManager', 'RoomStore',
+    function($scope, $timeout, Auth, Cache, ArrayUtils, Config, Screen, Log, RoomPositionManager, RoomStore) {
 
     $scope.inboxCount = 0;
 
@@ -502,7 +501,7 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
         $scope.canCloseRoom = false;
 
         // When the user value changes update the user interface
-        $scope.$on(bUserValueChangedNotification, function (user) {
+        $scope.$on(bUserValueChangedNotification, function () {
             Log.notification(bUserValueChangedNotification, "MainBoxController");
             $timeout(function () {
                 $scope.$digest();
@@ -517,13 +516,20 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
 
         $scope.$on(bRoomBadgeChangedNotification, function () {
             Log.notification(bRoomBadgeChangedNotification, "MainBoxController");
-            // Loop over rooms
-            $scope.inboxCount = RoomStore.inboxBadgeCount();
-            $timeout(function () {
-                $scope.$digest();
-            });
+            $scope.updateInboxCount();
         });
 
+        $scope.$on(bLoginCompleteNotification, function () {
+            Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+            $scope.updateInboxCount();
+        });
+    };
+
+    $scope.updateInboxCount = function () {
+        $scope.inboxCount = RoomStore.inboxBadgeCount();
+        $timeout(function () {
+            $scope.$digest();
+        });
     };
 
     $scope.updateMainBoxSize = function () {
@@ -562,15 +568,15 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
     };
 
     /**
-     * Return a list of users filtered by the search box
+     * Return a list of friends filtered by the search box
      * @return A list of users who's names meet the search text
      */
-    $scope.getUsers = function () {
+    $scope.getAllUsers = function () {
+        return ArrayUtils.objectToArray(Cache.friends);
+    };
 
-        // Filter online users to remove users that are blocking us
-        var users = Cache.onlineUsers;
-
-        return Utilities.filterByName(Cache.onlineUsers, $scope.search[$scope.activeTab]);
+    $scope.searchKeyword = function () {
+        return $scope.search[$scope.activeTab];
     };
 
     $scope.roomClicked = function (room) {
@@ -588,7 +594,9 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
             {
                 RoomPositionManager.insertRoom(room, 0, 300);
 
-            }).bind(this));
+            }).bind(this), function (error) {
+                console.log(error);
+            });
         }
         else {
             // If the room is in our list then we're already a member
@@ -601,8 +609,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'U
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager) {
 
     /**
      * Initialize the login controller
@@ -636,8 +644,15 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                     }
                 }
                 else {
-                    // Login was successful so log the user in given their ID
-                    $scope.handleUserLogin(authData);
+                    // Single sign on has been disabled but the token is still valid
+                    if(authData.provider == bProviderTypeCustom) {
+                        $scope.logout();
+                    }
+                    else {
+
+                        // Login was successful so log the user in given their ID
+                        $scope.handleUserLogin(authData, false);
+                    }
                 }
 
             } else {
@@ -687,7 +702,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 } else {
 
                     $rootScope.auth = result.auth;
-                    $rootScope.auth.provider = 'custom';
+                    $rootScope.auth.provider = bProviderTypeCustom;
                     $rootScope.auth.thirdPartyData = data;
 
                     if(result) {
@@ -703,15 +718,13 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 }
             }).bind(this));
 
-            //$scope.logout();
-
-        }).bind(this), function (error) {
+        }).bind(this), function () {
             $scope.logout();
         });
-    }
+    };
 
     $scope.setError = function (message) {
-        $scope.showError = !unORNull(message);
+        $scope.showError = !Utils.unORNull(message);
         $scope.errorMessage = message;
     };
 
@@ -734,22 +747,34 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         //
         Presence.stop();
 
+        if($rootScope.user) {
+            StateManager.userOff($rootScope.user.meta.uid);
+        }
+
+        StateManager.off();
+
+        RoomPositionManager.closeAllRooms();
+
         // Nullify the user
         $rootScope.user = null;
 
         // Clear the cache down
         Cache.clear();
 
+
         // Allow the user to log back in
         $scope.showLoginBox();
 
-        //
+        // Set all current rooms off
+
         $scope.hideNotification();
 
         $scope.email = "";
         $scope.password = "";
 
         $rootScope.$broadcast(bLogoutNotification);
+
+        LocalStorage.clearToken();
 
         $timeout(function () {
             $rootScope.$digest();
@@ -781,7 +806,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         // Hide the overlay
         $scope.showNotification(bNotificationTypeWaiting, "Logging in");
 
-        var handleResult = function (error, authData) {
+        var handleResult = function (error) {
             if(error) {
                 $scope.hideNotification();
                 $scope.handleLoginError(error);
@@ -879,7 +904,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
      * Bind the user to Firebase
      * Using the user's authentcation information create
      * a three way binding to the user property
-     * @param {Obj} the User object from Firebase authentication
+     * @param userData - User object from Firebase authentication
+     * @param firstLogin - Has the user just signed up?
      */
 
     $scope.handleUserLogin = function (userData, firstLogin) {
@@ -936,7 +962,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
      * Handle a login error
      * Show a red warning box in the UI with the
      * error message
-     * @param {Obj} the error returned from Firebase
+     * @param error - error returned from Firebase
      */
     $scope.handleLoginError = function (error) {
 
@@ -975,7 +1001,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'RoomPositionManager', 'Log', function($scope, $timeout, Auth, Screen, RoomPositionManager, Log) {
+myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils',
+    function($scope, $timeout, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils) {
 
     $scope.showEmojis = false;
     $scope.headerColor = $scope.config.headerColor;
@@ -1034,28 +1061,7 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
                 digest();
             }
         });
-
-        $scope.$on(bRoomFlashHeaderNotification, function (event, room) {
-            Log.notification(bRoomFlashHeaderNotification, 'CreateRoomController');
-            if(room == $scope.room) {
-                $scope.flashHeader();
-            }
-        });
-
     };
-
-    $scope.flashHeader = function () {
-        // Change the header color
-        $scope.headerColor = '#555555';
-        $timeout(function () {
-            $scope.$digest();
-        });
-        // Set another timeout
-        $timeout(function () {
-            $scope.headerColor = $scope.config.headerColor;
-            $scope.$digest();
-        }, 500);
-    }
 
     $scope.getZIndex = function () {
        // Make sure windows further to the right have a higher index
@@ -1147,32 +1153,39 @@ myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'Room
         $scope.boxWasDragged = true;
     };
 
-    // TODO: Need to refactor this!
-    $scope.getUsers = function () {
-
-        var users = $scope.room.getUsers();
-        // Add the users to an array
-        var array = [];
-        for(var key in users) {
-            if(users.hasOwnProperty(key)) {
-                array.push(users[key]);
-            }
-        }
-        // Sort the array
-        array.sort(function (a, b) {
-            a = unORNull(a.online) ? false : a.online;
-            b = unORNull(b.online) ? false : b.online;
-
-            if(a == b) {
-                return 0;
-            }
-            else {
-                return a == true ? -1 : 1;
-            }
-        });
-
-        return array;
+    $scope.getAllUsers = function () {
+        return ArrayUtils.objectToArray($scope.room.getUsers());
     };
+
+    $scope.searchKeyword = function () {
+        return null;
+    };
+
+//    $scope.getUsers = function () {
+//
+//        var users = $scope.room.getUsers();
+//        // Add the users to an array
+//        var array = [];
+//        for(var key in users) {
+//            if(users.hasOwnProperty(key)) {
+//                array.push(users[key]);
+//            }
+//        }
+//        // Sort the array
+//        array.sort(function (a, b) {
+//            a = Utils.unORNull(a.online) ? false : a.online;
+//            b = Utils.unORNull(b.online) ? false : b.online;
+//
+//            if(a == b) {
+//                return 0;
+//            }
+//            else {
+//                return a == true ? -1 : 1;
+//            }
+//        });
+//
+//        return array;
+//    };
 
     $scope.setTyping = function (typing) {
         if(typing) {
@@ -1190,6 +1203,7 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 
     $scope.rooms = [];
     $scope.moreChatsMinimized = true;
+    $scope.roomBackgroundColor = '#FFF';
 
     $scope.init = function () {
         $scope.boxWidth = bRoomListBoxWidth;
@@ -1203,6 +1217,8 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
         $scope.$on(bUpdateRoomActiveStatusNotification, $scope.updateList);
         $scope.$on(bRoomUpdatedNotification, $scope.updateList);
         $scope.$on(bLogoutNotification, $scope.updateList);
+
+
     };
 
     $scope.updateList = function () {
@@ -1261,10 +1277,15 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
                 room.setOffset(offset);
                 room.width = width;
                 room.height = height;
+                //room.setSizeToDefault();
                 room.setActive(true);
                 room.badge = null;
                 room.minimized = false;
                 room.slot = slot;
+
+//                RoomPositionManager.setDirty();
+//                RoomPositionManager.updateRoomPositions(room, 0);
+//                RoomPositionManager.updateAllRoomActiveStatus();
 
                 break;
             }
@@ -1293,63 +1314,65 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 'Log', 'RoomPositionManager', 'RoomStore',
     function($scope, $timeout, Auth, Room, Log, RoomPositionManager, RoomStore) {
 
-    $scope.init = function () {
-        $scope.clearForm();
+        $scope.public = false;
 
-        $scope.$on(bShowCreateChatBox, function () {
-            Log.notification(bShowCreateChatBox, 'CreateRoomController');
-            $scope.focusName = true;
-        });
+        $scope.init = function () {
+            $scope.clearForm();
 
-    };
+            $scope.$on(bShowCreateChatBox, function () {
+                Log.notification(bShowCreateChatBox, 'CreateRoomController');
+                $scope.focusName = true;
+            });
 
-    $scope.createRoom  = function () {
-
-        var promise;
-
-        // Is this a public room?
-        if($scope.public) {
-
-            promise = Room.createPublicRoom(
-                $scope.room.name,
-                $scope.room.description
-            );
-        }
-        else {
-            promise = Room.createRoom(
-                $scope.room.name,
-                $scope.room.description,
-                $scope.room.invitesEnabled,
-                false
-            );
-        }
-
-        promise.then(function (rid) {
-            var room = RoomStore.getOrCreateRoomWithID(rid);
-            RoomPositionManager.insertRoom(room, 0, 300);
-        });
-
-        $scope.back();
-    };
-
-    $scope.back  = function () {
-        $scope.clearForm();
-        $scope.showMainBox();
-    };
-
-    $scope.clearForm = function () {
-        $scope.room = {
-            invitesEnabled: false,
-            name: null,
-            description: null
         };
-    };
 
-    $scope.init();
+        $scope.createRoom  = function () {
+
+            var promise;
+
+            // Is this a public room?
+            if($scope.public) {
+
+                promise = Room.createPublicRoom(
+                    $scope.room.name,
+                    $scope.room.description
+                );
+            }
+            else {
+                promise = Room.createRoom(
+                    $scope.room.name,
+                    $scope.room.description,
+                    $scope.room.invitesEnabled,
+                    false
+                );
+            }
+
+            promise.then(function (rid) {
+                var room = RoomStore.getOrCreateRoomWithID(rid);
+                RoomPositionManager.insertRoom(room, 0, 300);
+            });
+
+            $scope.back();
+        };
+
+        $scope.back  = function () {
+            $scope.clearForm();
+            $scope.showMainBox();
+        };
+
+        $scope.clearForm = function () {
+            $scope.room = {
+                invitesEnabled: false,
+                name: null,
+                description: null
+            };
+        };
+
+        $scope.init();
 
 }]);
 
-myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', 'ArrayUtils', function($scope, $timeout, Log, ArrayUtils) {
+myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', 'ArrayUtils', 'Utils', function($scope, $timeout, Log, ArrayUtils, Utils) {
 
     $scope.rooms = [];
     $scope.allRooms = [];
@@ -1389,16 +1412,16 @@ myApp.controller('PublicRoomsListController', ['$scope', '$timeout', 'Log', 'Arr
 
         $scope.allRooms.sort(function(a, b) {
 
-            var au = unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
-            var bu = unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+            var au = Utils.unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
+            var bu = Utils.unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
 
             if(au != bu) {
                 return au ? 1 : -1;
             }
 
             // Weight
-            var aw = unORNull(a.meta.weight) ? 100 : a.meta.weight;
-            var bw = unORNull(b.meta.weight) ? 100 : b.meta.weight;
+            var aw = Utils.unORNull(a.meta.weight) ? 100 : a.meta.weight;
+            var bw = Utils.unORNull(b.meta.weight) ? 100 : b.meta.weight;
 
             if(aw != bw) {
                 return aw - bw;
@@ -1445,13 +1468,13 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
 
     $scope.init = function () {
 
-        $scope.$on(bRoomAddedNotification, (function (event, room) {
+        $scope.$on(bRoomAddedNotification, (function () {
             Log.notification(bRoomAddedNotification, 'InboxRoomsListController');
             $scope.updateList();
 
         }).bind(this));
 
-        $scope.$on(bRoomRemovedNotification, function (event, room) {
+        $scope.$on(bRoomRemovedNotification, function () {
             Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
             $scope.updateList();
         });
@@ -1490,28 +1513,125 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
 
 }]);
 
-myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', function($scope, Cache, Utilities) {
+myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'Cache', 'ArrayUtils', function($scope, $timeout, Log, Cache, ArrayUtils) {
 
-    $scope.init = function (header) {
-        $scope.sectionHeader = header;
+    $scope.users = [];
+    $scope.allUsers = [];
+
+    $scope.init = function () {
+
+        $scope.$on(bOnlineUserAddedNotification, (function () {
+            Log.notification(bOnlineUserAddedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+
+        }).bind(this));
+
+        $scope.$on(bOnlineUserRemovedNotification, function () {
+            Log.notification(bOnlineUserRemovedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bUserBlockedNotification, function () {
+            Log.notification(bUserBlockedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bUserUnblockedNotification, function () {
+            Log.notification(bUserUnblockedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bFriendAddedNotification, function () {
+            Log.notification(bFriendAddedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bFriendRemovedNotification, function () {
+            Log.notification(bFriendAddedNotification, 'OnlineUsersListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bLogoutNotification, $scope.updateList);
+
+        $scope.$watchCollection('search', $scope.updateList);
+
     };
 
-    $scope.getUsers = function() {
+    $scope.updateList = function () {
 
-        // Filter rooms by search text
-        var friends = Utilities.filterByName(Cache.friends, $scope.search.text);
-        // Add the friends to an array
-        var array = [];
+        // Filter online users to remove users that are blocking us
+        $scope.allUsers = ArrayUtils.objectToArray(Cache.onlineUsers);
+        $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.search[$scope.activeTab], function (user) {
+            return user.meta.name;
+        });
 
-        for(var key in friends) {
-            if (friends.hasOwnProperty(key)) {
-                array.push(friends[key]);
+        $timeout(function(){
+            $scope.$digest();
+        });
+    };
+
+    $scope.init();
+
+}]);
+
+myApp.controller('UserListController', ['$scope', '$timeout', 'Cache', 'ArrayUtils', 'Log', function($scope, $timeout, Cache, ArrayUtils, Log) {
+
+    $scope.users = [];
+    $scope.allUsers = [];
+
+    $scope.init = function () {
+
+        $scope.$on(bFriendAddedNotification, function () {
+            Log.notification(bFriendAddedNotification, 'UserListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bFriendRemovedNotification, function () {
+            Log.notification(bFriendAddedNotification, 'UserListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bUserBlockedNotification, function () {
+            Log.notification(bUserBlockedNotification, 'UserListController');
+            $scope.updateList();
+        });
+
+        $scope.$on(bUserUnblockedNotification, function () {
+            Log.notification(bUserUnblockedNotification, 'UserListController');
+            $scope.updateList();
+        });
+
+        // TODO: A bit hacky
+        $scope.$on(bRoomUpdatedNotification, function (event, room) {
+            Log.notification(bRoomUpdatedNotification, 'UserListController');
+            if(room == $scope.room) {
+                $scope.updateList();
             }
+        });
+
+        $scope.$on(bLogoutNotification, $scope.updateList);
+
+        $scope.$watchCollection('search', $scope.updateList);
+
+    };
+
+    $scope.updateList = function () {
+
+        // Filter online users to remove users that are blocking us
+        $scope.allUsers = $scope.getAllUsers();
+
+        if($scope.searchKeyword()) {
+            $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.searchKeyword(), function (user) {
+                return user.meta.name;
+            });
+        }
+        else {
+            $scope.users = $scope.allUsers;
         }
 
         // Sort the array first by who's online
         // then alphabetically
-        array.sort(function (a, b) {
+        $scope.users.sort(function (a, b) {
             // Sort by who's online first then alphabetcially
             var aOnline = Cache.onlineUsers[a.meta.uid];
             var bOnline = Cache.onlineUsers[b.meta.uid];
@@ -1527,16 +1647,17 @@ myApp.controller('FriendsListController', ['$scope', 'Cache', 'Utilities', funct
             }
         });
 
-        // Filter by search term
-        array = Utilities.filterByName(array, $scope.search[$scope.activeTab]);
-
-        return array;
+        $timeout(function(){
+            $scope.$digest();
+        });
     };
+
+    $scope.init();
 
 }]);
 
-myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', 'LocalStorage',
-    function($scope, Auth, Config, SoundEffects, Log, LocalStorage) {
+myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', 'LocalStorage', 'Paths',
+    function($scope, Auth, Config, SoundEffects, Log, LocalStorage, Paths) {
 
     $scope.ref = null;
     $scope.muted = false;
@@ -1567,7 +1688,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
 
         // When the box will be opened we need to add a listener to the
         // user
-        $scope.$on(bShowProfileSettingsBox, (function (event, args) {
+        $scope.$on(bShowProfileSettingsBox, (function () {
 
             Log.notification(bShowProfileSettingsBox, 'ProfileSettingsController');
 
@@ -1581,7 +1702,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
                 // Create a firebase ref to the user
                 $scope.ref = Paths.userMetaRef($scope.getUser().meta.uid);
 
-                $scope.ref.on('value', function (snapshot) {
+                $scope.ref.on('value', function () {
 
                     $scope.validate();
 

@@ -70,7 +70,7 @@ myApp.factory('WebStorage', ['$window', function ($window) {
     return WebStorage.init();
 }]);
 
-myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', function ($rootScope, $timeout, WebStorage) {
+myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', function ($rootScope, $timeout, WebStorage, Utils) {
     var LocalStorage = {
 
         mainMinimizedKey: 'cc_main_minimized',
@@ -86,6 +86,8 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', function 
 
         roomsKey: 'cc_rooms',
         usersKey: 'cc_users',
+
+        onlineCountKey: 'cc_online_count',
 
         rooms: {},
         users: {},
@@ -181,7 +183,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', function 
         getProperty: function (key) {
             var c = WebStorage.getProperty(key);
 
-            if(!unORNull(c)) {
+            if(!Utils.unORNull(c)) {
                 var e;
                 try {
                     e = eval(c);
@@ -204,6 +206,12 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', function 
             this.removeProperty(this.roomsKey);
             this.removeProperty(this.usersKey);
             this.cacheCleared = true;
+        },
+
+        clearToken: function () {
+            this.removeProperty(this.tokenKey);
+            this.removeProperty(this.UIDKey);
+            this.removeProperty(this.tokenExpiryKey);
         }
     };
     return LocalStorage.init();
