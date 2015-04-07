@@ -157,10 +157,10 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
     };
 
     User.prototype.addRoom = function (room) {
-        return this.addRoomWithRID(room.meta.rid);
+        return this.addRoomWithRID(room.meta.rid, room.type());
     };
 
-    User.prototype.addRoomWithRID = function (rid) {
+    User.prototype.addRoomWithRID = function (rid, type) {
 
         var deferred = $q.defer();
 
@@ -180,6 +180,10 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
                 deferred.reject(error);
             }
         }).bind(this));
+
+        //if(type == bRoomTypePublic) {
+        //    ref.onDisconnect().remove();
+        //}
 
         return deferred.promise;
     };
@@ -255,6 +259,27 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
             }
         }).bind(this));
         this.entity.updateState(bBlockedPath);
+        return deferred.promise;
+    };
+
+    User.prototype.markRoomReadTime = function (rid) {
+
+        var deferred = $q.defer();
+
+        var ref = Paths.userRoomsRef(this.meta.uid).child(rid);
+
+        var data = {};
+        data[bReadKey] = Firebase.ServerValue.TIMESTAMP;
+
+        ref.update(data, function (error) {
+            if(!error) {
+                deferred.resolve();
+            }
+            else {
+                deferred.reject(error);
+            }
+        });
+
         return deferred.promise;
     };
 

@@ -205,6 +205,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
         clearCache: function () {
             this.removeProperty(this.roomsKey);
             this.removeProperty(this.usersKey);
+            this.clearToken();
             this.cacheCleared = true;
         },
 
@@ -212,6 +213,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
             this.removeProperty(this.tokenKey);
             this.removeProperty(this.UIDKey);
             this.removeProperty(this.tokenExpiryKey);
+            this.removeProperty(this.apiDetailsKey);
         }
     };
     return LocalStorage.init();

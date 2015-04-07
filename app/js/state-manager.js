@@ -77,12 +77,21 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
                 var rid = snapshot.key();
                 if(rid) {
                     var room = RoomStore.getOrCreateRoomWithID(rid);
+
                     room.newPanel = snapshot.val().newPanel;
                     //Cache.addPublicRoom(room);
 
                     room.on().then(function () {
 
                         $rootScope.$broadcast(bPublicRoomAddedNotification, room);
+
+                        // Check to see if the room is marked as public
+                        // TODO: Depricated code fix for old customers who didn't have
+                        // public room flagged
+                        if(!room.meta.isPublic && !room.meta.type) {
+                            var ref = Paths.roomMetaRef(room.meta.rid);
+                            ref.update({type: bRoomTypePublic});
+                        }
 
                         RoomStore.addRoom(room);
 
@@ -188,7 +197,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                 roomsRef.on('child_added', (function (snapshot) {
                     var room = snapshot.val();
                     if(room) {
-                        this.impl_roomAdded(room.rid, room.invitedBy);
+                        this.impl_roomAdded(room.rid, room.invitedBy, room.read);
                     }
 
                 }).bind(this));
@@ -338,13 +347,14 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
 
         /**
          *
-         * @param snapshot
+         * @param rid
+         * @param invitedBy
+         * @param readTimestamp
          */
-        impl_roomAdded: function (rid, invitedBy) {
+        impl_roomAdded: function (rid, invitedBy, readTimestamp) {
 
             if (rid && invitedBy) {
                 var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
-
 
                 // First check if we want to accept the room
                 // This should never happen
@@ -359,6 +369,10 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                 // Does the room already exist?
                 var room = RoomStore.getOrCreateRoomWithID(rid);
                 room.deleted = false;
+
+                // If you clear the cache without this all the messages
+                // would show up as unread...
+                room.readTimestamp = readTimestamp;
 
                 room.invitedBy = invitedByUser;
 

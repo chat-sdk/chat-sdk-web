@@ -40,6 +40,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.invitedBy = null;
             this.open = false;
             this.typingMessage = null;
+            this.readTimestamp = 0; // When was the thread last read?
 
             // The room associated with this use
             // this is used to make sure that if a user logs out
@@ -145,7 +146,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             // Private chat x users
             // Ben Smiley
             if(!this.name || !this.name.length) {
-                if (this.type() == bRoomTypePublic) {
+                if (this.isPublic()) {
                     this.name = bRoomDefaultNamePublic;
                 }
                 else if (this.userCount() == 1) {
@@ -171,7 +172,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
          */
         Room.prototype.close = function () {
 
-            if(this.type() == bRoomTypePublic) {
+            if(this.isPublic()) {
                 this.leaveAndClose();
             }
             else {
@@ -451,46 +452,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             return setStatusForUser(this, $rootScope.user, bUserStatusMember, true);
         };
 
-        var setStatusForUser = function(room, user, status, force) {
-
-            if(Utils.unORNull(force)) {
-                force = false;
-            }
-
-            var deferred = $q.defer();
-
-            // Check the current status
-            var currentStatus = room.getUserStatus(user);
-            if(currentStatus == status && !force) {
-                deferred.resolve();
-                return deferred.promise;
-            }
-
-            var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
-
-            var data = {
-                status: status,
-                uid: user.meta.uid,
-                time: Firebase.ServerValue.TIMESTAMP
-            };
-
-            ref.update(data, (function (error) {
-                if(!error) {
-                    room.entity.updateState(bUsersMetaPath);
-                    deferred.resolve();
-                }
-                else {
-                    deferred.reject(error);
-                }
-            }).bind(room));
-
-            if(room.isPublic()) {
-                ref.onDisconnect().remove();
-            }
-
-            return deferred.promise;
-        };
-
         // Update the timestamp on the user status
         Room.prototype.updateUserStatusTime = function (user) {
 
@@ -687,15 +648,17 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             // Now update this room with this data
             var roomMetaRef = Paths.roomMetaRef(this.meta.rid);
 
-            //
-            var lastMessageMeta = message.meta;
-            lastMessageMeta['userName'] = user.meta.name;
+            // Last message
+            this.setLastMessage(message, user);
 
-            // Update the room
-            roomMetaRef.update({
-                lastUpdated: Firebase.ServerValue.TIMESTAMP,
-                lastMessage: lastMessageMeta
-            });
+//            var lastMessageMeta = message.meta;
+//            lastMessageMeta['userName'] = user.meta.name;
+//
+//            // Update the room
+//            roomMetaRef.update({
+//                lastUpdated: Firebase.ServerValue.TIMESTAMP,
+//                lastMessage: lastMessageMeta
+//            });
 
             // The user's been active so update their status
             // with the current time
@@ -703,12 +666,32 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             // Avoid a clash..
             this.entity.updateState(bMessagesPath).then((function () {
-                this.entity.updateState(bMetaKey);
+                //this.entity.updateState(bMetaKey);
             }).bind(this));
 
             // Update the user's presence state
-            Presence.update();
+            //Presence.update();
 
+        };
+
+        Room.prototype.setLastMessage = function (message, user) {
+
+            var deferred = $q.defer();
+
+            var lastMessageMeta = message.meta;
+            lastMessageMeta['userName'] = user.meta.name;
+
+            var ref = Paths.roomLastMessageRef(this.meta.rid);
+            ref.set(lastMessageMeta, function (error) {
+                if(!error) {
+                    deferred.resolve(null);
+                }
+                else {
+                    deferred.reject(error);
+                }
+            });
+
+            return deferred.promise;
         };
 
         Room.prototype.loadMoreMessages = function (callback, numberOfMessages) {
@@ -819,6 +802,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
             this.badge = 0;
             this.sendBadgeChangedNotification();
+
+            // Mark the date when the thread was read
+            if(!this.isPublic())
+                $rootScope.user.markRoomReadTime(this.meta.rid);
+
         };
 
         Room.prototype.sendBadgeChangedNotification = function () {
@@ -880,7 +868,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 open: this.open,
                 badge: this.badge,
                 associatedUserID: this.associatedUserID,
-                offset: this.offset
+                offset: this.offset,
+                readTimestamp: this.readTimestamp
             };
         };
 
@@ -896,6 +885,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 this.badge = sr.badge;
                 this.associatedUserID = sr.associatedUserID;
                 this.offset = sr.offset;
+                this.readTimestamp = sr.readTimestamp;
 
                 //this.setUsersMeta(sr.usersMeta);
 
@@ -1018,13 +1008,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             var roomUsersRef = Paths.roomUsersRef(this.meta.rid);
 
             roomUsersRef.on('child_added', (function (snapshot) {
-                if(snapshot.val()) {
+                if(snapshot.val() && snapshot.val().uid) {
                     this.addUserMeta(snapshot.val());
                 }
             }).bind(this));
 
             roomUsersRef.on('child_removed', (function (snapshot) {
-                if(snapshot.val()) {
+                if(snapshot.val() && snapshot.val().uid) {
                     this.removeUserMeta(snapshot.val());
                 }
             }).bind(this));
@@ -1092,6 +1082,15 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     // Send a notification to the chat room
                     $rootScope.$broadcast(bChatUpdatedNotification, this);
+                }).bind(this));
+
+                // Listen to the last message
+                var lastMessageRef = Paths.roomLastMessageRef(this.meta.rid);
+                lastMessageRef.on('value', (function (snapshot) {
+                    if(snapshot.val()) {
+                        this.lastMessageMeta = snapshot.val();
+                        this.update(false);
+                    }
                 }).bind(this));
 
                 // Do we really need to use a promise here?
@@ -1179,7 +1178,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
 
             // If the room is inactive or minimized increase the badge
-            if((!this.active || this.minimized || !this.isOpen()) && !this.isPublic() && !message.read) {
+            if((!this.active || this.minimized || !this.isOpen()) && !this.isPublic() && !message.read && (message.meta.time > this.readTimestamp || !this.readTimestamp)) {
 
                 if(!this.unreadMessages) {
                     this.unreadMessages  = [];
@@ -1285,6 +1284,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             if(this.userOnlineStateChangedNotificationOff) {
                 this.userOnlineStateChangedNotificationOff();
             }
+
+            var lastMessageRef = Paths.roomLastMessageRef(this.meta.rid);
+            lastMessageRef.off();
 
             this.messagesOff();
 
@@ -1492,6 +1494,46 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             return deferred.promise;
         };
 
+        var setStatusForUser = function(room, user, status, force) {
+
+            if(Utils.unORNull(force)) {
+                force = false;
+            }
+
+            var deferred = $q.defer();
+
+            // Check the current status
+            var currentStatus = room.getUserStatus(user);
+            if(currentStatus == status && !force) {
+                deferred.resolve();
+                return deferred.promise;
+            }
+
+            var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
+
+            var data = {
+                status: status,
+                uid: user.meta.uid,
+                time: Firebase.ServerValue.TIMESTAMP
+            };
+
+            ref.update(data, (function (error) {
+                if(!error) {
+                    room.entity.updateState(bUsersMetaPath);
+                    deferred.resolve();
+                }
+                else {
+                    deferred.reject(error);
+                }
+            }).bind(room));
+
+            if(room.isPublic()) {
+                ref.onDisconnect().remove();
+            }
+
+            return deferred.promise;
+        };
+
         Room.addUserToRoom = function (rid, user, status, type) {
 
             var data = {
@@ -1500,12 +1542,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 time: Firebase.ServerValue.TIMESTAMP
             };
 
-            // Can we add the user to the room?
-
             var d1 = $q.defer();
 
-            var ref = Paths.roomUsersRef(rid);
-            ref.child(user.meta.uid).update(data, function (error) {
+            var ref = Paths.roomUsersRef(rid).child(user.meta.uid);
+            ref.update(data, function (error) {
                 if(!error) {
                     d1.resolve();
                 }
@@ -1514,19 +1554,19 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }
             });
 
+            if(type == bRoomTypePublic) {
+                ref.onDisconnect().remove();
+            }
+
             var promises = [
                 d1.promise,
-                user.addRoomWithRID(rid)
+                user.addRoomWithRID(rid, type)
             ];
 
             var deferred = $q.defer();
 
             $q.all(promises).then(function () {
                 Entity.updateState(bRoomsPath, rid, bUsersMetaPath);
-
-                if(type == bRoomTypePublic) {
-                    ref.onDisconnect().remove();
-                }
 
                 deferred.resolve();
 
