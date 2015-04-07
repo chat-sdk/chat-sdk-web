@@ -1,5 +1,5 @@
-/*! UIkit 2.15.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
-(function($, UI) {
+/*! UIkit 2.18.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+(function(UI) {
 
     "use strict";
 
@@ -17,11 +17,11 @@
             // init code
             UI.ready(function(context) {
 
-                UI.$("[data-@-grid-match]", context).each(function() {
+                UI.$("[data-uk-grid-match]", context).each(function() {
                     var grid = UI.$(this), obj;
 
                     if (!grid.data("gridMatchHeight")) {
-                        obj = UI.gridMatchHeight(grid, UI.Utils.options(grid.attr("data-@-grid-match")));
+                        obj = UI.gridMatchHeight(grid, UI.Utils.options(grid.attr("data-uk-grid-match")));
                     }
                 });
             });
@@ -36,16 +36,13 @@
 
             if (!this.columns.length) return;
 
-            UI.$win.on('resize orientationchange', (function() {
+            UI.$win.on('load resize orientationchange', (function() {
 
                 var fn = function() {
                     $this.match();
                 };
 
-                $(function() {
-                    fn();
-                    UI.$win.on("load", fn);
-                });
+                UI.$(function() { fn(); });
 
                 return UI.Utils.debounce(fn, 50);
             })());
@@ -65,49 +62,16 @@
 
         match: function() {
 
-            this.revert();
-
             var firstvisible = this.columns.filter(":visible:first");
 
             if (!firstvisible.length) return;
 
-            var stacked = Math.ceil(100 * parseFloat(firstvisible.css('width')) / parseFloat(firstvisible.parent().css('width'))) >= 100 ? true : false,
-                max     = 0,
-                $this   = this;
+            var stacked = Math.ceil(100 * parseFloat(firstvisible.css('width')) / parseFloat(firstvisible.parent().css('width'))) >= 100;
 
-            if (stacked) return;
-
-            if(this.options.row) {
-
-                this.element.width(); // force redraw
-
-                setTimeout(function(){
-
-                    var lastoffset = false, group = [];
-
-                    $this.elements.each(function(i) {
-                        var ele = $(this), offset = ele.offset().top;
-
-                        if(offset != lastoffset && group.length) {
-
-                            $this.matchHeights($(group));
-                            group  = [];
-                            offset = ele.offset().top;
-                        }
-
-                        group.push(ele);
-                        lastoffset = offset;
-                    });
-
-                    if(group.length) {
-                        $this.matchHeights($(group));
-                    }
-
-                }, 0);
-
+            if (stacked) {
+                this.revert();
             } else {
-
-                this.matchHeights(this.elements);
+                UI.Utils.matchHeights(this.elements, this.options);
             }
 
             return this;
@@ -116,30 +80,13 @@
         revert: function() {
             this.elements.css('min-height', '');
             return this;
-        },
-
-        matchHeights: function(elements){
-
-            if(elements.length < 2) return;
-
-            var max = 0;
-
-            elements.each(function() {
-                max = Math.max(max, $(this).outerHeight());
-            }).each(function(i) {
-
-                var element = $(this),
-                    height  = max - (element.outerHeight() - element.height());
-
-                element.css('min-height', height + 'px');
-            });
         }
     });
 
     UI.component('gridMargin', {
 
         defaults: {
-            "cls": "@-grid-margin"
+            "cls": "uk-grid-margin"
         },
 
         boot: function() {
@@ -147,11 +94,11 @@
             // init code
             UI.ready(function(context) {
 
-                UI.$("[data-@-grid-margin]", context).each(function() {
+                UI.$("[data-uk-grid-margin]", context).each(function() {
                     var grid = UI.$(this), obj;
 
                     if (!grid.data("gridMargin")) {
-                        obj = UI.gridMargin(grid, UI.Utils.options(grid.attr("data-@-grid-margin")));
+                        obj = UI.gridMargin(grid, UI.Utils.options(grid.attr("data-uk-grid-margin")));
                     }
                 });
             });
@@ -159,10 +106,66 @@
 
         init: function() {
 
-            var $this = this;
-
             var stackMargin = UI.stackMargin(this.element, this.options);
         }
     });
 
-})(jQuery, UIkit);
+    // helper
+
+    UI.Utils.matchHeights = function(elements, options) {
+
+        elements = UI.$(elements).css('min-height', '');
+        options  = UI.$.extend({ row : true }, options);
+
+        var matchHeights = function(group){
+
+            if(group.length < 2) return;
+
+            var max = 0;
+
+            group.each(function() {
+                max = Math.max(max, UI.$(this).outerHeight());
+            }).each(function() {
+
+                var element = UI.$(this),
+                height  = max - (element.outerHeight() - element.height());
+
+                element.css('min-height', height + 'px');
+            });
+        };
+
+        if(options.row) {
+
+            elements.first().width(); // force redraw
+
+            setTimeout(function(){
+
+                var lastoffset = false, group = [];
+
+                elements.each(function() {
+
+                    var ele = UI.$(this), offset = ele.offset().top;
+
+                    if(offset != lastoffset && group.length) {
+
+                        matchHeights(UI.$(group));
+                        group  = [];
+                        offset = ele.offset().top;
+                    }
+
+                    group.push(ele);
+                    lastoffset = offset;
+                });
+
+                if(group.length) {
+                    matchHeights(UI.$(group));
+                }
+
+            }, 0);
+
+        } else {
+            matchHeights(elements);
+        }
+    };
+
+})(UIkit);

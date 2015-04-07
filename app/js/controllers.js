@@ -1702,9 +1702,12 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
                 // Create a firebase ref to the user
                 $scope.ref = Paths.userMetaRef($scope.getUser().meta.uid);
 
-                $scope.ref.on('value', function () {
+                $scope.ref.on('value', function (snapshot) {
 
                     $scope.validate();
+
+                    // This is a method created by the directive...
+                    $scope.setDateOfBirth(snapshot.val().dateOfBirth);
 
                 }, function (error) {
                     if(DEBUG) console.log(error);
@@ -1753,11 +1756,15 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
             $scope.ref.off('value');
             $scope.ref = null;
 
+            $scope.user.meta.dateOfBirth = $scope.dateOfBirth.getTime();
+            $scope.user.meta.yearOfBirth = $scope.dateOfBirth.getFullYear();
+
             // Did the user update any values?
             if($scope.dirty) {
                 $scope.user.pushMeta();
                 $scope.dirty = false;
             }
+
 
         }
         else {

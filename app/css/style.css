@@ -87,7 +87,7 @@ div#cc-app div#cc-base {
 
     background: rgba(0,0,0,0.2) !important;
 
-    z-index: 900000 !important;
+    z-index: 9998 !important;
 }
 
 /* The bottom bar for the menu box */

@@ -63,7 +63,8 @@
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left  uk-text-left">Year of birth</div>
-                    <ng-include src=" baseURL + 'year-of-birth-select.html'"></ng-include>
+                    <!--<ng-include src=" baseURL + 'year-of-birth-select.html'"></ng-include>-->
+                    <input class="uk-width-1-2 uk-float-right" type="text" pikaday="{{ user.meta.dateOfBirth }}">
                 </div>
                 <div class="uk-form-row">
                     <input class="uk-width-1-1"

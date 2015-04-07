@@ -18,7 +18,7 @@
     "FileSaver": "latest",
     "moment": "latest",
     "angular-sanitize": "latest",
-    "angular-emoji-filter": "latest",
-    "howler": "latest"
+    "howler": "latest",
+    "pikaday": "latest"
   }
 }

@@ -557,3 +557,24 @@ myApp.directive('ccFlash', ['$timeout', function ($timeout) {
         });
     };
 }]);
+
+myApp.directive('pikaday', ["$rootScope", function ($rootScope) {
+    return function (scope, element, attr) {
+
+        var picker = new Pikaday({
+            field: element[0],
+            firstDay: 1,
+            minDate: new Date('1920-01-01'),
+            maxDate: new Date(),
+            defaultDate: new Date('1990-01-01'),
+            onSelect: function (date) {
+                scope.dateOfBirth = date;
+            }
+        });
+
+        scope.setDateOfBirth = function (date) {
+            picker.setDate(date ? date : '1990-01-01');
+        };
+
+    };
+}]);
