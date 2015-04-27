@@ -10,6 +10,7 @@ var bRoomDefaultName1To1 = "Private Chat";
 var bRoomDefaultNameGroup = "Group Chat";
 var bRoomDefaultNamePublic = "Public Chat";
 
+
 //
 // Used to load partials
 //
@@ -160,6 +161,8 @@ var bProfileBoxWidth = 300;
 var bMinute = 60;
 var bHour = bMinute * 60;
 var bDay = bHour * 24;
+
+Firebase.enableLogging(true);
 
 var myApp = angular.module('myApp.utilities', []);
 

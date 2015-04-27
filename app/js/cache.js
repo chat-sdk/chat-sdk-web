@@ -223,7 +223,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
                 if(this.rooms.hasOwnProperty(rid)) {
                     var room = this.rooms[rid];
                     // Make sure that we only return private rooms for the current user
-                    if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.meta.uid) {
+                    if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.meta.uid && room.usersMeta != {}) {
                         rooms.push(this.rooms[rid]);
                     }
                 }
@@ -240,7 +240,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
                     }
                 }
             }
-            rooms = ArrayUtils.getRoomsWithUsers(rooms, [user1, user2])
+            rooms = ArrayUtils.getRoomsWithUsers(rooms, [user1, user2]);
             return ArrayUtils.roomsSortedByMostRecent(rooms);
         },
 

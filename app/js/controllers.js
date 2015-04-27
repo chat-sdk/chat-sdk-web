@@ -1756,8 +1756,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
             $scope.ref.off('value');
             $scope.ref = null;
 
-            $scope.user.meta.dateOfBirth = $scope.dateOfBirth.getTime();
-            $scope.user.meta.yearOfBirth = $scope.dateOfBirth.getFullYear();
+            var dob = $scope.dateOfBirth;
+
+            $scope.user.meta.dateOfBirth = dob ? dob.getTime() : null;
+            $scope.user.meta.yearOfBirth = dob  ? dob.getFullYear() : $scope.user.meta.yearOfBirth;
 
             // Did the user update any values?
             if($scope.dirty) {

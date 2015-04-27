@@ -182,6 +182,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         /**
          * Leave the room perminantly
+         * -
          */
         Room.prototype.leaveAndClose = function () {
 
@@ -509,13 +510,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     usersInRoom++;
                 }
             }
-            var totalUsers = 0;
-            for(var key in this.usersMeta) {
-                if(this.usersMeta.hasOwnProperty(key)) {
-                    totalUsers++;
-                }
-            }
-            return totalUsers == usersInRoom;
+            return usersInRoom == users.length;
+//            var totalUsers = 0;
+//            for(var key in this.usersMeta) {
+//                if(this.usersMeta.hasOwnProperty(key)) {
+//                    totalUsers++;
+//                }
+//            }
+//            return totalUsers == usersInRoom;
         };
 
         /**
@@ -866,7 +868,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 usersMeta: this.usersMeta,
                 deleted: this.deleted,
                 open: this.open,
-                badge: this.badge,
+                //badge: this.badge,
                 associatedUserID: this.associatedUserID,
                 offset: this.offset,
                 readTimestamp: this.readTimestamp
@@ -882,7 +884,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 this.meta = sr.meta;
                 this.deleted = sr.deleted;
                 this.open = sr.open;
-                this.badge = sr.badge;
+                //this.badge = sr.badge;
                 this.associatedUserID = sr.associatedUserID;
                 this.offset = sr.offset;
                 this.readTimestamp = sr.readTimestamp;
