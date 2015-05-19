@@ -38,7 +38,9 @@ gulp.task('minify-css', function() {
         'app/libs/flags/stylesheets/flags/flags16.css',
         'app/css/reset-uikit.css',
         'app/css/style.css',
-        'app/bower_components/angular-emoji-filter/dist/emoji.min.css'
+        'app/bower_components/angular-emoji-filter/dist/emoji.min.css',
+        'app/bower_components/pikaday/css/pikaday.css'
+        
         //'app/bower_components/uikit/dist/css/uikit.css',
         //'app/bower_components/uikit/dist/css/uikit.gradient.css',
         //'!*.min.css',
@@ -117,8 +119,10 @@ gulp.task('scripts', function() {
         'app/bower_components/FileSaver/FileSaver.js',
         'app/bower_components/moment/min/moment.min.js',
         'app/bower_components/angular-sanitize/angular-sanitize.min.js',
-        'app/bower_components/angular-emoji-filter/lib/cc-emoji.js',
+        //'app/bower_components/angular-emoji-filter/lib/cc-emoji.js',
+        'app/bower_components/pikaday/pikaday.js',
         'app/libs/sha256.js', 
+        'app/libs/cc-emoji.js', 
         'app/js/*.js'
     ];
 
