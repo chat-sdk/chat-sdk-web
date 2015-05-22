@@ -910,6 +910,10 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
     $scope.handleUserLogin = function (userData, firstLogin) {
 
+
+        // Write a record to the firebase to record this API key
+
+
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         API.getAPIDetails().then((function(api) {

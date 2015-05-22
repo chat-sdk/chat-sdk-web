@@ -64,6 +64,7 @@ var bBlockedPath = 'blocked';
 var bStatePath = 'state';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
+var bStatsPath = "stats";
 
 var bReadKey = 'read';
 
@@ -162,7 +163,7 @@ var bMinute = 60;
 var bHour = bMinute * 60;
 var bDay = bHour * 24;
 
-Firebase.enableLogging(true);
+//Firebase.enableLogging(true);
 
 var myApp = angular.module('myApp.utilities', []);
 
@@ -185,6 +186,10 @@ myApp.factory('Paths', [function () {
             else {
                 return new Firebase(bFirebaseRef);
             }
+        },
+
+        statsRef: function () {
+            return new Firebase(bFirebaseRef).child(bStatsPath).child(this.cid);
         },
 
         usersRef: function () {

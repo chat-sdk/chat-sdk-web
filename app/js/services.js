@@ -114,6 +114,20 @@ myApp.factory('Parse', ['$http', function ($http) {
     };
 }]);
 
+myApp.factory('Stats', ['Paths', function (Paths) {
+
+    return {
+
+        recordLogin: function () {
+
+            Paths.statsRef().child('login').transaction(function (value) {
+                return value + 1;
+            });
+
+        }
+    };
+}]);
+
 myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
 
     var setByDefault = 0;
@@ -848,8 +862,8 @@ myApp.factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'Loca
     return screen.init();
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Utilities, Presence, API, StateManager, Time, Upgrade, Utils, Paths) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Utilities', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths', 'Stats',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Utilities, Presence, API, StateManager, Time, Upgrade, Utils, Paths, Stats) {
 
     return {
 
@@ -860,6 +874,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
          * @param authUser - the authentication user provided by Firebase
          */
         bindUser: function (authUser) {
+
+            Stats.recordLogin();
 
             var deferred = $q.defer();
 
