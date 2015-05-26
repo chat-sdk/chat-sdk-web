@@ -565,6 +565,9 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
         if(tab == bFriendsTab) {
             $scope.title = "My friends";
         }
+        if(tab == bInboxTab) {
+            $scope.title = "Inbox";
+        }
     };
 
     /**

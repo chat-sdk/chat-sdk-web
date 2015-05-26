@@ -94,6 +94,7 @@ var bUserAllowInvitesNobody = 'Nobody';
 var bUsersTab = 'users';
 var bRoomsTab = 'rooms';
 var bFriendsTab = 'friends';
+var bInboxTab = 'inbox';
 
 var bProviderTypeCustom = 'custom';
 

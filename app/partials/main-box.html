@@ -34,7 +34,7 @@
     </div>
 
     <!--Add the search box-->
-    <div class="uk-overflow-container">
+    <div class="uk-overflow-container" ng-hide="activeTab=='inbox'">
         <form class="uk-panel uk-form uk-float-left cc-padded"
               ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10))}">
 
