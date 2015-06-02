@@ -37,20 +37,23 @@ myApp.controller('AppController', [
          * Single Sign on
          */
 
+        // Set the config object that contains settings for the chat
+        Config.setConfig(Config.setByInclude, CC_OPTIONS);
+
         // Setup the login and register URLs
-        var ssoURL = CC_OPTIONS.singleSignOnURL;
+        var ssoURL = Config.singleSignOnURL;
         $rootScope.singleSignOnEnabled = ssoURL && ssoURL.length > 0;
 
         if($rootScope.singleSignOnEnabled) {
             Paths.firebase().unauth();
         }
 
-        var loginURL = CC_OPTIONS.loginURL;
+        var loginURL = Config.loginURL;
         if(loginURL && loginURL.length > 0) {
             $rootScope.loginURL = loginURL;
         }
 
-        var registerURL = CC_OPTIONS.registerURL;
+        var registerURL = Config.registerURL;
         if(registerURL && registerURL.length > 0) {
             $rootScope.registerURL = registerURL;
         }
@@ -58,9 +61,6 @@ myApp.controller('AppController', [
         /**
          * Anonymous login and social login
          */
-
-        // Set the config object that contains settings for the chat
-        Config.setConfig(Config.setByInclude, CC_OPTIONS);
 
         $scope.setupImages();
 

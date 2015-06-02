@@ -23,7 +23,13 @@ var bPartialURL = '';
 var bFirebase = 'chatcat';
 
 // If we are then set the root URL to nothing
-if(document.location.origin === "http://chatcat") {
+if(document.location.origin === "http://symfony") {
+    bRootURL = '//chatcat/dist/';
+    bPartialURL = bRootURL + 'partials/';
+//    bFirebase = 'chatcatio-test';
+}
+
+else if(document.location.origin === "http://chatcat") {
       bRootURL = '';
       bPartialURL = 'partials/';
 //    bFirebase = 'chatcatio-test';
@@ -454,4 +460,106 @@ myApp.factory('ArrayUtils', [function () {
     }
 }]);
 
+//myApp.factory('Utilities', ['$q', function ($q) {
+//    return {
+//
+//        filterByName: function (array, name) {
+//            if(!name || name === "") {
+//                return array;
+//            }
+//            else {
+//                // Loop over all users
+//                var result = {};
+//                var u = null;
+//                var t = null;
+//                var n = null;
+//                for(var id in array) {
+//                    if(array.hasOwnProperty(id)) {
+//                        u = array[id];
+//                        // Switch to lower case and remove spaces
+//                        // to improve search results
+//                        t = name.toLowerCase().replace(/ /g,'');
+//                        n = u.meta.name.toLowerCase().replace(/ /g,'');
+//                        if(n.substring(0, t.length) == t) {
+//                            result[id] = u;
+//                        }
+//                    }
+//                }
+//                return result;
+//            }
+//        },
+//
+//        pullImageFromURL: function (context, url) {
+//
+//            var deferred = $q.defer();
+//
+//            context.post(bPullURL, {'url': url}).success((function(data, status) {
+//
+//                if(data && data.dataURL) {
+//                    deferred.resolve(data.dataURL);
+//                }
+//                else {
+//                    deferred.reject();
+//                }
+//
+//            }).bind(this)).error(function(data, status) {
+//
+//                deferred.reject();
+//
+//            });
+//
+//            return deferred.promise;
+//        },
+//
+//        saveImageFromURL: function (src) {
+//
+//            var deferred = $q.defer();
+//
+//            var image = new Image();
+//
+//            image.onload = function () {
+//
+//                // Resize the image
+//                var canvas = document.createElement('canvas'),
+//                    max_size = 100,
+//                    width = image.width,
+//                    height = image.height;
+//
+//                var x = 0;
+//                var y = 0;
+//
+//                if (width > height) {
+//                    x = (width - height)/2;
+//
+//                } else {
+//                    y = (height - width)/2;
+//                }
+//
+//                var size = width - 2 * x;
+//
+//                // First rescale the image to be square
+//                canvas.width = max_size;
+//                canvas.height = max_size;
+//
+//                try {
+//                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
+//                    var dataURL = canvas.toDataURL('image/jpeg');
+//                    deferred.resolve(dataURL);
+//                }
+//                catch (error) {
+//                    deferred.reject(error);
+//                }
+//            };
+//            image.src = src;
+//
+//            return deferred.promise;
+//        },
+//
+//        textWidth: function (text, font) {
+//            if (!this.textWidth.fakeEl) this.textWidth.fakeEl = jQuery('<span>').hide().appendTo(document.body);
+//            this.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
+//            return this.textWidth.fakeEl.width();
+//        }
+//    };
+//}]);
 
