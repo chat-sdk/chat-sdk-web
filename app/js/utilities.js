@@ -151,6 +151,11 @@ var bUserUnblockedNotification = 'bUserUnblockedNotification';
 var bFriendAddedNotification = 'bFriendAddedNotification';
 var bFriendRemovedNotification = 'bFriendRemovedNotification';
 
+var bLoginModeSimple = "simple";
+var bLoginModeSingleSignOn = "singleSignOn";
+var bLoginModeToken = "token";
+var bLoginModeAuthenticating = "authenticating";
+
 // Chat width
 var bChatRoomWidth = 230;
 var bChatRoomHeight = 300;

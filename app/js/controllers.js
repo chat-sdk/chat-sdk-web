@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager) {
 
     $scope.totalUserCount = 0;
 
@@ -30,23 +30,9 @@ myApp.controller('AppController', [
         $rootScope.baseURL = bPartialURL;
         $rootScope.websiteName = $window.location.host;
 
-        // By default the main box isn't minimized
-        //$scope.minimize = false;
-
         /**
          * Single Sign on
          */
-
-        // Set the config object that contains settings for the chat
-        Config.setConfig(Config.setByInclude, CC_OPTIONS);
-
-        // Setup the login and register URLs
-        var ssoURL = Config.singleSignOnURL;
-        $rootScope.singleSignOnEnabled = ssoURL && ssoURL.length > 0;
-
-        if($rootScope.singleSignOnEnabled) {
-            Paths.firebase().unauth();
-        }
 
         var loginURL = Config.loginURL;
         if(loginURL && loginURL.length > 0) {
@@ -114,7 +100,16 @@ myApp.controller('AppController', [
      * Show the login box
      */
     $scope.showLoginBox = function () {
+        $scope.showLoginBox(null);
+    };
+
+    $scope.showLoginBox = function (mode) {
+//        Paths.firebase().unauth();
+        $rootScope.loginMode = mode ? mode : Authentication.mode;
         $scope.activeBox = 'loginBox';
+        $timeout(function() {
+            $scope.$digest();
+        });
     };
 
     /**
@@ -309,12 +304,61 @@ myApp.controller('AppController', [
     /**
      * Log the user out
      */
+//    $scope. = function () {
+//
+//        // This will be handled by the logout listener anyway
+//        Paths.firebase().unauth();
+//
+//        $scope.showLoginBox();
+//    };
+
+    /**
+     *
+     */
     $scope.logout = function () {
 
-        // This will be handled by the logout listener anyway
+
+        // Now we need to
+        Presence.goOffline();
+
+        //
+        Presence.stop();
+
+        if($rootScope.user) {
+            StateManager.userOff($rootScope.user.meta.uid);
+        }
+
+        StateManager.off();
+
+        RoomPositionManager.closeAllRooms();
+
+        // Nullify the user
+        $rootScope.user = null;
+
+        // Clear the cache down
+        Cache.clear();
+
+
+        // Allow the user to log back in
+        // Handled by callback
+        //$scope.showLoginBox();
+
+        // Set all current rooms off
+
+        $scope.hideNotification();
+
+        $scope.email = "";
+        $scope.password = "";
+
+        $rootScope.$broadcast(bLogoutNotification);
+
+        LocalStorage.clearToken();
+
         Paths.firebase().unauth();
 
-        $scope.showLoginBox();
+        $timeout(function () {
+            $rootScope.$digest();
+        });
     };
 
     $scope.shutdown = function ($event) {
@@ -612,8 +656,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
+    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
 
     /**
      * Initialize the login controller
@@ -622,166 +666,143 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
      */
     $scope.init = function () {
 
-
         $scope.rememberMe = true;
-        $scope.firstTry = true;
 
         // Show the notification to say we're authenticating
-        $scope.showNotification(bNotificationTypeWaiting, "Authenticating");
+        //$scope.showNotification(bNotificationTypeWaiting, "Authenticating");
 
-        var ref = Paths.firebase();
-        ref.onAuth(function(authData) {
+        //$rootScope.loginMode = Authentication.loginMode;
+        //$scope.loginMode = Authentication.loginMode;
 
-            // Hide the waiting overlay
-            $scope.hideNotification();
+        $scope.showLoginBox(bLoginModeAuthenticating);
 
-            if (authData) {
-                // user authenticated with Firebase
-                if(DEBUG) console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
+        var handleAuthData = function (authData) {
 
-                if($rootScope.singleSignOnEnabled) {
-                    if($scope.firstTry) {
-                        Paths.firebase().unauth();
-                        $scope.singleSignOn();
-                        $scope.firstTry = false;
-                    }
-                }
-                else {
-                    // Single sign on has been disabled but the token is still valid
-                    if(authData.provider == bProviderTypeCustom) {
-                        $scope.logout();
-                    }
-                    else {
+            $rootScope.loginMode = Authentication.mode;
 
-                        // Login was successful so log the user in given their ID
-                        $scope.handleUserLogin(authData, false);
-                    }
-                }
+            console.log(authData);
 
-            } else {
-                // This is called whenever the page loads
-                if($rootScope.singleSignOnEnabled) {
-                    // Try to authenticate
-                    $scope.singleSignOn();
-                    $scope.firstTry = false;
-                }
-                else {
-                    $scope.logout();
-                }
+            $rootScope.auth = authData;
+            if(authData) {
+                $scope.handleUserLogin(authData, false);
             }
+            else {
+                $scope.showLoginBox();
+            }
+        };
 
-            // TODO: Enable user count even when user isn't online
-//            API.getAPIDetails().then(function (result) {
-//                OnlineConnector.on();
-//            });
-
+        Authentication.startAuthListener().then(function(authData) {
+            Authentication.setAuthListener(handleAuthData);
+            handleAuthData(authData);
+        }, function (error) {
+            Authentication.setAuthListener(handleAuthData);
+            //$scope.logout();
+            //$scope.hideNotification();
+            $scope.showLoginBox();
+            console.log(error);
         });
+
+
+//        var ref = Paths.firebase();
+//        ref.onAuth(function(authData) {
+//
+//            // Hide the waiting overlay
+//            $scope.hideNotification();
+//
+//            if (authData) {
+//                // user authenticated with Firebase
+//                if(DEBUG) console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
+//
+//                if($rootScope.singleSignOnEnabled) {
+//                    if($scope.firstTry) {
+//                        Paths.firebase().unauth();
+//                        $scope.singleSignOn();
+//                        $scope.firstTry = false;
+//                    }
+//                }
+//                else {
+//                    // Single sign on has been disabled but the token is still valid
+//                    if(authData.provider == bProviderTypeCustom) {
+//                        $scope.logout();
+//                    }
+//                    else {
+//
+//                        // Login was successful so log the user in given their ID
+//                        $scope.handleUserLogin(authData, false);
+//                    }
+//                }
+//
+//            } else {
+//                // This is called whenever the page loads
+//                if($rootScope.singleSignOnEnabled) {
+//                    // Try to authenticate
+//                    $scope.singleSignOn();
+//                    $scope.firstTry = false;
+//                }
+//                else {
+//                    $scope.logout();
+//                }
+//            }
+//
+//            // TODO: Enable user count even when user isn't online
+////            API.getAPIDetails().then(function (result) {
+////                OnlineConnector.on();
+////            });
+//
+//        });
     };
 
-    $scope.tries = 0;
-    $scope.singleSignOn = function () {
-
-        if(SingleSignOn.busy) {
-            return;
-        }
-        SingleSignOn.authenticate(CC_OPTIONS.singleSignOnURL).then((function (data) {
-
-            // Authenticate with firebase using token
-            Paths.firebase().authWithCustomToken(data.token, (function(error, result) {
-                if (error) {
-
-                    // If this is the first try then maybe the token has expired...
-                    // invalidate the token and try again
-                    if($scope.tries == 0) {
-                        $scope.tries++;
-                        // Invalidate the token and try again
-                        SingleSignOn.invalidate();
-                        $scope.singleSignOn();
-                    }
-                    else {
-                        $scope.logout();
-                    }
-
-                } else {
-
-                    $rootScope.auth = result.auth;
-                    $rootScope.auth.provider = bProviderTypeCustom;
-                    $rootScope.auth.thirdPartyData = data;
-
-                    if(result) {
-                        $scope.handleUserLogin($rootScope.auth, false);
-
-                        if (DEBUG) console.log('Authenticated successfully with payload:', result.auth);
-                        if (DEBUG) console.log('Auth expires at:', new Date(result.expires * 1000));
-                    }
-                    else {
-                        $scope.logout();
-                    }
-
-                }
-            }).bind(this));
-
-        }).bind(this), function () {
-            $scope.logout();
-        });
-    };
+//    $scope.tries = 0;
+//    $scope.singleSignOn = function () {
+//
+//        if(SingleSignOn.busy) {
+//            return;
+//        }
+//        SingleSignOn.authenticate(Config.singleSignOnURL).then((function (data) {
+//
+//            // Authenticate with firebase using token
+//            Paths.firebase().authWithCustomToken(data.token, (function(error, result) {
+//                if (error) {
+//
+//                    // If this is the first try then maybe the token has expired...
+//                    // invalidate the token and try again
+//                    if($scope.tries == 0) {
+//                        $scope.tries++;
+//                        // Invalidate the token and try again
+//                        SingleSignOn.invalidate();
+//                        $scope.singleSignOn();
+//                    }
+//                    else {
+//                        $scope.logout();
+//                    }
+//
+//                } else {
+//
+//                    $rootScope.auth = result.auth;
+//                    $rootScope.auth.provider = bProviderTypeCustom;
+//                    $rootScope.auth.thirdPartyData = data;
+//
+//                    if(result) {
+//                        $scope.handleUserLogin($rootScope.auth, false);
+//
+//                        if (DEBUG) console.log('Authenticated successfully with payload:', result.auth);
+//                        if (DEBUG) console.log('Auth expires at:', new Date(result.expires * 1000));
+//                    }
+//                    else {
+//                        $scope.logout();
+//                    }
+//
+//                }
+//            }).bind(this));
+//
+//        }).bind(this), function () {
+//            $scope.logout();
+//        });
+//    };
 
     $scope.setError = function (message) {
         $scope.showError = !Utils.unORNull(message);
         $scope.errorMessage = message;
-    };
-
-    /**
-     *
-     */
-    $scope.logout = function () {
-
-        // Try to unbind the user - we should have setup
-        // this function when the user was created
-//        try {
-//            $scope.unbindUser();
-//        }
-//        catch (err) {
-//        }
-
-        // Now we need to
-        Presence.goOffline();
-
-        //
-        Presence.stop();
-
-        if($rootScope.user) {
-            StateManager.userOff($rootScope.user.meta.uid);
-        }
-
-        StateManager.off();
-
-        RoomPositionManager.closeAllRooms();
-
-        // Nullify the user
-        $rootScope.user = null;
-
-        // Clear the cache down
-        Cache.clear();
-
-
-        // Allow the user to log back in
-        $scope.showLoginBox();
-
-        // Set all current rooms off
-
-        $scope.hideNotification();
-
-        $scope.email = "";
-        $scope.password = "";
-
-        $rootScope.$broadcast(bLogoutNotification);
-
-        LocalStorage.clearToken();
-
-        $timeout(function () {
-            $rootScope.$digest();
-        });
     };
 
     $scope.loginWithPassword = function () {
@@ -913,9 +934,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
     $scope.handleUserLogin = function (userData, firstLogin) {
 
-
         // Write a record to the firebase to record this API key
-
 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
@@ -924,9 +943,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
             // Get the number of chatters that are currently online
             Auth.numberOfChatters().then((function(number) {
 
-                $scope.hideNotification();
-
                 if(number >= api.max) {
+                    $scope.hideNotification();
                     alert("Sorry the chat server is full! Try again later");
                     this.logout();
                 }
@@ -942,6 +960,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                         }
 
                         $rootScope.$broadcast(bLoginCompleteNotification);
+                        $scope.hideNotification();
 
                     }, function(error) {
                         $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
@@ -1747,7 +1766,10 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         var cityValid = meta.city && meta.city.length >= $scope.validation.city.minChars && meta.city.length <= $scope.validation.city.maxChars;
         $scope.validation.city.valid = cityValid;
 
-        return nameValid && cityValid;
+        var dateOfBirthValid = meta.dateOfBirth;
+        $scope.validation.dateOfBirth = dateOfBirthValid;
+
+        return nameValid && cityValid && dateOfBirthValid;
 
     };
 
@@ -1757,24 +1779,23 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
      */
     $scope.done = function () {
 
+        var dob = $scope.dateOfBirth;
+
+        $scope.user.meta.dateOfBirth = dob ? dob.getTime() : null;
+        $scope.user.meta.yearOfBirth = dob ? dob.getFullYear() : $scope.user.meta.yearOfBirth;
+
         // Is the name valid?
         if($scope.validate()) {
             $scope.showMainBox();
             $scope.ref.off('value');
             $scope.ref = null;
 
-            var dob = $scope.dateOfBirth;
-
-            $scope.user.meta.dateOfBirth = dob ? dob.getTime() : null;
-            $scope.user.meta.yearOfBirth = dob  ? dob.getFullYear() : $scope.user.meta.yearOfBirth;
 
             // Did the user update any values?
             if($scope.dirty) {
                 $scope.user.pushMeta();
                 $scope.dirty = false;
             }
-
-
         }
         else {
             if(!$scope.validation.name.valid) {
@@ -1782,6 +1803,9 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
             }
             if(!$scope.validation.city.valid) {
                 $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between "+$scope.validation.city.minChars+" - "+$scope.validation.city.maxChars+" characters long", "Ok");
+            }
+            if(!$scope.validation.city.dateOfBirth) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The date of birth must be set", "Ok");
             }
         }
     };

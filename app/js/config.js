@@ -118,6 +118,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
             this.setValue("singleSignOnAPILevel", config, setBy);
             this.setValue("apiLevel", config, setBy);
             this.setValue("singleSignOn", config, setBy);
+            this.setValue("singleSignOnURL", config, setBy);
             this.setValue("registerURL", config, setBy);
             this.setValue("loginURL", config, setBy);
 

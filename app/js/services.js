@@ -383,18 +383,18 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 }).bind(this);
 
                 // Get the third party data
-                var userData = null;
+                var userData = {name: null};
 
                 var p = authUser.provider;
                 if(p == "facebook" || p == "twitter" || p == "google" || p == "github") {
                     userData = authUser[p].cachedUserProfile;
                 }
-                else if (p == "custom") {
+                else if (p == "custom" && authUser.thirdPartyData) {
                     userData = authUser.thirdPartyData;
                 }
-                else {
-                    userData = {name: null}
-                }
+//                else {
+//                    userData = {name: null}
+//                }
 
                 // Set the user's name
                 setUserProperty("name", userData.name);
@@ -442,7 +442,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     setUserProperty("city", userData.city);
                     setUserProperty("gender", userData.gender);
                     setUserProperty("country", userData.countryCode);
+                    // TODO: Depricated
                     setUserProperty("yearOfBirth", userData.yearOfBirth);
+                    setUserProperty("dateOfBirth", userData.dateOfBirth);
                     setUserProperty("homepageLink", userData.homepageLink, true);
                     setUserProperty("homepageText", userData.homepageText, true);
 

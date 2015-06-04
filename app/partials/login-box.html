@@ -5,7 +5,7 @@
 
             <div class="cc-box-header" ng-style="{background: config.headerColor}">Login or Register</div>
 
-            <form ng-hide="singleSignOnEnabled" class="uk-panel uk-form cc-inner-margin">
+            <form ng-show="loginMode == 'simple'" class="uk-panel uk-form cc-inner-margin">
                 <div class="uk-form-row">
                     <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" enter-submit="loginWithPassword()" required />
                 </div>
@@ -41,13 +41,19 @@
                     <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</button>
                 </div>
             </form>
-            <form ng-show="singleSignOnEnabled" class="uk-panel uk-form cc-inner-margin">
+            <form ng-show="loginMode == 'singleSignOn'" class="uk-panel uk-form cc-inner-margin">
                 <a ng-show="loginURL" ng-href="{{ loginURL }}"> Login </a>
                 <div ng-hide="loginURL"> Login </div>
                 &nbsp;or
                 <a ng-show="registerURL" ng-href="{{ registerURL }}"> Register </a>
                 <div ng-hide="registerURL"> Register </div>
                 &nbsp;with {{ websiteName }} to start chatting!
+            </form>
+            <form ng-show="loginMode == 'token'" class="uk-panel uk-form cc-inner-margin">
+                Login token not valid
+            </form>
+            <form ng-show="loginMode == 'authenticating'" class="uk-panel uk-form cc-inner-margin">
+                Authenticating... <img ng-src="{{ ::img_loader }}" width="26" height="26" />
             </form>
         </div>
     </div>

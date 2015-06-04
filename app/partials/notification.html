@@ -1,13 +1,12 @@
 <div class="cc-notification-outer" ng-controller="NotificationController" ng-show="notification.show" >
     <div class="cc-overlay" ></div>
-    <div class="cc-notification cc-shadow">
+    <div class="cc-notification cc-shadow" ng-style="{height: (notification.message && notification.message.length) ? 100 : 60}">
         <div>
             <span class="cc-title">{{ notification.title }}</span>
             <br/>
             <!-- Waiting indicator -->
             <img ng-show="notification.type == 'waiting'"  ng-src="{{ ::img_loader }}" width="26" height="26" />
             <br/>
-
 
             <!-- Payload -->
             <span class="cc-message" >{{ notification.message }}</span>

@@ -950,7 +950,7 @@ div#cc-app div.cc-notification {
     right: 0;
 
     width: 80%;
-    height: 100px;
+    /*height: 100px;*/
     background: white;
 
     text-align: center;

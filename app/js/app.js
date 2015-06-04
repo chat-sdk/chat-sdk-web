@@ -46,5 +46,7 @@ var myApp = angular.module('myApp', [
 //    $sceDelegateProvider.resourceUrlBlacklist([
 //        'http://myapp.example.com/clickThru**'
 //    ]);
+}]).run(['Config', function (Config) {
+    Config.setConfig(Config.setByInclude, CC_OPTIONS);
 }]);
 

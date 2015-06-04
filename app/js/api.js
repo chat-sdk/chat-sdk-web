@@ -4,6 +4,161 @@
 
 var myApp = angular.module('myApp.api', []);
 
+myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils', 'SingleSignOn',
+    function ($q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils, SingleSignOn) {
+        var Authentication = {
+
+            mode: bLoginModeSimple,
+            getToken: null,
+            authListener: null,
+
+            init: function () {
+
+                // Is there a valid get token?
+                var pairs = $window.location.search.replace("?", "").split("&");
+                for(var i = 0; i < pairs.length; i++) {
+                    var values = pairs[i].split("=");
+                    if(values.length == 2) {
+                        if(values[0] == "cc_token") {
+                            this.getToken = values[1];
+                            this.mode = bLoginModeToken;
+                            break;
+                        }
+                    }
+                }
+
+                if(!this.getToken) {
+                    // Setup the login and register URLs
+                    var ssoURL = Config.singleSignOnURL;
+                    if(ssoURL && ssoURL.length > 0) {
+                        this.mode = bLoginModeSingleSignOn;
+                    }
+
+                }
+
+                return this;
+            },
+
+            setAuthListener: function (callback) {
+                this.authListener = callback;
+            },
+
+            modeIs: function (mode) {
+                return this.mode == mode;
+            },
+
+            startAuthListener: function () {
+
+                var deferred = $q.defer();
+
+                var ref = Paths.firebase();
+
+                var auth = ref.getAuth();
+
+                if(this.modeIs(bLoginModeToken)) {
+                    // This process should result in one of two outcomes
+                    if(auth) {
+                        if(this.getToken != auth.token) {
+                            ref.unauth();
+                            deferred.resolve(this.authenticateWithToken());
+                        }
+                        else {
+                            deferred.resolve(null);
+                        }
+                    }
+                    else {
+                        deferred.resolve(this.authenticateWithToken());
+                    }
+                }
+                // We always unauth with SSO
+                else if (this.modeIs(bLoginModeSingleSignOn)) {
+                    ref.unauth();
+                    deferred.resolve(this.authenticateWithSSO());
+                }
+                // We unauth with simple login if the token has a custom provider
+                else {
+                    // The user is using simple sign on and they're authenticated
+                    if(auth && auth.provider != bProviderTypeCustom) {
+                        deferred.resolve(auth);
+                    }
+                    else {
+                        ref.unauth();
+                        deferred.resolve(null);
+                    }
+                }
+
+//            if(auth) {
+//                else {
+//                    deferred.resolve(auth);
+//                    if(callback) {
+//                        callback(auth);
+//                    }
+//                    return deferred.promise;
+//                }
+
+                // If we're using token auth and the token is different
+                // to the one stored then unauth
+                ref.onAuth((function(authData) {
+                    if(this.authListener) {
+                        this.authListener(authData);
+                    }
+                }).bind(this));
+
+                return deferred.promise;
+            },
+
+            ssoAttempts: 0,
+            authenticateWithSSO: function () {
+
+                var ref = Paths.firebase();
+                var deferred = $q.defer();
+
+                SingleSignOn.authenticate().then((function (data) {
+                    ref.authWithCustomToken(data.token, (function(error, result) {
+                        if(!error) {
+                            result.thirdPartyData = data;
+                            deferred.resolve(result);
+                        }
+                        else {
+                            deferred.reject(error);
+                        }
+                    }).bind(this));
+                }).bind(this), (function (error) {
+                    if(this.ssoAttempts == 0) {
+                        this.ssoAttempts++;
+                        SingleSignOn.invalidate();
+                        deferred.resolve(this.authenticateWithSSO());
+                    }
+                    else {
+                        deferred.reject(error);
+                    }
+                }).bind(this));
+
+                return deferred.promise;
+            },
+
+            authenticateWithToken: function () {
+
+                var ref = Paths.firebase();
+                var deferred = $q.defer();
+
+                ref.authWithCustomToken(this.getToken, (function(error, result) {
+                    if(!error) {
+                        deferred.resolve(result);
+                    }
+                    else {
+                        deferred.reject(error);
+                    }
+                }).bind(this));
+
+                return deferred.promise;
+            }
+
+        };
+        return Authentication.init();
+    }
+]);
+
 myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils',
     function ($q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils) {
     return {
@@ -219,7 +374,10 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
             LocalStorage.removeProperty(LocalStorage.UIDKey);
         },
 
-        authenticate: function (url) {
+        authenticate: function () {
+
+            var url = Config.singleSignOnURL;
+
             this.busy = true;
             switch (this.getAPILevel()) {
                 case 0:
@@ -338,14 +496,12 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
             var deferred = $q.defer();
 
             $http(params).then((function (r) {
-
-                if(r && r.data && !r.data.error) {
-                    if(!r.data.error && r.status == 200) {
-
-                        deferred.resolve(r.data);
+                if(r && r.data && r.status == 200) {
+                    if(r.data.error) {
+                        deferred.reject(r.data.error);
                     }
                     else {
-                        deferred.reject(r.data.error ? r.data.error : this.defaultError);
+                        deferred.resolve(r.data);
                     }
                 }
                 else {
