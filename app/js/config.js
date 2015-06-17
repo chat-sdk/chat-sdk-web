@@ -3,20 +3,21 @@
  */
 var myApp = angular.module('myApp.config', []);
 
-myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope, $timeout, Paths) {
 
     // Priorities for setting
     var setByDefault = 0;
-    var setByInclude = 1;
-    var setBySingleSignOn = 2;
-    var setByFirebase = 3;
+    var setByControlPanel = 10;
+    var setByInclude = 20;
+    var setBySingleSignOn = 30;
 
     return {
 
         setByDefault: setByDefault,
         setByInclude: setByInclude,
         setBySingleSignOn: setBySingleSignOn,
-        setByFirebase: setByFirebase,
+        //setByFirebase: setByFirebase,
+        setByControlPanel: setByControlPanel,
 
         singleSignOnURL: null,
         singleSignOnURLSet: setByDefault,
@@ -77,6 +78,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
         apiLevel: 0,
         apiLevelSet: setByDefault,
 
+        // TODO: check this
         maxConcurrent: 20,
         maxConcurrentSet: setByDefault,
 
@@ -133,10 +135,17 @@ myApp.factory('Config', ['$rootScope', '$timeout', function ($rootScope, $timeou
         },
 
         setValue: function (name, data, setBy) {
-            if(data[name] && this[name+"Set"] < setBy) {
+            if(data[name] && this[name+"Set"] <= setBy) {
                 this[name] = data[name];
                 this[name+"Set"] = setBy;
             }
+        },
+
+        startConfigListener: function () {
+            var ref = Paths.configRef();
+            ref.on('value', (function (snapshot) {
+                this.setConfig(this.setByControlPanel, snapshot.val());
+            }).bind(this));
         }
 
     };

@@ -35,7 +35,7 @@
 
     <!--Add the search box-->
     <div class="uk-overflow-container" ng-hide="activeTab=='inbox'">
-        <form class="uk-panel uk-form uk-float-left cc-padded"
+        <form class="uk-panel uk-form uk-float-left cc-padded cc-search-bar"
               ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10))}">
 
             <input class="uk-width-1-1 uk-form-small" type="text" ng-model="search[activeTab]" placeholder="Search" />

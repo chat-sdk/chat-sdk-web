@@ -481,6 +481,9 @@ myApp.controller('AppController', [
         $scope.notification.type = type;
         $scope.notification.button = button;
         $scope.notification.show = true;
+        $timeout(function () {
+            $scope.$digest();
+        });
     };
 
     $scope.init();
@@ -668,137 +671,33 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         $scope.rememberMe = true;
 
-        // Show the notification to say we're authenticating
-        //$scope.showNotification(bNotificationTypeWaiting, "Authenticating");
-
-        //$rootScope.loginMode = Authentication.loginMode;
-        //$scope.loginMode = Authentication.loginMode;
-
         $scope.showLoginBox(bLoginModeAuthenticating);
 
-        var handleAuthData = function (authData) {
-
-            $rootScope.loginMode = Authentication.mode;
-
-            console.log(authData);
-
-            $rootScope.auth = authData;
-            if(authData) {
-                $scope.handleUserLogin(authData, false);
-            }
-            else {
-                $scope.showLoginBox();
-            }
-        };
-
         Authentication.startAuthListener().then(function(authData) {
-            Authentication.setAuthListener(handleAuthData);
-            handleAuthData(authData);
+            Authentication.setAuthListener($scope.handleAuthData);
+            $scope.handleAuthData(authData);
         }, function (error) {
-            Authentication.setAuthListener(handleAuthData);
+            Authentication.setAuthListener($scope.handleAuthData);
             //$scope.logout();
             //$scope.hideNotification();
             $scope.showLoginBox();
             console.log(error);
         });
-
-
-//        var ref = Paths.firebase();
-//        ref.onAuth(function(authData) {
-//
-//            // Hide the waiting overlay
-//            $scope.hideNotification();
-//
-//            if (authData) {
-//                // user authenticated with Firebase
-//                if(DEBUG) console.log("User ID: " + authData.uid + ", Provider: " + authData.provider);
-//
-//                if($rootScope.singleSignOnEnabled) {
-//                    if($scope.firstTry) {
-//                        Paths.firebase().unauth();
-//                        $scope.singleSignOn();
-//                        $scope.firstTry = false;
-//                    }
-//                }
-//                else {
-//                    // Single sign on has been disabled but the token is still valid
-//                    if(authData.provider == bProviderTypeCustom) {
-//                        $scope.logout();
-//                    }
-//                    else {
-//
-//                        // Login was successful so log the user in given their ID
-//                        $scope.handleUserLogin(authData, false);
-//                    }
-//                }
-//
-//            } else {
-//                // This is called whenever the page loads
-//                if($rootScope.singleSignOnEnabled) {
-//                    // Try to authenticate
-//                    $scope.singleSignOn();
-//                    $scope.firstTry = false;
-//                }
-//                else {
-//                    $scope.logout();
-//                }
-//            }
-//
-//            // TODO: Enable user count even when user isn't online
-////            API.getAPIDetails().then(function (result) {
-////                OnlineConnector.on();
-////            });
-//
-//        });
     };
 
-//    $scope.tries = 0;
-//    $scope.singleSignOn = function () {
-//
-//        if(SingleSignOn.busy) {
-//            return;
-//        }
-//        SingleSignOn.authenticate(Config.singleSignOnURL).then((function (data) {
-//
-//            // Authenticate with firebase using token
-//            Paths.firebase().authWithCustomToken(data.token, (function(error, result) {
-//                if (error) {
-//
-//                    // If this is the first try then maybe the token has expired...
-//                    // invalidate the token and try again
-//                    if($scope.tries == 0) {
-//                        $scope.tries++;
-//                        // Invalidate the token and try again
-//                        SingleSignOn.invalidate();
-//                        $scope.singleSignOn();
-//                    }
-//                    else {
-//                        $scope.logout();
-//                    }
-//
-//                } else {
-//
-//                    $rootScope.auth = result.auth;
-//                    $rootScope.auth.provider = bProviderTypeCustom;
-//                    $rootScope.auth.thirdPartyData = data;
-//
-//                    if(result) {
-//                        $scope.handleUserLogin($rootScope.auth, false);
-//
-//                        if (DEBUG) console.log('Authenticated successfully with payload:', result.auth);
-//                        if (DEBUG) console.log('Auth expires at:', new Date(result.expires * 1000));
-//                    }
-//                    else {
-//                        $scope.logout();
-//                    }
-//
-//                }
-//            }).bind(this));
-//
-//        }).bind(this), function () {
-//            $scope.logout();
-//        });
-//    };
+    $scope.handleAuthData = function (authData) {
+        $rootScope.loginMode = Authentication.mode;
+
+        console.log(authData);
+
+        $rootScope.auth = authData;
+        if(authData) {
+            $scope.handleUserLogin(authData, false);
+        }
+        else {
+            $scope.showLoginBox();
+        }
+    };
 
     $scope.setError = function (message) {
         $scope.showError = !Utils.unORNull(message);
@@ -828,7 +727,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         $scope.showError = false;
 
         // Hide the overlay
-        $scope.showNotification(bNotificationTypeWaiting, "Logging in");
+        $scope.showNotification(bNotificationTypeWaiting, "Logging in", "For social login make sure to enable popups!");
 
         var handleResult = function (error) {
             if(error) {
@@ -868,10 +767,39 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 scope = "email";
             }
 
-            ref.authWithOAuthPopup(method, handleResult, {
-                remember: "sessionOnly",
-                scope: scope
+            // Remove the listener
+            Authentication.setAuthListener(null);
+
+            $rootScope.$broadcast(bStartSocialLoginNotification, {
+                action: method,
+                path: Paths.firebase().toString(),
+                scope: scope,
+                remember: "sessionOnly"
+            }, function (data) {
+                if(data.authData) {
+                    var ref = Paths.firebase();
+                    ref.authWithCustomToken(data.authData.token, function (error, authData) {
+                        $rootScope.auth = data.authData;
+
+                        // Reinstate the handler
+                        Authentication.setAuthListener($scope.handleAuthData);
+
+                        // Handle the result manually
+                        // We do this because if we handle auth using the callback the provider data
+                        // is null
+                        $scope.handleAuthData(data.authData);
+
+                    });
+                }
+                else {
+                    $scope.showNotification(bNotificationTypeAlert, "Social login failed", "Please try again", "Ok");
+                }
             });
+
+//            ref.authWithOAuthPopup(method, handleResult, {
+//                remember: "sessionOnly",
+//                scope: scope
+//            });
         }
     };
 
@@ -939,6 +867,12 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         API.getAPIDetails().then((function(api) {
+
+            // Start the config listner to get the current
+            // settings from Firebase
+            Config.startConfigListener();
+
+            console.log("API Key: " + API.meta.cid);
 
             // Get the number of chatters that are currently online
             Auth.numberOfChatters().then((function(number) {

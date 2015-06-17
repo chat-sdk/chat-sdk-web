@@ -637,39 +637,58 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             if(!text || text.length === 0)
                 return;
 
-            // Make the message
-            var message = Message.buildMeta(this.meta.rid, user.meta.uid, text);
+            var innerSendMessage = (function (text, user) {
 
-            // Get a ref to the room
-            var ref = Paths.roomMessagesRef(this.meta.rid);
 
-            // Add the message
-            var newRef = ref.push();
-            newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP);
+                // Make the message
+                var message = Message.buildMeta(this.meta.rid, user.meta.uid, text);
 
-            // Now update this room with this data
-            var roomMetaRef = Paths.roomMetaRef(this.meta.rid);
+                // Get a ref to the room
+                var ref = Paths.roomMessagesRef(this.meta.rid);
 
-            // Last message
-            this.setLastMessage(message, user);
+                // Add the message
+                var newRef = ref.push();
 
-//            var lastMessageMeta = message.meta;
-//            lastMessageMeta['userName'] = user.meta.name;
-//
-//            // Update the room
-//            roomMetaRef.update({
-//                lastUpdated: Firebase.ServerValue.TIMESTAMP,
-//                lastMessage: lastMessageMeta
-//            });
+                var deferred = $q.defer();
 
-            // The user's been active so update their status
-            // with the current time
-            this.updateUserStatusTime(user);
+                newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP, function (error) {
+                    if(!error) {
+                        deferred.resolve(null);
+                    }
+                    else {
+                        deferred.reject(error);
+                    }
+                });
 
-            // Avoid a clash..
-            this.entity.updateState(bMessagesPath).then((function () {
-                //this.entity.updateState(bMetaKey);
-            }).bind(this));
+                // Now update this room with this data
+                var roomMetaRef = Paths.roomMetaRef(this.meta.rid);
+
+                // Last message
+                var p1 = this.setLastMessage(message, user);
+
+                // The user's been active so update their status
+                // with the current time
+                this.updateUserStatusTime(user);
+
+                // Avoid a clash..
+                var p2 = this.entity.updateState(bMessagesPath);
+
+                return $q.all([
+                    deferred.promise, p1, p2
+                ]);
+
+            }).bind(this);
+
+            innerSendMessage(text, user).then(function () {
+
+            }, function (error) {
+                // If there's an error update the state i.e. make sure we're online
+                // and try to resend
+                Presence.update().then(function () {
+                    innerSendMessage(text, user);
+                });
+
+            });
 
             // Update the user's presence state
             //Presence.update();

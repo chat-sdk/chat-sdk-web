@@ -660,6 +660,10 @@ div#cc-app .cc-padded {
     padding: 5px;
 }
 
+div#cc-app .cc-search-bar {
+    margin-bottom: 0;
+}
+
 div#cc-app .cc-thumbnail-20 {
     border-radius: 10px;
     width: 20px;

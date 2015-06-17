@@ -14,7 +14,7 @@ myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config',
 
             init: function () {
 
-                // Is there a valid get token?
+                // Is there a valid get token in the URL?
                 var pairs = $window.location.search.replace("?", "").split("&");
                 for(var i = 0; i < pairs.length; i++) {
                     var values = pairs[i].split("=");
@@ -165,6 +165,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
 
         meta: {},
         timeout: null,
+        errorMessageCouldNotConnect: "Could not connection to Chatcat.io API",
 
         getAPILevel: function () {
             return Config.apiLevel;
@@ -210,37 +211,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             }
         },
 
-        getAPIDetailsLevel1: function () {
-            var deferred = $q.defer();
 
-            var url = this.getDomain();
-
-            // Make a call to the new API
-            $http({
-                method: 'get',
-                url: 'http://symfony/app_dev.php/api/chat/plan',
-                params: {
-                    domain: url
-                }
-            }).then((function (response) {
-                // We need to get:
-                // Plan:
-                // apiKey
-                // maxConcurrent
-                // showAds
-                // whiteLabel
-                // singleSignOn
-                console.log("Response");
-
-            }).bind(this), function (error, message) {
-
-                deferred.reject("Could not connection to Chatcat.io API");
-
-            });
-
-
-                return deferred.promise;
-        },
 
         getDomain: function () {
             // Do we have a primaryURL?
@@ -258,6 +229,48 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             return url;
         },
 
+        getAPIDetailsLevel1: function () {
+            var deferred = $q.defer();
+
+            var url = this.getDomain();
+
+            // Make a call to the new API
+            $http({
+                method: 'get',
+                url: 'http://symfony/app_dev.php/api/chat/plan',
+                params: {
+                    domain: url
+                }
+            }).then((function (response) {
+                if(response.status == 200) {
+
+                    this.meta = {
+                        cid: response.data.apiKey,
+                        max: 250, // TODO: Change this
+                        ads: response.data.showAds,
+                        whiteLabel: response.data.whiteLabel,
+                        singleSignOn: response.data.singleSignOn
+                    };
+
+
+                    Paths.setCID(this.meta.cid);
+
+                    // Save the meta data
+                    this.saveAPIDetails(this.meta);
+
+
+                    deferred.resolve(response.data);
+                }
+                else {
+                    deferred.reject(this.errorMessageCouldNotConnect);
+                }
+            }).bind(this), function (error, message) {
+                //TODO: Test this
+                deferred.reject(error.message);
+            });
+
+            return deferred.promise;
+        },
         getAPIDetailsLevel0: function () {
 
             var deferred = $q.defer();
@@ -330,9 +343,9 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                     deferred.reject(r1.data.message);
                 }
 
-            }).bind(this), function (error, message) {
-
-                deferred.reject("Could not connection to Chatcat.io API");
+            }).bind(this), function (error) {
+                // TODO: Check this
+                deferred.reject(error.message);
 
             });
 

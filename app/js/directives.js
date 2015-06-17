@@ -578,3 +578,36 @@ myApp.directive('pikaday', ["$rootScope", function ($rootScope) {
 
     };
 }]);
+
+myApp.directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", function ($rootScope, $document, $window, Paths) {
+    return function (scope, element, attr) {
+
+        $rootScope.$on(bStartSocialLoginNotification, function (event, data, callback) {
+
+            //element.load(function () {
+
+//                var data = {
+//                    action: 'github',
+//                    path: Paths.firebase().toString()
+//                };
+
+                // Add the event listener
+                var eventMethod = $window.addEventListener ? "addEventListener" : "attachEvent";
+                var eventer = $window[eventMethod];
+                var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+                eventer(messageEvent, function(e) {
+                    if (e.data) {
+                        var data = JSON.parse(e.data);
+                        callback(data);
+                    }
+                    else {
+                        callback(null);
+                    }
+                });
+
+                element.get(0).contentWindow.postMessage(JSON.stringify(data), "*");
+            //});
+        });
+    };
+}]);

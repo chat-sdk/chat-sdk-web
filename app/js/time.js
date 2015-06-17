@@ -66,10 +66,10 @@ myApp.factory('Time', ['$q', 'Paths', function ($q, Paths) {
         formatTimestamp: function (timestamp, type) {
             try {
                 if(type == '24hour') {
-                    return moment(meta.time).format('HH:mm');
+                    return moment(timestamp).format('HH:mm');
                 }
                 else {
-                    return moment(meta.time).format('h:mm a');
+                    return moment(timestamp).format('h:mm a');
                 }
             }
             // In some cases (maktab.pk) a javascript conflict seems to stop moment working

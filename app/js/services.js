@@ -240,6 +240,9 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
         },
 
         update: function () {
+
+            var deferred = $q.defer();
+
             if(this.user) {
                 var uid = this.user.meta.uid;
                 if (uid) {
@@ -248,10 +251,16 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                     ref.onDisconnect().remove();
 
                     ref.setWithPriority({
-                            uid: uid,
-                            time: Firebase.ServerValue.TIMESTAMP
-                        }, this.user.meta.name
-                    );
+                        uid: uid,
+                        time: Firebase.ServerValue.TIMESTAMP
+                    }, this.user.meta.name, function (error) {
+                        if(!error) {
+                            deferred.resolve();
+                        }
+                        else {
+                            deferred.reject(error);
+                        }
+                    });
 
 //                    // Update the user online counter
 //                    var userCountRef = Paths.onlineUserCountRef();
@@ -262,6 +271,10 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
 //                        return Math.max(currentValue - 1, 0);
 //                    });
 
+                    var promises = [
+                        deferred.promise
+                    ];
+
                     // Go online for the public rooms
                     var rooms = Cache.rooms;
                     var room;
@@ -271,11 +284,15 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                             // We need to set ourself as a member again
                             room = rooms[i];
                             if(room.isPublic())
-                                room.join(bUserStatusMember);
+                                promises.push(room.join(bUserStatusMember));
 
                     }
+
+                    return $q.all(promises);
                 }
             }
+            deferred.resolve(null);
+            return deferred.promise;
         }
 
 //        onlineCounterPlusOne: function () {
@@ -387,7 +404,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 var p = authUser.provider;
                 if(p == "facebook" || p == "twitter" || p == "google" || p == "github") {
-                    userData = authUser[p].cachedUserProfile;
+                    if(authUser[p] && authUser[p].cachedUserProfile) {
+                        userData = authUser[p].cachedUserProfile;
+                    }
                 }
                 else if (p == "custom" && authUser.thirdPartyData) {
                     userData = authUser.thirdPartyData;
@@ -419,7 +438,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                     // We need to transform the twiter url to replace 'normal' with 'bigger'
                     // to get the 75px image instad of the 50px
-                    imageURL = userData.profile_image_url.replace("normal", "bigger");
+                    if(userData.profile_image_url) {
+                        imageURL = userData.profile_image_url.replace("normal", "bigger");
+                    }
 
                     setUserProperty("description", userData.description);
                     setUserProperty("city", userData.location);
@@ -465,8 +486,9 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 }
 
                 // If they don't have a profile picture load it from the social network
-                setUserProperty('image', imageURL);
-                user.setImage(imageURL);
+                if(setUserProperty('image', imageURL)) {
+                    user.setImage(imageURL);
+                }
 
                 /** LOCATION **/
                 // Get the user's city and country from their IP

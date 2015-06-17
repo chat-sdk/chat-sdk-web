@@ -78,6 +78,7 @@ var bMetaKey = "meta";
 var bImageKey = "image";
 var bTimeKey = "time";
 var bUserCountKey = "user-count";
+var bConfigKey = "config";
 
 var bOnlineKey = "online";
 var bTypeKey = "type";
@@ -138,6 +139,8 @@ var bScreenSizeChangedNotification = 'bScreenSizeChangedNotification';
 
 var bLoginCompleteNotification = 'bLoginCompleteNotification';
 var bLogoutNotification = 'bLogoutNotification';
+
+var bStartSocialLoginNotification = 'bStartSocialLoginNotification';
 
 var bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
 var bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
@@ -207,6 +210,10 @@ myApp.factory('Paths', [function () {
         usersRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("usersRef");
             return this.firebase().child(bUsersPath);
+        },
+
+        configRef: function () {
+            return this.firebase().child(bConfigKey);
         },
 
         timeRef: function (uid) {
