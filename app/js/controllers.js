@@ -630,6 +630,11 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
     };
 
     $scope.roomClicked = function (room) {
+
+        // Trim the messages array in case it gets too long
+        // we only need to store the last 200 messages!
+        room.trimMessageList();
+
         // Messages on is called by when we add the room to the user
         // If the room is already open do nothing!
         if(room.isOpen()) {
@@ -961,11 +966,12 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils',
-    function($scope, $timeout, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils) {
+myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils',
+    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils) {
 
     $scope.showEmojis = false;
     $scope.headerColor = $scope.config.headerColor;
+    $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
 
     $scope.init = function (room) {
 

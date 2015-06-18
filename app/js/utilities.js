@@ -42,6 +42,7 @@ else if(document.location.origin === "http://ccwp") {
 }
 //// We're live so we need to use the full remote URL
 else {
+    // This is also used for the social login iFrame - don't forget to change it there too
     bRootURL = '//chatcat.firebaseapp.com/';
     bPartialURL = 'https://chatcat.firebaseapp.com/partials/';
     //bFirebase = 'chatcat';

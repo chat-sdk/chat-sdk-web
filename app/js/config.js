@@ -135,7 +135,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope
         },
 
         setValue: function (name, data, setBy) {
-            if(data[name] && this[name+"Set"] <= setBy) {
+            if(data && data[name] && this[name+"Set"] <= setBy) {
                 this[name] = data[name];
                 this[name+"Set"] = setBy;
             }

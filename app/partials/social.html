@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="https://cdn.firebase.com/js/client/2.2.7/firebase.js"></script>
+    <script>
+
+        var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+        var eventer = window[eventMethod];
+        var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+
+        // Listen to message from child window
+        eventer(messageEvent,function(e) {
+            if (e.data) {
+                var data = JSON.parse(e.data);
+                if(data.path && data.action) {
+                    var ref = new Firebase(data.path);
+                    ref.authWithOAuthPopup(data.action, function(error, authData) {
+                        var data = {
+                            authData: authData,
+                            error: error,
+                            action: e.data.action
+                        };
+                        window.parent.postMessage(JSON.stringify(data), "*");
+                    }, {
+                        remember: data.remember,
+                        scope: data.scope
+                    });
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+Hello
+</body>
+</html>

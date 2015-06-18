@@ -197,6 +197,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
             else if(type == bRoomTypeGroup || type == bRoomTypePublic) {
 
+                this.messagesOff();
+
                 var promises = [
                     this.removeUser($rootScope.user),
                     $rootScope.user.removeRoom(this)
@@ -791,6 +793,22 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.sortMessageArray(this.messages);
         };
 
+        Room.prototype.deduplicateMessages = function () {
+            var uniqueMessages = [];
+
+            // Deduplicate list
+            var lastMID = null;
+            for(var i = 0; i < this.messages.length; i++) {
+                if(this.messages[i].mid != lastMID) {
+                    uniqueMessages.push(this.messages[i]);
+                }
+                lastMID = this.messages[i].mid;
+            }
+
+            this.messages = uniqueMessages;
+
+        };
+
         Room.prototype.deleteMessages = function () {
             this.messages.length = 0;
             if(this.unreadMessages) {
@@ -832,7 +850,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.sendBadgeChangedNotification = function () {
             $rootScope.$broadcast(bRoomBadgeChangedNotification, this);
-        }
+        };
 
         Room.prototype.transcript = function () {
 
@@ -1134,14 +1152,21 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         Room.prototype.addMessageMeta = function (mid, val, serialization, silent) {
 
             if(!val || !val.text || val.text.length === 0) {
-                return;
+                return false;
+            }
+
+            // Check that the message doesn't already exist
+            for(var i = 0; i < this.messages.length; i++) {
+                if(this.messages[i].mid == mid) {
+                    return false;
+                }
             }
 
             if(this.lastMessage) {
                 // Sometimes we get double messages
                 // check that this message hasn't been added already
                 if(this.lastMessage.mid == mid) {
-                    return;
+                    return false;
                 }
             }
 
@@ -1191,11 +1216,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 // We always hide the time for the latest message
                 message.hideTime = true;
 
+
                 this.messages.push(message);
 
                 this.sortMessages();
 
                 this.lastMessage = message;
+
+                return true;
             }
 
             // If the room is inactive or minimized increase the badge
@@ -1249,15 +1277,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 startDate++;
             }
 
-
             if(startDate) {
                 // Start 1 thousandth of a second after the last message
                 // so we don't get a duplicate
                 ref = ref.startAt(startDate);
             }
-            else {
-                ref = ref.limitToLast(Config.maxHistoricMessages);
-            }
+            ref = ref.limitToLast(Config.maxHistoricMessages);
 
             // Add listen to messages added to this thread
             ref.on('child_added', (function (snapshot) {
@@ -1270,22 +1295,42 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 this.deleted = false;
                 //setStatusForUser(this, $rootScope.user, bUserStatusMember, false);
 
-                this.addMessageMeta(snapshot.key(), snapshot.val());
+                if(this.addMessageMeta(snapshot.key(), snapshot.val())) {
+                    // Trim the room to make sure the message count isn't growing
+                    // out of control
+                    this.trimMessageList();
 
-                // Is the window visible?
-                // Play the sound
-                if(!this.muted) {
-                    if(Visibility.getIsHidden()) {
-                        // Only make a sound for messages that were recieved less than
-                        // 30 seconds ago
-                        if(DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val().time);
-                        if(DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
-                        if(Math.abs(Time.now() - snapshot.val().time)/1000 < 30) {
-                            SoundEffects.messageReceived();
+                    // Is the window visible?
+                    // Play the sound
+                    if(!this.muted) {
+                        if(Visibility.getIsHidden()) {
+                            // Only make a sound for messages that were recieved less than
+                            // 30 seconds ago
+                            if(DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val().time);
+                            if(DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
+                            if(Math.abs(Time.now() - snapshot.val().time)/1000 < 30) {
+                                SoundEffects.messageReceived();
+                            }
                         }
                     }
                 }
+
             }).bind(this));
+        };
+
+        Room.prototype.trimMessageList = function () {
+            this.sortMessages();
+            this.deduplicateMessages();
+
+            var toRemove = this.messages.length - 100;
+            if(toRemove > 0) {
+                for(var j = 0; j < toRemove; j++) {
+                    this.messages.shift();
+
+                }
+            }
+
+
         };
 
         Room.prototype.messagesOff = function () {
