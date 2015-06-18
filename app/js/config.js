@@ -3,7 +3,7 @@
  */
 var myApp = angular.module('myApp.config', []);
 
-myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope, $timeout, Paths) {
+myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($rootScope, $timeout, Paths, Utils) {
 
     // Priorities for setting
     var setByDefault = 0;
@@ -91,11 +91,17 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope
         singleSignOn: true,
         singleSignOnSet: setByDefault,
 
-        registerURL: null,
-        registerURLSet: setByDefault,
+        onlineUsersEnabled: true,
+        onlineUsersEnabledSet: setByDefault,
 
-        loginURL: null,
-        loginURLSet: setByDefault,
+        publicRoomsEnabled: true,
+        publicRoomsEnabledSet: setByDefault,
+
+        friendsEnabled: true,
+        friendsEnabledSet: setByDefault,
+
+        friends: [],
+        friendsSet: setByDefault,
 
         // We update the config using the data provided
         // but we only update variables where the priority
@@ -124,6 +130,12 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope
             this.setValue("registerURL", config, setBy);
             this.setValue("loginURL", config, setBy);
 
+            this.setValue("onlineUsersEnabled", config, setBy);
+            this.setValue("publicRoomsEnabled", config, setBy);
+            this.setValue("friendsEnabled", config, setBy);
+
+            this.setValue("friends", config, setBy);
+
             // After we've updated the config we need to digest the
             // root scope
             $timeout(function() {
@@ -132,10 +144,12 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', function ($rootScope
 
             $rootScope.config = this;
 
+            $rootScope.$broadcast(bConfigUpdatedNotification);
+
         },
 
         setValue: function (name, data, setBy) {
-            if(data && data[name] && this[name+"Set"] <= setBy) {
+            if(data && !Utils.unORNull(data[name]) && this[name+"Set"] <= setBy) {
                 this[name] = data[name];
                 this[name+"Set"] = setBy;
             }

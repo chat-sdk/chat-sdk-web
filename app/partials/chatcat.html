@@ -12,7 +12,12 @@
             <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
                     <div class="cc-inner cc-pointer">
-                        {{ totalUserCount }} {{ totalUserCount == 1 ? 'Person' : 'People' }} online
+                        <span ng-show="totalUserCount > 0">
+                            {{ totalUserCount }} {{ totalUserCount == 1 ? 'Person' : 'People' }} online
+                        </span>
+                        <span ng-show="totalUserCount == 0">
+                            Chatcat Messenger
+                        </span>
                         <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
                             <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
                         </a>

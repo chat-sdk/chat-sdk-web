@@ -4,7 +4,8 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defines', 'Utils', 'Paths', function ($rootScope, $timeout, $q, Entity, Cache, Defines, Utils, Paths) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Defines', 'Utils', 'Paths',
+    function ($rootScope, $timeout, $q, Entity, Defines, Utils, Paths) {
 
     function User (uid) {
         this.meta =  {
@@ -20,10 +21,23 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
         this.entity = new Entity(bUsersPath, uid);
     }
 
-    //User.prototype = new Entity(bUsersPath, null);
-    //User.prototype.constructor = User;
-
     User.prototype.on = function () {
+
+        if(this.entity.pathIsOn[bMetaKey]) {
+            return;
+        }
+
+        var ref = Paths.userOnlineRef(this.meta.uid);
+        ref.on('value', (function (snapshot) {
+            this.online = snapshot.val();
+            if(this.online) {
+                $rootScope.$broadcast(bOnlineUserAddedNotification);
+            }
+            else {
+                $rootScope.$broadcast(bOnlineUserRemovedNotification);
+            }
+        }).bind(this));
+
         return this.entity.pathOn(bMetaKey, (function (val) {
             if(val) {
                 this.meta = val;
@@ -42,9 +56,8 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
 
     // Stop listening to the Firebase location
     User.prototype.off = function () {
-        ///this.pathOff(bThumbnailKey);
         this.entity.pathOff(bMetaKey);
-
+        Paths.userOnlineRef(this.meta.uid).off();
     };
 
     User.prototype.pushMeta = function () {
@@ -77,16 +90,24 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Cache', 'Defin
             return true;
         }
 
-        var allowInvites = this.meta.allowInvites;
+        var allowInvites = this.allowInvites();
         if(Utils.unORNull(allowInvites) || allowInvites == bUserAllowInvitesEveryone) {
             return true;
         }
-        else if (allowInvites == bUserAllowInvitesFriends) {
-            return Cache.isFriend(invitingUser);
-        }
+//        else if (allowInvites == bUserAllowInvitesFriends) {
+//            return FriendsConnector.isFriend(invitingUser);
+//        }
         else {
             return false;
         }
+    };
+
+    User.prototype.allowInvites = function () {
+        return this.meta.allowInvites;
+    };
+
+    User.prototype.allowInvitesFrom = function (type) {
+        return this.allowInvites() == type;
     };
 
     User.prototype.updateImageURL = function (imageURL) {

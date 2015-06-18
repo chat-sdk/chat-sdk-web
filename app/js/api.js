@@ -211,8 +211,6 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             }
         },
 
-
-
         getDomain: function () {
             // Do we have a primaryURL?
             var url = Config.primaryDomain;
@@ -252,12 +250,10 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                         singleSignOn: response.data.singleSignOn
                     };
 
-
                     Paths.setCID(this.meta.cid);
 
                     // Save the meta data
                     this.saveAPIDetails(this.meta);
-
 
                     deferred.resolve(response.data);
                 }
@@ -418,6 +414,7 @@ myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStor
                 // These will be overridden by options which are set on the
                 // config tab of the user's Firebase install
                 Config.setConfig(Config.setBySingleSignOn, data);
+
 
                 this.busy = false;
                 deferred.resolve(data);

@@ -4,10 +4,116 @@
 
 var myApp = angular.module('myApp.stateManager', ['firebase']);
 
-myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'Paths', function ($rootScope, User, Cache, UserStore, Paths) {
+myApp.factory('FriendsConnector', ['$rootScope', 'User', 'UserStore', 'Paths', 'Utils', function ($rootScope, User, UserStore, Paths, Utils) {
+    return {
+
+        friends: {},
+
+        on: function (uid) {
+            var friendsRef = Paths.userFriendsRef(uid);
+
+            friendsRef.on('child_added', (function (snapshot) {
+
+                if(snapshot && snapshot.val()) {
+                    this.impl_friendAdded(snapshot);
+                }
+
+            }).bind(this));
+
+            friendsRef.on('child_removed', (function (snapshot) {
+
+                if(snapshot && snapshot.val()) {
+                    this.impl_friendRemoved(snapshot);
+                }
+
+            }).bind(this));
+        },
+
+        off: function (uid) {
+            var friendsRef = Paths.userFriendsRef(uid);
+
+            friendsRef.off('child_added');
+            friendsRef.off('child_removed');
+
+            this.friends = {};
+        },
+
+        /**
+         * Friends
+         */
+
+        impl_friendAdded: function (snapshot) {
+
+            var uid = snapshot.val().uid;
+            if(uid) {
+                var user = UserStore.getOrCreateUserWithID(uid);
+
+                user.removeFriend = function () {
+                    snapshot.ref().remove();
+                };
+                this.addFriend(user);
+            }
+
+        },
+
+        impl_friendRemoved: function (snapshot) {
+            this.removeFriendWithID(snapshot.val().uid);
+        },
+
+        addFriendsFromSSO: function (friends) {
+            for(var i = 0; i < friends.length; i++) {
+                var uid = friends[i];
+
+                var user = UserStore.getOrCreateUserWithID(uid);
+                user.ssoFriend = true;
+
+                this.addFriend(user);
+            }
+        },
+
+        addFriend: function (user) {
+            if(user && user.meta && user.meta.uid) {
+                this.friends[user.meta.uid] = user;
+                user.friend = true;
+                $rootScope.$broadcast(bFriendAddedNotification);
+            }
+        },
+
+        isFriend: function (user) {
+            if(user && user.meta) {
+                return this.isFriendUID(user.meta.uid);
+            }
+            return false;
+        },
+
+        isFriendUID: function(uid) {
+            return !Utils.unORNull(this.friends[uid]);
+        },
+
+        removeFriend: function (user) {
+            if(user && user.meta && user.meta.uid) {
+                this.removeFriendWithID(user.meta.uid);
+            }
+        },
+
+        removeFriendWithID: function (uid) {
+            if(uid) {
+                var user = this.friends[uid];
+                if(user) {
+                    user.friend = false;
+                    delete this.friends[uid];
+                    $rootScope.$broadcast(bFriendRemovedNotification);
+                }
+            }
+        }
+    }
+}]);
+
+myApp.factory('OnlineConnector', ['$rootScope', 'User', 'UserStore', 'Paths', 'Utils', function ($rootScope, User, UserStore, Paths, Utils) {
     return {
 
         isOn: false,
+        onlineUsers: {},
 
         on: function () {
 
@@ -20,7 +126,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'P
 
             onlineUsersRef.on("child_added", (function (snapshot) {
 
-                console.log('Online: ' + snapshot.val().uid);
+                if(DEBUG) console.log('Online: ' + snapshot.val().uid);
 
                 // Get the UID of the added user
                 var uid = null;
@@ -29,7 +135,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'P
 
                     var user = UserStore.getOrCreateUserWithID(uid);
 
-                    if(Cache.addOnlineUser(user)) {
+                    if(this.addOnlineUser(user)) {
                         // Update the user's rooms
                         $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
                     }
@@ -46,7 +152,7 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'P
                 user.off();
 
                 if (user) {
-                    Cache.removeOnlineUser(user);
+                    this.removeOnlineUser(user);
                 }
 
                 $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
@@ -58,16 +164,76 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'Cache', 'UserStore', 'P
 
             this.isOn = false;
 
+            //this.onlineUsers = {};
+            // having the user.blocked is useful because it means
+            // that the partials don't have to call a function
+            // however when you logout you want the flags to be reset
+            for(var key in this.onlineUsers) {
+                if(this.onlineUsers.hasOwnProperty(key)) {
+                    this.onlineUsers[key].blocked = false;
+                    this.onlineUsers[key].friend = false;
+                }
+            }
+            this.onlineUsers = {};
+
             var onlineUsersRef = Paths.onlineUsersRef();
 
             onlineUsersRef.off('child_added');
             onlineUsersRef.off('child_removed');
+        },
+
+        /**
+         * Online users
+         */
+
+        addOnlineUser: function (user) {
+            if(user && user.meta && user.meta.uid) {
+                if(!$rootScope.user || user.meta.uid != $rootScope.user.meta.uid) {
+                    user.online = true;
+                    this.onlineUsers[user.meta.uid] = user;
+                    $rootScope.$broadcast(bOnlineUserAddedNotification);
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        removeOnlineUser: function (user) {
+            if(user && user.meta && user.meta.uid) {
+                this.removeOnlineUserWithID(user.meta.uid);
+            }
+        },
+
+        removeOnlineUserWithID: function (uid) {
+            if(uid) {
+                var user = this.onlineUsers[uid];
+                if(user) {
+                    user.online = false;
+                    delete this.onlineUsers[uid];
+                    $rootScope.$broadcast(bOnlineUserRemovedNotification);
+                }
+            }
+        },
+
+        onlineUserCount: function () {
+            var i = 0;
+            for(var key in this.onlineUsers) {
+                if(this.onlineUsers.hasOwnProperty(key)) {
+                    i++;
+                }
+            }
+            return i;
         }
+
+//        isOnlineWithUID: function (uid) {
+//            return !Utils.unORNull(this.onlineUsers[uid]);
+//        }
 
     }
 }]);
 
-myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths', function ($rootScope, Room, RoomStore, Paths) {
+myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths',
+    function ($rootScope, Room, RoomStore, Paths) {
     return {
         on: function () {
             var publicRoomsRef = Paths.publicRoomsRef();
@@ -122,8 +288,8 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
 /**
  * This should really be called the CurrentUserConnector
  */
-myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths',
-    function ($rootScope, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths) {
+myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths',
+    function ($rootScope, FriendsConnector, Config, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths) {
     return {
 
         isOn: false,
@@ -143,12 +309,16 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
             /**
              * Public rooms ref
              */
-            PublicRoomsConnector.on();
+            if(Config.publicRoomsEnabled) {
+                PublicRoomsConnector.on();
+            }
 
             /**
              * Online users ref
              */
-            OnlineConnector.on();
+            if(Config.onlineUsersEnabled) {
+                OnlineConnector.on();
+            }
 
         },
 
@@ -160,7 +330,10 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
             this.isOn = false;
 
             PublicRoomsConnector.off();
-            OnlineConnector.off();
+
+            if(Config.onlineUsersEnabled) {
+                OnlineConnector.off();
+            }
 
         },
 
@@ -218,23 +391,9 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
              * Friends
              */
 
-            var friendsRef = Paths.userFriendsRef(uid);
-
-            friendsRef.on('child_added', (function (snapshot) {
-
-                if(snapshot && snapshot.val()) {
-                    this.impl_friendAdded(snapshot);
-                }
-
-            }).bind(this));
-
-            friendsRef.on('child_removed', (function (snapshot) {
-
-                if(snapshot && snapshot.val()) {
-                    this.impl_friendRemoved(snapshot);
-                }
-
-            }).bind(this));
+            if(Config.friendsEnabled) {
+                FriendsConnector.on(uid);
+            }
 
             /**
              * Blocked
@@ -268,10 +427,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
             roomsRef.off('child_added');
             roomsRef.off('child_removed');
 
-            var friendsRef = Paths.userFriendsRef(uid);
-
-            friendsRef.off('child_added');
-            friendsRef.off('child_removed');
+            FriendsConnector.off(uid);
 
             var blockedUsersRef = Paths.userBlockedRef(uid);
 
@@ -305,24 +461,6 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
 
             Cache.removeBlockedUserWithID(snapshot.val().uid);
 
-        },
-
-        impl_friendAdded: function (snapshot) {
-
-            var uid = snapshot.val().uid;
-            if(uid) {
-                var user = UserStore.getOrCreateUserWithID(uid);
-
-                user.removeFriend = function () {
-                    snapshot.ref().remove();
-                };
-                Cache.addFriend(user);
-            }
-
-        },
-
-        impl_friendRemoved: function (snapshot) {
-            Cache.removeFriendWithID(snapshot.val().uid);
         },
 
         impl_roomAddInitial: function (rooms) {
@@ -365,6 +503,11 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                 if(!$rootScope.user.canBeInvitedByUser(invitedByUser)) {
                     return;
                 }
+                // If they only allow invites from friends
+                // the other user must be a friend
+                if($rootScope.user.allowInvitesFrom(bUserAllowInvitesFriends) && !FriendsConnector.isFriend(invitedByUser)) {
+                    return;
+                }
 
                 // Does the room already exist?
                 var room = RoomStore.getOrCreateRoomWithID(rid);
@@ -392,7 +535,7 @@ myApp.factory('StateManager', ['$rootScope', 'Room', 'User', 'Cache', 'RoomStore
                             //room.messagesOn();
 
                             // If the user is a friend
-                            if(Cache.isFriendUID(invitedBy)) {
+                            if(FriendsConnector.isFriendUID(invitedBy)) {
                                 room.join(bUserStatusMember);
                                 // Set the user to member
                                 //room.setStatusForUser($rootScope.user, bUserStatusMember);

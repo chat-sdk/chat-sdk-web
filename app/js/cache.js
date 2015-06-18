@@ -269,8 +269,8 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
         rooms: [],
 
         // These are user specific stores
-        onlineUsers: {},
-        friends: {},
+        //onlineUsers: {},
+        //friends: {},
         blockedUsers: {},
 
         init: function () {
@@ -317,45 +317,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
             return ar;
         },
 
-        /**
-         * Friends
-         */
 
-        addFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.friends[user.meta.uid] = user;
-                user.friend = true;
-                $rootScope.$broadcast(bFriendAddedNotification);
-            }
-        },
-
-        isFriend: function (user) {
-            if(user && user.meta) {
-                return this.isFriendUID(user.meta.uid);
-            }
-            return false;
-        },
-
-        isFriendUID: function(uid) {
-            return !Utils.unORNull(this.friends[uid]);
-        },
-
-        removeFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeFriendWithID(user.meta.uid);
-            }
-        },
-
-        removeFriendWithID: function (uid) {
-            if(uid) {
-                var user = this.friends[uid];
-                if(user) {
-                    user.friend = false;
-                    delete this.friends[uid];
-                    $rootScope.$broadcast(bFriendRemovedNotification);
-                }
-            }
-        },
 
         /**
          * Blocked users
@@ -384,42 +346,6 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
             }
         },
 
-        /**
-         * Online users
-         */
-
-        addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                if(!$rootScope.user || user.meta.uid != $rootScope.user.meta.uid) {
-                    user.online = true;
-                    this.onlineUsers[user.meta.uid] = user;
-                    $rootScope.$broadcast(bOnlineUserAddedNotification);
-                    return true;
-                }
-            }
-            return false;
-        },
-
-        removeOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeOnlineUserWithID(user.meta.uid);
-            }
-        },
-
-        removeOnlineUserWithID: function (uid) {
-            if(uid) {
-                var user = this.onlineUsers[uid];
-                if(user) {
-                    user.online = false;
-                    delete this.onlineUsers[uid];
-                    $rootScope.$broadcast(bOnlineUserRemovedNotification);
-                }
-            }
-        },
-
-        isOnlineWithUID: function (uid) {
-            return !Utils.unORNull(this.onlineUsers[uid]);
-        },
 
         /**
          * Utility functions
@@ -427,19 +353,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
 
         clear: function () {
 
-            //this.onlineUsers = {};
-            // having the user.blocked is useful because it means
-            // that the partials don't have to call a function
-            // however when you logout you want the flags to be reset
-            for(var key in this.onlineUsers) {
-                if(this.onlineUsers.hasOwnProperty(key)) {
-                    this.onlineUsers[key].blocked = false;
-                    this.onlineUsers[key].friend = false;
-                }
-            }
-
             this.blockedUsers = {};
-            this.friends = {};
             this.rooms = [];
 
             $timeout(function() {

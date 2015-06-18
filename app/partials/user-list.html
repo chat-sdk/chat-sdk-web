@@ -1,7 +1,11 @@
 <table class="uk-table">
     <span class="cc-section-header">{{ sectionHeader }}</span>
     <tr ng-repeat="(id, aUser) in users" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
-        <td style="position: relative" class="cc-row" ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'" draggable-user="user" ng-click="userClicked(aUser)">
+        <td style="position: relative"
+            class="cc-row"
+            ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'"
+            draggable-user="user"
+            ng-click="userClicked(aUser)">
 
             <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}"/>
 

@@ -86,6 +86,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
         };
 
+//        Room.prototype.update = function () {
+//            this.update(false);
+//        };
+
         Room.prototype.updateTyping = function () {
 
             var i = 0;
@@ -486,7 +490,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 if(this.usersMeta.hasOwnProperty(key)) {
                     var user = this.usersMeta[key];
                     if($rootScope.user && $rootScope.user.meta) {
-                        if((Cache.onlineUsers[user.uid] || $rootScope.user.meta.uid == user.uid) && this.userIsActiveWithUID(user.uid)) {
+                        if((UserStore.users[user.uid].online || $rootScope.user.meta.uid == user.uid) && this.userIsActiveWithUID(user.uid)) {
                             i++;
                         }
                     }
@@ -1223,7 +1227,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 this.lastMessage = message;
 
-                return true;
             }
 
             // If the room is inactive or minimized increase the badge
@@ -1252,6 +1255,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
 
             this.update(silent);
+
+            return true;
         };
 
         Room.prototype.messagesOn = function (timestamp) {

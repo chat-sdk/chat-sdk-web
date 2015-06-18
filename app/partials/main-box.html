@@ -6,29 +6,32 @@
         </a>
     </div>
 
-    <div class="cc-tab-container cc-bottom-shadow" >
-        <div class="cc-tab cc-tab-1-4"
-             ng-class="{selected: activeTab == 'users'}"
+    <div class="cc-tab-container cc-bottom-shadow" ng-show="tabCount > 1">
+        <div class="cc-tab"
+             ng-class="[activeTab == 'users' ? 'selected': null, 'cc-tab-1-' + tabCount]"
              ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
-             ng-click="tabClicked('users')">
+             ng-click="tabClicked('users')"
+             ng-show="usersTabEnabled">
             USERS
         </div>
-        <div class="cc-tab cc-tab-1-4"
-             ng-class="{selected: activeTab == 'rooms'}"
+        <div class="cc-tab"
+             ng-class="[activeTab == 'rooms' ? 'selected': null, 'cc-tab-1-' + tabCount]"
              ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
-             ng-click="tabClicked('rooms')">
+             ng-click="tabClicked('rooms')"
+             ng-show="roomsTabEnabled">
             ROOMS
         </div>
-        <div class="cc-tab cc-tab-1-4"
-             ng-class="{selected: activeTab == 'inbox'}"
+        <div class="cc-tab"
+             ng-class="[activeTab == 'inbox' ? 'selected': null, 'cc-tab-1-' + tabCount]"
              ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
              ng-click="tabClicked('inbox')">
             INBOX <span ng-show="inboxCount > 0" class="cc-tab-indicator">{{ inboxCount }}</span>
         </div>
-        <div class="cc-tab cc-tab-1-4"
-             ng-class="{selected: activeTab == 'friends'}"
+        <div class="cc-tab"
+             ng-class="[activeTab == 'friends' ? 'selected': null, 'cc-tab-1-' + tabCount]"
              ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
-             ng-click="tabClicked('friends')">
+             ng-click="tabClicked('friends')"
+             ng-show="friendsTabEnabled">
             FRIENDS
         </div>
     </div>

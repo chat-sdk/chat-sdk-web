@@ -166,7 +166,8 @@ myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
  * status
  * We need to call visibility to make sure it's initilized
  */
-myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q', function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
+myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q',
+    function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
     var Presence = {
 
         user: null,
@@ -246,21 +247,29 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
             if(this.user) {
                 var uid = this.user.meta.uid;
                 if (uid) {
-                    var ref = Paths.onlineUserRef(uid);
 
-                    ref.onDisconnect().remove();
+                    if(Config.onlineUsersEnabled) {
+                        var ref = Paths.onlineUserRef(uid);
 
-                    ref.setWithPriority({
-                        uid: uid,
-                        time: Firebase.ServerValue.TIMESTAMP
-                    }, this.user.meta.name, function (error) {
-                        if(!error) {
-                            deferred.resolve();
-                        }
-                        else {
-                            deferred.reject(error);
-                        }
-                    });
+                        ref.onDisconnect().remove();
+
+                        ref.setWithPriority({
+                            uid: uid,
+                            time: Firebase.ServerValue.TIMESTAMP
+                        }, this.user.meta.name, function (error) {
+                            if(!error) {
+                                deferred.resolve();
+                            }
+                            else {
+                                deferred.reject(error);
+                            }
+                        });
+                    }
+
+                    // Also store this information on the user object
+                    var userOnlineRef = Paths.userOnlineRef(uid);
+                    userOnlineRef.set(true);
+                    userOnlineRef.onDisconnect().set(false);
 
 //                    // Update the user online counter
 //                    var userCountRef = Paths.onlineUserCountRef();

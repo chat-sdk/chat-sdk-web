@@ -155,10 +155,13 @@ var bUserUnblockedNotification = 'bUserUnblockedNotification';
 var bFriendAddedNotification = 'bFriendAddedNotification';
 var bFriendRemovedNotification = 'bFriendRemovedNotification';
 
+var bConfigUpdatedNotification = "bConfigUpdatedNotification";
+
 var bLoginModeSimple = "simple";
 var bLoginModeSingleSignOn = "singleSignOn";
 var bLoginModeToken = "token";
 var bLoginModeAuthenticating = "authenticating";
+
 
 // Chat width
 var bChatRoomWidth = 230;
@@ -242,6 +245,11 @@ myApp.factory('Paths', [function () {
             return this.userRef(fid).child(bStatePath);
         },
 
+        userOnlineRef: function (fid) {
+            return this.userRef(fid).child(bOnlineKey);
+        },
+
+
 //    userThumbnailRef: function (fid) {
 //        if(DEBUG) console.log("");
 //        return this.userRef(fid).child(bThumbnailKey);
@@ -266,6 +274,7 @@ myApp.factory('Paths', [function () {
             if(FIREBASE_REF_DEBUG) console.log("onlineUserRef");
             return this.onlineUsersRef().child(fid);
         },
+
 
         roomsRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("roomsRef");

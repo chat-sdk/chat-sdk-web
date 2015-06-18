@@ -5,10 +5,11 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager) {
 
     $scope.totalUserCount = 0;
+    $scope.friendsEnabled = true;
 
     $scope.init = function () {
 
@@ -165,6 +166,8 @@ myApp.controller('AppController', [
      */
     $scope.showProfileBox = function (uid, duration) {
 
+        $scope.friendsEnabled = Config.friendsEnabled;
+
         $scope.profileBoxStyle = {
             right: 250,
             width: bProfileBoxWidth,
@@ -207,7 +210,7 @@ myApp.controller('AppController', [
     };
 
     $scope.isFriend = function (user) {
-        return Cache.isFriend(user);
+        return FriendsConnector.isFriend(user);
     };
 
     $scope.blockUnblockUser = function(user) {
@@ -255,20 +258,14 @@ myApp.controller('AppController', [
     };
 
     $scope.isOnline = function (user) {
-        Cache.isOnlineWithUID(user.meta.uid);
+        return user.online;
     };
 
     /**
      * @return number of online users
      */
     $scope.updateTotalUserCount = function () {
-        var i = 0;
-        for(var key in Cache.onlineUsers) {
-            if(Cache.onlineUsers.hasOwnProperty(key)) {
-                i++;
-            }
-        }
-        $scope.totalUserCount = i;
+        $scope.totalUserCount = OnlineConnector.onlineUserCount();
     };
 
     $scope.userClicked = function (user) {
@@ -524,12 +521,41 @@ myApp.controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', fun
 
 }]);
 
-myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'ArrayUtils', 'Config', 'Screen', 'Log', 'RoomPositionManager', 'RoomStore',
-    function($scope, $timeout, Auth, Cache, ArrayUtils, Config, Screen, Log, RoomPositionManager, RoomStore) {
+myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsConnector', 'ArrayUtils', 'Config', 'Screen', 'Log', 'RoomPositionManager', 'RoomStore',
+    function($scope, $timeout, Auth, FriendsConnector, ArrayUtils, Config, Screen, Log, RoomPositionManager, RoomStore) {
 
     $scope.inboxCount = 0;
 
+    $scope.usersTabEnabled = true
+    $scope.roomsTabEnabled = true;
+    $scope.friendsTabEnabled = true;
+    $scope.tabCount = 0;
+
     $scope.init = function () {
+
+        // Work out how many tabs there are
+        $scope.$on(bConfigUpdatedNotification, function () {
+            $scope.usersTabEnabled = Config.onlineUsersEnabled;
+            $scope.roomsTabEnabled = Config.publicRoomsEnabled;
+            $scope.friendsTabEnabled = Config.friendsEnabled;
+
+            $scope.tabCount = $scope.numberOfTabs();
+
+            // Make the users tab start clicked
+            if(Config.onlineUsersEnabled) {
+                $scope.tabClicked(bUsersTab);
+            }
+            else if(Config.publicRoomsEnabled) {
+                $scope.tabClicked(bRoomsTab);
+            }
+            else {
+                $scope.tabClicked(bInboxTab);
+            }
+
+            $timeout(function () {
+                $scope.$digest();
+            })
+        });
 
         // Setup the search variable - if we don't do this
         // Angular can't set search.text
@@ -537,9 +563,6 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
         $scope.search[bUsersTab] = "";
         $scope.search[bRoomsTab] = "";
         $scope.search[bFriendsTab] = "";
-
-        // Make the users tab start clicked
-        $scope.tabClicked(bUsersTab);
 
         // This is used by sub views for their layouts
         $scope.boxWidth = bMainBoxWidth;
@@ -570,6 +593,21 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
             Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
             $scope.updateInboxCount();
         });
+
+    };
+
+    $scope.numberOfTabs = function () {
+        var tabs = 1;
+        if(Config.onlineUsersEnabled) {
+            tabs++;
+        }
+        if(Config.publicRoomsEnabled) {
+            tabs++;
+        }
+        if(Config.friendsEnabled) {
+            tabs++;
+        }
+        return tabs;
     };
 
     $scope.updateInboxCount = function () {
@@ -622,7 +660,7 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
      * @return A list of users who's names meet the search text
      */
     $scope.getAllUsers = function () {
-        return ArrayUtils.objectToArray(Cache.friends);
+        return ArrayUtils.objectToArray(FriendsConnector.friends);
     };
 
     $scope.searchKeyword = function () {
@@ -664,8 +702,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'Cache', 'A
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
-    function($rootScope, $scope, $timeout, Auth, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
+    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
 
     /**
      * Initialize the login controller
@@ -872,6 +910,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         API.getAPIDetails().then((function(api) {
+
+            // Load friends from config
+            if(Config.friends) {
+                FriendsConnector.addFriendsFromSSO(Config.friends);
+            }
 
             // Start the config listner to get the current
             // settings from Firebase
@@ -1479,7 +1522,7 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
 
 }]);
 
-myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'Cache', 'ArrayUtils', function($scope, $timeout, Log, Cache, ArrayUtils) {
+myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'ArrayUtils', 'OnlineConnector', function($scope, $timeout, Log, ArrayUtils, OnlineConnector) {
 
     $scope.users = [];
     $scope.allUsers = [];
@@ -1526,7 +1569,7 @@ myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'Cac
     $scope.updateList = function () {
 
         // Filter online users to remove users that are blocking us
-        $scope.allUsers = ArrayUtils.objectToArray(Cache.onlineUsers);
+        $scope.allUsers = ArrayUtils.objectToArray(OnlineConnector.onlineUsers);
         $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.search[$scope.activeTab], function (user) {
             return user.meta.name;
         });
@@ -1540,7 +1583,7 @@ myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'Cac
 
 }]);
 
-myApp.controller('UserListController', ['$scope', '$timeout', 'Cache', 'ArrayUtils', 'Log', function($scope, $timeout, Cache, ArrayUtils, Log) {
+myApp.controller('UserListController', ['$scope', '$timeout', 'OnlineConnector', 'ArrayUtils', 'Log', function($scope, $timeout, OnlineConnector, ArrayUtils, Log) {
 
     $scope.users = [];
     $scope.allUsers = [];
@@ -1599,8 +1642,8 @@ myApp.controller('UserListController', ['$scope', '$timeout', 'Cache', 'ArrayUti
         // then alphabetically
         $scope.users.sort(function (a, b) {
             // Sort by who's online first then alphabetcially
-            var aOnline = Cache.onlineUsers[a.meta.uid];
-            var bOnline = Cache.onlineUsers[b.meta.uid];
+            var aOnline = OnlineConnector.onlineUsers[a.meta.uid];
+            var bOnline = OnlineConnector.onlineUsers[b.meta.uid];
 
             if(aOnline != bOnline) {
                 return aOnline ? 1 : -1;

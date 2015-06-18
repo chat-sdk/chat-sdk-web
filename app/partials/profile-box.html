@@ -28,7 +28,7 @@
         <div class="uk-width-1-4 uk-text-center">
             <button class="uk-button uk-button-success uk-button-small uk-text-center" ng-click="userClicked(currentUser)">Chat</button>
         </div>
-        <div class="uk-width-2-4 uk-text-center">
+        <div class="uk-width-2-4 uk-text-center" ng-hide="currentUser.ssoFriend || !friendsEnabled">
             <button class="uk-button uk-button-primary uk-button-small uk-text-center" ng-click="addRemoveFriend(currentUser)">{{ isFriend(currentUser) ? 'Remove friend' : 'Add friend' }}</button>
         </div>
         <div class="uk-width-1-4 uk-text-center">
