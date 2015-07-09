@@ -11,6 +11,9 @@ myApp.controller('AppController', [
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
 
+    $rootScope.messageTypeText = bMessageTypeText;
+    $rootScope.messageTypeImage = bMessageTypeImage;
+
     $scope.init = function () {
 
         Partials.load();
@@ -91,6 +94,7 @@ myApp.controller('AppController', [
         $rootScope.img_24_save = bImagesURL + 'cc-24-save.png';
         $rootScope.img_24_copy = bImagesURL + 'cc-24-copy.png';
         $rootScope.img_24_cross = bImagesURL + 'cc-24-cross.png';
+        $rootScope.img_30_image = bImagesURL + 'cc-30-image.png';
     };
 
     $scope.getUser = function () {
@@ -535,6 +539,7 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
 
         // Work out how many tabs there are
         $scope.$on(bConfigUpdatedNotification, function () {
+
             $scope.usersTabEnabled = Config.onlineUsersEnabled;
             $scope.roomsTabEnabled = Config.publicRoomsEnabled;
             $scope.friendsTabEnabled = Config.friendsEnabled;
@@ -1009,11 +1014,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils',
-    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils) {
+myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'Parse',
+    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, Parse) {
 
     $scope.showEmojis = false;
-    $scope.headerColor = $scope.config.headerColor;
+    //$scope.headerColor = $scope.config.headerColor;
     $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
 
     $scope.init = function (room) {
@@ -1072,6 +1077,61 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         });
     };
 
+    $scope.startImageUpload = function () {
+        $scope.uploadingImage = true;
+    };
+
+    $scope.imageUploadFinished = function () {
+        $scope.uploadingImage = false;
+        $scope.sendingImage = false;
+    };
+
+    $scope.sendImageMessage = function($files, room) {
+
+        var f = $files[0];
+        if(!f || $scope.sendingImage) {
+            this.imageUploadFinished();
+            return;
+        }
+
+        $scope.sendingImage = true;
+
+        if(f.type == "image/png" || f.type == 'image/jpeg') {
+
+        }
+        else {
+            $scope.showNotification(bNotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+            this.imageUploadFinished();
+            return;
+        }
+
+        if($files.length > 0) {
+            Parse.uploadFile(f).then((function(r) {
+                if(r.data && r.data.url) {
+
+                    var reader = new FileReader();
+
+                    // Load the image into the canvas immediately to get the dimensions
+                    reader.onload = (function() {
+                        return function(e) {
+                            var image = new Image();
+                            image.onload = function () {
+                                room.sendImageMessage($scope.getUser(), r.data.url, image.width, image.height);
+                            };
+                            image.src = e.target.result;
+                        };
+                    })(f);
+                    reader.readAsDataURL(f);
+                }
+                this.imageUploadFinished();
+
+            }).bind(this), (function (error) {
+                $scope.showNotification(bNotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
+                this.imageUploadFinished();
+            }).bind(this));
+        }
+    };
+
     $scope.getZIndex = function () {
        // Make sure windows further to the right have a higher index
        var z =  $scope.room.zIndex ? $scope.room.zIndex :  100 * (1 - $scope.room.offset/Screen.screenWidth);
@@ -1083,7 +1143,7 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
 
         $scope.showEmojis = false;
 
-        $scope.room.sendMessage($scope.input.text, user);
+        $scope.room.sendMessage($scope.input.text, user, bMessageTypeText);
         $scope.input.text = "";
     };
 
@@ -1111,7 +1171,9 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         $scope.showEmojis = !$scope.showEmojis;
     };
 
-    // Save the super class
+
+
+        // Save the super class
     $scope.superShowProfileBox = $scope.showProfileBox;
     $scope.showProfileBox = function (uid) {
 

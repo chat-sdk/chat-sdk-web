@@ -528,8 +528,10 @@ myApp.directive('infiniteScroll', [
     }
 ]);
 
-myApp.directive('ccFlash', ['$timeout', function ($timeout) {
+myApp.directive('ccFlash', ['$timeout', 'Config', function ($timeout, Config) {
     return function (scope, element, attr) {
+
+//        var originalColor = Config.headerColor;
 
         var originalColor = element.css('background-color');
         var originalTag = element.attr('cc-flash');
@@ -548,6 +550,9 @@ myApp.directive('ccFlash', ['$timeout', function ($timeout) {
 
                     // Set another timeout
                     $timeout(function () {
+                        if(tag == "room-header") {
+                            originalColor = Config.headerColor;
+                        }
                         element.css('background-color', originalColor);
                         scope.$digest();
                         animating = false;
@@ -611,3 +616,13 @@ myApp.directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", 
         });
     };
 }]);
+
+myApp.directive('onEditMessage', function () {
+    return function (scope, element, attr) {
+        scope.$on(bEditMessageNotification, function (event, mid, newText) {
+            if(mid == scope.message.meta.mid) {
+                element.text(newText);
+            }
+        });
+    };
+});

@@ -2,7 +2,7 @@
 <div class="cc-chat-box-outer" ng-show="room.active" ng-style="{right: room.offset, height: (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location animate-room>
 
     <div class="cc-chat-box cc-shadow" ng-style="{height: room.height, width: room.width}" ng-hide="room.minimized" >
-        <div class="cc-box-header cc-pointer" ng-style="{background: headerColor}" cc-flash="room-header">
+        <div class="cc-box-header cc-pointer" ng-style="{'background-color': config.headerColor}" cc-flash="room-header">
             <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
                 <img ng-src="{{ ::img_30_minimize }}" />
             </a>
@@ -14,25 +14,24 @@
 
         <div class="cc-tab-container cc-bottom-shadow">
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'messages' ? {'border-bottom-color': headerColor} : null"
+                 ng-style="activeTab == 'messages' ? {'border-bottom-color': config.headerColor} : null"
                  ng-class="{selected: activeTab == 'messages'}"
                  ng-click="tabClicked('messages')">
                 MESSAGES
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'users' ? {'border-bottom-color': headerColor} : null"
+                 ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
                  ng-class="{selected: activeTab == 'users'}"
                  ng-click="tabClicked('users')">
                 USERS
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'settings' ? {'border-bottom-color': headerColor} : null"
+                 ng-style="activeTab == 'settings' ? {'border-bottom-color': config.headerColor} : null"
                  ng-class="{selected: activeTab == 'settings'}"
                  ng-click="tabClicked('settings')">
                 SETTINGS
             </div>
         </div>
-
 
         <div ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" ng-style="{'height': room.height - 30 - 30}" stop-shake>
             <ng-include ng-controller="UserListController" ng-show="activeTab == 'users'" src="baseURL + 'user-list.html'"></ng-include>
@@ -42,12 +41,14 @@
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
         <div ng-show="!showEmojis && activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake disable-drag>
             <div ng-repeat="message in room.messages track by message.mid">
-
                 <div>
                     <div class="cc-message-outer">
                         <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.thumbnail }}" />
-                        <span class="cc-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}">
+                        <span ng-show="message.meta.type == messageTypeText" class="cc-bubble" ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" ng-style="{'max-width': room.width - 80}" on-edit-message>
                             <div class="cc-enable-select" ng-bind-html="::message.meta.text | linky: '_blank' | emoji"></div>
+                        </span>
+                        <span ng-show="message.meta.type == messageTypeImage" class="cc-bubble cc-image-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}" on-edit-message>
+                            <a href="{{ message.imageURL }}" target="_blank"><img ng-src="{{ ::message.thumbnailURL }}"></a></span>
                         </span>
                     </div>
                     <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
@@ -77,10 +78,28 @@
             <div class="cc-typing-indicator">
                 {{ room.typingMessage }}
             </div>
-            <textarea class="cc-chat-box-msg-txt" ng-model="input.text" enter-submit="sendMessage()" fit-text="84" placeholder="Type message here..." ng-blur="setTyping(false)" ng-keyup="setTyping(true)" ></textarea>
+            <textarea class="cc-chat-box-msg-txt"
+                      ng-model="input.text"
+                      enter-submit="sendMessage()"
+                      fit-text="84"
+                      ng-style="{'width': room.width - 60}"
+                      placeholder="Type message here..."
+                      ng-blur="setTyping(false)"
+                      ng-keyup="setTyping(true)" ></textarea>
             <button class="cc-emoji-button" ng-click="toggleEmoticons()">
                 <img ng-src="{{ ::img_30_emojis }}">
             </button>
+            <!--<button class="cc-image-button" ng-click="sendImageMessage()">-->
+                <!--<img ng-src="{{ ::img_30_image }}">-->
+            <!--</button>-->
+            <div class="cc-image-button uk-container-center">
+                <input class="cc-hidden-input"
+                type="file"
+                ng-file-select="sendImageMessage($files, room)" ng-click="startImageUpload()">
+                <img ng-src="{{ ::img_30_image }}" ng-show="!uploadingImage">
+                <img ng-src="{{ ::img_loader }}" width="25" height="25" ng-show="uploadingImage">
+            </div>
+
         </div>
 
         <!--The overlay that appears if the user hasn't accepted the invitation-->

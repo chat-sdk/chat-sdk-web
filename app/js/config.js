@@ -10,6 +10,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
     var setByControlPanel = 10;
     var setByInclude = 20;
     var setBySingleSignOn = 30;
+    var setByAdmin = 40;
 
     return {
 
@@ -18,6 +19,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
         setBySingleSignOn: setBySingleSignOn,
         //setByFirebase: setByFirebase,
         setByControlPanel: setByControlPanel,
+        setByAdmin: setByAdmin,
 
         singleSignOnURL: null,
         singleSignOnURLSet: setByDefault,
@@ -80,16 +82,16 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
 
         // TODO: check this
         maxConcurrent: 20,
-        maxConcurrentSet: setByDefault,
+        maxConcurrentSet: setByAdmin,
 
         showAds: true,
-        showAdsSet: setByDefault,
+        showAdsSet: setByAdmin,
 
         whiteLabel: true,
-        whiteLabelSet: setByDefault,
+        whiteLabelSet: setByAdmin,
 
         singleSignOn: true,
-        singleSignOnSet: setByDefault,
+        singleSignOnSet: setByAdmin,
 
         onlineUsersEnabled: true,
         onlineUsersEnabledSet: setByDefault,
@@ -145,6 +147,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
             $rootScope.config = this;
 
             $rootScope.$broadcast(bConfigUpdatedNotification);
+            $timeout(function () {
+                $rootScope.$digest()
+            });
 
         },
 

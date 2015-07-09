@@ -449,9 +449,9 @@ div#cc-app div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt {
 
     max-height: 28px;
     /*width: 225px;*/
-   /*margin-left: 5px;*/
+    margin-left: 30px;
 
-    width: 100%;
+    /*width: 100%;*/
 
     resize: none;
     font-size: 12px;
@@ -551,28 +551,56 @@ div#cc-app .cc-bubble:after
 div#cc-app .cc-right-bubble {
     float: right;
     margin-right: 15px;
-    background: #EEE;
     right: 27px;
 }
 
-div#cc-app .cc-right-bubble:after {
+div#cc-app .cc-right-text-bubble {
+    background: #EEE;
+}
+
+div#cc-app .cc-right-text-bubble:after {
+    right: -9px;
     border-width: 5px 0 5px 9px;
     border-color: transparent #EEE;
-    right: -9px;
 }
 
 div#cc-app .cc-left-bubble {
     float: left;
     margin-left: 15px;
-    background: #91dfff;
     left: 27px;
 }
 
-div#cc-app .cc-left-bubble:after {
+div#cc-app .cc-left-text-bubble {
+    background: #91dfff;
+}
+
+div#cc-app .cc-left-text-bubble:after {
     border-width: 5px 9px 5px 0;
     border-color: transparent #91dfff;
     left: -9px;
 }
+
+div#cc-app .cc-bubble-image img {
+    border-radius: 5px;
+}
+
+div#cc-app .cc-image-bubble {
+    width: 150px;
+    max-width: 150px;
+    height: 150px;
+    max-height: 150px;
+    margin-left: 0;
+}
+
+div#cc-app .cc-image-bubble:after {
+    border-style: none;
+}
+
+
+div#cc-app .cc-bubble img {
+    border-radius: 5px;
+}
+
 
 div#cc-app div.cc-user-drag {
     position: absolute !important;
@@ -1076,7 +1104,22 @@ div#cc-app .cc-emoji {
 div#cc-app .cc-emoji-button {
     position: absolute;
     bottom: -2px;
+    left: 0;
+}
+
+div#cc-app .cc-image-button {
+    position: absolute;
+    bottom: -2px;
     right: -2px;
+    width: 30px;
+    height: 30px;
+}
+
+div#cc-app .cc-image-button img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none
 }
 
 div#cc-app .cc-sound-icon {

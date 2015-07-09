@@ -32,8 +32,9 @@
                         {{ room.lastMessageMeta.userName }}:
                         &nbsp;
                     </div>
-                    <div class="cc-ellipsis cc-pointer cc-message" ng-bind-html="room.lastMessageMeta.text | linky: '_blank' | emoji">
+                    <div ng-show="!room.lastMessageMeta || room.lastMessageMeta.type == messageTypeText" class="cc-ellipsis cc-pointer cc-message" ng-bind-html="room.lastMessageMeta.text | linky: '_blank' | emoji">
                     </div>
+                    <div ng-show="room.lastMessageMeta.type == messageTypeImage" class="cc-ellipsis cc-pointer cc-message">Image Message</div>
                 </div>
             </div>
         </td>

@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Defines', 'Utils', 'Paths',
-    function ($rootScope, $timeout, $q, Entity, Defines, Utils, Paths) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Defines', 'Utils', 'Paths', 'CloudImage',
+    function ($rootScope, $timeout, $q, Entity, Defines, Utils, Paths, CloudImage) {
 
     function User (uid) {
         this.meta =  {
@@ -29,12 +29,14 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Defines', 'Uti
 
         var ref = Paths.userOnlineRef(this.meta.uid);
         ref.on('value', (function (snapshot) {
-            this.online = snapshot.val();
-            if(this.online) {
-                $rootScope.$broadcast(bOnlineUserAddedNotification);
-            }
-            else {
-                $rootScope.$broadcast(bOnlineUserRemovedNotification);
+            if(!Utils.unORNull(snapshot.val())) {
+                this.online = snapshot.val();
+                if(this.online) {
+                    $rootScope.$broadcast(bOnlineUserAddedNotification);
+                }
+                else {
+                    $rootScope.$broadcast(bOnlineUserRemovedNotification);
+                }
             }
         }).bind(this));
 
@@ -148,8 +150,10 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Defines', 'Uti
                 this.thumbnail = image;
             }
             else {
-                this.image = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/100x100/' + image;
-                this.thumbnail = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/30x30/' + image;
+                this.image = CloudImage.cloudImage(image, 100, 100);
+                this.thumbnail = CloudImage.cloudImage(image, 30, 30);
+//                this.image = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/100x100/' + image;
+//                this.thumbnail = 'http://' + Defines.cloudImageToken + '.cloudimage.io/s/crop/30x30/' + image;
             }
         }
     };

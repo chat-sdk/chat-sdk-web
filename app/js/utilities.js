@@ -20,7 +20,8 @@ var bRoomDefaultNamePublic = "Public Chat";
 // Are we testing locally?
 var bRootURL = '';
 var bPartialURL = '';
-var bFirebase = 'chatcat';
+//var bFirebase = 'chatcat';
+var bFirebase = 'chat-sdk-android-2';
 
 // If we are then set the root URL to nothing
 if(document.location.origin === "http://symfony") {
@@ -155,6 +156,9 @@ var bUserUnblockedNotification = 'bUserUnblockedNotification';
 var bFriendAddedNotification = 'bFriendAddedNotification';
 var bFriendRemovedNotification = 'bFriendRemovedNotification';
 
+var bDeleteMessageNotification = 'bDeleteMessageNotification';
+var bEditMessageNotification = 'bEditMessageNotification';
+
 var bConfigUpdatedNotification = "bConfigUpdatedNotification";
 
 var bLoginModeSimple = "simple";
@@ -162,6 +166,8 @@ var bLoginModeSingleSignOn = "singleSignOn";
 var bLoginModeToken = "token";
 var bLoginModeAuthenticating = "authenticating";
 
+var bMessageTypeText = 0;
+var bMessageTypeImage = 2;
 
 // Chat width
 var bChatRoomWidth = 230;

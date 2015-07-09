@@ -638,16 +638,20 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
          * MESSAGES
          */
 
-        Room.prototype.sendMessage = function (text, user) {
+        Room.prototype.sendImageMessage = function (user, url, width, height) {
+            // Build the payload
+            this.sendMessage(url+','+url+',W'+width+"&H"+height, user, bMessageTypeImage);
+        };
+
+        Room.prototype.sendMessage = function (text, user, type) {
 
             if(!text || text.length === 0)
                 return;
 
             var innerSendMessage = (function (text, user) {
 
-
                 // Make the message
-                var message = Message.buildMeta(this.meta.rid, user.meta.uid, text);
+                var message = Message.buildMeta(this.meta.rid, user.meta.uid, text, type);
 
                 // Get a ref to the room
                 var ref = Paths.roomMessagesRef(this.meta.rid);
@@ -1321,6 +1325,21 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }
 
             }).bind(this));
+
+            ref.on('child_removed', (function (snapshot) {
+                if(snapshot.val()) {
+                    for(var i = 0; i < this.messages.length; i++) {
+                        var message = this.messages[i];
+                        if(message.mid == snapshot.key()) {
+                            this.messages.splice(i, 1);
+                            break;
+                        }
+                    }
+                    //$rootScope.$broadcast(bDeleteMessageNotification, snapshot.val().meta.mid);
+                    this.update(false);
+                }
+            }).bind(this));
+
         };
 
         Room.prototype.trimMessageList = function () {
@@ -1334,8 +1353,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 }
             }
-
-
         };
 
         Room.prototype.messagesOff = function () {

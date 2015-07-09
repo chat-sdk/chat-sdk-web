@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.message', ['firebase']);
 
-myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time',
-    function ($rootScope, $q, $sce, UserStore, User, Config, Time) {
+myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
+    function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
 
         var bMessageSideRight = 'right';
         var bMessageSideLeft = 'left';
@@ -23,6 +23,20 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
             this.read = false;
 
             if(meta) {
+
+                if(!meta.type) {
+                    meta.type = bMessageTypeText;
+                }
+
+                if(meta.type == bMessageTypeImage) {
+                    // Get the image and thumbnail URLs
+                    var parts = meta.text.split(',');
+                    if(parts.length >= 3) {
+                        var url = parts[0];
+                        this.thumbnailURL = CloudImage.cloudImage(url, 200, 200);
+                        this.imageURL = url;
+                    }
+                }
 
                 // Our messages are on the right - other user's messages are
                 // on the left
@@ -82,13 +96,14 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
 
         // Static methods
 
-        Message.buildMeta = function (rid, uid, text) {
+        Message.buildMeta = function (rid, uid, text, type) {
             return {
                 meta: {
                     rid: rid,
                     uid: uid,
                     time: Firebase.ServerValue.TIMESTAMP,
-                    text: text
+                    text: text,
+                    type: type
                 }
             };
         };

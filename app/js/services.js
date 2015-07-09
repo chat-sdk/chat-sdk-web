@@ -24,6 +24,19 @@ myApp.factory('Defines', [function (LocalStorage) {
     };
 }]);
 
+myApp.factory('CloudImage', [function (LocalStorage) {
+    return {
+        // Cloud Image
+        cloudImageToken: 'skbb48',
+
+        cloudImage: function(url, w, h) {
+            return 'http://' + this.cloudImageToken + '.cloudimage.io/s/crop/'+w+'x'+h+'/' + url;
+        }
+
+    };
+}]);
+
+
 myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
     return {
 
