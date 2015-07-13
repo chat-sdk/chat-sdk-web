@@ -911,7 +911,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
     $scope.handleUserLogin = function (userData, firstLogin) {
 
         // Write a record to the firebase to record this API key
-
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
         API.getAPIDetails().then((function(api) {
@@ -954,21 +953,21 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                     });
                 }
 
-            }).bind(this), function (error) {
+            }).bind(this), (function (error) {
 
                 // We couldn't connect to Chatcat.io API
                 // Next check to see if they specified an API key
                 console.log(error);
 
-                //alert(error);
-                //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
-            });
+                this.setError(message);
+                $scope.hideNotification();
+            }).bind(this));
 
-        }).bind(this), function (error) {
+        }).bind(this), (function (error) {
             console.log(error);
-            //alert(error);
-            //$scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
-        });
+            this.setError(error);
+            $scope.hideNotification();
+        }).bind(this));
     };
 
     /**

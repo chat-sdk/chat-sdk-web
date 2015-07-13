@@ -113,17 +113,7 @@ myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config',
                 var ref = Paths.firebase();
                 var deferred = $q.defer();
 
-                SingleSignOn.authenticate().then((function (data) {
-                    ref.authWithCustomToken(data.token, (function(error, result) {
-                        if(!error) {
-                            result.thirdPartyData = data;
-                            deferred.resolve(result);
-                        }
-                        else {
-                            deferred.reject(error);
-                        }
-                    }).bind(this));
-                }).bind(this), (function (error) {
+                var retry = (function (deferred, error) {
                     if(this.ssoAttempts == 0) {
                         this.ssoAttempts++;
                         SingleSignOn.invalidate();
@@ -132,6 +122,20 @@ myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config',
                     else {
                         deferred.reject(error);
                     }
+                }).bind(this);
+
+                SingleSignOn.authenticate().then((function (data) {
+                    ref.authWithCustomToken(data.token, (function(error, result) {
+                        if(!error) {
+                            result.thirdPartyData = data;
+                            deferred.resolve(result);
+                        }
+                        else {
+                            retry(deferred, error);
+                        }
+                    }).bind(this));
+                }).bind(this), (function (error) {
+                    retry(deferred, error);
                 }).bind(this));
 
                 return deferred.promise;
@@ -235,7 +239,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             // Make a call to the new API
             $http({
                 method: 'get',
-                url: 'http://symfony/app_dev.php/api/chat/plan',
+                url: bAPIGatewayLevel1,
                 params: {
                     domain: url
                 }
@@ -261,8 +265,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                     deferred.reject(this.errorMessageCouldNotConnect);
                 }
             }).bind(this), function (error, message) {
-                //TODO: Test this
-                deferred.reject(error.message);
+                deferred.reject(error.data.message);
             });
 
             return deferred.promise;
@@ -276,7 +279,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             //Contact the API
             $http({
                 method: 'get',
-                url: '//chatcat.io/wp-admin/admin-ajax.php',
+                url: bAPIGatewayLevel0,
                 params: {
                     action: 'get-api-key',
                     domain: url
@@ -289,7 +292,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                     // Using the API key get the groups
                     $http({
                         method: 'get',
-                        url: '//chatcat.io/wp-admin/admin-ajax.php',
+                        url: bAPIGatewayLevel0,
                         params: {
                             action: 'get-group-details',
                             api_key: r1.data.api_key
