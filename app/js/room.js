@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 
@@ -41,6 +41,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.open = false;
             this.typingMessage = null;
             this.readTimestamp = 0; // When was the thread last read?
+
+            this.thumbnail = bDefaultRoomImage;
+            this.showImage = false;
 
             // The room associated with this use
             // this is used to make sure that if a user logs out
@@ -80,6 +83,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
          */
         Room.prototype.update = function (silent) {
             this.updateName();
+            this.setImage(this.meta.image);
             this.updateOnlineUserCount();
             if(Utils.unORNull(silent) || silent == false) {
                 $rootScope.$broadcast(bRoomUpdatedNotification, this);
@@ -855,6 +859,52 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 $rootScope.user.markRoomReadTime(this.meta.rid);
 
         };
+
+        Room.prototype.updateImageURL = function (imageURL) {
+            // Compare to the old URL
+            var imageChanged = imageURL != this.meta.image;
+            if(imageChanged) {
+                this.meta.image = imageURL;
+                this.setImage(imageURL, false);
+                this.pushMeta();
+            }
+        };
+
+        Room.prototype.setImage = function (image, isData) {
+
+            this.showImage = this.type() == bRoomTypePublic;
+
+            if(!image) {
+                image = bDefaultRoomImage;
+            }
+            else {
+                if(isData || image == bDefaultRoomImage) {
+                    this.thumbnail = image;
+                }
+                else {
+                    this.thumbnail = CloudImage.cloudImage(image, 30, 30);
+                }
+            }
+        };
+
+        Room.prototype.pushMeta = function () {
+
+            var deferred = $q.defer();
+
+            var ref = Paths.roomMetaRef(this.meta.rid);
+            ref.update(this.meta, (function (error) {
+                if(!error) {
+                    deferred.resolve();
+                    this.entity.updateState(bMetaKey);
+                }
+                else {
+                    deferred.reject(error);
+                }
+            }).bind(this));
+
+            return deferred.promise;
+        };
+
 
         Room.prototype.sendBadgeChangedNotification = function () {
             $rootScope.$broadcast(bRoomBadgeChangedNotification, this);

@@ -24,7 +24,6 @@ var bFirebase = 'chatcat';
 //var bFirebase = 'chat-sdk-android-2';
 var bAPIGatewayLevel0 = '//chatcat.io/wp-admin/admin-ajax.php';
 var bAPIGatewayLevel1 = 'http://dev.chatcatapp.com/api/chat/plan';
-
 //var bAPIGatewayLevel1 = 'http://symfony/app_dev.php/api/chat/plan';
 
 // If we are then set the root URL to nothing
@@ -58,6 +57,7 @@ var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
 var bImagesURL = bRootURL + 'img/';
 var bAudioURL = bRootURL + 'audio/';
 var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
+var bDefaultRoomImage = bImagesURL + 'cc-100-room-pic.png';
 
 var bPullURL = "//chat.deluge.co/server/pull.php";
 //var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";

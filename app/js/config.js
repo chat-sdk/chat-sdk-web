@@ -77,7 +77,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
         singleSignOnAPILevel: 1,
         singleSignOnAPILevelSet: setByDefault,
 
-        apiLevel: 0,
+        apiLevel: 1,
         apiLevelSet: setByDefault,
 
         // TODO: check this

@@ -4,9 +4,12 @@
         <td class="cc-pointer" ng-click="roomClicked(room)"
             title="{{ room.meta.description }}" cc-flash="room-list">
             <div class="uk-overflow-container cc-height-20 cc-pointer">
+
+                <img ng-show="room.showImage" class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ room.thumbnail }}"/>
+
                 <!-- Room name -->
                 <!-- Line height is a fix to stop icon being too low down -->
-                <div class="uk-float-left cc-valign-image-fix" >
+                <div class="uk-float-left cc-valign-image-fix cc-right-margin-5" >
                     <a class="cc-thumbnail-20" ng-show="canCloseRoom" ng-click="room.close()">
                         <img ng-src="{{ ::img_20_cross }}" />
                     </a>
