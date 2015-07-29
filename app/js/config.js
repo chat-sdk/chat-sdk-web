@@ -108,6 +108,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
         imageMessagesEnabled: false,
         imageMessagesEnabledSet: setByDefault,
 
+        marginRight: 10,
+        marginRightSet: setByDefault,
+
         // We update the config using the data provided
         // but we only update variables where the priority
         // of this setBy entity is higher than the previous

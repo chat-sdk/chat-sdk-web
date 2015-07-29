@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -17,6 +17,10 @@ myApp.controller('AppController', [
     $scope.init = function () {
 
         Partials.load();
+
+        API.getOnlineUserCount().then(function (count) {
+            $scope.totalUserCount = count;
+        });
 
         // Show the waiting overlay
         $scope.notification = {

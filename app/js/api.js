@@ -171,6 +171,25 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
         timeout: null,
         errorMessageCouldNotConnect: "Could not connection to Chatcat.io API",
 
+        getOnlineUserCount: function () {
+
+            var deferred = $q.defer();
+
+            $http({
+                method: 'get',
+                url: bAPIRoot + 'user/online-count',
+                params: {
+                    domain: this.getDomain()
+                }
+            }).then((function (response) {
+                deferred.resolve(response.data);
+            }).bind(this), (function (error) {
+                deferred.reject(error);
+            }).bind(this));
+
+            return deferred.promise;
+        },
+
         getAPILevel: function () {
             return Config.apiLevel;
         },
@@ -239,7 +258,7 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
             // Make a call to the new API
             $http({
                 method: 'get',
-                url: bAPIGatewayLevel1,
+                url: bAPIRoot+'chat/plan',
                 params: {
                     domain: url
                 }

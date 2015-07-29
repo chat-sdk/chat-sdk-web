@@ -23,7 +23,8 @@ var bPartialURL = '';
 var bFirebase = 'chatcat';
 //var bFirebase = 'chat-sdk-android-2';
 var bAPIGatewayLevel0 = '//chatcat.io/wp-admin/admin-ajax.php';
-var bAPIGatewayLevel1 = 'http://dev.chatcatapp.com/api/chat/plan';
+var bAPIRoot = 'http://dev.chatcatapp.com/api/';
+//var bAPIGatewayLevel1 = bAPIRoot+'chat/plan';
 //var bAPIGatewayLevel1 = 'http://symfony/app_dev.php/api/chat/plan';
 
 // If we are then set the root URL to nothing

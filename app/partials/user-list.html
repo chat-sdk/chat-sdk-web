@@ -7,7 +7,7 @@
             draggable-user="user"
             ng-click="userClicked(aUser)">
 
-            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}"/>
+            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}" title="{{ aUser.meta.uid }}"/>
 
             <div class="uk-float-left cc-user-name cc-user-name" ng-class="aUser.meta.description ? 'cc-show-status' : ''" >
                 <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.meta.name }}</div>
