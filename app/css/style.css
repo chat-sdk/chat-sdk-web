@@ -260,6 +260,12 @@ div#cc-app .cc-profile-description {
     min-width: 300px;
 }
 
+div#cc-app .cc-user-id {
+    float: right;
+    font-size: 0.8em;
+    color: #d3d3d3;
+    margin: 5px;
+}
 
 /* The user profile overlay */
 div#cc-app div#cc-profile-box {
@@ -546,6 +552,20 @@ div#cc-app .cc-bubble:after
     display: block;
     width: 0;
     z-index: 1;
+}
+
+div#cc-app .cc-flag {
+    /*background-color: red;*/
+    width: 20px;
+    height: 20px;
+}
+
+div#cc-app .cc-right-flag {
+    float: left;
+}
+
+div#cc-app .cc-left-flag {
+    float: right;
 }
 
 div#cc-app .cc-right-bubble {

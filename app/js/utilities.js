@@ -78,6 +78,7 @@ var bStatePath = 'state';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
 var bStatsPath = "stats";
+var bFlaggedMessagesPath = "flagged";
 
 var bReadKey = 'read';
 
@@ -355,6 +356,10 @@ myApp.factory('Paths', [function () {
         onlineUserCountRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("onlineUserCountRef");
             return this.firebase().child(bOnlineUserCountKey);
+        },
+
+        flaggedMessageRef: function (mid) {
+            return this.firebase().child(bFlaggedMessagesPath).child(mid);
         }
 
     };

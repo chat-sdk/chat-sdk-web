@@ -99,6 +99,8 @@ myApp.controller('AppController', [
         $rootScope.img_24_copy = bImagesURL + 'cc-24-copy.png';
         $rootScope.img_24_cross = bImagesURL + 'cc-24-cross.png';
         $rootScope.img_30_image = bImagesURL + 'cc-30-image.png';
+        $rootScope.img_20_flag = bImagesURL + 'cc-20-flag.png';
+        $rootScope.img_20_flagged = bImagesURL + 'cc-20-flagged.png';
     };
 
     $scope.getUser = function () {
@@ -1895,6 +1897,7 @@ myApp.controller('ChatSettingsController', ['$scope', function($scope) {
         window.prompt("Copy to clipboard: Ctrl+C, Enter", $scope.room.transcript());
     };
 
+
 }]);
 
 myApp.controller('EmojiController', ['$scope', 'Emojis', function($scope, Emojis) {
@@ -1912,5 +1915,23 @@ myApp.controller('EmojiController', ['$scope', 'Emojis', function($scope, Emojis
     };
 
     $scope.init();
+
+}]);
+
+myApp.controller('UserProfileBoxController', ['$scope', function($scope) {
+
+    $scope.copyUserID = function () {
+
+        // Get the ID
+        var id = $scope.currentUser.meta.uid;
+//        if(id) {
+//            var parts = id.split(':');
+//            if(parts.length == 2) {
+//                id = parts[1];
+//            }
+//        }
+
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", id);
+    };
 
 }]);

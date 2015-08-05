@@ -274,6 +274,64 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.deleted = true;
         };
 
+        Room.prototype.toggleMessageFlag = function (message) {
+            if(message.flagged) {
+                return this.unflagMessage(message);
+            }
+            else {
+                return this.flagMessage(message);
+            }
+        };
+
+        Room.prototype.flagMessage = function (message) {
+
+            message.flagged = true;
+
+            var deferred = $q.defer();
+
+            var ref = Paths.flaggedMessageRef(message.mid);
+            ref.set({
+                roomName: this.name,
+                roomType: this.type(),
+                message: message.meta,
+                time: Firebase.ServerValue.TIMESTAMP,
+                rid: this.meta.rid
+            }, (function (error) {
+                if(!error) {
+                    deferred.resolve();
+                }
+                else {
+                    message.flagged = false;
+                    $rootScope.$broadcast(bChatUpdatedNotification, this);
+
+                    deferred.reject(error);
+                }
+            }).bind(this));
+
+            return deferred.promise;
+        };
+
+        Room.prototype.unflagMessage = function (message) {
+
+            var deferred = $q.defer();
+
+            message.flagged = false;
+
+            var ref = Paths.flaggedMessageRef(this.meta.rid, message.mid);
+            ref.remove((function (error) {
+                if(!error) {
+                    deferred.resolve();
+                }
+                else {
+                    message.flagged = true;
+                    $rootScope.$broadcast(bChatUpdatedNotification, this);
+                    deferred.reject(error);
+                }
+            }).bind(this));
+
+            return deferred.promise;
+        };
+
         /**
          * Leave the room - remove the current user from the room
          */

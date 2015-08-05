@@ -50,6 +50,12 @@
                         <span ng-show="message.meta.type == messageTypeImage" class="cc-bubble cc-image-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}" on-edit-message>
                             <a href="{{ message.imageURL }}" target="_blank"><img ng-src="{{ ::message.thumbnailURL }}"></a></span>
                         </span>
+                        <span class="cc-flag" ng-class="'cc-' + message.side + '-flag'" ng-show="message.side == 'left'">
+                            <a class="cc-pointer" ng-click="room.toggleMessageFlag(message)">
+                                <img ng-show="!message.flagged" ng-src="{{ ::img_20_flag }}"/>
+                                <img ng-show="message.flagged" ng-src="{{ ::img_20_flagged }}"/>
+                            </a>
+                        </span>
                     </div>
                     <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
                         <div class="cc-message-margin cc-ellipsis" ng-class="'uk-float-' + message.side">

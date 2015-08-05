@@ -19,6 +19,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
             this.side = null;
             this.timeString = null;
             this.user = null;
+            this.flagged = false;
 
             this.read = false;
 
@@ -68,7 +69,8 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
                 return {
                     meta: this.meta,
                     mid: this.mid,
-                    read: this.read
+                    read: this.read,
+                    flagged: this.flagged
                 }
             },
 
@@ -76,6 +78,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
                 this.mid = sm.mid;
                 this.meta = sm.meta;
                 this.read = sm.read;
+                this.flagged = sm.flagged;
             },
 
             shouldHideUser: function (nextMessage) {
