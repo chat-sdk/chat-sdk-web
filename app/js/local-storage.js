@@ -88,6 +88,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
         usersKey: 'cc_users',
 
         onlineCountKey: 'cc_online_count',
+        timestampKey: 'cc_timestamp',
 
         rooms: {},
         users: {},
@@ -207,6 +208,19 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
             this.removeProperty(this.usersKey);
             this.clearToken();
             this.cacheCleared = true;
+        },
+
+        clearCacheWithTimestamp: function (timestamp) {
+            if(!timestamp) return;
+
+            var currentTimestamp = this.getProperty(this.timestampKey);
+            if(!currentTimestamp || timestamp > currentTimestamp) {
+                this.removeProperty(this.roomsKey);
+                this.removeProperty(this.usersKey);
+                this.clearToken();
+                this.setProperty(this.timestampKey, timestamp);
+                this.cacheCleared = true;
+            }
         },
 
         clearToken: function () {

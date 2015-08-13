@@ -849,11 +849,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                     $scope.showNotification(bNotificationTypeAlert, "Social login failed", "Please try again", "Ok");
                 }
             });
-
-//            ref.authWithOAuthPopup(method, handleResult, {
-//                remember: "sessionOnly",
-//                scope: scope
-//            });
         }
     };
 
@@ -926,10 +921,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 FriendsConnector.addFriendsFromSSO(Config.friends);
             }
 
-            // Start the config listner to get the current
-            // settings from Firebase
-            Config.startConfigListener();
-
             console.log("API Key: " + API.meta.cid);
 
             // Get the number of chatters that are currently online
@@ -942,21 +933,29 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 }
                 else {
 
-                    Auth.bindUser(userData).then(function() {
-                        // We have the user's ID so we can get the user's object
-                        if(firstLogin) {
-                            $scope.showProfileSettingsBox();
-                        }
-                        else {
-                            $scope.showMainBox();
-                        }
+                    // Start the config listner to get the current
+                    // settings from Firebase
+                    Config.startConfigListener().then((function () {
 
-                        $rootScope.$broadcast(bLoginCompleteNotification);
-                        $scope.hideNotification();
+                        // This allows us to clear the cache remotely
+                        LocalStorage.clearCacheWithTimestamp(Config.clearCacheTimestamp);
 
-                    }, function(error) {
-                        $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
-                    });
+                        Auth.bindUser(userData).then(function() {
+                            // We have the user's ID so we can get the user's object
+                            if(firstLogin) {
+                                $scope.showProfileSettingsBox();
+                            }
+                            else {
+                                $scope.showMainBox();
+                            }
+
+                            $rootScope.$broadcast(bLoginCompleteNotification);
+                            $scope.hideNotification();
+
+                        }, function(error) {
+                            $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
+                        });
+                    }).bind());
                 }
 
             }).bind(this), (function (error) {

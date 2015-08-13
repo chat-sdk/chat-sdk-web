@@ -700,6 +700,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             }
 
         },
+
         numberOfChatters: function () {
 
             var deferred = $q.defer();

@@ -367,21 +367,21 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
                 this.impl_roomAddInitial(snapshot.val());
 
                 // A new room was added so we should start listening to it
+
+                //This is just wrong - it should be snapshot.key()...
                 roomsRef.on('child_added', (function (snapshot) {
                     var room = snapshot.val();
-                    if(room) {
+                    if(room && room.rid) {
                         this.impl_roomAdded(room.rid, room.invitedBy, room.read);
                     }
 
                 }).bind(this));
 
                 roomsRef.on('child_removed', (function (snapshot) {
-
-                    var room = snapshot.val();
-                    if(room) {
-                        this.impl_roomRemoved(room.rid);
+                    var rid = snapshot.key();
+                    if(rid) {
+                        this.impl_roomRemoved(rid);
                     }
-
                 }).bind(this));
 
             }).bind(this));
@@ -469,13 +469,20 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
             var room = null;
             for(var key in rooms) {
                 if(rooms.hasOwnProperty(key)) {
-                    room = RoomStore.getOrCreateRoomWithID(key);
 
-                    // The user is a member of this room
-                    // We have to call this so the Room position manager can
-                    // calculate the offsets
-                    if(room.open) {
-                        RoomPositionManager.insertRoom(room, i++, 0);
+                    var roomData = rooms[key];
+
+                    // Check that the data is valid - sometimes
+                    // a room can end up without a rid
+                    if(roomData.rid) {
+                        room = RoomStore.getOrCreateRoomWithID(key);
+
+                        // The user is a member of this room
+                        // We have to call this so the Room position manager can
+                        // calculate the offsets
+                        if(room.open) {
+                            RoomPositionManager.insertRoom(room, i++, 0);
+                        }
                     }
                 }
             }
@@ -564,7 +571,13 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
 
         impl_roomRemoved: function (rid) {
 
-            //var room = RoomCache.getRoomWithID(rid);
+            var room = RoomStore.getRoomWithID(rid);
+            room.close();
+
+            if(room.type() == bRoomType1to1){
+                RoomStore.removeRoom(room);
+                $rootScope.$broadcast(bRoomRemovedNotification);
+            }
 
             //RoomPositionManager.closeRoom(room);
 

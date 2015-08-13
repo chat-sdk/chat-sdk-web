@@ -19,7 +19,8 @@
                         var data = {
                             authData: authData,
                             error: error,
-                            action: e.data.action
+                            action: e.data.action,
+                            provider: 'chatcat'
                         };
                         window.parent.postMessage(JSON.stringify(data), "*");
                     }, {

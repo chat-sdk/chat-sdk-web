@@ -604,11 +604,13 @@ myApp.directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", 
                 eventer(messageEvent, function(e) {
                     if (e.data) {
                         var data = JSON.parse(e.data);
-                        callback(data);
+                        if(data.provider == 'chatcat') {
+                            callback(data);
+                        }
                     }
-                    else {
-                        callback(null);
-                    }
+//                    else {
+//                        callback(null);
+//                    }
                 });
 
                 element.get(0).contentWindow.postMessage(JSON.stringify(data), "*");

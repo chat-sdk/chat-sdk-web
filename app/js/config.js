@@ -3,7 +3,7 @@
  */
 var myApp = angular.module('myApp.config', []);
 
-myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($rootScope, $timeout, Paths, Utils) {
+myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', function ($rootScope, $timeout, $q, Paths, Utils) {
 
     // Priorities for setting
     var setByDefault = 0;
@@ -111,6 +111,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
         marginRight: 10,
         marginRightSet: setByDefault,
 
+        clearCacheTimestamp: null,
+        clearCacheTimestampSet: setByDefault,
+
         // We update the config using the data provided
         // but we only update variables where the priority
         // of this setBy entity is higher than the previous
@@ -141,6 +144,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
             this.setValue("onlineUsersEnabled", config, setBy);
             this.setValue("publicRoomsEnabled", config, setBy);
             this.setValue("friendsEnabled", config, setBy);
+            this.setValue("clearCacheTimestamp", config, setBy);
 
             this.setValue("friends", config, setBy);
 
@@ -167,10 +171,16 @@ myApp.factory('Config', ['$rootScope', '$timeout', 'Paths', 'Utils', function ($
         },
 
         startConfigListener: function () {
+
+            var deferred = $q.defer();
+
             var ref = Paths.configRef();
             ref.on('value', (function (snapshot) {
                 this.setConfig(this.setByControlPanel, snapshot.val());
+                deferred.resolve();
             }).bind(this));
+
+            return deferred.promise;
         }
 
     };
