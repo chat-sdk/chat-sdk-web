@@ -108,7 +108,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         imageMessagesEnabled: false,
         imageMessagesEnabledSet: setByDefault,
 
-        marginRight: 10,
+        marginRight: 0,
         marginRightSet: setByDefault,
 
         clearCacheTimestamp: null,
@@ -145,6 +145,8 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
             this.setValue("publicRoomsEnabled", config, setBy);
             this.setValue("friendsEnabled", config, setBy);
             this.setValue("clearCacheTimestamp", config, setBy);
+            this.setValue("imageMessagesEnabled", config, setBy);
+            this.setValue("marginRight", config, setBy);
 
             this.setValue("friends", config, setBy);
 

@@ -578,7 +578,7 @@ myApp.directive('pikaday', ["$rootScope", function ($rootScope) {
         });
 
         scope.setDateOfBirth = function (date) {
-            picker.setDate(date ? date : '1990-01-01');
+            picker.setDate(date ? new Date(date) : '1990-01-01');
         };
 
     };
