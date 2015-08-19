@@ -36,6 +36,8 @@
                 <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" baseURL + 'main-box.html'"></ng-include>
                 <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" baseURL + 'create-room-box.html'"></ng-include>
 
+                <ng-include ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" baseURL + 'error-box.html'"></ng-include>
+
                 <div ng-controller="ChatBarController" >
                     <div ng-repeat="(id, room) in rooms">
                         <div ng-controller="ChatController">

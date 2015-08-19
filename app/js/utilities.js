@@ -114,6 +114,10 @@ var bInboxTab = 'inbox';
 var bProviderTypeCustom = 'custom';
 
 var bProfileSettingsBox = 'profileSettingsBox';
+var bLoginBox = 'loginBox';
+var bMainBox = 'mainBox';
+var bCreateRoomBox = 'createRoomBox';
+var bErrorBox = 'errorBox';
 
 var bShowProfileSettingsBox = 'showProfileSettingsBox';
 var bShowCreateChatBox = 'showCreateChatBox';
@@ -220,7 +224,7 @@ myApp.factory('Paths', [function () {
         },
 
         statsRef: function () {
-            return new Firebase(bFirebaseRef).child(bStatsPath).child(this.cid);
+            return new Firebase(bFirebaseRef).child(bStatsPath).child('august_15').child(this.cid);
         },
 
         usersRef: function () {

@@ -172,7 +172,9 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
             var su = this.users[user.meta.uid];
             if(su) {
                 user.deserialize(su);
+                return true;
             }
+            return false;
         },
 
         setProperty: function(key, value) {

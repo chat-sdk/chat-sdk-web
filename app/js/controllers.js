@@ -117,7 +117,7 @@ myApp.controller('AppController', [
     $scope.showLoginBox = function (mode) {
 //        Paths.firebase().unauth();
         $rootScope.loginMode = mode ? mode : Authentication.mode;
-        $scope.activeBox = 'loginBox';
+        $scope.activeBox = bLoginBox;
         $timeout(function() {
             $scope.$digest();
         });
@@ -138,14 +138,22 @@ myApp.controller('AppController', [
      * Show the main box
      */
     $scope.showMainBox = function () {
-        $scope.activeBox = 'mainBox';
+        $scope.activeBox = bMainBox;
+    };
+
+    $scope.showErrorBox = function (message) {
+        $scope.activeBox = bErrorBox;
+        $scope.errorBoxMessage = message;
+        $timeout(function() {
+            $scope.$digest();
+        });
     };
 
     /**
      * Show the create public room box
      */
     $scope.showCreateRoomBox = function () {
-        $scope.activeBox = 'createRoomBox';
+        $scope.activeBox = bCreateRoomBox;
         $scope.$broadcast(bShowCreateChatBox);
     };
 
@@ -958,20 +966,24 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                     }).bind());
                 }
 
-            }).bind(this), (function (error) {
+            }).bind(this), (function (message) {
 
                 // We couldn't connect to Chatcat.io API
                 // Next check to see if they specified an API key
-                console.log(error);
+                console.log(message);
 
-                this.setError(message);
+//                this.setError(message);
                 $scope.hideNotification();
+
+                $scope.showErrorBox(message);
+
             }).bind(this));
 
-        }).bind(this), (function (error) {
-            console.log(error);
-            this.setError(error);
+        }).bind(this), (function (message) {
+            console.log(message);
+            //this.setError(message);
             $scope.hideNotification();
+            $scope.showErrorBox(message)
         }).bind(this));
     };
 
@@ -1175,9 +1187,7 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         $scope.showEmojis = !$scope.showEmojis;
     };
 
-
-
-        // Save the super class
+    // Save the super class
     $scope.superShowProfileBox = $scope.showProfileBox;
     $scope.showProfileBox = function (uid) {
 
@@ -1923,14 +1933,13 @@ myApp.controller('UserProfileBoxController', ['$scope', function($scope) {
 
         // Get the ID
         var id = $scope.currentUser.meta.uid;
-//        if(id) {
-//            var parts = id.split(':');
-//            if(parts.length == 2) {
-//                id = parts[1];
-//            }
-//        }
 
         window.prompt("Copy to clipboard: Ctrl+C, Enter", id);
     };
+
+}]);
+
+myApp.controller('ErrorBoxController', ['$scope', function($scope) {
+
 
 }]);

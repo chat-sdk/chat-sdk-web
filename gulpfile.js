@@ -129,7 +129,7 @@ gulp.task('scripts', function() {
 	// Non-minified version
     gulp.src(paths)
         .pipe(concat('all.js'))
-    	.pipe(insert.wrap('var cc = (function () {', '}());$.noConflict();'))
+    	.pipe(insert.wrap('var cc = (function () {', '}());$.noConflict(true);'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
         
@@ -139,7 +139,7 @@ gulp.task('scripts', function() {
 //	    .pipe(uglify('all.min.js', {
 //    	  outSourceMap: true
 //    	}))
-    	.pipe(insert.wrap('var cc = (function () {', '}()); $.noConflict();'))
+    	.pipe(insert.wrap('var cc = (function () {', '}()); $.noConflict(true);'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
         
