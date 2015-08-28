@@ -13,18 +13,7 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
     FacebookProvider.init('735373466519297');
 }]);
 
-myApp.factory('Defines', [function (LocalStorage) {
-    return {
-        // Cloud Image
-        cloudImageToken: 'skbb48',
-
-        // Parse
-        parseAPIKey: ''
-
-    };
-}]);
-
-myApp.factory('CloudImage', [function (LocalStorage) {
+myApp.factory('CloudImage', [function () {
     return {
         // Cloud Image
         cloudImageToken: 'skbb48',
@@ -36,18 +25,17 @@ myApp.factory('CloudImage', [function (LocalStorage) {
     };
 }]);
 
-
 myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
     return {
 
-        messageRecievedSoundNumber: 1,
+        messageReceivedSoundNumber: 1,
         muted: LocalStorage.isMuted(),
 
         messageReceived: function () {
             if(this.muted) {
                 return;
             }
-            if(this.messageRecievedSoundNumber == 1) {
+            if(this.messageReceivedSoundNumber == 1) {
                 this.alert1();
             }
         },
@@ -81,9 +69,78 @@ myApp.factory('Log', [function () {
     };
 }]);
 
+myApp.factory('Marquee', ['$window', '$interval', function ($window, $interval) {
+    var Marquee = {
+
+        running: null,
+        title: "",
+
+        init: function () {
+            this.title = $window.document.title;
+            return this;
+        },
+
+        startWithMessage: function (message) {
+            if(this.running) {
+                this.stop();
+            }
+            var text = "Chatcat Message: " + message + "...";
+
+            this.running = $interval((function () {
+                // Change the page title
+                $window.document.title = text;
+                if(text.length > 0) {
+                    text = text.slice(1);
+                }
+                else {
+                    this.stop();
+                }
+            }).bind(this), 80);
+        },
+
+        stop: function () {
+            $interval.cancel(this.running);
+            this.running = null;
+            // Change the page title
+            $window.document.title = this.title;
+        }
+
+    };
+    return Marquee.init();
+}]);
+
+/**
+ * This service allows us to flag a room to be opened. This
+ * is useful because when we create a new room it's turned
+ * on in the impl_roomAdded function. We want to be able
+ * to flag it to be opened from anywhere and then let
+ * that function open it
+ */
+myApp.factory('RoomOpenQueue', [function () {
+    return {
+
+        rids: [],
+
+        addRoomWithID: function (rid) {
+            if(this.rids.indexOf(rid) <0) {
+                this.rids.push(rid);
+            }
+        },
+
+        roomExistsAndPop: function (rid) {
+            var index = this.rids.indexOf(rid);
+            if(index >= 0) {
+                this.rids.splice(index, 1);
+                return true;
+            }
+            return false;
+        }
+    };
+}]);
+
 myApp.factory('Partials', ['$http', '$templateCache', function ($http, $templateCache) {
     return {
-        load: function (baseURL) {
+        load: function () {
             $http.get(bPartialURL + 'chat-room.html', {cache:$templateCache});
             $http.get(bPartialURL + 'chat-settings.html', {cache:$templateCache});
             $http.get(bPartialURL + 'countries-select.html', {cache:$templateCache});
@@ -127,11 +184,23 @@ myApp.factory('Parse', ['$http', function ($http) {
     };
 }]);
 
-myApp.factory('Stats', ['Paths', function (Paths) {
+myApp.factory('Stats', ['Paths', '$window', '$rootScope', function (Paths, $window, $rootScope) {
 
-    return {
+    var Stats = {
+
+        ga: null,
+
+        init: function () {
+            return this;
+        },
+
+        recordMessage: function () {
+            $rootScope.$broadcast(bStatsMessageNotification);
+        },
 
         recordLogin: function () {
+
+            $rootScope.$broadcast(bStatsImpressionNotification);
 
             Paths.statsRef().child('login').transaction(function (value) {
                 return value + 1;
@@ -139,6 +208,7 @@ myApp.factory('Stats', ['Paths', function (Paths) {
 
         }
     };
+    return Stats.init();
 }]);
 
 
@@ -284,15 +354,6 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                     userOnlineRef.set(true);
                     userOnlineRef.onDisconnect().set(false);
 
-//                    // Update the user online counter
-//                    var userCountRef = Paths.onlineUserCountRef();
-//                    userCountRef.transaction(function (currentValue) {
-//                        return (currentValue || 0) + 1;
-//                    });
-//                    userCountRef.onDisconnect().transaction(function (currentValue) {
-//                        return Math.max(currentValue - 1, 0);
-//                    });
-
                     var promises = [
                         deferred.promise
                     ];
@@ -316,37 +377,6 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
             deferred.resolve(null);
             return deferred.promise;
         }
-
-//        onlineCounterPlusOne: function () {
-//
-//            var deferred = $q.defer();
-//
-//            if(this.onlineCount == 0) {
-//                var ref = Paths.onlineUserCountRef();
-//                ref.transaction((function(value) {
-//                    deferred.resolve();
-//                    this.onlineCount++;
-//                    return value + 1;
-//                }).bind(this));
-//            }
-//
-//            return deferred.promise;
-//        },
-//
-//        onlineCounterMinusOne: function () {
-//
-//            var deferred = $q.defer();
-//
-//            var ref = Paths.onlineUserCountRef();
-//            ref.transaction((function(value) {
-//                this.onlineCount--;
-//                return Math.max(value - 1, 0);
-//            }).bind(this), function () {
-//                deferred.resolve();
-//            });
-//
-//            return deferred.promise;
-//        }
     };
 
     return Presence.init();
@@ -549,7 +579,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 /** Tidy up existing rooms **/
 
                 /** Create static rooms **/
-                this.addStaticRooms();
+                //this.addStaticRooms();
 
                 // Start listening to online user list and public rooms list
                 StateManager.on();
@@ -587,142 +617,30 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             });
 
             return deferred.promise;
-        },
-
-        addStaticRooms: function () {
-
-            var addRoom = (function (roomDef) {
-                // Validate the room
-                if(Utils.unORNull(roomDef.name) || roomDef.name.length === 0) {
-                    console.log("ERROR: Room name is undefined or of zero length");
-                    return;
-                }
-                if(Utils.unORNull(roomDef.rid) || roomDef.rid.length === 0) {
-                    console.log("ERROR: Room rid is undefined or of zero length");
-                    return;
-                }
-                if(Utils.unORNull(roomDef.description) || roomDef.description.length === 0) {
-                    console.log("WARNING: Room description is undefined or of zero length");
-                }
-                if(Utils.unORNull(roomDef.weight)) {
-                    roomDef.weight = 100;
-                }
-
-                Room.createRoomWithRID(
-                    roomDef.rid,
-                    roomDef.name,
-                    roomDef.description,
-                    true,
-                    bRoomTypePublic,
-                    false,
-                    roomDef.weight
-                );
-
-            }).bind(this);
-
-            var staticRooms = this.getStaticRooms();
-
-            // Get the existing static rooms
-            var ref = Paths.publicRoomsRef();
-
-            // Get the existing public rooms and add any that don't exist
-            ref.once('value', (function (snapshot) {
-
-                var existingRooms = snapshot.val();
-
-                // Now add the rooms
-                for(var key in staticRooms) {
-                    if(staticRooms.hasOwnProperty(key)) {
-                        if(!existingRooms || (existingRooms && !existingRooms[key])) {
-                            addRoom(staticRooms[key]);
-                        }
-                    }
-                }
-
-                this.cleanStaticRooms(existingRooms);
-
-            }).bind(this));
-
-        },
-
-        getStaticRooms: function () {
-            // Get a full list of static rooms
-            var staticRooms = {};
-
-            var room = null;
-            if(CC_OPTIONS && CC_OPTIONS.staticRooms) {
-                for(var i = 0; i < CC_OPTIONS.staticRooms.length; i++) {
-                    room = CC_OPTIONS.staticRooms[i];
-                    staticRooms[room.rid] = room;
-                }
-            }
-            if(API.meta && API.meta.rooms) {
-                for(i = 0; i < API.meta.rooms.length; i++) {
-                    room = API.meta.rooms[i];
-                    staticRooms[room.rid] = room;
-                }
-            }
-
-            return staticRooms;
-        },
-
-        cleanStaticRooms: function (existingRooms) {
-
-            var staticRooms = this.getStaticRooms();
-
-            // Now we want to compare the static rooms with the list of
-            // public rooms
-
-            for(var key in existingRooms) {
-                if(existingRooms.hasOwnProperty(key)) {
-
-                    var rid = existingRooms[key].rid;
-
-                    // This means that it's not a user created room
-                    if(rid && rid.length != 20 && !existingRooms[key].userCreated) {
-                        // Is this room included in the list of rooms we made?
-                        if(!staticRooms[rid]) {
-                            // Get the room
-                            var room = RoomStore.getOrCreateRoomWithID(rid);
-
-                            // Get the online
-
-                            // TODO: this is a workout around until we remove the Anuj code
-                            // Is this a newPanel room
-                            if(!room.newPanel) {
-                                // Remove the room from the public list and delete the room
-                                //room.delete();
-                                room.removeFromPublicRooms();
-                            }
-                        }
-                    }
-                }
-            }
-
-        },
-
-        numberOfChatters: function () {
-
-            var deferred = $q.defer();
-
-            // Get the number of chatters
-            var ref = Paths.onlineUsersRef();
-            ref.once('value', function (snapshot) {
-
-                var i = 0;
-                var chatters = snapshot.val();
-                for(var key in chatters) {
-                    if(chatters.hasOwnProperty(key)) {
-                        i++;
-                    }
-                }
-
-                deferred.resolve(i);
-            }, function (error) {
-                deferred.reject(error);
-            });
-
-            return deferred.promise;
         }
+
+//        numberOfChatters: function () {
+//
+//            var deferred = $q.defer();
+//
+//            // Get the number of chatters
+//            var ref = Paths.onlineUsersRef();
+//            ref.once('value', function (snapshot) {
+//
+//                var i = 0;
+//                var chatters = snapshot.val();
+//                for(var key in chatters) {
+//                    if(chatters.hasOwnProperty(key)) {
+//                        i++;
+//                    }
+//                }
+//
+//                deferred.resolve(i);
+//            }, function (error) {
+//                deferred.reject(error);
+//            });
+//
+//            return deferred.promise;
+//        }
     };
 }]);

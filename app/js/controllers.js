@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API', 'RoomOpenQueue',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API, RoomOpenQueue) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -296,20 +296,24 @@ myApp.controller('AppController', [
             // Check to see if there's an open room with the two users
             var rooms = Cache.getPrivateRoomsWithUsers($rootScope.user, user);
             if (rooms.length) {
-                rooms[0].flashHeader();
-                // The room is already open! Do nothing
-                return;
+                var r = rooms[0];
+                if(r.type() == bRoomType1to1) {
+                    r.flashHeader();
+                    // The room is already open! Do nothing
+                    return;
+                }
             }
             else {
                 rooms = RoomStore.getPrivateRoomsWithUsers($rootScope.user, user);
                 if(rooms.length) {
-                    RoomPositionManager.insertRoom(rooms[0], 0 , 300);
+                    var room = rooms[0];
+                    room.open(0, 300);
                     return;
                 }
             }
             Room.createPrivateRoom([user]).then(function (rid) {
-                var room = RoomStore.getOrCreateRoomWithID(rid);
-                RoomPositionManager.insertRoom(room, 0, 300);
+                RoomOpenQueue.addRoomWithID(rid);
+                //var room = RoomStore.getOrCreateRoomWithID(rid);
             }, function (error) {
                 console.log(error);
             });
@@ -344,6 +348,8 @@ myApp.controller('AppController', [
         }
 
         StateManager.off();
+
+        // TODO: Should we set all rooms off?
 
         RoomPositionManager.closeAllRooms();
 
@@ -694,28 +700,11 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
 
         // Messages on is called by when we add the room to the user
         // If the room is already open do nothing!
-        if(room.isOpen()) {
-            // Make the room flash
-            room.flashHeader();
+        if(room.flashHeader()) {
             return;
         }
 
-        if(room.isPublic()) {
-            // We always full leave a public room so we need to join again
-            room.join(bUserStatusMember).then((function ()
-            {
-                RoomPositionManager.insertRoom(room, 0, 300);
-
-            }).bind(this), function (error) {
-                console.log(error);
-            });
-        }
-        else {
-            // If the room is in our list then we're already a member
-            // since we never completely delete a room
-            // TODO: Handle case where we've cancelled the room
-            RoomPositionManager.insertRoom(room, 0, 300);
-        }
+        room.open(0, 300);
     };
 
     $scope.init();
@@ -932,7 +921,10 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
             console.log("API Key: " + API.meta.cid);
 
             // Get the number of chatters that are currently online
-            Auth.numberOfChatters().then((function(number) {
+            API.getOnlineUserCount().then((function (number) {
+
+//            });
+//            Auth.numberOfChatters().then((function(number) {
 
                 if(number >= api.max) {
                     $scope.hideNotification();
@@ -1281,6 +1273,11 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         }
     };
 
+    $scope.leaveRoom = function () {
+        $scope.room.close();
+        $scope.room.leave();
+    }
+
 }]);
 
 myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'LocalStorage', 'RoomPositionManager', 'Log',
@@ -1396,8 +1393,8 @@ myApp.controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', '
 
 }]);
 
-myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 'Log', 'RoomPositionManager', 'RoomStore',
-    function($scope, $timeout, Auth, Room, Log, RoomPositionManager, RoomStore) {
+myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 'Log', 'RoomOpenQueue',
+    function($scope, $timeout, Auth, Room, Log, RoomOpenQueue) {
 
         $scope.public = false;
 
@@ -1417,7 +1414,6 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
 
             // Is this a public room?
             if($scope.public) {
-
                 promise = Room.createPublicRoom(
                     $scope.room.name,
                     $scope.room.description
@@ -1428,13 +1424,17 @@ myApp.controller('CreateRoomController', ['$scope', '$timeout', 'Auth', 'Room', 
                     $scope.room.name,
                     $scope.room.description,
                     $scope.room.invitesEnabled,
-                    false
+                    bRoomType1to1
                 );
             }
 
             promise.then(function (rid) {
-                var room = RoomStore.getOrCreateRoomWithID(rid);
-                RoomPositionManager.insertRoom(room, 0, 300);
+                RoomOpenQueue.addRoomWithID(rid);
+
+//                var room = RoomStore.getOrCreateRoomWithID(rid);
+//                room.on().then(function () {
+//                    room.open(0, 300);
+//                });
             });
 
             $scope.back();
@@ -1565,7 +1565,7 @@ myApp.controller('InboxRoomsListController', ['$scope', '$timeout', 'Log', 'Room
         });
 
         $scope.$on(bLoginCompleteNotification, function () {
-            Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+            Log.notification(bLoginCompleteNotification, 'InboxRoomsListController');
             RoomStore.loadPrivateRoomsToMemory();
             $scope.updateList();
         });

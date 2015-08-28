@@ -238,14 +238,15 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
         on: function () {
             var publicRoomsRef = Paths.publicRoomsRef();
 
+            // Start listening to Firebase
             publicRoomsRef.on('child_added', (function (snapshot) {
 
                 var rid = snapshot.key();
                 if(rid) {
                     var room = RoomStore.getOrCreateRoomWithID(rid);
 
-                    room.newPanel = snapshot.val().newPanel;
-                    //Cache.addPublicRoom(room);
+                    // TODO: Remove this
+                    //room.newPanel = snapshot.val().newPanel;
 
                     room.on().then(function () {
 
@@ -254,12 +255,12 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
                         // Check to see if the room is marked as public
                         // TODO: Depricated code fix for old customers who didn't have
                         // public room flagged
-                        if(!room.meta.isPublic && !room.meta.type) {
-                            var ref = Paths.roomMetaRef(room.meta.rid);
-                            ref.update({type: bRoomTypePublic});
-                        }
+//                        if(!room.meta.isPublic && !room.meta.type) {
+//                            var ref = Paths.roomMetaRef(room.meta.rid);
+//                            ref.update({type: bRoomTypePublic});
+//                        }
 
-                        RoomStore.addRoom(room);
+                        //RoomStore.addRoom(room);
 
                     });
 
@@ -288,8 +289,8 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
 /**
  * This should really be called the CurrentUserConnector
  */
-myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths',
-    function ($rootScope, FriendsConnector, Config, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths) {
+myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths', 'RoomOpenQueue',
+    function ($rootScope, FriendsConnector, Config, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths, RoomOpenQueue) {
     return {
 
         isOn: false,
@@ -361,31 +362,20 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
 
             var roomsRef = Paths.userRoomsRef(uid);
 
-            // Get the value of the rooms
-            roomsRef.once('value', (function (snapshot) {
-
-                this.impl_roomAddInitial(snapshot.val());
-
-                // A new room was added so we should start listening to it
-
-                //This is just wrong - it should be snapshot.key()...
-                roomsRef.on('child_added', (function (snapshot) {
-                    var room = snapshot.val();
-                    if(room && room.rid) {
-                        this.impl_roomAdded(room.rid, room.invitedBy, room.read);
-                    }
-
-                }).bind(this));
-
-                roomsRef.on('child_removed', (function (snapshot) {
-                    var rid = snapshot.key();
-                    if(rid) {
-                        this.impl_roomRemoved(rid);
-                    }
-                }).bind(this));
+            roomsRef.on('child_added', (function (snapshot) {
+                var room = snapshot.val();
+                if(room && room.rid) {
+                    this.impl_roomAdded(room.rid, room.invitedBy, room.read);
+                }
 
             }).bind(this));
 
+            roomsRef.on('child_removed', (function (snapshot) {
+                var rid = snapshot.key();
+                if(rid) {
+                    this.impl_roomRemoved(rid);
+                }
+            }).bind(this));
 
             /**
              * Friends
@@ -463,35 +453,9 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
 
         },
 
-        impl_roomAddInitial: function (rooms) {
-            var i = 0;
-
-            var room = null;
-            for(var key in rooms) {
-                if(rooms.hasOwnProperty(key)) {
-
-                    var roomData = rooms[key];
-
-                    // Check that the data is valid - sometimes
-                    // a room can end up without a rid
-                    if(roomData.rid) {
-                        room = RoomStore.getOrCreateRoomWithID(key);
-
-                        // The user is a member of this room
-                        // We have to call this so the Room position manager can
-                        // calculate the offsets
-                        if(room.open) {
-                            RoomPositionManager.insertRoom(room, i++, 0);
-                        }
-                    }
-                }
-            }
-            RoomPositionManager.updateRoomPositions(null, 0);
-            RoomPositionManager.updateAllRoomActiveStatus();
-        },
-
         /**
-         *
+         * This is called each time a room is added to the user's
+         * list of rooms
          * @param rid
          * @param invitedBy
          * @param readTimestamp
@@ -512,59 +476,27 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
                 }
                 // If they only allow invites from friends
                 // the other user must be a friend
-                if($rootScope.user.allowInvitesFrom(bUserAllowInvitesFriends) && !FriendsConnector.isFriend(invitedByUser)) {
+                if($rootScope.user.allowInvitesFrom(bUserAllowInvitesFriends) && !FriendsConnector.isFriend(invitedByUser) && invitedByUser != $rootScope.user) {
                     return;
                 }
 
                 // Does the room already exist?
                 var room = RoomStore.getOrCreateRoomWithID(rid);
-                room.deleted = false;
 
                 // If you clear the cache without this all the messages
                 // would show up as unread...
                 room.readTimestamp = readTimestamp;
-
                 room.invitedBy = invitedByUser;
+                room.deleted = false;
 
-                room.userDeletedDate().then(function(timestamp) {
-
-                    if(timestamp) {
-                       room.deleted = true;
+                room.on().then(function () {
+                    if(room.isOpen) {
+                        room.open(-1, 0);
                     }
-
-                    room.on().then(function () {
-
-                        // Here there are two main options
-                        // 1) We clicked on a room
-                        // 2) We were invited by someone else
-                        if($rootScope.user.meta.uid != invitedBy) {
-
-                            //room.messagesOn();
-
-                            // If the user is a friend
-                            if(FriendsConnector.isFriendUID(invitedBy)) {
-                                room.join(bUserStatusMember);
-                                // Set the user to member
-                                //room.setStatusForUser($rootScope.user, bUserStatusMember);
-                            }
-                            else {
-                                // Join the room
-                                room.join(bUserStatusMember);
-                            }
-
-                            // A room has been added
-                            $rootScope.$broadcast(bRoomAddedNotification);
-                        }
-
-                        // Maybe we refreshed the page so we were
-                        // automatically removed from the room
-                        // Add us back in
-                        if(room.isPublic()) {
-                            Room.addUserToRoom(room.meta.rid, $rootScope.user, bUserStatusMember, bRoomTypePublic);
-                        }
-
-                        room.messagesOn(timestamp);
-                    });
+                    // If the user just created the room...
+                    if(RoomOpenQueue.roomExistsAndPop(room.meta.rid)) {
+                        room.open(0, 300);
+                    }
                 });
             }
         },
@@ -578,14 +510,6 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
                 RoomStore.removeRoom(room);
                 $rootScope.$broadcast(bRoomRemovedNotification);
             }
-
-            //RoomPositionManager.closeRoom(room);
-
-//            RoomPositionManager.removeRoom(room);
-//            RoomPositionManager.autoPosition(300);
-//            RoomPositionManager.updateAllRoomActiveStatus();
-//
-//            $rootScope.$broadcast(bRoomClosedNotification, room);
         }
 
     };

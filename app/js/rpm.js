@@ -75,18 +75,17 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
                 // If the room is already added then return
                 if(this.roomIsOpen(room)) {
-                    room.open = true;
+                    room.isOpen = true;
                     return;
                 }
 
-                // If the room is open
-                //if(room.open) {
-                //    room.flashHeader();
-                //    return;
-                //}
-
                 // Update the rooms from the cache
                 this.updateRoomsList();
+
+                // We have no slot so add it to the max position
+                if(slot == -1) {
+                    slot = this.rooms.length;
+                }
 
                 var i;
 
@@ -122,17 +121,6 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
 
             },
 
-//        removeRoom: function (room) {
-//
-//            Cache.removeRoom(room);
-//
-//            // Update the slot positions
-//            this.autoSetSlots();
-//            this.setDirty();
-//
-//            //$rootScope.$broadcast(bRoomClosedNotification, room);
-//        },
-
             roomIsOpen: function (room) {
                 return ArrayUtils.contains(this.rooms, room);
             },
@@ -140,7 +128,7 @@ myApp.factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$w
             closeRoom: function (room) {
 
                 if(!this.roomIsOpen(room)) {
-                    room.open = false;
+                    room.isOpen = false;
                     return;
                 }
 

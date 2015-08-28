@@ -283,7 +283,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
 
         addRoom: function (room) {
             if(!ArrayUtils.contains(this.rooms, room)) {
-                room.open = true;
+                room.isOpen = true;
                 this.rooms.push(room);
             }
         },
@@ -293,7 +293,7 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
 //        },
 
         removeRoom: function (room) {
-            room.open = false;
+            room.isOpen = false;
             ArrayUtils.remove(this.rooms, room);
         },
 

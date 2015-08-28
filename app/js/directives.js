@@ -619,6 +619,36 @@ myApp.directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", 
     };
 }]);
 
+myApp.directive('statsIframe', ['$window', '$rootScope', function ($window, $rootScope) {
+    return function (scope, element, attr) {
+
+        var url = $window.location.host;
+
+        // Is there a www.?
+        if(url.match(/^www\./))
+        {
+            url = url.substring(4);
+        }
+
+        $rootScope.$on(bStatsImpressionNotification, function () {
+            element.get(0).contentWindow.postMessage(JSON.stringify({
+                sender: 'chatcat',
+                action: 'impression',
+                value: url
+            }), "*");
+        });
+
+        $rootScope.$on(bStatsMessageNotification, function () {
+            element.get(0).contentWindow.postMessage(JSON.stringify({
+                sender: 'chatcat',
+                action: 'message',
+                value: url
+            }), "*");
+        });
+
+    };
+}]);
+
 myApp.directive('onEditMessage', function () {
     return function (scope, element, attr) {
         scope.$on(bEditMessageNotification, function (event, mid, newText) {

@@ -25,7 +25,7 @@ var bFirebase = 'chatcat';
 var bAPIGatewayLevel0 = '//chatcat.io/wp-admin/admin-ajax.php';
 var bAPIRoot = 'http://dev.chatcatapp.com/api/';
 //var bAPIGatewayLevel1 = bAPIRoot+'chat/plan';
-//var bAPIGatewayLevel1 = 'http://symfony/app_dev.php/api/chat/plan';
+//var bAPIRoot = 'http://symfony/app_dev.php/api/';
 
 // If we are then set the root URL to nothing
 if(document.location.origin === "http://symfony") {
@@ -153,6 +153,9 @@ var bLoginCompleteNotification = 'bLoginCompleteNotification';
 var bLogoutNotification = 'bLogoutNotification';
 
 var bStartSocialLoginNotification = 'bStartSocialLoginNotification';
+
+var bStatsImpressionNotification = 'bStatsImpressionNotification';
+var bStatsMessageNotification = 'bStatsMessageNotification';
 
 var bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
 var bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
