@@ -100,6 +100,9 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
         // Static methods
 
         Message.buildMeta = function (rid, uid, text, type) {
+
+            //text = text + "\r\n" + text;
+
             return {
                 meta: {
                     rid: rid,

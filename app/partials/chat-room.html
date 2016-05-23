@@ -45,7 +45,7 @@
                     <div class="cc-message-outer">
                         <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.thumbnail }}" />
                         <span ng-show="message.meta.type == messageTypeText" class="cc-bubble" ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" ng-style="{'max-width': room.width - 80}" on-edit-message>
-                            <div class="cc-enable-select" ng-bind-html="::message.meta.text | linky: '_blank' | emoji"></div>
+                            <div class="cc-enable-select" ng-bind-html="::message.meta.text | linky: '_blank' | emoji | newline"></div>
                         </span>
                         <span ng-show="message.meta.type == messageTypeImage" class="cc-bubble cc-image-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}" on-edit-message>
                             <a href="{{ message.imageURL }}" target="_blank"><img ng-src="{{ ::message.thumbnailURL }}"></a></span>

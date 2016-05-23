@@ -192,51 +192,65 @@
                 input = "";
             }
 
-            if(input == ':)' || input == ':-)') {
-                input = ':smile:';
-            }
-            else if (input == '&lt;3') {
-                input = ':heart:';
-            }
-            else if (input == ':o' || input == ':O' || input == ':-o' || input == ':-O') {
-                input = ':open_mouth:';
-            }
-            else if (input == ';)' || input == ':-)') {
-                input = ':wink:';
-            }
-            else if (input == ':s' || input == ':S' || input == ':-s' || input == ':-S') {
-                input = ':confused:';
-            }
-            else if (input == ":'(") {
-                input = ':cry:';
-            }
-            else if (input == ':(' || input == ':-(') {
-                input = ':frowning:';
-            }
-            else if (input == ':p' || input == ':P' || input == ':-p' || input == ':-P') {
-                input = ':stuck_out_tongue:';
-            }
-            else if (input == ';p' || input == ';P' || input == ';-p' || input == ';-P') {
-                input = ':stuck_out_tongue_winking_eye:';
-            }
-            else if (input == '(h)' || input == '(H)') {
-                input = ':sunglasses:';
-            }
-            else if (input == '(a)' || input == '(A)') {
-                input = ':angel:';
-            }
-            else if (input == ':#' || input == ':-#') {
-                input = ':no_mouth:';
-            }
-            else if (input == ':d' || input == ':D' || input == ':-d' || input == ':-D') {
-                input = ':grin:';
-            }
-            else if (input == ':*' || input == ':-*') {
-                input = ':kissing:';
-            }
-            else if (input == '(kiss)') {
-                input = ':kiss:';
-            }
+            var replaceAll = function(target, search, replacement) {
+                return target.split(search).join(replacement);
+            };
+
+            input = input + " ";
+
+            input = replaceAll(input, ':s ', ':confused:');
+            input = replaceAll(input, ':S ', ':confused:');
+            input = replaceAll(input, ':-s ', ':confused:');
+            input = replaceAll(input, ':-S ', ':confused:');
+
+            input = replaceAll(input, ':o ', ':open_mouth:');
+            input = replaceAll(input, ':O ', ':open_mouth:');
+            input = replaceAll(input, ':-o ', ':open_mouth:');
+            input = replaceAll(input, ':-O ', ':open_mouth:');
+
+            input = replaceAll(input, ':) ', ':smile:');
+            input = replaceAll(input, ':-) ', ':smile:');
+
+            input = replaceAll(input, '&lt;3 ', ':heart:');
+
+
+            input = replaceAll(input, ';) ', ':wink:');
+            input = replaceAll(input, ';-) ', ':wink:');
+
+            input = replaceAll(input, ":'( ", ':cry:');
+
+            input = replaceAll(input, ':-( ', ':frowning:');
+
+            input = replaceAll(input, ':p ', ':stuck_out_tongue:');
+            input = replaceAll(input, ':P ', ':stuck_out_tongue:');
+            input = replaceAll(input, ':-p ', ':stuck_out_tongue:');
+            input = replaceAll(input, ':-P ', ':stuck_out_tongue:');
+
+            input = replaceAll(input, ';P ', ':stuck_out_tongue_winking_eye:');
+            input = replaceAll(input, ';P ', ':stuck_out_tongue_winking_eye:');
+            input = replaceAll(input, ';-p ', ':stuck_out_tongue_winking_eye:');
+            input = replaceAll(input, ';-P ', ':stuck_out_tongue_winking_eye:');
+
+            input = replaceAll(input, '(h) ', ':sunglasses:');
+            input = replaceAll(input, '(H) ', ':sunglasses:');
+
+            input = replaceAll(input, '(a) ', ':angel:');
+            input = replaceAll(input, '(A) ', ':angel:');
+
+            input = replaceAll(input, ':# ', ':no_mouth:');
+            input = replaceAll(input, ':-# ', ':no_mouth:');
+
+            input = replaceAll(input, ':d ', ':grin:');
+            input = replaceAll(input, ':D ', ':grin:');
+            input = replaceAll(input, ':-d ', ':grin:');
+            input = replaceAll(input, ':-D ', ':grin:');
+
+            input = replaceAll(input, ':* ', ':kissing:');
+            input = replaceAll(input, ':-* ', ':kissing:');
+
+            input = replaceAll(input, '(kiss) ', ':kiss:');
+
+            input  = input.trim();
 
             return input.replace(rEmojis, function (match, text) {
                 return "<i class='emoji emoji_" + text + "' title=':" + text + ":'>" + text + "</i>";

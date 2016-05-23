@@ -167,7 +167,7 @@
         ],
         rEmojis = new RegExp(":(" + emojis.join("|") + "):", "g");
 
-    angular.module("emoji", []).filter("emoji", ["$sce", "$sanitze", function ($sce, $sanitze) {
+    angular.module("emoji", []).filter("emoji", ["$sce", "$sanitize", function ($sce, $sanitze) {
         return function (input) {
             var output;
 

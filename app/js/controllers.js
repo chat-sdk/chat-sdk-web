@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API', 'RoomOpenQueue',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API, RoomOpenQueue) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API', 'RoomOpenQueue',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API, RoomOpenQueue) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -15,6 +15,17 @@ myApp.controller('AppController', [
     $rootScope.messageTypeImage = bMessageTypeImage;
 
     $scope.init = function () {
+
+        // Check to see if the user wants the chat to
+        // load on this page. We look at the showOnPaths variable
+        // in the options
+        //CC_OPTIONS.showOnPaths = "*ccwp, *p*";
+        if(CC_OPTIONS && CC_OPTIONS.showOnPaths) {
+            var paths = CC_OPTIONS.showOnPaths;
+            if(!PathAnalyser.shouldShowChatOnPath(paths)) {
+                return;
+            }
+        }
 
         Partials.load();
 
@@ -183,6 +194,10 @@ myApp.controller('AppController', [
      * box before the box disappears
      */
     $scope.showProfileBox = function (uid, duration) {
+
+        if(Config.disableUserInfoPopup) {
+            return;
+        }
 
         $scope.friendsEnabled = Config.friendsEnabled;
 

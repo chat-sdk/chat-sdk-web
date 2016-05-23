@@ -23,7 +23,7 @@ var bPartialURL = '';
 var bFirebase = 'chatcat';
 //var bFirebase = 'chat-sdk-android-2';
 var bAPIGatewayLevel0 = '//chatcat.io/wp-admin/admin-ajax.php';
-var bAPIRoot = 'http://dev.chatcatapp.com/api/';
+var bAPIRoot = '//dev.chatcatapp.com/api/';
 //var bAPIGatewayLevel1 = bAPIRoot+'chat/plan';
 //var bAPIRoot = 'http://symfony/app_dev.php/api/';
 

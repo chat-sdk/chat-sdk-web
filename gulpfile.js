@@ -121,6 +121,7 @@ gulp.task('scripts', function() {
         'app/bower_components/angular-sanitize/angular-sanitize.min.js',
         //'app/bower_components/angular-emoji-filter/lib/cc-emoji.js',
         'app/bower_components/pikaday/pikaday.js',
+        'app/bower_components/howler/howler.min.js',
         'app/libs/sha256.js', 
         'app/libs/cc-emoji.js', 
         'app/js/*.js'

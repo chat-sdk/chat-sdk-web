@@ -284,7 +284,11 @@ myApp.factory('API', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStor
                     deferred.reject(this.errorMessageCouldNotConnect);
                 }
             }).bind(this), function (error, message) {
-                deferred.reject(error.data.message);
+                var m = "Could not get site details";
+                if(error.data && error.data.message) {
+                    m = error.data.message;
+                }
+                deferred.reject(m);
             });
 
             return deferred.promise;
