@@ -6,18 +6,20 @@
             {{ userDrag.user.meta.name }}
         </div>
 
-
         <div id="cc-base" >
 
             <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
                     <div class="cc-inner cc-pointer">
-                        <span ng-show="totalUserCount > 0">
-                            {{ totalUserCount }} {{ totalUserCount == 1 ? 'Person' : 'People' }} online
+                        <span>
+                            {{ totalUserCount }} <!-- {{ totalUserCount == 1 ? 'Person' : 'People' }} -->&nbsp; Online
                         </span>
-                        <span ng-show="totalUserCount == 0">
-                            Chatcat Messenger
-                        </span>
+                        <!--<span ng-show="totalUserCount == 0">-->
+                            <!--Chatcat Messenger-->
+                        <!--</span>-->
+                        <a href="http://chatcat.io" target="_blank">
+                            <img class="uk-float-right" ng-src="{{ ::img_30_powered_by }}" />
+                        </a>
                         <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
                             <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
                         </a>

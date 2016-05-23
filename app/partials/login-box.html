@@ -3,7 +3,7 @@
     <div class="uk-vertical-align uk-text-center uk-height-1-1">
         <div class="uk-vertical-align-middle uk-width-1-1" >
 
-            <div class="cc-box-header" ng-style="{background: config.headerColor}">Login or Register</div>
+            <div class="cc-box-header" ng-show="loginMode != 'clickToChat'" ng-style="{background: config.headerColor}">Login or Register</div>
 
             <form ng-show="loginMode == 'simple'" class="uk-panel uk-form cc-inner-margin">
                 <div class="uk-form-row">
@@ -54,6 +54,9 @@
             </form>
             <form ng-show="loginMode == 'authenticating'" class="uk-panel uk-form cc-inner-margin">
                 Authenticating... <img ng-src="{{ ::img_loader }}" width="26" height="26" />
+            </form>
+            <form ng-show="loginMode == 'clickToChat'" class="uk-panel uk-form cc-inner-margin">
+                <div class="cc-pointer" ng-click="startChatting()">Click to start chatting!&nbsp;&nbsp;&nbsp;<img ng-class="cc-image-30" ng-src="{{ ::img_30_start_chatting }}" /></div>
             </form>
             <iframe social-iframe src="https://chatcat.firebaseapp.com/partials/social.html" style="display: none" ></iframe>
         </div>

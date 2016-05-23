@@ -90,6 +90,8 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
         onlineCountKey: 'cc_online_count',
         timestampKey: 'cc_timestamp',
 
+        lastVisited: 'cc_last_visited',
+
         rooms: {},
         users: {},
 
@@ -175,6 +177,14 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
                 return true;
             }
             return false;
+        },
+
+        getLastVisited: function () {
+            return this.getProperty(this.lastVisited);
+        },
+
+        setLastVisited: function () {
+            this.setProperty(this.lastVisited, new Date().getTime());
         },
 
         setProperty: function(key, value) {

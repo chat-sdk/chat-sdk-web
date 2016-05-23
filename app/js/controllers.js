@@ -112,6 +112,8 @@ myApp.controller('AppController', [
         $rootScope.img_30_image = bImagesURL + 'cc-30-image.png';
         $rootScope.img_20_flag = bImagesURL + 'cc-20-flag.png';
         $rootScope.img_20_flagged = bImagesURL + 'cc-20-flagged.png';
+        $rootScope.img_30_powered_by = bImagesURL + 'cc-30-powered-by.png';
+        $rootScope.img_30_start_chatting = bImagesURL + 'cc-30-start-chatting.png';
     };
 
     $scope.getUser = function () {
@@ -737,6 +739,18 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         $scope.rememberMe = true;
 
+        var lastVisited = LocalStorage.getLastVisited();
+        if((new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
+            $scope.showLoginBox(bLoginModeClickToChat);
+        }
+        else {
+            $scope.startChatting();
+        }
+
+    };
+
+    $scope.startChatting = function() {
+        LocalStorage.setLastVisited();
         $scope.showLoginBox(bLoginModeAuthenticating);
 
         Authentication.startAuthListener().then(function(authData) {

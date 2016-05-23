@@ -93,7 +93,7 @@ div#cc-app div#cc-base {
 /* The bottom bar for the menu box */
 div#cc-app div.cc-menu-bar {
     position: fixed;
-    width: 200px;
+    width: 240px;
     right: 0;
 }
 

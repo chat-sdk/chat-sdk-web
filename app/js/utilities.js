@@ -65,6 +65,10 @@ var bPullURL = "//chat.deluge.co/server/pull.php";
 
 var bDefaultAvatarProvider = "http://flathash.com";
 
+// Last visited
+// Show the click to chat box if the user has visited more than x hours
+var bLastVisitedTimeout = 1 * bHour;
+
 // Paths
 var bUsersPath = "users";
 var bUsersMetaPath = "usersMeta";
@@ -178,6 +182,7 @@ var bLoginModeSimple = "simple";
 var bLoginModeSingleSignOn = "singleSignOn";
 var bLoginModeToken = "token";
 var bLoginModeAuthenticating = "authenticating";
+var bLoginModeClickToChat = "clickToChat";
 
 var bMessageTypeText = 0;
 var bMessageTypeImage = 2;
@@ -200,6 +205,7 @@ var bProfileBoxWidth = 300;
 var bMinute = 60;
 var bHour = bMinute * 60;
 var bDay = bHour * 24;
+
 
 //Firebase.enableLogging(true);
 

@@ -117,6 +117,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         disableUserInfoPopup: false,
         disableUserInfoPopupSet: setByDefault,
 
+        clickToChatTimeout: bLastVisitedTimeout,
+        clickToChatTimeoutSet: setByDefault,
+
         // We update the config using the data provided
         // but we only update variables where the priority
         // of this setBy entity is higher than the previous
