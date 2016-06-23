@@ -11,7 +11,7 @@
             <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
                     <div class="cc-inner cc-pointer">
-                        <span>
+                        <span ng-show="totalUserCount > 0">
                             {{ totalUserCount }} <!-- {{ totalUserCount == 1 ? 'Person' : 'People' }} -->&nbsp; Online
                         </span>
                         <!--<span ng-show="totalUserCount == 0">-->

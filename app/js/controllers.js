@@ -740,7 +740,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         $scope.rememberMe = true;
 
         var lastVisited = LocalStorage.getLastVisited();
-        if((new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
+        if(Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
             $scope.showLoginBox(bLoginModeClickToChat);
         }
         else {
@@ -1793,6 +1793,11 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
                 minChars: 2,
                 maxChars: 50,
                 valid: true
+            },
+            profileLink: {
+                minChars: 0,
+                maxChars: 100,
+                valid: true
             }
         };
 
@@ -1843,6 +1848,53 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         $scope.cacheCleared = true;
     };
 
+    $scope.isValidURL = function(url) {// wrapped in self calling function to prevent global pollution
+
+        //URL pattern based on rfc1738 and rfc3986
+        var rg_pctEncoded = "%[0-9a-fA-F]{2}";
+        var rg_protocol = "(http|https):\\/\\/";
+
+        var rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
+
+        var rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
+        var rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
+        var rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
+        var rg_port = "[0-9]+";
+
+        var rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
+
+        // chars sets
+        // safe           = "$" | "-" | "_" | "." | "+"
+        // extra          = "!" | "*" | "'" | "(" | ")" | ","
+        // hsegment       = *[ alpha | digit | safe | extra | ";" | ":" | "@" | "&" | "=" | escape ]
+        var rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
+        var rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
+
+        var rg_path = rg_segment + "(\\/" + rg_segment + ")*";
+        var rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+        var rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+
+        var rgHttpUrl = new RegExp(
+            "^"
+            + rg_protocol
+            + "(" + rg_userinfo + ")?"
+            + rg_hostport
+            + "(\\/"
+            + "(" + rg_path + ")?"
+            + "(" + rg_query + ")?"
+            + "(" + rg_fragment + ")?"
+            + ")?"
+            + "$"
+        );
+
+        // export public function
+        if (rgHttpUrl.test(url)) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     $scope.validate = function () {
 
         var meta = $scope.getUser().meta;
@@ -1854,10 +1906,15 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         var cityValid = meta.city && meta.city.length >= $scope.validation.city.minChars && meta.city.length <= $scope.validation.city.maxChars;
         $scope.validation.city.valid = cityValid;
 
+        var profileLinkValid = meta.profileLink && meta.profileLink.length >= $scope.validation.profileLink.minChars && meta.profileLink.length <= $scope.validation.profileLink.maxChars;
+        profileLinkValid = $scope.isValidURL(meta.profileLink) || !meta.profileLink.length;
+
+        $scope.validation.profileLink.valid = profileLinkValid;
+
         var dateOfBirthValid = meta.dateOfBirth;
         $scope.validation.dateOfBirth = dateOfBirthValid;
 
-        return nameValid && cityValid && dateOfBirthValid;
+        return nameValid && cityValid && dateOfBirthValid && profileLinkValid;
 
     };
 
@@ -1892,8 +1949,11 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
             if(!$scope.validation.city.valid) {
                 $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between "+$scope.validation.city.minChars+" - "+$scope.validation.city.maxChars+" characters long", "Ok");
             }
-            if(!$scope.validation.city.dateOfBirth) {
+            if(!$scope.validation.dateOfBirth.valid) {
                 $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The date of birth must be set", "Ok");
+            }
+            if(!$scope.validation.profileLink.valid) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The profile link must be a valid URL", "Ok");
             }
         }
     };

@@ -1338,7 +1338,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.shouldIncrementUnreadMessageBadge = function () {
-            return (!this.active || this.minimized || !RoomPositionManager.roomIsOpen(this)) && !this.isPublic();
+            return (!this.active || this.minimized || !RoomPositionManager.roomIsOpen(this));// && !this.isPublic();
         };
 
         Room.prototype.messagesOn = function (timestamp) {

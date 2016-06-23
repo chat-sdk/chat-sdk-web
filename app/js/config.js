@@ -120,6 +120,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         clickToChatTimeout: bLastVisitedTimeout,
         clickToChatTimeoutSet: setByDefault,
 
+        userProfileLinkEnabled: false,
+        userProfileLinkEnabledSet: setByDefault,
+
         // We update the config using the data provided
         // but we only update variables where the priority
         // of this setBy entity is higher than the previous
@@ -155,6 +158,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
             this.setValue("marginRight", config, setBy);
 
             this.setValue("friends", config, setBy);
+
+            this.setValue("clickToChatTimeout", config, setBy);
+            this.setValue("userProfileLinkEnabled", config, setBy);
 
             // After we've updated the config we need to digest the
             // root scope

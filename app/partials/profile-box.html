@@ -10,7 +10,10 @@
         <div class="cc-right-margin-5">
             <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.thumbnail }}" />
             <span class="uk-float-left" >
-                <div class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.meta.name }}</div>
+                <div ng-hide="config.userProfileLinkEnabled && currentUser.meta.profileLink.length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.meta.name }}</div>
+                <div ng-show="config.userProfileLinkEnabled && currentUser.meta.profileLink.length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis"><a ng-href="{{ currentUser.meta.profileLink }}" target="_blank">{{ currentUser.meta.name }}</a></div>
                 <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.meta.city }}</div>
             </span>
             <div class="f32 uk-float-right" >

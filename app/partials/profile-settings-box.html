@@ -74,6 +74,14 @@
                            ng-class="validation.city.valid ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
+                    <input class="uk-width-1-1 "
+                           ng-show="config.userProfileLinkEnabled"
+                           type="url"
+                           placeholder="Profile link... i.e. http://yoursite.com"
+                           ng-model="user.meta.profileLink"
+                           ng-class="validation.profileLink.valid ? '' : 'uk-form-danger'"/>
+                </div>
+                <div class="uk-form-row">
                     <ng-include src=" baseURL + 'countries-select.html'"></ng-include>
                 </div>
                 <div class="uk-form-row">
