@@ -16,7 +16,8 @@ myApp.config(['FacebookProvider', function(FacebookProvider) {
 myApp.factory('CloudImage', [function () {
     return {
         // Cloud Image
-        cloudImageToken: 'skbb48',
+        //cloudImageToken: 'skbb48',
+        cloudImageToken: 'ck3mb2jn',
 
         cloudImage: function(url, w, h) {
             return 'http://' + this.cloudImageToken + '.cloudimage.io/s/crop/'+w+'x'+h+'/' + url;
