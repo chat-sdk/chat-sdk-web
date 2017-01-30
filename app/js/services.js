@@ -17,10 +17,10 @@ myApp.factory('CloudImage', [function () {
     return {
         // Cloud Image
         //cloudImageToken: 'skbb48',
-        cloudImageToken: 'ck3mb2jn',
+        cloudImageToken: 'cag084en',
 
         cloudImage: function(url, w, h) {
-            return 'http://' + this.cloudImageToken + '.cloudimage.io/s/crop/'+w+'x'+h+'/' + url;
+            return 'http://' + this.cloudImageToken + '.cloudimg.io/s/crop/'+w+'x'+h+'/' + url;
         }
 
     };

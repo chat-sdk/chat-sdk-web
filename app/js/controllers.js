@@ -27,6 +27,14 @@ myApp.controller('AppController', [
             }
         }
 
+        // Start the config listner to get the current
+        // settings from Firebase
+        API.getAPIDetails().then((function(api) {
+            Config.startConfigListener().then(function () {
+
+            });
+        }).bind(this));
+
         Partials.load();
 
         API.getOnlineUserCount().then(function (count) {
@@ -962,9 +970,6 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                 }
                 else {
 
-                    // Start the config listner to get the current
-                    // settings from Firebase
-                    Config.startConfigListener().then((function () {
 
                         // This allows us to clear the cache remotely
                         LocalStorage.clearCacheWithTimestamp(Config.clearCacheTimestamp);
@@ -984,7 +989,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
                         }, function(error) {
                             $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
                         });
-                    }).bind());
+                   // }).bind());
                 }
 
             }).bind(this), (function (message) {
@@ -1770,8 +1775,8 @@ myApp.controller('UserListController', ['$scope', '$timeout', 'OnlineConnector',
 
 }]);
 
-myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', 'LocalStorage', 'Paths',
-    function($scope, Auth, Config, SoundEffects, Log, LocalStorage, Paths) {
+myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'Log', 'LocalStorage', 'Paths', 'Utils',
+    function($scope, Auth, Config, SoundEffects, Log, LocalStorage, Paths, Utils) {
 
     $scope.ref = null;
     $scope.muted = false;
@@ -1907,7 +1912,7 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         $scope.validation.city.valid = cityValid;
 
         var profileLinkValid = meta.profileLink && meta.profileLink.length >= $scope.validation.profileLink.minChars && meta.profileLink.length <= $scope.validation.profileLink.maxChars;
-        profileLinkValid = $scope.isValidURL(meta.profileLink) || !meta.profileLink.length;
+        profileLinkValid = $scope.isValidURL(meta.profileLink) || !Utils.unORNull(!meta.profileLink) || !meta.profileLink.length;
 
         $scope.validation.profileLink.valid = profileLinkValid;
 
