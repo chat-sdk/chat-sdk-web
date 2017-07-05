@@ -167,7 +167,7 @@ myApp.factory('Parse', ['$http', function ($http) {
 
         uploadFile: function (file) {
 
-            var serverUrl = 'https://api.parse.com/1/files/' + file.name;
+            var serverUrl = 'https://parseapi.back4app.com/1/files/' + file.name;
             return $http({
                 method: "post",
                 headers: {
