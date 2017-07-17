@@ -185,35 +185,6 @@ myApp.factory('Parse', ['$http', function ($http) {
     };
 }]);
 
-myApp.factory('Stats', ['Paths', '$window', '$rootScope', function (Paths, $window, $rootScope) {
-
-    var Stats = {
-
-        ga: null,
-
-        init: function () {
-            return this;
-        },
-
-        recordMessage: function () {
-            $rootScope.$broadcast(bStatsMessageNotification);
-        },
-
-        recordLogin: function () {
-
-            $rootScope.$broadcast(bStatsImpressionNotification);
-
-            Paths.statsRef().child('login').transaction(function (value) {
-                return value + 1;
-            });
-
-        }
-    };
-    return Stats.init();
-}]);
-
-
-
 myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
 
     var Visibility = {
@@ -477,8 +448,8 @@ myApp.factory('PathAnalyser', [function () {
     };
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Presence', 'API', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths', 'Stats',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Presence, API, StateManager, Time, Upgrade, Utils, Paths, Stats) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Presence', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths',
+              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Presence, StateManager, Time, Upgrade, Utils, Paths) {
 
     return {
 
@@ -489,8 +460,6 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
          * @param authUser - the authentication user provided by Firebase
          */
         bindUser: function (authUser) {
-
-            Stats.recordLogin();
 
             var deferred = $q.defer();
 

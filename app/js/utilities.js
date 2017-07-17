@@ -20,12 +20,11 @@ var bRoomDefaultNamePublic = "Public Chat";
 // Are we testing locally?
 var bRootURL = '';
 var bPartialURL = '';
-var bFirebase = 'chatcat';
-//var bFirebase = 'chat-sdk-android-2';
-var bAPIGatewayLevel0 = '//chatcat.io/wp-admin/admin-ajax.php';
-var bAPIRoot = '//dev.chatcatapp.com/api/';
-//var bAPIGatewayLevel1 = bAPIRoot+'chat/plan';
-//var bAPIRoot = 'http://symfony/app_dev.php/api/';
+var bFirebase = 'chat-sdk';
+var bSingleSignOn = false;
+var bCID = 'test';
+var bAds = true;
+
 
 // If we are then set the root URL to nothing
 if(document.location.origin === "http://symfony") {
@@ -81,7 +80,6 @@ var bBlockedPath = 'blocked';
 var bStatePath = 'state';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
-var bStatsPath = "stats";
 var bFlaggedMessagesPath = "flagged";
 
 var bReadKey = 'read';
@@ -158,9 +156,6 @@ var bLogoutNotification = 'bLogoutNotification';
 
 var bStartSocialLoginNotification = 'bStartSocialLoginNotification';
 
-var bStatsImpressionNotification = 'bStatsImpressionNotification';
-var bStatsMessageNotification = 'bStatsMessageNotification';
-
 var bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
 var bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
 
@@ -230,10 +225,6 @@ myApp.factory('Paths', [function () {
             else {
                 return new Firebase(bFirebaseRef);
             }
-        },
-
-        statsRef: function () {
-            return new Firebase(bFirebaseRef).child(bStatsPath).child('august_15').child(this.cid);
         },
 
         usersRef: function () {

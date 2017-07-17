@@ -77,13 +77,6 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         singleSignOnAPILevel: 1,
         singleSignOnAPILevelSet: setByDefault,
 
-        apiLevel: 1,
-        apiLevelSet: setByDefault,
-
-        // TODO: check this
-        maxConcurrent: 20,
-        maxConcurrentSet: setByAdmin,
-
         showAds: true,
         showAdsSet: setByAdmin,
 

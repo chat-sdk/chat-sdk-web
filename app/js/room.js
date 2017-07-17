@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Stats', 'Marquee',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Stats, Marquee) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 
@@ -805,7 +805,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 newRef.setWithPriority(message.meta, Firebase.ServerValue.TIMESTAMP, function (error) {
                     if(!error) {
                         deferred.resolve(null);
-                        Stats.recordMessage();
                     }
                     else {
                         deferred.reject(error);

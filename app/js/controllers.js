@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'API', 'RoomOpenQueue',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, API, RoomOpenQueue) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -27,19 +27,19 @@ myApp.controller('AppController', [
             }
         }
 
+        Paths.setCID(bCID);
+
         // Start the config listner to get the current
         // settings from Firebase
-        API.getAPIDetails().then((function(api) {
-            Config.startConfigListener().then(function () {
+        Config.startConfigListener().then(function () {
 
-            });
-        }).bind(this));
+        });
 
         Partials.load();
 
-        API.getOnlineUserCount().then(function (count) {
-            $scope.totalUserCount = count;
-        });
+        //API.getOnlineUserCount().then(function (count) {
+        //    $scope.totalUserCount = count;
+        //});
 
         // Show the waiting overlay
         $scope.notification = {
@@ -735,8 +735,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'API', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
-    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, API, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
+    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
 
     /**
      * Initialize the login controller
@@ -948,69 +948,30 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         // Write a record to the firebase to record this API key
         $scope.showNotification(bNotificationTypeWaiting, "Opening Chat...");
 
-        API.getAPIDetails().then((function(api) {
-
             // Load friends from config
             if(Config.friends) {
                 FriendsConnector.addFriendsFromSSO(Config.friends);
             }
 
-            console.log("API Key: " + API.meta.cid);
+            // This allows us to clear the cache remotely
+            LocalStorage.clearCacheWithTimestamp(Config.clearCacheTimestamp);
 
-            // Get the number of chatters that are currently online
-            API.getOnlineUserCount().then((function (number) {
-
-//            });
-//            Auth.numberOfChatters().then((function(number) {
-
-                if(number >= api.max) {
-                    $scope.hideNotification();
-                    alert("Sorry the chat server is full! Try again later");
-                    this.logout();
+            Auth.bindUser(userData).then(function() {
+                // We have the user's ID so we can get the user's object
+                if(firstLogin) {
+                    $scope.showProfileSettingsBox();
                 }
                 else {
-
-
-                        // This allows us to clear the cache remotely
-                        LocalStorage.clearCacheWithTimestamp(Config.clearCacheTimestamp);
-
-                        Auth.bindUser(userData).then(function() {
-                            // We have the user's ID so we can get the user's object
-                            if(firstLogin) {
-                                $scope.showProfileSettingsBox();
-                            }
-                            else {
-                                $scope.showMainBox();
-                            }
-
-                            $rootScope.$broadcast(bLoginCompleteNotification);
-                            $scope.hideNotification();
-
-                        }, function(error) {
-                            $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
-                        });
-                   // }).bind());
+                    $scope.showMainBox();
                 }
 
-            }).bind(this), (function (message) {
-
-                // We couldn't connect to Chatcat.io API
-                // Next check to see if they specified an API key
-                console.log(message);
-
-//                this.setError(message);
+                $rootScope.$broadcast(bLoginCompleteNotification);
                 $scope.hideNotification();
 
-                $scope.showErrorBox(message);
+            }, function(error) {
+                $scope.showNotification(bNotificationTypeAlert, 'Login Error', error, 'Ok');
+            });
 
-            }).bind(this));
-
-        }).bind(this), (function (message) {
-            console.log(message);
-            //this.setError(message);
-            $scope.hideNotification();
-            $scope.showErrorBox(message)
-        }).bind(this));
     };
 
     /**
