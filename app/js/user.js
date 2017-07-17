@@ -165,7 +165,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
     };
 
     User.prototype.addRoom = function (room) {
-        return this.addRoomWithRID(room.meta.rid, room.type());
+        return this.addRoomWithRID(room.rid(), room.type());
     };
 
     User.prototype.addRoomWithRID = function (rid, type) {
@@ -197,7 +197,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
     };
 
     User.prototype.removeRoom = function (room) {
-        return this.removeRoomWithRID(room.meta.rid);
+        return this.removeRoomWithRID(room.rid());
     };
 
     User.prototype.removeRoomWithRID = function (rid) {
@@ -242,6 +242,14 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
         }).bind(this));
 
         return deferred.promise;
+    };
+
+    User.prototype.uid = function () {
+        return this.meta.uid;
+    };
+
+    User.prototype.setUID = function (uid) {
+        return this.meta.uid = uid;
     };
 
     User.prototype.removeFriend = function (friend) {

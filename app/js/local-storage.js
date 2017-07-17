@@ -164,7 +164,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
         },
 
         updateRoomFromStore: function (room) {
-            var sr = this.rooms[room.meta.rid];
+            var sr = this.rooms[room.rid()];
             if(sr) {
                 room.deserialize(sr);
             }

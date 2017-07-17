@@ -1146,7 +1146,7 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
 
         $scope.showEmojis = false;
 
-        $scope.room.sendMessage($scope.input.text, user, bMessageTypeText);
+        $scope.room.sendTextMessage($scope.input.text, user, bMessageTypeText);
         $scope.input.text = "";
     };
 

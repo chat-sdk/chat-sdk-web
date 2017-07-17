@@ -191,14 +191,14 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
         },
 
         addRoom: function (room) {
-            if(room && room.meta && room.meta.rid) {
-                this.rooms[room.meta.rid] = room;
+            if(room && room.rid()) {
+                this.rooms[room.rid()] = room;
             }
         },
 
         removeRoom: function (room) {
-            if(room && room.meta && room.meta.rid) {
-                delete this.rooms[room.meta.rid];
+            if(room && room.rid()) {
+                delete this.rooms[room.rid()];
             }
         },
 

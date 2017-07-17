@@ -256,7 +256,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
                         // TODO: Depricated code fix for old customers who didn't have
                         // public room flagged
 //                        if(!room.meta.isPublic && !room.meta.type) {
-//                            var ref = Paths.roomMetaRef(room.meta.rid);
+//                            var ref = Paths.roomMetaRef(room.rid());
 //                            ref.update({type: bRoomTypePublic});
 //                        }
 
@@ -494,7 +494,7 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
                         room.open(-1, 0);
                     }
                     // If the user just created the room...
-                    if(RoomOpenQueue.roomExistsAndPop(room.meta.rid)) {
+                    if(RoomOpenQueue.roomExistsAndPop(room.rid())) {
                         room.open(0, 300);
                     }
                 });

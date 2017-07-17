@@ -20,9 +20,9 @@ var bRoomDefaultNamePublic = "Public Chat";
 // Are we testing locally?
 var bRootURL = '';
 var bPartialURL = '';
-var bFirebase = 'chat-sdk';
+var bFirebase = 'chat-sdk-v4';
 var bSingleSignOn = false;
-var bCID = 'test';
+var bCID = 'firebase_v4_local_3';
 var bAds = true;
 
 
@@ -70,8 +70,8 @@ var bLastVisitedTimeout = 1 * bHour;
 
 // Paths
 var bUsersPath = "users";
-var bUsersMetaPath = "usersMeta";
-var bRoomsPath = "rooms";
+var bUsersMetaPath = "users";
+var bRoomsPath = "threads";
 var bPublicRoomsPath = "public-rooms";
 var bMessagesPath = 'messages';
 var bTypingPath = 'typing';
@@ -81,10 +81,40 @@ var bStatePath = 'state';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
 var bFlaggedMessagesPath = "flagged";
+var bLastMessageAddedDatePath = "last-message-added";
+
+var messageUID = "user-firebase-id";
+//var messageRID = "rid";
+var messageType = "type";
+var messagePayload = "payload";
+var messageTime = "date";
+var messageJSON = "JSON";
+
+// JSON Keys
+var messageText = "text";
+var messageImageURL = "image-url";
+var messageThumbnailURL = "thumbnail-url";
+
+var messageImageWidth = "image-width";
+var messageImageHeight = "image-height";
+
+var userUID = "uid";
+
+var roomCreated = "creation-date";
+var roomRID = "rid";
+var roomUserCreated = "userCreated";
+var roomName = "name";
+var roomInvitesEnabled = "invitesEnabled";
+var roomDescription = "description";
+var roomWeight = "weight";
+var roomType = "type_v4";
+var roomTypeV3 = "type";
+var roomCreatorEntityID = "creator-entity-id";
 
 var bReadKey = 'read';
 
 var bMetaKey = "meta";
+var bDetailsKey = "details";
 var bImageKey = "image";
 var bTimeKey = "time";
 var bUserCountKey = "user-count";
@@ -98,10 +128,18 @@ var bUserStatusMember = 'member';
 //var bUserStatusInvited = 'invited'; // Depricated
 var bUserStatusClosed = 'closed';
 
-var bRoomType1to1 = '1to1';
-var bRoomTypeGroup = 'group';
-var bRoomTypePublic = 'public';
-var bRoomTypeInvalid = 'invalid';
+//var bRoomType1to1 = '1to1';
+//var bRoomTypeGroup = 'group';
+//var bRoomTypePublic = 'public';
+//var bRoomTypeInvalid = 'invalid';
+
+var bRoomTypeInvalid = 0x0;
+var bRoomTypeGroup = 0x1;
+var bRoomType1to1 = 0x2;
+var bRoomTypePublic = 0x4;
+
+var bRoomTypePrivateV3 = 0;
+var bRoomTypePublicV3 = 1;
 
 var bUserAllowInvitesEveryone = 'Everyone';
 var bUserAllowInvitesFriends = 'Friends';
@@ -180,6 +218,7 @@ var bLoginModeAuthenticating = "authenticating";
 var bLoginModeClickToChat = "clickToChat";
 
 var bMessageTypeText = 0;
+var bMessageTypeLocation = 1;
 var bMessageTypeImage = 2;
 
 // Chat width
@@ -314,12 +353,17 @@ myApp.factory('Paths', [function () {
 
         roomMetaRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomMetaRef");
-            return this.roomRef(fid).child(bMetaKey);
+            return this.roomRef(fid).child(bDetailsKey);
         },
 
         roomLastMessageRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
             return this.roomRef(fid).child(bLastMessagePath);
+        },
+
+        roomLastMessageAddedDateRef: function (fid) {
+            if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
+            return this.roomMetaRef(fid).child(bLastMessageAddedDatePath);
         },
 
         roomStateRef: function (fid) {
@@ -417,8 +461,8 @@ myApp.factory('ArrayUtils', [function () {
 
         roomsSortedByMostRecent: function (rooms) {
             rooms.sort(function (a, b) {
-                var at = a.lastMessageMeta ? a.lastMessageMeta.time : a.meta.created;
-                var bt = b.lastMessageMeta ? b.lastMessageMeta.time : b.meta.created;
+                var at = a.lastMessageMeta ? a.lastMessageMeta[messageTime] : a.created();
+                var bt = b.lastMessageMeta ? b.lastMessageMeta[messageTime] : b.created();
 
                 return bt - at;
             });

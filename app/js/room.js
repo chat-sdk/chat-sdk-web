@@ -68,7 +68,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.getRID = function () {
-            return this.meta.rid;
+            return this.rid();
         };
 
         Room.prototype.getUserCreated = function () {
@@ -94,17 +94,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
         };
 
-//        Room.prototype.update = function () {
-//            this.update(false);
-//        };
-
         Room.prototype.updateTyping = function () {
 
             var i = 0;
             var name = null;
             for(var key in this.typing) {
                 if(this.typing.hasOwnProperty(key)) {
-                    if(key == $rootScope.user.meta.uid) {
+                    if(key == $rootScope.user.uid()) {
                         continue;
                     }
                     name = this.typing[key];
@@ -177,7 +173,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             var deferred = $q.defer();
 
-            if(!this.isOn && this.meta && this.meta.rid) {
+            if(!this.isOn && this.rid()) {
                 this.isOn = true;
 
                 var on = (function () {
@@ -198,13 +194,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                 // First get the meta
                 this.metaOn().then((function () {
-
-                    // TODO: depricated
-                    // Fix for old customers
-                    if(!this.meta.isPublic && !this.meta.type) {
-                        var ref = Paths.roomMetaRef(this.meta.rid);
-                        ref.update({type: bRoomTypePublic});
-                    }
 
                     switch (this.type()) {
                         case bRoomType1to1:
@@ -366,8 +355,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             var type = this.calculatedType();
             if(type != this.type()) {
                 // One important thing is that we can't go from group -> 1to1
-                if(this.meta.type != bRoomTypeGroup) {
-                    Room.updateRoomType(this.meta.rid, type);
+                if(this.type() != bRoomTypeGroup) {
+                    Room.updateRoomType(this.rid(), type);
                 }
             }
         };
@@ -410,7 +399,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 roomType: this.type(),
                 message: message.meta,
                 time: Firebase.ServerValue.TIMESTAMP,
-                rid: this.meta.rid
+                rid: this.rid()
             }, (function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -432,7 +421,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             message.flagged = false;
 
-            var ref = Paths.flaggedMessageRef(this.meta.rid, message.mid);
+            var ref = Paths.flaggedMessageRef(this.rid(), message.mid);
             ref.remove((function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -449,8 +438,33 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.isPublic = function () {
             //return this.meta.isPublic;
-            return this.meta.type == bRoomTypePublic
-                || this.meta.isPublic; //TODO: Depricated
+            return this.type() == bRoomTypePublic;
+        };
+
+        Room.prototype.type = function () {
+            return this.metaValue(roomType);
+        };
+
+        Room.prototype.rid = function () {
+            return this.metaValue(roomRID);
+        };
+
+        Room.prototype.metaValue = function (key) {
+            if(this.meta) {
+                return this.meta[key];
+            }
+            return null;
+        };
+
+        Room.prototype.created = function () {
+            return this.metaValue(roomCreated);
+        };
+
+        Room.prototype.setMetaValue = function (key, value) {
+            if(!this.meta) {
+                this.meta = {};
+            }
+            this.meta[key] = value;
         };
 
         /**
@@ -469,8 +483,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         // TODO: #1
         Room.prototype.removeUser = function (user) {
-            var ref = Paths.roomUsersRef(this.meta.rid);
-            ref.child(user.meta.uid).remove();
+            var ref = Paths.roomUsersRef(this.rid());
+            ref.child(user.uid()).remove();
         };
 
         Room.prototype.canInviteUser = function () {
@@ -483,7 +497,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 // Are we the owner?
                 var owner = this.getOwner();
                 if(owner && owner.meta) {
-                    return owner.meta.uid == $rootScope.user.meta.uid;
+                    return owner.uid() == $rootScope.user.uid();
                 }
                 else {
                     return false;
@@ -533,7 +547,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             // This could be called from the UI so it's important
             // to wait until users has been populated
             if(user && user.meta) {
-                return this.getUserInfoWithUID(user.meta.uid);
+                return this.getUserInfoWithUID(user.uid());
             }
             return null;
         };
@@ -549,8 +563,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 if(this.users.hasOwnProperty(key)) {
                     var user = this.users[key];
                     if(user.meta && $rootScope.user && $rootScope.user.meta) {
-                        if(user.meta.uid != $rootScope.user.meta.uid && this.userIsActiveWithUID(user.meta.uid)) {
-                            users[user.meta.uid] = user;
+                        if(user.uid() != $rootScope.user.uid() && this.userIsActiveWithUID(user.uid())) {
+                            users[user.uid()] = user;
                         }
                     }
                 }
@@ -586,7 +600,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 //        };
 
         Room.prototype.containsUser = function (user) {
-            return this.users[user.meta.uid] != null;
+            return this.users[user.uid()] != null;
         };
 
         Room.prototype.acceptInvitation = function () {
@@ -602,8 +616,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 time: Firebase.ServerValue.TIMESTAMP
             };
 
-            var ref = Paths.roomUsersRef(this.meta.rid);
-            ref.child(user.meta.uid).update(data, function (error) {
+            var ref = Paths.roomUsersRef(this.rid());
+            ref.child(user.uid()).update(data, function (error) {
                 if(!error) {
                     deferred.resolve();
                 }
@@ -624,7 +638,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 if(this.usersMeta.hasOwnProperty(key)) {
                     var user = this.usersMeta[key];
                     if($rootScope.user && $rootScope.user.meta) {
-                        if((UserStore.users[user.uid].online || $rootScope.user.meta.uid == user.uid) && this.userIsActiveWithUID(user.uid)) {
+                        if((UserStore.users[user.uid].online || $rootScope.user.uid() == user.uid) && this.userIsActiveWithUID(user.uid)) {
                             i++;
                         }
                     }
@@ -653,93 +667,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }
             }
             for(var i = 0; i < users.length; i++) {
-                if(this.usersMeta[users[i].meta.uid]) {
+                if(this.usersMeta[users[i].meta[userUID]]) {
                     usersInRoom++;
                 }
             }
             return usersInRoom == users.length && usersInRoom == totalUsers;
-//            var totalUsers = 0;
-//            for(var key in this.usersMeta) {
-//                if(this.usersMeta.hasOwnProperty(key)) {
-//                    totalUsers++;
-//                }
-//            }
-//            return totalUsers == usersInRoom;
         };
-
-        /**
-         * This function will return the time in seconds
-         * since a message was posted in the room - if
-         *
-         */
-//        Room.prototype.timeSinceLastMessage = function () {
-//
-//            if(unORNull(this.meta.lastUpdated)) {
-//                return 60 * 60 * 24 * 10;
-//            }
-//            else {
-//                var date =  new Date(this.meta.lastUpdated);
-//                var time = 0;
-//                if(!date.now) {
-//                    time = date.getTime();
-//                }
-//                else {
-//                    time = date.now();
-//                }
-//                return time * 1000;
-//            }
-//
-//        };
-
-        /**
-         * Checks the rooms meta data to see if it
-         * is inactive
-         * Rooms are considered inactive if:
-         * - They've been created more than 3 days ago
-         * - They have no users and no messages have been added in the last day
-         * - They have users but no messages have been added in the last 2 days
-         */
-//        Room.prototype.isInactive = function () {
-//
-//            // If this is a static room then
-//            // we just return
-//            if(!this.meta.userCreated) {
-//                return false;
-//            }
-//
-//            var created = timeSince(this.meta.created);
-//
-//            // This is a room that was created before this patch
-//            // went live - therefore we'll delete it
-//            if(created < 0) {
-//                return true;
-//            }
-//            else {
-//
-//                // If the room was created more than three days
-//                // ago it's a candidate to be deleted
-//                if(created > bDay * 3) {
-//
-//                    var lastUpdated = timeSince(this.meta.lastUpdated);
-//
-//                    // if there are no users check when
-//                    if(this.onlineUserCount() == 0) {
-//
-//                        // Check when the last message was sent
-//                        if(lastUpdated < 0 || lastUpdated > bDay) {
-//                            return true;
-//                        }
-//                    }
-//                    else {
-//                        // Check when the last message was sent
-//                        if(lastUpdated < 0 || lastUpdated > bDay * 2) {
-//                            return true;
-//                        }
-//                    }
-//                }
-//            }
-//            return false;
-//        };
 
         /***********************************
          * LAYOUT
@@ -781,21 +714,22 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.sendImageMessage = function (user, url, width, height) {
             // Build the payload
-            this.sendMessage(url+','+url+',W'+width+"&H"+height, user, bMessageTypeImage);
+            var message = Message.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
+            this.sendMessage(message, user);
         };
 
-        Room.prototype.sendMessage = function (text, user, type) {
-
+        Room.prototype.sendTextMessage = function (text, user, type) {
             if(!text || text.length === 0)
                 return;
+            var message = Message.buildMeta(this.rid(), user.uid(), text, type);
+            this.sendMessage(message, user);
+        };
 
-            var innerSendMessage = (function (text, user) {
-
-                // Make the message
-                var message = Message.buildMeta(this.meta.rid, user.meta.uid, text, type);
+        Room.prototype.sendMessage = function (message, user) {
+            var innerSendMessage = (function (message, user) {
 
                 // Get a ref to the room
-                var ref = Paths.roomMessagesRef(this.meta.rid);
+                var ref = Paths.roomMessagesRef(this.rid());
 
                 // Add the message
                 var newRef = ref.push();
@@ -812,7 +746,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 });
 
                 // Now update this room with this data
-                var roomMetaRef = Paths.roomMetaRef(this.meta.rid);
+                var roomMetaRef = Paths.roomMetaRef(this.rid());
 
                 // Last message
                 var p1 = this.setLastMessage(message, user);
@@ -830,13 +764,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             }).bind(this);
 
-            innerSendMessage(text, user).then(function () {
+            innerSendMessage(message, user).then(function () {
 
             }, function (error) {
                 // If there's an error update the state i.e. make sure we're online
                 // and try to resend
                 Presence.update().then(function () {
-                    innerSendMessage(text, user);
+                    innerSendMessage(message.text(), user);
                 });
 
             });
@@ -853,7 +787,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             var lastMessageMeta = message.meta;
             lastMessageMeta['userName'] = user.meta.name;
 
-            var ref = Paths.roomLastMessageRef(this.meta.rid);
+            var ref = Paths.roomLastMessageRef(this.rid());
             ref.set(lastMessageMeta, function (error) {
                 if(!error) {
                     deferred.resolve(null);
@@ -863,7 +797,24 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }
             });
 
-            return deferred.promise;
+            var deferred2 = $q.defer();
+
+            // Also set the last-message-added property
+            var roomMetaRef = Paths.roomMetaRef(this.rid());
+            var data = {};
+            data[bLastMessageAddedDatePath] = Firebase.ServerValue.TIMESTAMP;
+            roomMetaRef.update(data, function (error) {
+                if(!error) {
+                    deferred2.resolve(null);
+                }
+                else {
+                    deferred2.reject(error);
+                }
+            });
+
+            return $q.all([
+                deferred.promise, deferred2.promise
+            ]);
         };
 
         Room.prototype.loadMoreMessages = function (callback, numberOfMessages) {
@@ -878,14 +829,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             // If we already have a message then only listen for new
             // messages
-            if(this.messages.length && this.lastMessage.meta.time) {
+            if(this.messages.length && this.lastMessage.time()) {
 
                 this.loadingMoreMessages = true;
 
                 // Also get the messages from the room
-                var ref = Paths.roomMessagesRef(this.meta.rid).orderByPriority();
+                var ref = Paths.roomMessagesRef(this.rid()).orderByPriority();
 
-                ref = ref.endAt(this.messages[0].meta.time);
+                ref = ref.endAt(this.messages[0].time());
                 ref = ref.limitToLast(numberOfMessages);
 
                 // Store the messages locally
@@ -967,7 +918,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.sortMessageArray = function (messages) {
             messages.sort(function (a, b) {
-                return a.meta.time - b.meta.time;
+                return a.time() - b.time();
             });
         };
 
@@ -993,7 +944,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             // Mark the date when the thread was read
             if(!this.isPublic())
-                $rootScope.user.markRoomReadTime(this.meta.rid);
+                $rootScope.user.markRoomReadTime(this.rid());
 
         };
 
@@ -1028,11 +979,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             var deferred = $q.defer();
 
-            var ref = Paths.roomMetaRef(this.meta.rid);
+            var ref = Paths.roomMetaRef(this.rid());
             ref.update(this.meta, (function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(bMetaKey);
+                    this.entity.updateState(bDetailsKey);
                 }
                 else {
                     deferred.reject(error);
@@ -1053,7 +1004,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             for(var i in this.messages) {
                 if(this.messages.hasOwnProperty(i)) {
                     var m = this.messages[i];
-                    transcript += Time.formatTimestamp(m.meta.time) + " " + m.user.meta.name + ": " + m.meta.text + "\n";
+                    transcript += Time.formatTimestamp(m.time()) + " " + m.user.meta.name + ": " + m.text() + "\n";
                 }
             }
 
@@ -1066,7 +1017,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.startTyping = function (user) {
             // The user is typing...
-            var ref = Paths.roomTypingRef(this.meta.rid).child(user.meta.uid);
+            var ref = Paths.roomTypingRef(this.rid()).child(user.uid());
             ref.set({name: user.meta.name});
 
             // If the user disconnects, tidy up by removing the typing
@@ -1075,7 +1026,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.finishTyping = function (user) {
-            var ref = Paths.roomTypingRef(this.meta.rid).child(user.meta.uid);
+            var ref = Paths.roomTypingRef(this.rid()).child(user.uid());
             ref.remove();
         };
 
@@ -1146,7 +1097,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
          * room meta data
          */
         Room.prototype.metaOn = function () {
-            return this.entity.pathOn(bMetaKey, (function (val) {
+            return this.entity.pathOn(bDetailsKey, (function (val) {
                 if(val) {
                     this.meta = val;
                     this.update();
@@ -1155,32 +1106,32 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.metaOff = function () {
-            this.entity.pathOff(bMetaKey);
+            this.entity.pathOff(bDetailsKey);
         };
 
         Room.prototype.addUserMeta = function (meta) {
             // We only display users who have been active
             // recently
             if(Room.userIsActiveWithInfo(meta)) {
-                this.usersMeta[meta.uid] = meta;
+                this.usersMeta[meta[userUID]] = meta;
 
                 // Add the user object
-                var user = UserStore.getOrCreateUserWithID(meta.uid);
-                this.users[user.meta.uid] = user;
+                var user = UserStore.getOrCreateUserWithID(meta[userUID]);
+                this.users[user.uid()] = user;
 
                 this.update(false);
             }
         };
 
         Room.prototype.removeUserMeta = function (meta) {
-            delete this.usersMeta[meta.uid];
-            delete this.users[meta.uid];
+            delete this.usersMeta[meta[userUID]];
+            delete this.users[meta[userUID]];
             this.update(false);
         };
 
         Room.prototype.usersMetaOn = function () {
 
-            var roomUsersRef = Paths.roomUsersRef(this.meta.rid);
+            var roomUsersRef = Paths.roomUsersRef(this.rid());
 
             roomUsersRef.on('child_added', (function (snapshot) {
                 if(snapshot.val() && snapshot.val().uid) {
@@ -1196,14 +1147,14 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.usersMetaOff = function () {
-            Paths.roomUsersRef(this.meta.rid).off();
+            Paths.roomUsersRef(this.rid()).off();
         };
 
         Room.prototype.userDeletedDate = function () {
 
             var deferred = $q.defer();
 
-            var ref = Paths.roomUsersRef(this.meta.rid).child($rootScope.user.meta.uid);
+            var ref = Paths.roomUsersRef(this.rid()).child($rootScope.user.uid());
             ref.once('value',function (snapshot) {
                 var val = snapshot.val();
                 if(val && val.status == bUserStatusClosed) {
@@ -1226,7 +1177,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
         Room.prototype.addMessageMeta = function (mid, val, serialization, silent) {
 
-            if(!val || !val.text || val.text.length === 0) {
+            if(!val || !val[messagePayload] || val[messagePayload].length === 0) {
                 return false;
             }
 
@@ -1252,7 +1203,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
 
             // Change the page title
-            Marquee.startWithMessage(message.user.meta.name + ': ' + message.meta.text);
+            Marquee.startWithMessage(message.user.meta.name + ': ' + message.text());
             //$window.document.title = message.meta.text + "...";
 
             // Add the message to this room
@@ -1271,16 +1222,6 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     // - User 1 (name hidden)
                     // - User 1
                     lastMessage.hideName = lastMessage.shouldHideUser(message);
-                    //lastMessage.hideName = message.meta.uid == lastMessage.meta.uid;
-
-                    // Last message date
-                    //var lastDate = new Date(lastMessage.meta.time);
-                    //var newDate = new Date(message.meta.time);
-
-                    // If messages have the same day, hour and minute
-                    // hide the time
-
-                    //lastMessage.hideTime = lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
 
                     lastMessage.hideTime = lastMessage.shouldHideDate(message);
 
@@ -1302,7 +1243,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
 
             // If the room is inactive or minimized increase the badge
-            if(this.shouldIncrementUnreadMessageBadge() && !message.read && (message.meta.time > this.readTimestamp || !this.readTimestamp)) {
+            if(this.shouldIncrementUnreadMessageBadge() && !message.read && (message.time() > this.readTimestamp || !this.readTimestamp)) {
 
                 if(!this.unreadMessages) {
                     this.unreadMessages  = [];
@@ -1323,7 +1264,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.updateUnreadMessageCounter = function (messageMeta) {
-            if(this.shouldIncrementUnreadMessageBadge() && (messageMeta.time > this.readTimestamp || !this.readTimestamp)) {
+            if(this.shouldIncrementUnreadMessageBadge() && (messageMeta[messageTime] > this.readTimestamp || !this.readTimestamp)) {
                 // If this is the first badge then this.badge will
                 // undefined - so set it to one
                 if (!this.badge) {
@@ -1343,20 +1284,20 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         Room.prototype.messagesOn = function (timestamp) {
 
             // Make sure the room is valid
-            if(this.messagesAreOn || !this.meta || !this.meta.rid) {
+            if(this.messagesAreOn || !this.rid()) {
                 return;
             }
             this.messagesAreOn = true;
 
             // Also get the messages from the room
-            var ref = Paths.roomMessagesRef(this.meta.rid);
+            var ref = Paths.roomMessagesRef(this.rid());
 
             var startDate = timestamp;
             if(Utils.unORNull(startDate)) {
                 // If we already have a message then only listen for new
                 // messages
-                if(this.lastMessage && this.lastMessage.meta.time) {
-                    startDate = this.lastMessage.meta.time + 1;
+                if(this.lastMessage && this.lastMessage.time()) {
+                    startDate = this.lastMessage.time() + 1;
                 }
             }
             else {
@@ -1373,7 +1314,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             // Add listen to messages added to this thread
             ref.on('child_added', (function (snapshot) {
 
-                if(Cache.isBlockedUser(snapshot.val().uid)) {
+                if(Cache.isBlockedUser(snapshot.val()[messageUID])) {
                     return;
                 }
 
@@ -1388,9 +1329,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                         if (Visibility.getIsHidden()) {
                             // Only make a sound for messages that were recieved less than
                             // 30 seconds ago
-                            if (DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val().time);
+                            if (DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val()[messageTime]);
                             if (DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
-                            if (Math.abs(Time.now() - snapshot.val().time) / 1000 < 30) {
+                            if (Math.abs(Time.now() - snapshot.val()[messageTime]) / 1000 < 30) {
                                 SoundEffects.messageReceived();
                             }
                         }
@@ -1433,15 +1374,15 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.messagesAreOn = false;
 
             // Get the room meta data
-            if(this.meta && this.meta.rid) {
-                Paths.roomMessagesRef(this.meta.rid).off();
+            if(this.rid()) {
+                Paths.roomMessagesRef(this.rid()).off();
             }
         };
 
         Room.prototype.typingOn = function () {
 
             // Handle typing
-            var ref = Paths.roomTypingRef(this.meta.rid);
+            var ref = Paths.roomTypingRef(this.rid());
 
             ref.on('child_added', (function (snapshot) {
                 this.typing[snapshot.key()] = snapshot.val().name;
@@ -1464,11 +1405,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.typingOff = function () {
-            Paths.roomTypingRef(this.meta.rid).off();
+            Paths.roomTypingRef(this.rid()).off();
         };
 
         Room.prototype.lastMessageOn = function () {
-            var lastMessageRef = Paths.roomLastMessageRef(this.meta.rid);
+            var lastMessageRef = Paths.roomLastMessageRef(this.rid());
             lastMessageRef.on('value', (function (snapshot) {
                 if(snapshot.val()) {
 
@@ -1476,7 +1417,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
                     // If the message comes in then we should make sure
                     // the room is undeleted
-                    if(!Cache.isBlockedUser(this.lastMessageMeta.uid)) {
+                    if(!Cache.isBlockedUser(this.lastMessageMeta[messageUID])) {
                         if(this.deleted) {
                             this.deleted = false;
                             $rootScope.$broadcast(bRoomAddedNotification, this);
@@ -1491,53 +1432,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         };
 
         Room.prototype.lastMessageOff = function () {
-            Paths.roomLastMessageRef(this.meta.rid).off();
+            Paths.roomLastMessageRef(this.rid()).off();
         };
-
-//        Room.prototype.increaseUserCount = function () {
-//            var metaRef = Paths.roomMetaRef(this.meta.rid).child(bUserCountKey);
-//            metaRef.transaction(function(value) {
-//                return value + 1;
-//            });
-//        };
-//
-//        Room.prototype.decreaseUserCount = function () {
-//            var metaRef = Paths.roomMetaRef(this.meta.rid).child(bUserCountKey);
-//            metaRef.transaction(function(value) {
-//                return MAX(value - 1, 0);
-//            });
-//        };
-
-        /**
-         * If this public room doesn't already exist
-         * add it to the list of public rooms
-         * @returns {promise}
-         */
-//        Room.prototype.addToPublicRooms = function () {
-//
-//            var deferred = $q.defer();
-//
-//            // Does this room already exist?
-//            var ref = Paths.publicRoomRef(this.getRID());
-//            ref.once('value', (function(snapshot) {
-//                if(!snapshot.val()) {
-//                    ref.set({
-//                        rid: this.meta.rid,
-//                        created: Firebase.ServerValue.TIMESTAMP,
-//                        userCreated: this.getUserCreated()
-//                    }, function (error) {
-//                        if(!error) {
-//                            deferred.resolve();
-//                        }
-//                        else {
-//                            deferred.reject(error);
-//                        }
-//                    });
-//                }
-//            }).bind(this));
-//
-//            return deferred.promise;
-//        };
 
         /**
          * Remove a public room
@@ -1591,6 +1487,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 rid = Paths.roomsRef().push().key();
             }
             var roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
+            roomMeta[roomCreatorEntityID] = $rootScope.user.uid();
 
             var roomMetaRef = Paths.roomMetaRef(rid);
 
@@ -1607,11 +1504,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     if(type == bRoomTypePublic) {
                         var ref = Paths.publicRoomRef(rid);
 
-                        var data = {
-                            rid: rid,
-                            created: Firebase.ServerValue.TIMESTAMP,
-                            userCreated: true
-                        };
+                        var data = {};
+
+                        data[roomCreated] = Firebase.ServerValue.TIMESTAMP;
+                        data[roomRID] = rid;
+                        data[roomUserCreated] = true;
 
                         ref.set(data, (function (error) {
                             if(!error) {
@@ -1627,7 +1524,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                     }
                 }
 
-                Entity.updateState(bRoomsPath, rid, bMetaKey);
+                Entity.updateState(bRoomsPath, rid, bDetailsKey);
 
             }).bind(this));
 
@@ -1704,11 +1601,11 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 return deferred.promise;
             }
 
-            var ref = Paths.roomUsersRef(room.meta.rid).child(user.meta.uid);
+            var ref = Paths.roomUsersRef(room.rid()).child(user.uid());
 
             var data = {
                 status: status,
-                uid: user.meta.uid,
+                uid: user.uid(),
                 time: Firebase.ServerValue.TIMESTAMP
             };
 
@@ -1733,13 +1630,13 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             var data = {
                 status: status,
-                uid: user.meta.uid,
+                uid: user.uid(),
                 time: Firebase.ServerValue.TIMESTAMP
             };
 
             var d1 = $q.defer();
 
-            var ref = Paths.roomUsersRef(rid).child(user.meta.uid);
+            var ref = Paths.roomUsersRef(rid).child(user.uid());
             ref.update(data, function (error) {
                 if(!error) {
                     d1.resolve();
@@ -1775,31 +1672,24 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
 
             });
 
-//            user.addRoomWithRID(rid).then(function () {
-//                deferred.resolve();
-//                Entity.updateState(bRoomsPath, rid, bUsersMetaPath);
-//            }, function (error) {
-//
-//            });
-
-            // TRAFFIC
-
             return deferred.promise;
         };
 
         Room.roomMeta = function (rid, name, description, userCreated, invitesEnabled, type, weight) {
-            return {
-                rid: rid ? rid : null,
-                name: name ? name : null,
-                invitesEnabled: !Utils.unORNull(invitesEnabled) ? invitesEnabled : true,
-                description: description ? description : null,
-                userCreated: !Utils.unORNull(userCreated) ? userCreated : true,
-                // TODO: Depricated
-                isPublic: !Utils.unORNull(type) ? type == bRoomTypePublic : false,
-                created: Firebase.ServerValue.TIMESTAMP,
-                weight: weight ? weight : 0,
-                type: type
-            }
+
+            var m = {};
+            m[roomRID] = rid ? rid : null;
+            m[roomName] = name ? name : null;
+            m[roomInvitesEnabled] = !Utils.unORNull(invitesEnabled) ? invitesEnabled : true;
+            m[roomDescription] = description ? description : null;
+            m[roomUserCreated] = !Utils.unORNull(userCreated) ? userCreated : true;
+            m[roomCreated] = Firebase.ServerValue.TIMESTAMP;
+            m[roomWeight] = weight ? weight : 0;
+            m[roomType] = type;
+            // A fix for legacy v3 users
+            m[roomTypeV3] = type == bRoomTypePublic ? bRoomTypePublicV3 : bRoomTypePrivateV3;
+
+            return m;
         };
 
         Room.userIsActiveWithInfo = function (info) {

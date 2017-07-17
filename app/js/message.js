@@ -10,6 +10,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
         var bMessageSideRight = 'right';
         var bMessageSideLeft = 'left';
 
+
         function Message(mid, meta) {
 
             this.mid = mid;
@@ -25,35 +26,35 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
 
             if(meta) {
 
-                if(!meta.type) {
-                    meta.type = bMessageTypeText;
+                if(!this.type()) {
+                    this.setType(bMessageTypeText);
                 }
 
-                if(meta.type == bMessageTypeImage) {
+                if(this.type() == bMessageTypeImage) {
                     // Get the image and thumbnail URLs
-                    var parts = meta.text.split(',');
-                    if(parts.length >= 3) {
-                        var url = parts[0];
-                        this.thumbnailURL = CloudImage.cloudImage(url, 200, 200);
-                        this.imageURL = url;
+                    var json = JSON.parse(meta[messageJSON]);
+
+                    if(json) {
+                        this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
+                        this.imageURL = json[messageImageURL];
                     }
                 }
 
                 // Our messages are on the right - other user's messages are
                 // on the left
-                this.side = this.meta.uid == $rootScope.user.meta.uid ? bMessageSideRight : bMessageSideLeft;
+                this.side = this.uid() == $rootScope.user.uid() ? bMessageSideRight : bMessageSideLeft;
 
-                this.timeString = Time.formatTimestamp(meta.time, Config.clockType);
+                this.timeString = Time.formatTimestamp(this.time(), Config.clockType);
 
                 // Set the user
-                if(this.meta.uid) {
+                if(this.uid()) {
 
                     // We need to set the user here
-                    if(this.meta.uid == $rootScope.user.meta.uid) {
+                    if(this.uid() == $rootScope.user.meta.uid) {
                         this.user = $rootScope.user;
                     }
                     else {
-                        this.user = UserStore.getOrCreateUserWithID(this.meta.uid);
+                        this.user = UserStore.getOrCreateUserWithID(this.uid());
                     }
                 }
             }
@@ -82,36 +83,105 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
             },
 
             shouldHideUser: function (nextMessage) {
-                return this.meta.uid == nextMessage.meta.uid;
+                return this.uid() == nextMessage.uid();
             },
 
             shouldHideDate: function (nextMessage) {
                 // Last message date
-                var lastDate = new Date(nextMessage.meta.time);
-                var newDate = new Date(this.meta.time);
+                var lastDate = new Date(nextMessage.time());
+                var newDate = new Date(this.time());
 
                 // If messages have the same day, hour and minute
                 // hide the time
                 return lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+            },
+
+            setTime: function (time) {
+                this.setMetaValue(messageTime, time);
+            },
+
+            time: function () {
+                return this.metaValue(messageTime);
+            },
+
+            setText: function (text) {
+                this.setMetaValue(messagePayload, text);
+            },
+
+            text: function() {
+                return this.metaValue(messagePayload);
+            },
+
+            type: function () {
+                return this.metaValue(messageType);
+            },
+
+            setType: function (type) {
+                this.setMetaValue(messageType, type);
+            },
+
+            uid: function () {
+                return this.metaValue(messageUID);
+            },
+
+            setUID: function (uid) {
+                this.setMetaValue(messageUID, uid);
+            },
+
+            metaValue: function (key) {
+                if(this.meta) {
+                    return this.meta[key];
+                }
+                return null;
+            },
+
+            setMetaValue: function (key, value) {
+                if(!this.meta) {
+                    this.meta = {};
+                }
+                this.meta[key] = value;
             }
+
 
         };
 
         // Static methods
+        Message.buildImageMeta = function (rid, uid, imageURL, thumbnailURL, width, height) {
+
+            var text = url+','+url+',W'+width+"&H"+height;
+
+            var m = Message.buildMeta(rid, uid, text, bMessageTypeImage);
+
+            var json = {};
+
+            json[messageText] = text;
+            json[messageImageURL] = imageURL;
+            json[messageThumbnailURL] = thumbnailURL;
+            json[messageImageWidth] = width;
+            json[messageImageHeight] = height;
+
+            m.meta[messageJSON] = JSON.stringify(json);
+
+            return m;
+        };
 
         Message.buildMeta = function (rid, uid, text, type) {
-
-            //text = text + "\r\n" + text;
-
-            return {
-                meta: {
-                    rid: rid,
-                    uid: uid,
-                    time: Firebase.ServerValue.TIMESTAMP,
-                    text: text,
-                    type: type
-                }
+            var m = {
+                meta: {}
             };
+
+            m.meta[messageUID] = uid;
+            m.meta[messagePayload] = text;
+            m.meta[messageJSON] = {};
+
+            var json = {};
+            json[messageText] = text;
+
+            m.meta[messageJSON] = JSON.stringify(json);
+            m.meta[messageType] = type;
+            m.meta[messageTime] = Firebase.ServerValue.TIMESTAMP;
+
+            return m;
         };
 
         return Message;
