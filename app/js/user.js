@@ -45,7 +45,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
                 this.meta = val;
 
                 // Update the user's thumbnail
-                this.setImage(this.meta.image);
+                this.setImage(this.imageURL());
 
                 // Here we want to update the
                 // - Main box
@@ -114,45 +114,27 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
 
     User.prototype.updateImageURL = function (imageURL) {
         // Compare to the old URL
-        var imageChanged = imageURL != this.meta.image;
+        var imageChanged = imageURL != this.imageURL();
         if(imageChanged) {
-            this.meta.image = imageURL;
+            this.setMetaValue(userImageURL, imageURL);
+            this.setImageURL(imageURL);
             this.setImage(imageURL, false);
             this.pushMeta();
         }
     };
 
-    User.prototype.migrateFromOldImageSystem = function () {
-        var imageRef = Paths.userImageRef(this.meta.uid);
-        imageRef.once('value', (function (snapshot) {
-            var image = null;
-            if(snapshot.value) {
-                var imageURL = snapshot.value['image'];
-                if(imageURL) {
-                    var parts = imageURL.split('http://');
-                    if(parts.length > 1 && parts[1].length) {
-                        image = 'http://' + parts[1];
-                    }
-                }
-            }
-            this.setImage(image ? image : bDefaultProfileImage);
-
-        }).bind(this));
-    };
-
     User.prototype.setImage = function (image, isData) {
-        if(!image) {
-            this.migrateFromOldImageSystem();
+        if(image === undefined) {
+            // TODO: Improve this
+            this.image = "http:" + $rootScope.img_30_profile_pic;
+        }
+        else if(isData || image == bDefaultProfileImage) {
+            this.image = image;
+            this.thumbnail = image;
         }
         else {
-            if(isData || image == bDefaultProfileImage) {
-                this.image = image;
-                this.thumbnail = image;
-            }
-            else {
-                this.image = CloudImage.cloudImage(image, 100, 100);
-                this.thumbnail = CloudImage.cloudImage(image, 30, 30);
-            }
+            this.image = CloudImage.cloudImage(image, 100, 100);
+            this.thumbnail = CloudImage.cloudImage(image, 30, 30);
         }
     };
 
@@ -175,7 +157,6 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
         var ref = Paths.userRoomsRef(this.meta.uid).child(rid);
 
         var data = {
-            rid: rid,
             invitedBy: $rootScope.user.meta.uid
         };
 
@@ -285,7 +266,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
         var ref = Paths.userRoomsRef(this.meta.uid).child(rid);
 
         var data = {};
-        data[bReadKey] = Firebase.ServerValue.TIMESTAMP;
+        data[bReadKey] = firebase.database.ServerValue.TIMESTAMP;
 
         ref.update(data, function (error) {
             if(!error) {
@@ -325,10 +306,33 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
             this.entity.deserialize(su._super);
             this.meta = su.meta;
             //this.setThumbnail(su.thumbnail);
-            this.setImage(su.meta.image);
+            this.setImage(su.meta[userImageURL]);
         }
     };
 
-    return User;
+    User.prototype.setImageURL = function(imageURL) {
+        this.setMetaValue(userImageURL, imageURL);
+    };
+
+    User.prototype.imageURL = function() {
+        return this.metaValue(userImageURL);
+    };
+
+    User.prototype.metaValue = function (key) {
+        if(this.meta) {
+            return this.meta[key];
+        }
+        return null;
+    };
+
+    User.prototype.setMetaValue = function (key, value) {
+        if(!this.meta) {
+            this.meta = {};
+        }
+        this.meta[key] = value;
+    };
+
+
+        return User;
 
 }]);

@@ -30,14 +30,12 @@
             </div>
             <!--We need to subtract 10 for the padding -->
             <div class="cc-last-message cc-ellipsis" ng-style="{'width': boxWidth - 20 }">
-                <div ng-show="room.lastMessageMeta.userName && room.lastMessageMeta.text">
+                <div ng-show="room.lastMessageUserName() && room.lastMessageText()">
                     <div class="uk-float-left cc-ellipsis cc-title cc-pointer" >
-                        {{ room.lastMessageMeta.userName }}:
+                        {{ room.lastMessageUserName() }}:
                         &nbsp;
                     </div>
-                    <div ng-show="!room.lastMessageMeta || room.lastMessageMeta.type == messageTypeText" class="cc-ellipsis cc-pointer cc-message" ng-bind-html="room.lastMessageMeta.text | linky: '_blank' | emoji">
-                    </div>
-                    <div ng-show="room.lastMessageMeta.type == messageTypeImage" class="cc-ellipsis cc-pointer cc-message">Image Message</div>
+                    <div class="cc-ellipsis cc-pointer cc-message" ng-bind-html="room.lastMessageText() | linky: '_blank' | emoji">
                 </div>
             </div>
         </td>

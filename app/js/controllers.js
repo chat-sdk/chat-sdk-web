@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Parse', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Parse, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue', 'NetworkManager',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue, NetworkManager) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -103,6 +103,7 @@ myApp.controller('AppController', [
         $rootScope.img_30_shutdown = bImagesURL + 'cc-30-shutdown_on.png';
         $rootScope.img_30_shutdown_on = bImagesURL + 'cc-30-shutdown.png';
         $rootScope.img_30_plus = bImagesURL + 'cc-30-plus.png';
+        $rootScope.img_30_profile_pic = bImagesURL + 'cc-30-profile-pic.png';
         $rootScope.img_30_gear = bImagesURL + 'cc-30-gear.png';
         $rootScope.img_loader = bImagesURL + 'loader.gif';
         $rootScope.img_20_user = bImagesURL + 'cc-20-user.png';
@@ -136,7 +137,6 @@ myApp.controller('AppController', [
     };
 
     $scope.showLoginBox = function (mode) {
-//        Paths.firebase().unauth();
         $rootScope.loginMode = mode ? mode : Authentication.mode;
         $scope.activeBox = bLoginBox;
         $timeout(function() {
@@ -400,7 +400,7 @@ myApp.controller('AppController', [
 
         LocalStorage.clearToken();
 
-        Paths.firebase().unauth();
+        Authentication.logout();
 
         $timeout(function () {
             $rootScope.$digest();
@@ -455,16 +455,20 @@ myApp.controller('AppController', [
         }
 
         if($files.length > 0) {
-            Parse.uploadFile($files[0]).then((function(r) {
-
-                if(r.data && r.data.url) {
-
-                    $scope.getUser().updateImageURL(r.data.url);
-                }
-
-            }).bind(this), (function (error) {
-
+            NetworkManager.upload.uploadFile($files[0]).then((function (path) {
+                $scope.getUser().updateImageURL(path);
             }).bind(this));
+
+            //Parse.uploadFile($files[0]).then((function(r) {
+            //
+            //    if(r.data && r.data.url) {
+            //
+            //        $scope.getUser().updateImageURL(r.data.url);
+            //    }
+            //
+            //}).bind(this), (function (error) {
+            //
+            //}).bind(this));
         }
 
         var reader = new FileReader();
@@ -735,8 +739,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication',
-    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication', 'Credential',
+    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication, Credential) {
 
     /**
      * Initialize the login controller
@@ -761,16 +765,32 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         LocalStorage.setLastVisited();
         $scope.showLoginBox(bLoginModeAuthenticating);
 
-        Authentication.startAuthListener().then(function(authData) {
-            Authentication.setAuthListener($scope.handleAuthData);
-            $scope.handleAuthData(authData);
-        }, function (error) {
-            Authentication.setAuthListener($scope.handleAuthData);
-            //$scope.logout();
-            //$scope.hideNotification();
+        if(Authentication.isAuthenticated()) {
+            $scope.handleAuthData(firebase.auth().currentUser);
+        }
+        else {
             $scope.showLoginBox();
-            console.log(error);
+        }
+
+        firebase.auth().onAuthStateChanged(function(user) {
+            if(user) {
+                $scope.handleAuthData(user);
+            }
+            else {
+                $scope.showLoginBox();
+            }
         });
+
+        //Authentication.startAuthListener().then(function(authData) {
+        //    Authentication.setAuthListener($scope.handleAuthData);
+        //    $scope.handleAuthData(authData);
+        //}, function (error) {
+        //    Authentication.setAuthListener($scope.handleAuthData);
+        //    //$scope.logout();
+        //    //$scope.hideNotification();
+        //    $scope.showLoginBox();
+        //    console.log(error);
+        //});
     };
 
     $scope.handleAuthData = function (authData) {
@@ -793,21 +813,37 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
     };
 
     $scope.loginWithPassword = function () {
-        $scope.login('password', {
-                email:$scope.email,
-                password:$scope.password,
-                rememberMe: $scope.rememberMe ? "default" : "sessionOnly"
-            }
-        );
+        $scope.login(new Credential().emailAndPassword($scope.email, $scope.password));
     };
 
-    /**
+    $scope.loginWithFacebook = function () {
+        $scope.login(new Credential().facebook());
+    };
+
+    $scope.loginWithTwitter = function () {
+        $scope.login(new Credential().twitter());
+    };
+
+    $scope.loginWithGoogle = function () {
+        $scope.login(new Credential().google());
+    };
+
+    $scope.loginWithGithub = function () {
+        $scope.login(new Credential().github());
+    };
+
+    $scope.loginWithAnonymous = function () {
+        $scope.login(new Credential().anonymous());
+    };
+
+        /**
      * Log the user in using the appropriate login method
      * @param method - the login method: facebook, twitter etc...
      * @param options - hash of options: remember me etc...
      */
-    $scope.login = function (method, options) {
+    $scope.login = function (credential) {
 
+        // TODO: Move this to a service!
         // Re-establish a connection with Firebase
         Presence.goOnline();
 
@@ -817,90 +853,27 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         // Hide the overlay
         $scope.showNotification(bNotificationTypeWaiting, "Logging in", "For social login make sure to enable popups!");
 
-        var handleResult = function (error) {
-            if(error) {
-                $scope.hideNotification();
-                $scope.handleLoginError(error);
+        Authentication.authenticate(credential).then(function (result) {
 
-                $timeout(function(){
-                    $scope.$digest();
-                });
-            }
-        };
+        }).catch(function (error) {
+            $scope.hideNotification();
+            $scope.handleLoginError(error);
 
-        var ref = Paths.firebase();
-
-        if(method == 'password') {
-            ref.authWithPassword({
-                email    : options.email,
-                password : options.password
-            }, handleResult, {
-                remember: $scope.rememberMe ? "default" : "sessionOnly"
+            $timeout(function(){
+                $scope.$digest();
             });
-        }
-        else if (method == 'anonymous') {
-            ref.authAnonymously(handleResult);
-        }
-        else {
-
-            var scope = null;
-
-            if(method == "facebook") {
-                scope = "email,user_likes";
-            }
-            if(method == "github") {
-                scope = "user,gist";
-            }
-            if(method == "google") {
-                scope = "email";
-            }
-
-            // Remove the listener
-            Authentication.setAuthListener(null);
-
-            $rootScope.$broadcast(bStartSocialLoginNotification, {
-                action: method,
-                path: Paths.firebase().toString(),
-                scope: scope,
-                remember: "sessionOnly"
-            }, function (data) {
-                if(data.authData) {
-                    var ref = Paths.firebase();
-                    ref.authWithCustomToken(data.authData.token, function (error, authData) {
-                        $rootScope.auth = data.authData;
-
-                        // Reinstate the handler
-                        Authentication.setAuthListener($scope.handleAuthData);
-
-                        // Handle the result manually
-                        // We do this because if we handle auth using the callback the provider data
-                        // is null
-                        $scope.handleAuthData(data.authData);
-
-                    });
-                }
-                else {
-                    $scope.showNotification(bNotificationTypeAlert, "Social login failed", "Please try again", "Ok");
-                }
-            });
-        }
+        });
     };
 
     $scope.forgotPassword  = function (email) {
 
-        var ref = Paths.firebase();
-        ref.resetPassword({
-            email : email
-        }, function(error) {
-            if (!error) {
-                $scope.showNotification(bNotificationTypeAlert, "Email sent",
-                    "Instructions have been sent. Please check your Junk folder!", "ok");
-                $scope.setError(null);
-            } else {
-                $scope.handleLoginError(error);
-            }
+        Authentication.resetPasswordByEmail(email).then(function () {
+            $scope.showNotification(bNotificationTypeAlert, "Email sent",
+                "Instructions have been sent. Please check your Junk folder!", "ok");
+            $scope.setError(null);
+        }).catch(function (error) {
+            $scope.handleLoginError(error);
         });
-
     };
 
     /**
@@ -919,20 +892,14 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         // First create the super
 
-        var ref = Paths.firebase();
-        ref.createUser({
-            email: email,
-            password: password
-        }, (function (error) {
-            if(error) {
-                $scope.handleLoginError(error);
-            }
-            else {
-                $scope.email = email;
-                $scope.password = password;
-                $scope.loginWithPassword();
-            }
+        Authentication.signUp(email, password).then((function () {
+            $scope.email = email;
+            $scope.password = password;
+            $scope.loginWithPassword();
+        }).bind(this)).catch((function (error) {
+            $scope.handleLoginError(error);
         }).bind(this));
+
     };
 
     /**
@@ -1017,8 +984,8 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'Parse',
-    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, Parse) {
+myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
+    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
 
     $scope.showEmojis = false;
     //$scope.headerColor = $scope.config.headerColor;
@@ -1109,7 +1076,7 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         }
 
         if($files.length > 0) {
-            Parse.uploadFile(f).then((function(r) {
+            NetworkManager.upload.uploadFile(f).then((function(r) {
                 if(r.data && r.data.url) {
 
                     var reader = new FileReader();

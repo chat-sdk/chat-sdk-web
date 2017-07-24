@@ -19,7 +19,9 @@ var myApp = angular.module('myApp', [
   'myApp.rpm',
   'myApp.utilities',
   'myApp.api',
-  'myApp.config'
+  'myApp.config',
+  'myApp.firebase',
+  'myApp.network'
 
 ]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([

@@ -49,7 +49,7 @@ myApp.factory('FriendsConnector', ['$rootScope', 'User', 'UserStore', 'Paths', '
                 var user = UserStore.getOrCreateUserWithID(uid);
 
                 user.removeFriend = function () {
-                    snapshot.ref().remove();
+                    snapshot.ref.remove();
                 };
                 this.addFriend(user);
             }
@@ -241,7 +241,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
             // Start listening to Firebase
             publicRoomsRef.on('child_added', (function (snapshot) {
 
-                var rid = snapshot.key();
+                var rid = snapshot.key;
                 if(rid) {
                     var room = RoomStore.getOrCreateRoomWithID(rid);
 
@@ -270,7 +270,7 @@ myApp.factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths
 
             publicRoomsRef.on('child_removed', (function (snapshot) {
 
-                var room = RoomStore.getOrCreateRoomWithID(snapshot.key());
+                var room = RoomStore.getOrCreateRoomWithID(snapshot.key);
                 $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
 
 
@@ -363,15 +363,14 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
             var roomsRef = Paths.userRoomsRef(uid);
 
             roomsRef.on('child_added', (function (snapshot) {
-                var room = snapshot.val();
-                if(room && room.rid) {
-                    this.impl_roomAdded(room.rid, room.invitedBy, room.read);
+                if(snapshot.val()) {
+                    this.impl_roomAdded(snapshot.key, snapshot.val().invitedBy);
                 }
 
             }).bind(this));
 
             roomsRef.on('child_removed', (function (snapshot) {
-                var rid = snapshot.key();
+                var rid = snapshot.key;
                 if(rid) {
                     this.impl_roomRemoved(rid);
                 }
@@ -439,7 +438,7 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
                 var user = UserStore.getOrCreateUserWithID(uid);
 
                 user.unblock = function () {
-                    snapshot.ref().remove();
+                    snapshot.ref.remove();
                 };
 
                 Cache.addBlockedUser(user);
@@ -460,7 +459,7 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
          * @param invitedBy
          * @param readTimestamp
          */
-        impl_roomAdded: function (rid, invitedBy, readTimestamp) {
+        impl_roomAdded: function (rid, invitedBy) {
 
             if (rid && invitedBy) {
                 var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
@@ -485,7 +484,6 @@ myApp.factory('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room
 
                 // If you clear the cache without this all the messages
                 // would show up as unread...
-                room.readTimestamp = readTimestamp;
                 room.invitedBy = invitedByUser;
                 room.deleted = false;
 

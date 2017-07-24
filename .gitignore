@@ -3,3 +3,5 @@ app/dist_test
 app/prod_test
 app/dist
 .idea
+app/bower_components
+

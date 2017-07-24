@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.api', []);
 
-myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils', 'SingleSignOn',
-    function ($q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils, SingleSignOn) {
+myApp.factory('Authentication', ['$rootScope','$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils', 'SingleSignOn', 'Credential',
+    function ($rootScope, $q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils, SingleSignOn, Credential) {
         var Authentication = {
 
             mode: bLoginModeSimple,
@@ -14,27 +14,27 @@ myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config',
 
             init: function () {
 
-                // Is there a valid get token in the URL?
-                var pairs = $window.location.search.replace("?", "").split("&");
-                for(var i = 0; i < pairs.length; i++) {
-                    var values = pairs[i].split("=");
-                    if(values.length == 2) {
-                        if(values[0] == "cc_token") {
-                            this.getToken = values[1];
-                            this.mode = bLoginModeToken;
-                            break;
-                        }
-                    }
-                }
-
-                if(!this.getToken) {
-                    // Setup the login and register URLs
-                    var ssoURL = Config.singleSignOnURL;
-                    if(ssoURL && ssoURL.length > 0) {
-                        this.mode = bLoginModeSingleSignOn;
-                    }
-
-                }
+                //// Is there a valid get token in the URL?
+                //var pairs = $window.location.search.replace("?", "").split("&");
+                //for(var i = 0; i < pairs.length; i++) {
+                //    var values = pairs[i].split("=");
+                //    if(values.length == 2) {
+                //        if(values[0] == "cc_token") {
+                //            this.getToken = values[1];
+                //            this.mode = bLoginModeToken;
+                //            break;
+                //        }
+                //    }
+                //}
+                //
+                //if(!this.getToken) {
+                //    // Setup the login and register URLs
+                //    var ssoURL = Config.singleSignOnURL;
+                //    if(ssoURL && ssoURL.length > 0) {
+                //        this.mode = bLoginModeSingleSignOn;
+                //    }
+                //
+                //}
 
                 return this;
             },
@@ -47,121 +47,265 @@ myApp.factory('Authentication', ['$q', '$http', '$window', '$timeout', 'Config',
                 return this.mode == mode;
             },
 
-            startAuthListener: function () {
-
+            authenticate: function (credential) {
                 var deferred = $q.defer();
 
-                var ref = Paths.firebase();
+                var handleSuccess = function (authData) {
+                    Config.setConfig(Config.setByInclude, CC_OPTIONS);
+                    deferred.resolve(authData);
+                };
 
-                var auth = ref.getAuth();
+                var handleError = function (error) {
+                    deferred.reject(error);
+                };
 
-                if(this.modeIs(bLoginModeToken)) {
-                    // This process should result in one of two outcomes
-                    if(auth) {
-                        if(this.getToken != auth.token) {
-                            ref.unauth();
-                            deferred.resolve(this.authenticateWithToken());
-                        }
-                        else {
-                            deferred.resolve(null);
-                        }
-                    }
-                    else {
-                        deferred.resolve(this.authenticateWithToken());
-                    }
+                if(this.isAuthenticated()) {
+                    handleSuccess(firebase.auth().currentUser);
+                    return deferred.promise;
                 }
-                // We always unauth with SSO
-                else if (this.modeIs(bLoginModeSingleSignOn)) {
-                    ref.unauth();
-                    deferred.resolve(this.authenticateWithSSO());
+
+                if(credential.getType() == credential.Email) {
+                    firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword()).then(handleSuccess).catch(handleError);
                 }
-                // We unauth with simple login if the token has a custom provider
+                else if(credential.getType() == credential.Anonymous) {
+                    firebase.auth().signInAnonymously().then(handleSuccess).catch(handleError);
+                }
+                else if(credential.getType() == credential.CustomToken) {
+                    firebase.auth().signInWithCustomToken(credential.getToken()).then(handleSuccess).catch(handleError);
+                }
                 else {
-                    // The user is using simple sign on and they're authenticated
-                    if(auth && auth.provider != bProviderTypeCustom) {
-                        deferred.resolve(auth);
+
+                    var scopes = null;
+                    var provider = null;
+
+                    if(credential.getType() == credential.Facebook) {
+                        provider = new firebase.auth.FacebookAuthProvider();
+                        scopes = "email,user_likes";
                     }
-                    else {
-                        ref.unauth();
-                        deferred.resolve(null);
+                    if(credential.getType() == credential.Github) {
+                        provider = new firebase.auth.GithubAuthProvider();
+                        scopes = "user,gist";
                     }
+                    if(credential.getType() == credential.Google) {
+                        provider = new firebase.auth.GoogleAuthProvider();
+                        scopes = "email";
+                    }
+                    if(credential.getType() == credential.Twitter) {
+                        provider = new firebase.auth.TwitterAuthProvider();
+                    }
+
+                    scopes = scopes.split(',');
+                    for(var scope in scopes) {
+                        if(scopes.hasOwnProperty(scope)) {
+                            provider.addScope(scope);
+                        }
+                    }
+
+                    firebase.auth().signInWithPopup (provider).then(handleSuccess).catch(handleError);
+
+
+                    // Used to log in using a remote partial i.e. if you wanted to log in using one social account
+                    // across multiple domains
+
+                    //$rootScope.$broadcast(bStartSocialLoginNotification, {
+                    //    action: credential.getType(),
+                    //    config: bFirebaseConfig,
+                    //    scope: scope,
+                    //    remember: "sessionOnly"
+                    //}, function (data) {
+                    //    if(data.authData) {
+                    //        firebase.auth().signInWithCustomToken(data.authData.token).then(handleSuccess).catch(handleError);
+                    //    }
+                    //    else {
+                    //        deferred.reject("Social login failed");
+                    //    }
+                    //});
                 }
 
-//            if(auth) {
-//                else {
-//                    deferred.resolve(auth);
-//                    if(callback) {
-//                        callback(auth);
-//                    }
-//                    return deferred.promise;
-//                }
-
-                // If we're using token auth and the token is different
-                // to the one stored then unauth
-                ref.onAuth((function(authData) {
-                    if(this.authListener) {
-                        this.authListener(authData);
-                    }
-                }).bind(this));
-
                 return deferred.promise;
             },
 
-            ssoAttempts: 0,
-            authenticateWithSSO: function () {
-
-                var ref = Paths.firebase();
-                var deferred = $q.defer();
-
-                var retry = (function (deferred, error) {
-                    if(this.ssoAttempts == 0) {
-                        this.ssoAttempts++;
-                        SingleSignOn.invalidate();
-                        deferred.resolve(this.authenticateWithSSO());
-                    }
-                    else {
-                        deferred.reject(error);
-                    }
-                }).bind(this);
-
-                SingleSignOn.authenticate().then((function (data) {
-                    ref.authWithCustomToken(data.token, (function(error, result) {
-                        if(!error) {
-                            result.thirdPartyData = data;
-                            deferred.resolve(result);
-                        }
-                        else {
-                            retry(deferred, error);
-                        }
-                    }).bind(this));
-                }).bind(this), (function (error) {
-                    retry(deferred, error);
-                }).bind(this));
-
-                return deferred.promise;
+            isAuthenticated: function () {
+                return firebase.auth().currentUser != null;
             },
 
-            authenticateWithToken: function () {
+            signUp: function (email, password) {
+                return firebase.auth().createUserWithEmailAndPassword(email, password);
+            },
 
-                var ref = Paths.firebase();
-                var deferred = $q.defer();
+            resetPasswordByEmail: function (email) {
+                return firebase.auth().sendPasswordResetEmail(email);
+            },
 
-                ref.authWithCustomToken(this.getToken, (function(error, result) {
-                    if(!error) {
-                        deferred.resolve(result);
-                    }
-                    else {
-                        deferred.reject(error);
-                    }
-                }).bind(this));
-
-                return deferred.promise;
+            logout: function () {
+                firebase.auth().signOut();
             }
+
+            //startAuthListener: function () {
+            //
+            //    var deferred = $q.defer();
+            //
+            //    var ref = Paths.firebase();
+            //
+            //    var auth = firebase.auth().currentUser;
+            //
+            //    if(this.modeIs(bLoginModeToken)) {
+            //        // This process should result in one of two outcomes
+            //        if(auth) {
+            //            if(this.getToken != auth.token) {
+            //                this.logout();
+            //                deferred.resolve(this.authenticateWithToken());
+            //            }
+            //            else {
+            //                deferred.resolve(null);
+            //            }
+            //        }
+            //        else {
+            //            deferred.resolve(this.authenticateWithToken());
+            //        }
+            //    }
+            //    // We always unauth with SSO
+            //    else if (this.modeIs(bLoginModeSingleSignOn)) {
+            //        this.logout();
+            //        deferred.resolve(this.authenticateWithSSO());
+            //    }
+            //    // We unauth with simple login if the token has a custom provider
+            //    else {
+            //        // The user is using simple sign on and they're authenticated
+            //        if(auth && auth.provider != bProviderTypeCustom) {
+            //            deferred.resolve(auth);
+            //        }
+            //        else {
+            //            this.logout();
+            //            deferred.resolve(null);
+            //        }
+            //    }
+            //
+            //    // If we're using token auth and the token is different
+            //    // to the one stored then unauth
+            //    firebase.auth().onAuthStateChanged((function (authData) {
+            //        if(this.authListener) {
+            //            this.authListener(authData);
+            //        }
+            //    }).bind(this));
+            //
+            //    return deferred.promise;
+            //},
+            //
+            //ssoAttempts: 0,
+            //authenticateWithSSO: function () {
+            //
+            //    var ref = Paths.firebase();
+            //    var deferred = $q.defer();
+            //
+            //    var retry = (function (deferred, error) {
+            //        if(this.ssoAttempts == 0) {
+            //            this.ssoAttempts++;
+            //            SingleSignOn.invalidate();
+            //            deferred.resolve(this.authenticateWithSSO());
+            //        }
+            //        else {
+            //            deferred.reject(error);
+            //        }
+            //    }).bind(this);
+            //
+            //    SingleSignOn.authenticate().then((function (data) {
+            //        firebase.auth().signInWithCustomToken(data.token).then((function (result) {
+            //            result.thirdPartyData = data;
+            //            deferred.resolve(result);
+            //        }).bind(this), (function(error) {
+            //            retry(deferred, error);
+            //        }).bind(this));
+            //    }).bind(this), (function (error) {
+            //        retry(deferred, error);
+            //    }).bind(this));
+            //
+            //    return deferred.promise;
+            //},
+            //
+            //authenticateWithToken: function () {
+            //    // TODO: Test this
+            //    return firebase.auth().signInWithCustomToken(this.getToken);
+            //}
 
         };
         return Authentication.init();
     }
 ]);
+
+myApp.factory('Credential', [
+    function () {
+
+        function Credential () {}
+
+        Credential.prototype = {
+
+            Email: "email",
+            Facebook: "facebook",
+            Twitter: "twitter",
+            Google: "google",
+            Github: "github",
+            Anonymous: "anonymous",
+            CustomToken: "custom",
+
+            emailAndPassword: function(email, password) {
+                this.email = email;
+                this.password = password;
+                this.type = this.Email;
+                return this;
+            },
+
+            facebook: function() {
+                this.type = this.Facebook;
+                return this;
+            },
+
+            twitter: function() {
+                this.type = this.Twitter;
+                return this;
+            },
+
+            google: function() {
+                this.type = this.Google;
+                return this;
+            },
+
+            github: function () {
+                this.type = this.Github;
+                return this;
+            },
+
+            anonymous: function () {
+                this.type = this.Anonymous;
+                return this;
+            },
+
+            customToken: function (token) {
+                this.token = token;
+                this.type = this.CustomToken;
+                return this;
+            },
+
+            getEmail: function () {
+                return this.email;
+            },
+
+            getPassword: function () {
+                return this.password;
+            },
+
+            getToken: function () {
+                return this.token;
+            },
+
+            getType: function () {
+                return this.type;
+            }
+
+        };
+
+        return Credential;
+}]);
 
 myApp.factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStorage', 'Utils',
     function ($rootScope, $q, $http, Config, LocalStorage, Utils) {

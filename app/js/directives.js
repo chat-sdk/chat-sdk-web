@@ -511,7 +511,7 @@ myApp.directive('infiniteScroll', [
                 var top = scrollTop;
                 var bottom = scrollHeight - scrollTop - height;
 
-                if(top < 1) {
+                if(top < 1 && scrollHeight > height) {
                     scope.room.loadMoreMessages(function () {
                         // Set the bottom distance based on the new height
                         elem.scrollTop(elem.prop('scrollHeight') - height - bottom);

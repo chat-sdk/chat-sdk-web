@@ -32,13 +32,13 @@
                     <a class="uk-float-right uk-link uk-link-muted cc-dark " ng-click="forgotPassword(email)" >Forgot Password?</a>
                 </div>
                 <div class="uk-form-row" ng-show="config.socialLoginEnabled">
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" ng-click="login('facebook', {'rememberMe': rememberMe})"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter cc-dark" ng-click="login('twitter', {'rememberMe': rememberMe})"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-github cc-dark" ng-click="login('github', {'rememberMe': rememberMe})"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus cc-dark" ng-click="login('google', {'rememberMe': rememberMe})"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" ng-click="loginWithFacebook()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter cc-dark" ng-click="loginWithTwitter()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-github cc-dark" ng-click="loginWithGithub()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus cc-dark" ng-click="loginWithGoogle()"></a>
                 </div>
                 <div class="uk-form-row" ng-show="config.anonymousLoginEnabled">
-                    <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="login('anonymous')">Anonymous Login</button>
+                    <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="loginWithAnonymous()">Anonymous Login</button>
                 </div>
             </form>
             <form ng-show="loginMode == 'singleSignOn'" class="uk-panel uk-form cc-inner-margin">
@@ -56,7 +56,7 @@
                 Authenticating... <img ng-src="{{ ::img_loader }}" width="26" height="26" />
             </form>
             <form ng-show="loginMode == 'clickToChat'" class="uk-panel uk-form cc-inner-margin">
-                <div class="cc-pointer" ng-click="startChatting()">Click to start chatting!&nbsp;&nbsp;&nbsp;<img ng-class="cc-image-30" ng-src="{{ ::img_30_start_chatting }}" /></div>
+                <div class="cc-pointer" ng-click="startChatting()">Click to start chatting!&nbsp;&nbsp;&nbsp; <img class="cc-image-30" ng-src="{{ ::img_30_start_chatting }}" /></div>
             </form>
             <iframe social-iframe src="https://chatcat.firebaseapp.com/partials/social.html" style="display: none" ></iframe>
         </div>

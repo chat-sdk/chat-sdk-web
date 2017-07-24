@@ -161,30 +161,6 @@ myApp.factory('Partials', ['$http', '$templateCache', function ($http, $template
     };
 }]);
 
-myApp.factory('Parse', ['$http', function ($http) {
-
-    return {
-
-        uploadFile: function (file) {
-
-            var serverUrl = 'https://parseapi.back4app.com/1/files/' + file.name;
-            return $http({
-                method: "post",
-                headers: {
-                    "X-Parse-Application-Id": '4S0kgcgrnuZ9JNzCqyV4I5NXN6z0tdv1aF2fKmzl',
-                    "X-Parse-REST-API-Key": '7SlPyi4eZHSPCuwtol0ftPu5wVfA0Bu6RVckQDRL',
-                    "Content-Type": file.type
-                },
-                url: serverUrl,
-                data: file,
-                processData: false,
-                contentType: false,
-                async:  true
-            });
-        }
-    };
-}]);
-
 myApp.factory('Visibility', ['$rootScope', function ($rootScope) {
 
     var Visibility = {
@@ -283,14 +259,14 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
         },
 
         goOffline: function () {
-            Firebase.goOffline();
+            firebase.database().goOffline();
 //            this.onlineCounterMinusOne().then(function () {
 //
 //            });
         },
 
         goOnline: function () {
-            Firebase.goOnline();
+            firebase.database().goOnline();
             //this.onlineCounterPlusOne();
             this.update();
         },
@@ -310,7 +286,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
 
                         ref.setWithPriority({
                             uid: uid,
-                            time: Firebase.ServerValue.TIMESTAMP
+                            time: firebase.database.ServerValue.TIMESTAMP
                         }, this.user.meta.name, function (error) {
                             if(!error) {
                                 deferred.resolve();
@@ -571,6 +547,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                 // If they don't have a profile picture load it from the social network
                 if(setUserProperty('image', imageURL)) {
+                    user.setImageURL(imageURL);
                     user.setImage(imageURL);
                 }
 
@@ -578,14 +555,14 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 // Get the user's city and country from their IP
                 if(!user.meta.country || !user.meta.city) {
 
-                    $http.post('http://ip-api.com/json').then((function (r) {
+                    $http.get('http://freegeoip.net/json/').then((function (r) {
 
                         var changed = false;
 
                         // The first time the user logs on
                         // try to guess which city and country they're from
                         changed = setUserProperty('city', r.data.city);
-                        changed = changed || setUserProperty('country', r.data.countryCode);
+                        changed = changed || setUserProperty('country', r.data.country_code);
 
                         if(changed) {
                             user.pushMeta();
@@ -600,6 +577,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                     }).bind(this), function (error) {
 
                     });
+
                 }
 
                 if(!angular.equals(user.meta, oldMeta)) {

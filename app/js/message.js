@@ -13,7 +13,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
 
         function Message(mid, meta) {
 
-            this.mid = mid;
+            this.setMID(mid);
             this.meta = meta;
 
             // Which side is the message on? 'left' or 'right'?
@@ -140,6 +140,10 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
                     this.meta = {};
                 }
                 this.meta[key] = value;
+            },
+
+            setMID: function (mid) {
+                this.mid = mid;
             }
 
 
@@ -148,7 +152,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
         // Static methods
         Message.buildImageMeta = function (rid, uid, imageURL, thumbnailURL, width, height) {
 
-            var text = url+','+url+',W'+width+"&H"+height;
+            var text = imageURL+','+imageURL+',W'+width+"&H"+height;
 
             var m = Message.buildMeta(rid, uid, text, bMessageTypeImage);
 
@@ -179,7 +183,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
 
             m.meta[messageJSON] = JSON.stringify(json);
             m.meta[messageType] = type;
-            m.meta[messageTime] = Firebase.ServerValue.TIMESTAMP;
+            m.meta[messageTime] = firebase.database.ServerValue.TIMESTAMP;
 
             return m;
         };

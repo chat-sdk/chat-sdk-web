@@ -107,7 +107,8 @@ gulp.task('scripts', function() {
 //        'app/bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
         'app/bower_components/jquery/dist/jquery.min.js',
 //        'app/bower_components/uikit/dist/js/uikit.min.js',
-        'app/bower_components/angular/angular.min.js',
+        'app/bower_components/angular/angular.js',
+//        'app/bower_components/angular/angular.min.js',
 //         'app/bower_components/angular-cookies/angular-cookies.min.js',
 		'app/bower_components/jquery-cookie/jquery.cookie.js',
         'app/bower_components/angular-file-upload/dist/angular-file-upload.min.js',
@@ -121,7 +122,7 @@ gulp.task('scripts', function() {
         'app/bower_components/angular-sanitize/angular-sanitize.min.js',
         //'app/bower_components/angular-emoji-filter/lib/cc-emoji.js',
         'app/bower_components/pikaday/pikaday.js',
-        'app/bower_components/howler/howler.min.js',
+        'app/bower_components/howler/dist/howler.min.js',
         'app/libs/sha256.js', 
         'app/libs/cc-emoji.js', 
         'app/js/*.js'

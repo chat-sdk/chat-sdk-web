@@ -2,7 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <script src="https://cdn.firebase.com/js/client/2.2.7/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
     <script>
 
         var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
@@ -13,19 +13,44 @@
         eventer(messageEvent,function(e) {
             if (e.data) {
                 var data = JSON.parse(e.data);
-                if(data.path && data.action) {
-                    var ref = new Firebase(data.path);
-                    ref.authWithOAuthPopup(data.action, function(error, authData) {
+                if(data.config && data.action) {
+                    firebase.initializeApp(data.config);
+                    var provider;
+                    if(data.action == "facebook") {
+                        provider = new firebase.auth.FacebookAuthProvider();
+                    }
+                    if(data.action == "twitter") {
+                        provider = new firebase.auth.TwitterAuthProvider();
+                    }
+                    if(data.action == "github") {
+                        provider = new firebase.auth.GithubAuthProvider();
+                    }
+                    if(data.action == "google") {
+                        provider = new firebase.auth.GoogleAuthProvider();
+                    }
+                    var scopes = data.scope.split(',');
+                    for(var scope in scopes) {
+                        if(scopes.hasOwnProperty(scope)) {
+                            provider.addScope(scope);
+                        }
+                    }
+
+                    firebase.auth().signInWithPopup(provider).then(function (authData) {
                         var data = {
                             authData: authData,
+                            error: null,
+                            action: e.data.action,
+                            provider: 'chatcat'
+                        };
+                        window.parent.postMessage(JSON.stringify(data), "*");
+                    }).catch(function (error) {
+                        var data = {
+                            authData: null,
                             error: error,
                             action: e.data.action,
                             provider: 'chatcat'
                         };
                         window.parent.postMessage(JSON.stringify(data), "*");
-                    }, {
-                        remember: data.remember,
-                        scope: data.scope
                     });
                 }
             }
@@ -33,6 +58,6 @@
     </script>
 </head>
 <body>
-Hello
+
 </body>
 </html>

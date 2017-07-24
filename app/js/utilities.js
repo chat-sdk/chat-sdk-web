@@ -22,8 +22,17 @@ var bRootURL = '';
 var bPartialURL = '';
 var bFirebase = 'chat-sdk-v4';
 var bSingleSignOn = false;
-var bCID = 'firebase_v4_local_3';
+var bCID = 'chat_sdk_web';
 var bAds = true;
+
+var bFirebaseConfig = {
+    apiKey: "AIzaSyASm9RYrr3u_Bc22eglk0OtsC2GnnTQp_c",
+    authDomain: "chat-sdk-v4.firebaseapp.com",
+    databaseURL: "https://chat-sdk-v4.firebaseio.com",
+    projectId: "chat-sdk-v4",
+    storageBucket: "chat-sdk-v4.appspot.com",
+    messagingSenderId: "1088435112418"
+};
 
 
 // If we are then set the root URL to nothing
@@ -72,16 +81,21 @@ var bLastVisitedTimeout = 1 * bHour;
 var bUsersPath = "users";
 var bUsersMetaPath = "users";
 var bRoomsPath = "threads";
-var bPublicRoomsPath = "public-rooms";
+var bPublicRoomsPath = "public-threads";
 var bMessagesPath = 'messages';
+var bFlaggedPath = 'flagged';
 var bTypingPath = 'typing';
 var bFriendsPath = 'friends';
 var bBlockedPath = 'blocked';
-var bStatePath = 'state';
+var bUpdatedPath = 'updated';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
 var bFlaggedMessagesPath = "flagged";
 var bLastMessageAddedDatePath = "last-message-added";
+var bCreatorEntityID = "creator-entity-id";
+var bDate = "date";
+var bMessage = "message";
+var bSenderEntityID = "sender-entity-id";
 
 var messageUID = "user-firebase-id";
 //var messageRID = "rid";
@@ -89,6 +103,8 @@ var messageType = "type";
 var messagePayload = "payload";
 var messageTime = "date";
 var messageJSON = "JSON";
+var messageUserName = "userName";
+var messageUserFirebaseID = "user-firebase-id";
 
 // JSON Keys
 var messageText = "text";
@@ -99,6 +115,7 @@ var messageImageWidth = "image-width";
 var messageImageHeight = "image-height";
 
 var userUID = "uid";
+var userImageURL = "pictureURL";
 
 var roomCreated = "creation-date";
 var roomRID = "rid";
@@ -109,7 +126,8 @@ var roomDescription = "description";
 var roomWeight = "weight";
 var roomType = "type_v4";
 var roomTypeV3 = "type";
-var roomCreatorEntityID = "creator-entity-id";
+var roomCreatorEntityID = bCreatorEntityID;
+
 
 var bReadKey = 'read';
 
@@ -250,6 +268,8 @@ myApp.factory('Paths', [function () {
     return {
 
         cid: null,
+        initialized: false,
+        database: null,
 
         setCID: function (cid) {
             if(FIREBASE_REF_DEBUG) console.log("setCID: " + cid);
@@ -257,12 +277,17 @@ myApp.factory('Paths', [function () {
         },
 
         firebase: function () {
+            if(!this.initialized) {
+                firebase.initializeApp(bFirebaseConfig);
+                this.database = firebase.database();
+                this.initialized = true;
+            }
             if(FIREBASE_REF_DEBUG) console.log("firebase");
             if(this.cid) {
-                return new Firebase(bFirebaseRef + this.cid);
+                return this.database.ref(this.cid);
             }
             else {
-                return new Firebase(bFirebaseRef);
+                return this.database.ref();
             }
         },
 
@@ -297,7 +322,7 @@ myApp.factory('Paths', [function () {
 
         userStateRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userStateRef");
-            return this.userRef(fid).child(bStatePath);
+            return this.userRef(fid).child(bUpdatedPath);
         },
 
         userOnlineRef: function (fid) {
@@ -368,7 +393,7 @@ myApp.factory('Paths', [function () {
 
         roomStateRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomStateRef");
-            return this.roomRef(fid).child(bStatePath);
+            return this.roomRef(fid).child(bUpdatedPath);
         },
 
         roomMessagesRef: function (fid) {
@@ -406,8 +431,8 @@ myApp.factory('Paths', [function () {
             return this.firebase().child(bOnlineUserCountKey);
         },
 
-        flaggedMessageRef: function (mid) {
-            return this.firebase().child(bFlaggedMessagesPath).child(mid);
+        flaggedMessageRef: function (tid, mid) {
+            return this.firebase().child(bFlaggedPath).child(bRoomsPath).child(tid).child(bMessagesPath).child(mid);
         }
 
     };

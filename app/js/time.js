@@ -23,7 +23,7 @@ myApp.factory('Time', ['$q', 'Paths', function ($q, Paths) {
             this.working = true;
 
             var ref = Paths.timeRef(uid);
-            ref.set(Firebase.ServerValue.TIMESTAMP, (function (error) {
+            ref.set(firebase.database.ServerValue.TIMESTAMP, (function (error) {
                 this.localTime = new Date().getTime();
                 if(!error) {
                     ref.once('value', (function (snapshot) {

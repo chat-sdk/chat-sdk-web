@@ -98,7 +98,7 @@ myApp.factory('Entity', ['$q', 'Paths', function ($q, Paths) {
         },
 
         stateRef: function (key) {
-            return this.ref().child(bStatePath).child(key);
+            return this.ref().child(bUpdatedPath).child(key);
         },
 
         updateState: function (key) {
@@ -106,7 +106,7 @@ myApp.factory('Entity', ['$q', 'Paths', function ($q, Paths) {
             var deferred = $q.defer();
 
             var ref = this.stateRef(key);
-            ref.set(Firebase.ServerValue.TIMESTAMP, function () {
+            ref.set(firebase.database.ServerValue.TIMESTAMP, function () {
                 deferred.resolve();
             });
 
@@ -135,7 +135,7 @@ myApp.factory('Entity', ['$q', 'Paths', function ($q, Paths) {
     };
 
     Entity.stateRef = function (path, id, key) {
-        return this.ref(path, id).child(bStatePath).child(key);
+        return this.ref(path, id).child(bUpdatedPath).child(key);
     };
 
     Entity.updateState = function (path, id, key) {
@@ -143,7 +143,7 @@ myApp.factory('Entity', ['$q', 'Paths', function ($q, Paths) {
         var deferred = $q.defer();
 
         var ref = this.stateRef(path, id, key);
-        ref.set(Firebase.ServerValue.TIMESTAMP, (function (error) {
+        ref.set(firebase.database.ServerValue.TIMESTAMP, (function (error) {
             if(!error) {
                 deferred.resolve();
             }
