@@ -1,4 +1,4 @@
-<div ng-app="myApp" ><ng-include src=" baseURL + 'chatcat.html'" ng-controller="AppController"></ng-include></div>
+<div ng-app="myApp" ><ng-include src=" partialsURL + 'chatcat.html'" ng-controller="AppController"></ng-include></div>
 <script type="text/javascript">
 
     // Set options here

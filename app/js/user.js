@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.user', ['firebase']);
 
-myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage',
-    function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage) {
+myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment',
+    function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment) {
 
     function User (uid) {
         this.meta =  {
@@ -14,7 +14,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
             description: null,
             city: null,
             country: null,
-            image: bDefaultProfileImage,
+            image: Environment.defaultProfilePictureURL(),
             allowInvites: bUserAllowInvitesEveryone
         };
         //this._id = uid
@@ -128,7 +128,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
             // TODO: Improve this
             this.image = "http:" + $rootScope.img_30_profile_pic;
         }
-        else if(isData || image == bDefaultProfileImage) {
+        else if(isData || image == Environment.defaultProfilePictureURL()) {
             this.image = image;
             this.thumbnail = image;
         }
@@ -143,7 +143,7 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
     };
 
     User.prototype.hasImage = function () {
-        return this.image && this.image != bDefaultProfileImage;
+        return this.image && this.image != Environment.defaultProfilePictureURL;
     };
 
     User.prototype.addRoom = function (room) {

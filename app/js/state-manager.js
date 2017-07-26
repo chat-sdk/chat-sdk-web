@@ -60,7 +60,7 @@ myApp.factory('FriendsConnector', ['$rootScope', 'User', 'UserStore', 'Paths', '
             this.removeFriendWithID(snapshot.val().uid);
         },
 
-        addFriendsFromSSO: function (friends) {
+        addFriendsFromConfig: function (friends) {
             for(var i = 0; i < friends.length; i++) {
                 var uid = friends[i];
 

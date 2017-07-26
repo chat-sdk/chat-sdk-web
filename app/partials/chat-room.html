@@ -34,8 +34,8 @@
         </div>
 
         <div ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" ng-style="{'height': room.height - 30 - 30}" stop-shake>
-            <ng-include ng-controller="UserListController" ng-show="activeTab == 'users'" src="baseURL + 'user-list.html'"></ng-include>
-            <ng-include ng-show="activeTab == 'settings'" src="baseURL + 'chat-settings.html'"></ng-include>
+            <ng-include ng-controller="UserListController" ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></ng-include>
+            <ng-include ng-show="activeTab == 'settings'" src="partialsURL + 'chat-settings.html'"></ng-include>
         </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
@@ -77,7 +77,7 @@
              ng-style="{'height': room.height - 30 - 30 - inputHeight}"
              stop-shake
              disable-drag>
-            <ng-include src="baseURL + 'emojis.html'"></ng-include>
+            <ng-include src="partialsURL + 'emojis.html'"></ng-include>
         </div>
 
         <div class="cc-chat-box-msg" ng-show="activeTab == 'messages'" disable-drag>

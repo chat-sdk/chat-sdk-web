@@ -32,29 +32,29 @@
 
             <div ng-show="on">
 
-                <ng-include ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" baseURL + 'login-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" partialsURL + 'login-box.html'"></ng-include>
 
-                <ng-include ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" baseURL + 'profile-settings-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" baseURL + 'main-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" baseURL + 'create-room-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" partialsURL + 'profile-settings-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" partialsURL + 'main-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" partialsURL + 'create-room-box.html'"></ng-include>
 
-                <ng-include ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" baseURL + 'error-box.html'"></ng-include>
+                <ng-include ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></ng-include>
 
                 <div ng-controller="ChatBarController" >
                     <div ng-repeat="(id, room) in rooms">
                         <div ng-controller="ChatController">
-                            <ng-include ng-init="init(room)" src=" baseURL + 'chat-room.html'"></ng-include>
+                            <ng-include ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></ng-include>
                         </div>
                     </div>
                 </div>
 
-                <ng-include src="baseURL + 'room-list-box.html'"></ng-include>
-                <ng-include src="baseURL + 'profile-box.html'"></ng-include>
+                <ng-include src="partialsURL + 'room-list-box.html'"></ng-include>
+                <ng-include src="partialsURL + 'profile-box.html'"></ng-include>
             </div>
         </div>
 </div>
 
-<iframe stats-iframe src="https://chatcat.firebaseapp.com/partials/stats.html" style="display: none" ></iframe>
+<!--<iframe stats-iframe src="https://chatcat.firebaseapp.com/partials/stats.html" style="display: none" ></iframe>-->
 
 <!--<script type="text/javascript">-->
     <!--var ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");-->

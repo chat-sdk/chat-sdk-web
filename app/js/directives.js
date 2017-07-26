@@ -291,17 +291,17 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPo
     };
 }]);
 
-myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
-    return function (scope, elm, attrs) {
-        $document.mousemove((function (e) {
-            //!elm.is(":hover")
-            if(scope.currentUser && jQuery('#'+elm.attr('id')+':hover').length == 0) {
-                // Keep the center of this box level with the mouse y
-                elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
-            }
-        }).bind(this));
-    };
-}]);
+//myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
+//    return function (scope, elm, attrs) {
+//        $document.mousemove((function (e) {
+//            //!elm.is(":hover")
+//            if(scope.currentUser && jQuery('#'+elm.attr('id')+':hover').length == 0) {
+//                // Keep the center of this box level with the mouse y
+//                elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
+//            }
+//        }).bind(this));
+//    };
+//}]);
 
 myApp.directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', function ($rootScope, $document, $timeout, Screen) {
     return function (scope, elm, attrs) {
@@ -449,8 +449,9 @@ myApp.directive('fitText', function () {
     return function(scope, element, attr) {
 
         element.bind('keyup', function(e) {
-            jQuery(element).height(0);
-            var height = jQuery(element)[0].scrollHeight;
+            //jQuery(element).height(0);
+            //var height = jQuery(element)[0].scrollHeight;
+            var height = element.prop('scrollHeight');
 
             // 8 is for the padding
             if (height < 26) {

@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'angularFileUpload', 'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue', 'NetworkManager',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue, NetworkManager) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', '$upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, $upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -20,14 +20,14 @@ myApp.controller('AppController', [
         // load on this page. We look at the showOnPaths variable
         // in the options
         //CC_OPTIONS.showOnPaths = "*ccwp, *p*";
-        if(CC_OPTIONS && CC_OPTIONS.showOnPaths) {
-            var paths = CC_OPTIONS.showOnPaths;
+        if(Environment.showOnPaths()) {
+            var paths = Environment.showOnPaths();
             if(!PathAnalyser.shouldShowChatOnPath(paths)) {
                 return;
             }
         }
 
-        Paths.setCID(bCID);
+        Paths.setCID(Environment.rootPath());
 
         // Start the config listner to get the current
         // settings from Firebase
@@ -54,7 +54,6 @@ myApp.controller('AppController', [
             $scope.on = true;
         }
 
-        $rootScope.baseURL = bPartialURL;
         $rootScope.websiteName = $window.location.host;
 
         /**
@@ -94,35 +93,35 @@ myApp.controller('AppController', [
      * server
      */
     $scope.setupImages = function () {
-        $rootScope.img_30_minimize = bImagesURL + 'cc-30-minimize.png';
-        $rootScope.img_30_resize = bImagesURL + 'cc-30-resize.png';
-        $rootScope.img_20_cross = bImagesURL + 'cc-20-cross.png';
-        $rootScope.img_30_cross = bImagesURL + 'cc-30-cross.png';
-        $rootScope.img_40_cross = bImagesURL + 'cc-40-cross.png';
-        $rootScope.img_40_tick = bImagesURL + 'cc-40-tick.png';
-        $rootScope.img_30_shutdown = bImagesURL + 'cc-30-shutdown_on.png';
-        $rootScope.img_30_shutdown_on = bImagesURL + 'cc-30-shutdown.png';
-        $rootScope.img_30_plus = bImagesURL + 'cc-30-plus.png';
-        $rootScope.img_30_profile_pic = bImagesURL + 'cc-30-profile-pic.png';
-        $rootScope.img_30_gear = bImagesURL + 'cc-30-gear.png';
-        $rootScope.img_loader = bImagesURL + 'loader.gif';
-        $rootScope.img_20_user = bImagesURL + 'cc-20-user.png';
-        $rootScope.img_20_friend = bImagesURL + 'cc-20-friend.png';
-        $rootScope.img_30_logout = bImagesURL + 'cc-30-logout.png';
-        $rootScope.img_30_emojis = bImagesURL + 'cc-30-emojis.png';
-        $rootScope.img_30_maximize = bImagesURL + 'cc-30-maximize.png';
-        $rootScope.img_30_sound_on = bImagesURL + 'cc-30-sound-on.png';
-        $rootScope.img_30_sound_off = bImagesURL + 'cc-30-sound-off.png';
-        $rootScope.img_30_clear_cache = bImagesURL + 'cc-30-clear-cache.png';
-        $rootScope.img_30_cache_cleared = bImagesURL + 'cc-30-cache-cleared.png';
-        $rootScope.img_24_save = bImagesURL + 'cc-24-save.png';
-        $rootScope.img_24_copy = bImagesURL + 'cc-24-copy.png';
-        $rootScope.img_24_cross = bImagesURL + 'cc-24-cross.png';
-        $rootScope.img_30_image = bImagesURL + 'cc-30-image.png';
-        $rootScope.img_20_flag = bImagesURL + 'cc-20-flag.png';
-        $rootScope.img_20_flagged = bImagesURL + 'cc-20-flagged.png';
-        $rootScope.img_30_powered_by = bImagesURL + 'cc-30-powered-by.png';
-        $rootScope.img_30_start_chatting = bImagesURL + 'cc-30-start-chatting.png';
+        $rootScope.img_30_minimize = Environment.imagesURL() + 'cc-30-minimize.png';
+        $rootScope.img_30_resize = Environment.imagesURL() + 'cc-30-resize.png';
+        $rootScope.img_20_cross = Environment.imagesURL() + 'cc-20-cross.png';
+        $rootScope.img_30_cross = Environment.imagesURL() + 'cc-30-cross.png';
+        $rootScope.img_40_cross = Environment.imagesURL() + 'cc-40-cross.png';
+        $rootScope.img_40_tick = Environment.imagesURL() + 'cc-40-tick.png';
+        $rootScope.img_30_shutdown = Environment.imagesURL() + 'cc-30-shutdown_on.png';
+        $rootScope.img_30_shutdown_on = Environment.imagesURL() + 'cc-30-shutdown.png';
+        $rootScope.img_30_plus = Environment.imagesURL() + 'cc-30-plus.png';
+        $rootScope.img_30_profile_pic = Environment.imagesURL() + 'cc-30-profile-pic.png';
+        $rootScope.img_30_gear = Environment.imagesURL() + 'cc-30-gear.png';
+        $rootScope.img_loader = Environment.imagesURL() + 'loader.gif';
+        $rootScope.img_20_user = Environment.imagesURL() + 'cc-20-user.png';
+        $rootScope.img_20_friend = Environment.imagesURL() + 'cc-20-friend.png';
+        $rootScope.img_30_logout = Environment.imagesURL() + 'cc-30-logout.png';
+        $rootScope.img_30_emojis = Environment.imagesURL() + 'cc-30-emojis.png';
+        $rootScope.img_30_maximize = Environment.imagesURL() + 'cc-30-maximize.png';
+        $rootScope.img_30_sound_on = Environment.imagesURL() + 'cc-30-sound-on.png';
+        $rootScope.img_30_sound_off = Environment.imagesURL() + 'cc-30-sound-off.png';
+        $rootScope.img_30_clear_cache = Environment.imagesURL() + 'cc-30-clear-cache.png';
+        $rootScope.img_30_cache_cleared = Environment.imagesURL() + 'cc-30-cache-cleared.png';
+        $rootScope.img_24_save = Environment.imagesURL() + 'cc-24-save.png';
+        $rootScope.img_24_copy = Environment.imagesURL() + 'cc-24-copy.png';
+        $rootScope.img_24_cross = Environment.imagesURL() + 'cc-24-cross.png';
+        $rootScope.img_30_image = Environment.imagesURL() + 'cc-30-image.png';
+        $rootScope.img_20_flag = Environment.imagesURL() + 'cc-20-flag.png';
+        $rootScope.img_20_flagged = Environment.imagesURL() + 'cc-20-flagged.png';
+        $rootScope.img_30_powered_by = Environment.imagesURL() + 'cc-30-powered-by.png';
+        $rootScope.img_30_start_chatting = Environment.imagesURL() + 'cc-30-start-chatting.png';
     };
 
     $scope.getUser = function () {
@@ -588,28 +587,9 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
 
         // Work out how many tabs there are
         $scope.$on(bConfigUpdatedNotification, function () {
-
-            $scope.usersTabEnabled = Config.onlineUsersEnabled;
-            $scope.roomsTabEnabled = Config.publicRoomsEnabled;
-            $scope.friendsTabEnabled = Config.friendsEnabled;
-
-            $scope.tabCount = $scope.numberOfTabs();
-
-            // Make the users tab start clicked
-            if(Config.onlineUsersEnabled) {
-                $scope.tabClicked(bUsersTab);
-            }
-            else if(Config.publicRoomsEnabled) {
-                $scope.tabClicked(bRoomsTab);
-            }
-            else {
-                $scope.tabClicked(bInboxTab);
-            }
-
-            $timeout(function () {
-                $scope.$digest();
-            })
+            $scope.updateConfig();
         });
+        $scope.updateConfig();
 
         // Setup the search variable - if we don't do this
         // Angular can't set search.text
@@ -649,6 +629,29 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
         });
 
     };
+
+        $scope.updateConfig = function () {
+            $scope.usersTabEnabled = Config.onlineUsersEnabled;
+            $scope.roomsTabEnabled = Config.publicRoomsEnabled;
+            $scope.friendsTabEnabled = Config.friendsEnabled;
+
+            $scope.tabCount = $scope.numberOfTabs();
+
+            // Make the users tab start clicked
+            if(Config.onlineUsersEnabled) {
+                $scope.tabClicked(bUsersTab);
+            }
+            else if(Config.publicRoomsEnabled) {
+                $scope.tabClicked(bRoomsTab);
+            }
+            else {
+                $scope.tabClicked(bInboxTab);
+            }
+
+            $timeout(function () {
+                $scope.$digest();
+            })
+        };
 
     $scope.numberOfTabs = function () {
         var tabs = 1;
@@ -917,7 +920,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
             // Load friends from config
             if(Config.friends) {
-                FriendsConnector.addFriendsFromSSO(Config.friends);
+                FriendsConnector.addFriendsFromConfig(Config.friends);
             }
 
             // This allows us to clear the cache remotely

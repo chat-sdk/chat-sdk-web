@@ -2,28 +2,31 @@
 
 
 // Declare app level module which depends on filters, and services
-var myApp = angular.module('myApp', [
-  'myApp.filters',
-  'myApp.services',
-  'myApp.directives',
-  'myApp.controllers',
-  'myApp.room',
-  'myApp.user',
-  'myApp.message',
-  'myApp.stateManager',
-  'myApp.cache',
-  'myApp.localStorage',
-  'myApp.time',
-  'myApp.upgrade',
-  'myApp.entity',
-  'myApp.rpm',
-  'myApp.utilities',
-  'myApp.api',
-  'myApp.config',
-  'myApp.firebase',
-  'myApp.network'
-
-]).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
+var myApp = angular.module('myApp',
+    [
+        'myApp.filters',
+        'myApp.services',
+        'myApp.directives',
+        'myApp.controllers',
+        'myApp.room',
+        'myApp.user',
+        'myApp.message',
+        'myApp.stateManager',
+        'myApp.cache',
+        'myApp.localStorage',
+        'myApp.time',
+        'myApp.upgrade',
+        'myApp.entity',
+        'myApp.rpm',
+        'myApp.utilities',
+        'myApp.api',
+        'myApp.config',
+        'myApp.firebase',
+        'myApp.network',
+        'myApp.environment',
+        'myApp.paths'
+    ]
+).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([
         // Allow same origin resource loads.
         'self',
@@ -48,7 +51,7 @@ var myApp = angular.module('myApp', [
 //    $sceDelegateProvider.resourceUrlBlacklist([
 //        'http://myapp.example.com/clickThru**'
 //    ]);
-}]).run(['Config', function (Config) {
-    Config.setConfig(Config.setByInclude, CC_OPTIONS);
+}]).run(['Config', 'Environment', function (Config, Environment) {
+    Config.setConfig(Config.setByInclude, Environment.options());
 }]);
 

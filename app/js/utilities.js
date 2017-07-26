@@ -10,72 +10,11 @@ var bRoomDefaultName1To1 = "Private Chat";
 var bRoomDefaultNameGroup = "Group Chat";
 var bRoomDefaultNamePublic = "Public Chat";
 
-
-//
-// Used to load partials
-//
-
-//var ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");
-
-// Are we testing locally?
-var bRootURL = '';
-var bPartialURL = '';
-var bFirebase = 'chat-sdk-v4';
-var bSingleSignOn = false;
-var bCID = 'chat_sdk_web';
-var bAds = true;
-
-var bFirebaseConfig = {
-    apiKey: "AIzaSyASm9RYrr3u_Bc22eglk0OtsC2GnnTQp_c",
-    authDomain: "chat-sdk-v4.firebaseapp.com",
-    databaseURL: "https://chat-sdk-v4.firebaseio.com",
-    projectId: "chat-sdk-v4",
-    storageBucket: "chat-sdk-v4.appspot.com",
-    messagingSenderId: "1088435112418"
-};
-
-
-// If we are then set the root URL to nothing
-if(document.location.origin === "http://symfony") {
-    bRootURL = '//chatcat/dist/';
-    bPartialURL = bRootURL + 'partials/';
-//    bFirebase = 'chatcatio-test';
-}
-
-else if(document.location.origin === "http://chatcat") {
-      bRootURL = '';
-      bPartialURL = 'partials/';
-//    bFirebase = 'chatcatio-test';
-}
-// Are we testing on the wordpress plugin?
-else if(document.location.origin === "http://ccwp") {
-    bRootURL = '//chatcat/dist/';
-    bPartialURL = bRootURL + 'partials/';
-//    bFirebase = 'chatcatio-test';
-}
-//// We're live so we need to use the full remote URL
-else {
-    // This is also used for the social login iFrame - don't forget to change it there too
-    bRootURL = '//chatcat.firebaseapp.com/';
-    bPartialURL = 'https://chatcat.firebaseapp.com/partials/';
-    //bFirebase = 'chatcat';
-}
-
-var bFirebaseRef = '//' + bFirebase + '.firebaseio.com/';
-
-var bImagesURL = bRootURL + 'img/';
-var bAudioURL = bRootURL + 'audio/';
-var bDefaultProfileImage = bImagesURL + 'cc-100-profile-pic.png';
-var bDefaultRoomImage = bImagesURL + 'cc-100-room-pic.png';
-
-var bPullURL = "//chat.deluge.co/server/pull.php";
-//var bResizeURL = "http://chat.deluge.co/server/tmp/resize.php";
-
 var bDefaultAvatarProvider = "http://flathash.com";
 
 // Last visited
 // Show the click to chat box if the user has visited more than x hours
-var bLastVisitedTimeout = 1 * bHour;
+var bLastVisitedTimeout = bHour;
 
 // Paths
 var bUsersPath = "users";
@@ -91,7 +30,6 @@ var bUpdatedPath = 'updated';
 var bOnlineUserCountKey = 'onlineUserCount';
 var bLastMessagePath = "lastMessage";
 var bFlaggedMessagesPath = "flagged";
-var bLastMessageAddedDatePath = "last-message-added";
 var bCreatorEntityID = "creator-entity-id";
 var bDate = "date";
 var bMessage = "message";
@@ -150,6 +88,10 @@ var bUserStatusClosed = 'closed';
 //var bRoomTypeGroup = 'group';
 //var bRoomTypePublic = 'public';
 //var bRoomTypeInvalid = 'invalid';
+
+var bMinute = 60;
+var bHour = bMinute * 60;
+var bDay = bHour * 24;
 
 var bRoomTypeInvalid = 0x0;
 var bRoomTypeGroup = 0x1;
@@ -254,213 +196,14 @@ var bRoomListBoxHeight = 300;
 
 var bProfileBoxWidth = 300;
 
-var bMinute = 60;
-var bHour = bMinute * 60;
-var bDay = bHour * 24;
-
-
-//Firebase.enableLogging(true);
 
 var myApp = angular.module('myApp.utilities', []);
-
-myApp.factory('Paths', [function () {
-
-    return {
-
-        cid: null,
-        initialized: false,
-        database: null,
-
-        setCID: function (cid) {
-            if(FIREBASE_REF_DEBUG) console.log("setCID: " + cid);
-            this.cid = cid;
-        },
-
-        firebase: function () {
-            if(!this.initialized) {
-                firebase.initializeApp(bFirebaseConfig);
-                this.database = firebase.database();
-                this.initialized = true;
-            }
-            if(FIREBASE_REF_DEBUG) console.log("firebase");
-            if(this.cid) {
-                return this.database.ref(this.cid);
-            }
-            else {
-                return this.database.ref();
-            }
-        },
-
-        usersRef: function () {
-            if(FIREBASE_REF_DEBUG) console.log("usersRef");
-            return this.firebase().child(bUsersPath);
-        },
-
-        configRef: function () {
-            return this.firebase().child(bConfigKey);
-        },
-
-        timeRef: function (uid) {
-            if(FIREBASE_REF_DEBUG) console.log("timeRef");
-            return this.firebase().child(bTimeKey).child(uid);
-        },
-
-        userRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userRef");
-            return this.usersRef().child(fid);
-        },
-
-        userMetaRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userMetaRef");
-            return this.userRef(fid).child(bMetaKey);
-        },
-
-        userImageRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userImageRef");
-            return this.userRef(fid).child(bImageKey);
-        },
-
-        userStateRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userStateRef");
-            return this.userRef(fid).child(bUpdatedPath);
-        },
-
-        userOnlineRef: function (fid) {
-            return this.userRef(fid).child(bOnlineKey);
-        },
-
-
-//    userThumbnailRef: function (fid) {
-//        if(DEBUG) console.log("");
-//        return this.userRef(fid).child(bThumbnailKey);
-//    },
-
-        userFriendsRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userFriendsRef");
-            return this.userRef(fid).child(bFriendsPath);
-        },
-
-        userBlockedRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userBlockedRef");
-            return this.userRef(fid).child(bBlockedPath);
-        },
-
-        onlineUsersRef: function () {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUsersRef");
-            return this.firebase().child(bOnlineKey);
-        },
-
-        onlineUserRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUserRef");
-            return this.onlineUsersRef().child(fid);
-        },
-
-
-        roomsRef: function () {
-            if(FIREBASE_REF_DEBUG) console.log("roomsRef");
-            return this.firebase().child(bRoomsPath);
-        },
-
-        publicRoomsRef: function () {
-            if(FIREBASE_REF_DEBUG) console.log("publicRoomsRef");
-            return this.firebase().child(bPublicRoomsPath);
-        },
-
-        publicRoomRef: function (rid) {
-            if(FIREBASE_REF_DEBUG) console.log("publicRoomRef");
-            return this.publicRoomsRef().child(rid);
-        },
-
-        roomRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomRef");
-            return this.roomsRef().child(fid);
-        },
-
-        roomMetaRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomMetaRef");
-            return this.roomRef(fid).child(bDetailsKey);
-        },
-
-        roomLastMessageRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
-            return this.roomRef(fid).child(bLastMessagePath);
-        },
-
-        roomLastMessageAddedDateRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
-            return this.roomMetaRef(fid).child(bLastMessageAddedDatePath);
-        },
-
-        roomStateRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomStateRef");
-            return this.roomRef(fid).child(bUpdatedPath);
-        },
-
-        roomMessagesRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomMessagesRef");
-            return this.roomRef(fid).child(bMessagesPath);
-        },
-
-        roomUsersRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomUsersRef");
-            return this.roomRef(fid).child(bUsersMetaPath);
-        },
-
-        roomTypingRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("roomTypingRef");
-            return this.roomRef(fid).child(bTypingPath);
-        },
-
-        userRoomsRef: function (fid) {
-            if(FIREBASE_REF_DEBUG) console.log("userRoomsRef");
-            return this.userRef(fid).child(bRoomsPath);
-        },
-
-        messageUsersRef: function (rid, mid) {
-            if(FIREBASE_REF_DEBUG) console.log("messageUsersRef");
-            return this.messageRef(rid, mid).child(bUsersPath);
-        },
-
-        messageRef: function (rid, mid) {
-            if(FIREBASE_REF_DEBUG) console.log("messageRef");
-            return this.roomMessagesRef(rid).child(mid);
-        },
-
-        onlineUserCountRef: function () {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUserCountRef");
-            return this.firebase().child(bOnlineUserCountKey);
-        },
-
-        flaggedMessageRef: function (tid, mid) {
-            return this.firebase().child(bFlaggedPath).child(bRoomsPath).child(tid).child(bMessagesPath).child(mid);
-        }
-
-    };
-}]);
 
 myApp.factory('Utils', [function () {
 
     return {
-
         unORNull: function (object) {
             return object === 'undefined' || object == null;
-        },
-
-        timeSince: function (timestamp) {
-            if(this.unORNull(timestamp)) {
-                return -1;
-            }
-            else {
-                var date = new Date(timestamp);
-                var time = 0;
-                if (!date.now) {
-                    time = date.getTime();
-                }
-                else {
-                    time = date.now();
-                }
-                return time * 1000;
-            }
         }
     }
 
@@ -571,106 +314,4 @@ myApp.factory('ArrayUtils', [function () {
     }
 }]);
 
-//myApp.factory('Utilities', ['$q', function ($q) {
-//    return {
-//
-//        filterByName: function (array, name) {
-//            if(!name || name === "") {
-//                return array;
-//            }
-//            else {
-//                // Loop over all users
-//                var result = {};
-//                var u = null;
-//                var t = null;
-//                var n = null;
-//                for(var id in array) {
-//                    if(array.hasOwnProperty(id)) {
-//                        u = array[id];
-//                        // Switch to lower case and remove spaces
-//                        // to improve search results
-//                        t = name.toLowerCase().replace(/ /g,'');
-//                        n = u.meta.name.toLowerCase().replace(/ /g,'');
-//                        if(n.substring(0, t.length) == t) {
-//                            result[id] = u;
-//                        }
-//                    }
-//                }
-//                return result;
-//            }
-//        },
-//
-//        pullImageFromURL: function (context, url) {
-//
-//            var deferred = $q.defer();
-//
-//            context.post(bPullURL, {'url': url}).success((function(data, status) {
-//
-//                if(data && data.dataURL) {
-//                    deferred.resolve(data.dataURL);
-//                }
-//                else {
-//                    deferred.reject();
-//                }
-//
-//            }).bind(this)).error(function(data, status) {
-//
-//                deferred.reject();
-//
-//            });
-//
-//            return deferred.promise;
-//        },
-//
-//        saveImageFromURL: function (src) {
-//
-//            var deferred = $q.defer();
-//
-//            var image = new Image();
-//
-//            image.onload = function () {
-//
-//                // Resize the image
-//                var canvas = document.createElement('canvas'),
-//                    max_size = 100,
-//                    width = image.width,
-//                    height = image.height;
-//
-//                var x = 0;
-//                var y = 0;
-//
-//                if (width > height) {
-//                    x = (width - height)/2;
-//
-//                } else {
-//                    y = (height - width)/2;
-//                }
-//
-//                var size = width - 2 * x;
-//
-//                // First rescale the image to be square
-//                canvas.width = max_size;
-//                canvas.height = max_size;
-//
-//                try {
-//                    canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
-//                    var dataURL = canvas.toDataURL('image/jpeg');
-//                    deferred.resolve(dataURL);
-//                }
-//                catch (error) {
-//                    deferred.reject(error);
-//                }
-//            };
-//            image.src = src;
-//
-//            return deferred.promise;
-//        },
-//
-//        textWidth: function (text, font) {
-//            if (!this.textWidth.fakeEl) this.textWidth.fakeEl = jQuery('<span>').hide().appendTo(document.body);
-//            this.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
-//            return this.textWidth.fakeEl.width();
-//        }
-//    };
-//}]);
 

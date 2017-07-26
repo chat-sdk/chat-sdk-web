@@ -77,12 +77,6 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         singleSignOnAPILevel: 1,
         singleSignOnAPILevelSet: setByDefault,
 
-        showAds: true,
-        showAdsSet: setByAdmin,
-
-        whiteLabel: true,
-        whiteLabelSet: setByAdmin,
-
         singleSignOn: true,
         singleSignOnSet: setByAdmin,
 

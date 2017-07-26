@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.room', ['firebase']);
 
-myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee) {
+myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 
@@ -45,7 +45,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.typingMessage = null;
             this.readTimestamp = 0; // When was the thread last read?
 
-            this.thumbnail = bDefaultRoomImage;
+            this.thumbnail = Environment.defaultRoomPictureURL();
             this.showImage = false;
 
             // The room associated with this use
@@ -827,24 +827,23 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 }
             });
 
-            var deferred2 = $q.defer();
+            //var deferred2 = $q.defer();
+            //
+            //// Also set the last-message-added property
+            //var roomMetaRef = Paths.roomMetaRef(this.rid());
+            //var data = {};
+            //data[bLastMessageAddedDatePath] = firebase.database.ServerValue.TIMESTAMP;
+            //roomMetaRef.update(data, function (error) {
+            //    if(!error) {
+            //        deferred2.resolve(null);
+            //    }
+            //    else {
+            //        deferred2.reject(error);
+            //    }
+            //});
 
-            // Also set the last-message-added property
-            var roomMetaRef = Paths.roomMetaRef(this.rid());
-            var data = {};
-            data[bLastMessageAddedDatePath] = firebase.database.ServerValue.TIMESTAMP;
-            roomMetaRef.update(data, function (error) {
-                if(!error) {
-                    deferred2.resolve(null);
-                }
-                else {
-                    deferred2.reject(error);
-                }
-            });
 
-            return $q.all([
-                deferred.promise, deferred2.promise
-            ]);
+            return deferred.promise;
         };
 
         Room.prototype.loadMoreMessages = function (callback, numberOfMessages) {
@@ -998,10 +997,10 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             this.showImage = this.type() == bRoomTypePublic;
 
             if(!image) {
-                image = bDefaultRoomImage;
+                image = Environment.defaultRoomPictureURL();
             }
             else {
-                if(isData || image == bDefaultRoomImage) {
+                if(isData || image == Environment.defaultRoomPictureURL()) {
                     this.thumbnail = image;
                 }
                 else {

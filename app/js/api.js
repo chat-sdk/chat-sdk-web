@@ -4,8 +4,8 @@
 
 var myApp = angular.module('myApp.api', []);
 
-myApp.factory('Authentication', ['$rootScope','$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils', 'SingleSignOn', 'Credential',
-    function ($rootScope, $q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils, SingleSignOn, Credential) {
+myApp.factory('Authentication', ['$rootScope','$q', '$http', '$window', '$timeout', 'Config', 'LocalStorage', 'Paths', 'Utils', 'SingleSignOn', 'Credential', 'Environment',
+    function ($rootScope, $q, $http, $window, $timeout, Config, LocalStorage, Paths, Utils, SingleSignOn, Credential, Environment) {
         var Authentication = {
 
             mode: bLoginModeSimple,
@@ -51,7 +51,7 @@ myApp.factory('Authentication', ['$rootScope','$q', '$http', '$window', '$timeou
                 var deferred = $q.defer();
 
                 var handleSuccess = function (authData) {
-                    Config.setConfig(Config.setByInclude, CC_OPTIONS);
+                    Config.setConfig(Config.setByInclude, Environment.options());
                     deferred.resolve(authData);
                 };
 

@@ -10,14 +10,15 @@ var myApp = angular.module('myApp.services', ['firebase', 'facebook']).
 myApp.config(['FacebookProvider', function(FacebookProvider) {
     // Set your appId through the setAppId method or
     // use the shortcut in the initialize method directly.
-    FacebookProvider.init('735373466519297');
+    if(ChatSDKOptions.facebookAppID) {
+        FacebookProvider.init(ChatSDKOptions.facebookAppID);
+    }
 }]);
 
-myApp.factory('CloudImage', [function () {
+myApp.factory('CloudImage', ['Environment',function (Environment) {
     return {
         // Cloud Image
-        //cloudImageToken: 'skbb48',
-        cloudImageToken: 'cag084en',
+        cloudImageToken: Environment.cloudImageToken(),
 
         cloudImage: function(url, w, h) {
             return 'http://' + this.cloudImageToken + '.cloudimg.io/s/crop/'+w+'x'+h+'/' + url;
@@ -26,7 +27,7 @@ myApp.factory('CloudImage', [function () {
     };
 }]);
 
-myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
+myApp.factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalStorage, Environment) {
     return {
 
         messageReceivedSoundNumber: 1,
@@ -43,7 +44,7 @@ myApp.factory('SoundEffects', ['LocalStorage', function (LocalStorage) {
 
         alert1: function () {
             var sound = new Howl({
-                urls: [bAudioURL + 'alert_1.mp3']
+                urls: [Environment.audioURL() + 'alert_1.mp3']
             });
             sound.play();
         },
@@ -139,24 +140,24 @@ myApp.factory('RoomOpenQueue', [function () {
     };
 }]);
 
-myApp.factory('Partials', ['$http', '$templateCache', function ($http, $templateCache) {
+myApp.factory('Partials', ['$http', '$templateCache', 'Environment', function ($http, $templateCache, Environment) {
     return {
         load: function () {
-            $http.get(bPartialURL + 'chat-room.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'chat-settings.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'countries-select.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'create-room-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'emojis.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'login-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'main-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'notification.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'profile-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'profile-settings-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'room-description.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'room-list.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'room-list-box.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'user-list.html', {cache:$templateCache});
-            $http.get(bPartialURL + 'year-of-birth-select.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'chat-room.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'chat-settings.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'countries-select.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'create-room-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'emojis.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'login-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'main-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'notification.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'profile-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'profile-settings-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'room-description.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'room-list.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'room-list-box.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'user-list.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'year-of-birth-select.html', {cache:$templateCache});
         }
     };
 }]);
