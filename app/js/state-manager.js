@@ -72,16 +72,16 @@ myApp.factory('FriendsConnector', ['$rootScope', 'User', 'UserStore', 'Paths', '
         },
 
         addFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.friends[user.meta.uid] = user;
+            if(user && user.uid()) {
+                this.friends[user.uid()] = user;
                 user.friend = true;
                 $rootScope.$broadcast(bFriendAddedNotification);
             }
         },
 
         isFriend: function (user) {
-            if(user && user.meta) {
-                return this.isFriendUID(user.meta.uid);
+            if(user && user.uid()) {
+                return this.isFriendUID(user.uid());
             }
             return false;
         },
@@ -91,8 +91,8 @@ myApp.factory('FriendsConnector', ['$rootScope', 'User', 'UserStore', 'Paths', '
         },
 
         removeFriend: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeFriendWithID(user.meta.uid);
+            if(user && user.uid()) {
+                this.removeFriendWithID(user.uid());
             }
         },
 
@@ -187,10 +187,10 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'UserStore', 'Paths', 'U
          */
 
         addOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                if(!$rootScope.user || user.meta.uid != $rootScope.user.meta.uid) {
+            if(user && user.uid()) {
+                if(!$rootScope.user || user.uid() != $rootScope.user.uid()) {
                     user.online = true;
-                    this.onlineUsers[user.meta.uid] = user;
+                    this.onlineUsers[user.uid()] = user;
                     $rootScope.$broadcast(bOnlineUserAddedNotification);
                     return true;
                 }
@@ -199,8 +199,8 @@ myApp.factory('OnlineConnector', ['$rootScope', 'User', 'UserStore', 'Paths', 'U
         },
 
         removeOnlineUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.removeOnlineUserWithID(user.meta.uid);
+            if(user && user.meta && user.uid()) {
+                this.removeOnlineUserWithID(user.uid());
             }
         },
 

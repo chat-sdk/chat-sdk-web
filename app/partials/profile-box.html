@@ -6,33 +6,33 @@
      ng-mouseenter="cancelTimer()"
      ng-mouseleave="showProfileBox(null, 0)"
      center-mouse-y >
-    <div ng-hide="currentUser.meta.profileHTML && currentUser.meta.profileHTML.length > 0">
+    <div ng-hide="currentUser.getProfileHTML() && currentUser.getProfileHTML().length > 0">
         <div class="cc-right-margin-5">
-            <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.thumbnail }}" />
+            <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" ng-src="{{ currentUser.getThumbnail() }}" />
             <span class="uk-float-left" >
-                <div ng-hide="config.userProfileLinkEnabled && currentUser.meta.profileLink.length > 0"
-                     class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.meta.name }}</div>
-                <div ng-show="config.userProfileLinkEnabled && currentUser.meta.profileLink.length > 0"
-                     class="uk-text-bold cc-user-name cc-ellipsis"><a ng-href="{{ currentUser.meta.profileLink }}" target="_blank">{{ currentUser.meta.name }}</a></div>
-                <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.meta.city }}</div>
+                <div ng-hide="config.userProfileLinkEnabled && currentUser.getProfileLink().length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.getName() }}</div>
+                <div ng-show="config.userProfileLinkEnabled && currentUser.getProfileLink().length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis"><a ng-href="{{ currentUser.getProfileLink() }}" target="_blank">{{ currentUser.getName() }}</a></div>
+                <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.getLocation() }}</div>
             </span>
             <div class="f32 uk-float-right" >
-                <span class="flag {{ currentUser.meta.country | lowercase }}"></span>
+                <span class="flag {{ currentUser.getLocation() | lowercase }}"></span>
             </div>
             <span class="cc-user-id cc-pointer" ng-click="copyUserID()" >Copy ID</span>
         </div>
         <div class="uk-grid">
             <div class="uk-text-justify uk-text-small cc-profile-description">
-                {{ currentUser.meta.description }}
+                {{ currentUser.getStatus() }}
             </div>
             <div class="uk-text-small cc-margin-5 uk-align-right"
                  style="margin-right: 10px"
-                 ng-show="currentUser.meta.homepageLink && currentUser.meta.homepageLink.length">
-                <a ng-href="{{ currentUser.meta.homepageLink }}">{{ currentUser.meta.homepageText }}</a>
+                 ng-show="currentUser.getHomepageLink() && currentUser.getHomepageLink().length">
+                <a ng-href="{{ currentUser.getHomepageLink() }}">{{ currentUser.getHomepageText() }}</a>
             </div>
         </div>
     </div>
-    <div ng-show="currentUser.meta.profileHTML && currentUser.meta.profileHTML.length > 0">
+    <div ng-show="currentUser.getProfileHTML() && currentUser.getProfileHTML().length > 0">
         <div ng-bind-html="currentUserHTML"></div>
     </div>
     <div class="uk-grid uk-grid-small" style="padding: 5px;">

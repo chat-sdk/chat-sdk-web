@@ -50,7 +50,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
                 if(this.uid()) {
 
                     // We need to set the user here
-                    if(this.uid() == $rootScope.user.meta.uid) {
+                    if(this.uid() == $rootScope.user.uid()) {
                         this.user = $rootScope.user;
                     }
                     else {

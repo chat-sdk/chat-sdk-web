@@ -132,8 +132,8 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             for(var key in this.users) {
                 if(this.users.hasOwnProperty(key)) {
                     var user = this.users[key];
-                    if(!user.isMe() && user.meta.name && user.meta.name.length) {
-                        this.name += user.meta.name + ", ";
+                    if(!user.isMe() && user.getName() && user.getName().length) {
+                        this.name += user.getName() + ", ";
                     }
                 }
             }
@@ -815,7 +815,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             var deferred = $q.defer();
 
             var lastMessageMeta = message.meta;
-            lastMessageMeta['userName'] = user.meta.name;
+            lastMessageMeta['userName'] = user.getName();
 
             var ref = Paths.roomLastMessageRef(this.rid());
             ref.set(lastMessageMeta, function (error) {
@@ -1038,7 +1038,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             for(var i in this.messages) {
                 if(this.messages.hasOwnProperty(i)) {
                     var m = this.messages[i];
-                    transcript += Time.formatTimestamp(m.time()) + " " + m.user.meta.name + ": " + m.text() + "\n";
+                    transcript += Time.formatTimestamp(m.time()) + " " + m.user.getName() + ": " + m.text() + "\n";
                 }
             }
 
@@ -1052,7 +1052,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         Room.prototype.startTyping = function (user) {
             // The user is typing...
             var ref = Paths.roomTypingRef(this.rid()).child(user.uid());
-            ref.set({name: user.meta.name});
+            ref.set({name: user.getName()});
 
             // If the user disconnects, tidy up by removing the typing
             // indicator
@@ -1241,7 +1241,7 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
             }
 
             // Change the page title
-            Marquee.startWithMessage(message.user.meta.name + ': ' + message.text());
+            Marquee.startWithMessage(message.user.getName() + ': ' + message.text());
             //$window.document.title = message.meta.text + "...";
 
             // Add the message to this room

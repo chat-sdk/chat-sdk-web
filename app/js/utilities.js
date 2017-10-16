@@ -53,7 +53,6 @@ var messageImageWidth = "image-width";
 var messageImageHeight = "image-height";
 
 var userUID = "uid";
-var userImageURL = "pictureURL";
 
 var roomCreated = "creation-date";
 var roomRID = "rid";
@@ -67,6 +66,7 @@ var roomTypeV3 = "type";
 var roomCreatorEntityID = bCreatorEntityID;
 
 
+
 var bReadKey = 'read';
 
 var bMetaKey = "meta";
@@ -78,6 +78,21 @@ var bConfigKey = "config";
 
 var bOnlineKey = "online";
 var bTypeKey = "type";
+
+var bUserName = "name";
+var bUserCountryCode = "country-code";
+var bUserLocation = "location";
+var bUserImageURL = "pictureURL";
+var bUserGender = "gender";
+var bUserStatus = "status";
+var bUserProfileLink = "profile-link";
+var bUserHomepageLink = "homepage-link";
+var bUserHomepageText = "homepage_text";
+var bUserProfileHTML = "profile-html";
+var bUserAllowInvites = "allow-invites";
+
+// TODO:
+var bDefaultUserPrefix = "ChatSDK";
 
 var bUserStatusOwner = 'owner';
 var bUserStatusMember = 'member';
@@ -204,6 +219,10 @@ myApp.factory('Utils', [function () {
     return {
         unORNull: function (object) {
             return object === 'undefined' || object == null;
+        },
+
+        empty: function (object) {
+            return this.unORNull(object) || object.length == 0;
         }
     }
 

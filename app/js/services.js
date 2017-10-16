@@ -44,7 +44,7 @@ myApp.factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalSto
 
         alert1: function () {
             var sound = new Howl({
-                urls: [Environment.audioURL() + 'alert_1.mp3']
+                src: [Environment.audioURL() + 'alert_1.mp3']
             });
             sound.play();
         },
@@ -277,7 +277,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
             var deferred = $q.defer();
 
             if(this.user) {
-                var uid = this.user.meta.uid;
+                var uid = this.user.uid();
                 if (uid) {
 
                     if(Config.onlineUsersEnabled) {
@@ -288,7 +288,7 @@ myApp.factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Ca
                         ref.setWithPriority({
                             uid: uid,
                             time: firebase.database.ServerValue.TIMESTAMP
-                        }, this.user.meta.name, function (error) {
+                        }, this.user.getName(), function (error) {
                             if(!error) {
                                 deferred.resolve();
                             }
@@ -477,15 +477,15 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 //                }
 
                 // Set the user's name
-                setUserProperty("name", userData.name);
-                setUserProperty("name", "ChatCat" + Math.floor(Math.random() * 1000 + 1));
+                setUserProperty(bUserName, userData.name);
+                setUserProperty(bUserName, bDefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
 
                 var imageURL = null;
 
                 /** SOCIAL INFORMATION **/
                 if(authUser.provider == "facebook") {
 
-                    setUserProperty("gender", userData.gender == "male" ? "M": "F");
+                    setUserProperty(bUserGender, userData.gender == "male" ? "M": "F");
 
                     // Make an API request to Facebook to get an appropriately sized
                     // photo
@@ -503,58 +503,56 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                         imageURL = userData.profile_image_url.replace("normal", "bigger");
                     }
 
-                    setUserProperty("description", userData.description);
-                    setUserProperty("city", userData.location);
+                    setUserProperty(bUserStatus, userData.description);
+                    setUserProperty(bUserLocation, userData.location);
 
                 }
                 if(authUser.provider == "github") {
                     imageURL = userData.avatar_url;
-                    setUserProperty("name", authUser.login)
+                    setUserProperty(bUserName, authUser.login)
                 }
                 if(authUser.provider == "google") {
                     imageURL = userData.picture;
-                    setUserProperty("gender", userData.gender == "male" ? "M": "F");
+                    setUserProperty(bUserGender, userData.gender == "male" ? "M": "F");
                 }
                 if(authUser.provider == "anonymous") {
 
                 }
                 if(authUser.provider == "custom") {
 
-                    setUserProperty("description", userData.status);
-                    setUserProperty("city", userData.city);
-                    setUserProperty("gender", userData.gender);
-                    setUserProperty("country", userData.countryCode);
+                    setUserProperty(bUserStatus, userData[bUserStatus]);
+                    setUserProperty(bUserLocation, userData[bUserLocation]);
+                    setUserProperty(bUserGender, userData[bUserGender]);
+                    setUserProperty(bUserCountryCode, userData[bUserCountryCode]);
                     // TODO: Depricated
-                    setUserProperty("yearOfBirth", userData.yearOfBirth);
-                    setUserProperty("dateOfBirth", userData.dateOfBirth);
-                    setUserProperty("homepageLink", userData.homepageLink, true);
-                    setUserProperty("homepageText", userData.homepageText, true);
+                    setUserProperty(bUserHomepageLink, userData[bUserHomepageLink], true);
+                    setUserProperty(bUserHomepageText, userData[bUserHomepageText], true);
 
-                    if(userData.profileHTML && userData.profileHTML.length > 0) {
-                        setUserProperty("profileHTML", userData.profileHTML, true);
+                    if(userData[bUserProfileHTML] && userData[bUserProfileHTML].length > 0) {
+                        setUserProperty(bUserProfileHTML, userData[bUserProfileHTML], true);
                     }
                     else {
-                        user.meta.profileHTML = "";
+                        user.setProfileHTML("");
                     }
 
-                    if(userData.imageURL) {
-                        imageURL = userData.imageURL;
+                    if(userData[bUserImageURL]) {
+                        imageURL = userData[bUserImageURL];
                     }
                 }
 
                 if(!imageURL) {
-                    imageURL = bDefaultAvatarProvider + "/" + user.meta.name + ".png";
+                    imageURL = bDefaultAvatarProvider + "/" + user.getName() + ".png";
                 }
 
                 // If they don't have a profile picture load it from the social network
-                if(setUserProperty('image', imageURL)) {
+                if(setUserProperty(bUserImageURL, imageURL)) {
                     user.setImageURL(imageURL);
                     user.setImage(imageURL);
                 }
 
                 /** LOCATION **/
                 // Get the user's city and country from their IP
-                if(!user.meta.country || !user.meta.city) {
+                if(!user.getCountryCode() || !user.getLocation()) {
 
                     $http.get('http://freegeoip.net/json/').then((function (r) {
 
@@ -562,8 +560,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
 
                         // The first time the user logs on
                         // try to guess which city and country they're from
-                        changed = setUserProperty('city', r.data.city);
-                        changed = changed || setUserProperty('country', r.data.country_code);
+                        changed = setUserProperty(bUserLocation, r.data.city);
+                        changed = changed || setUserProperty(bUserCountryCode, r.data.country_code);
 
                         if(changed) {
                             user.pushMeta();
@@ -618,8 +616,8 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
             var timePromise = Time.start(uid);
 
             $q.all([userPromise, timePromise]).then(function () {
-                if (!$rootScope.user.meta.name) {
-                    $rootScope.user.meta.name = "";
+                if (!$rootScope.user.getName()) {
+                    $rootScope.user.setName("");
                 }
 
                 Presence.start($rootScope.user);

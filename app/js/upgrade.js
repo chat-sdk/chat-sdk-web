@@ -18,7 +18,7 @@ myApp.factory('Upgrade', ['$q', 'Paths', function ($q, Paths) {
                 }
                 // Now remove the friends reference
                 var deferred = $q.defer();
-                var ref = Paths.userMetaRef(user.meta.uid).child(bFriendsPath);
+                var ref = Paths.userMetaRef(user.uid()).child(bFriendsPath);
                 ref.remove((function (error) {
                     if(error) {
                         deferred.reject(error);
@@ -38,7 +38,7 @@ myApp.factory('Upgrade', ['$q', 'Paths', function ($q, Paths) {
                 }
                 // Now remove the friends reference
                 deferred = $q.defer();
-                ref = Paths.userMetaRef(user.meta.uid).child(bBlockedPath);
+                ref = Paths.userMetaRef(user.uid()).child(bBlockedPath);
                 ref.remove(function (error) {
                     if(error) {
                         deferred.reject(error);

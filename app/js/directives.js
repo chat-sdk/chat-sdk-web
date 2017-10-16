@@ -564,6 +564,7 @@ myApp.directive('ccFlash', ['$timeout', 'Config', function ($timeout, Config) {
     };
 }]);
 
+// Not used now - was used to show date of birth picker
 myApp.directive('pikaday', ["$rootScope", function ($rootScope) {
     return function (scope, element, attr) {
 
@@ -574,13 +575,8 @@ myApp.directive('pikaday', ["$rootScope", function ($rootScope) {
             maxDate: new Date(),
             defaultDate: new Date('1990-01-01'),
             onSelect: function (date) {
-                scope.dateOfBirth = date;
             }
         });
-
-        scope.setDateOfBirth = function (date) {
-            picker.setDate(date ? new Date(date) : '1990-01-01');
-        };
 
     };
 }]);

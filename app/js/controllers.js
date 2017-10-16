@@ -232,7 +232,7 @@ myApp.controller('AppController', [
         else {
             $scope.cancelTimer();
             $scope.currentUser = UserStore.getUserWithID(uid);
-            var profileHTML = $scope.currentUser.meta.profileHTML;
+            var profileHTML = $scope.currentUser.getProfileHTML();
             $scope.currentUserHTML = !profileHTML ? null : $sce.trustAsHtml(profileHTML);
         }
     };
@@ -266,7 +266,7 @@ myApp.controller('AppController', [
 
     $scope.isBlocked = function (user) {
         if(user) {
-            return !Utils.unORNull(Cache.blockedUsers[user.meta.uid]);
+            return !Utils.unORNull(Cache.blockedUsers[user.uid()]);
         }
         return false;
     };
@@ -313,7 +313,7 @@ myApp.controller('AppController', [
     $scope.userClicked = function (user) {
 
         // Is the user blocked?
-        if (Cache.isBlockedUser(user.meta.uid)) {
+        if (Cache.isBlockedUser(user.uid())) {
             $scope.getUser().unblockUser(user);
         }
         else {
@@ -368,7 +368,7 @@ myApp.controller('AppController', [
         Presence.stop();
 
         if($rootScope.user) {
-            StateManager.userOff($rootScope.user.meta.uid);
+            StateManager.userOff($rootScope.user.uid());
         }
 
         StateManager.off();
@@ -1612,7 +1612,7 @@ myApp.controller('OnlineUsersListController', ['$scope', '$timeout', 'Log', 'Arr
         // Filter online users to remove users that are blocking us
         $scope.allUsers = ArrayUtils.objectToArray(OnlineConnector.onlineUsers);
         $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.search[$scope.activeTab], function (user) {
-            return user.meta.name;
+            return user.getName();
         });
 
         $timeout(function(){
@@ -1672,7 +1672,7 @@ myApp.controller('UserListController', ['$scope', '$timeout', 'OnlineConnector',
 
         if($scope.searchKeyword()) {
             $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.searchKeyword(), function (user) {
-                return user.meta.name;
+                return user.getName();
             });
         }
         else {
@@ -1681,17 +1681,17 @@ myApp.controller('UserListController', ['$scope', '$timeout', 'OnlineConnector',
 
         // Sort the array first by who's online
         // then alphabetically
-        $scope.users.sort(function (a, b) {
+        $scope.users.sort(function (user1, user2) {
             // Sort by who's online first then alphabetcially
-            var aOnline = OnlineConnector.onlineUsers[a.meta.uid];
-            var bOnline = OnlineConnector.onlineUsers[b.meta.uid];
+            var aOnline = OnlineConnector.onlineUsers[user1.uid()];
+            var bOnline = OnlineConnector.onlineUsers[user2.uid()];
 
             if(aOnline != bOnline) {
                 return aOnline ? 1 : -1;
             }
             else {
-                if(a.meta.name != b.meta.name) {
-                    return a.meta.name > b.meta.name ? 1 : -1;
+                if(user1.getName() != user2.getName()) {
+                    return user1.getName() > user2.getName() ? 1 : -1;
                 }
                 return 0;
             }
@@ -1719,22 +1719,24 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         // Listen for validation errors
         $scope.muted = SoundEffects.muted;
 
-        $scope.validation = {
-            name: {
-                minChars: 2,
-                maxChars: 50,
-                valid: true
-            },
-            city: {
-                minChars: 2,
-                maxChars: 50,
-                valid: true
-            },
-            profileLink: {
-                minChars: 0,
-                maxChars: 100,
-                valid: true
-            }
+        $scope.validation = {};
+
+        $scope.validation[bUserName] = {
+            minLength: 2,
+            maxLength: 50,
+            valid: true
+        };
+
+        $scope.validation[bUserLocation] = {
+            minLength: 0,
+            maxLength: 50,
+            valid: true
+        };
+
+        $scope.validation[bUserProfileLink] = {
+            minLength: 0,
+            maxLength: 100,
+            valid: true
         };
 
         $scope.$watchCollection('user.meta', function () {
@@ -1745,32 +1747,21 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
         // user
         $scope.$on(bShowProfileSettingsBox, (function () {
 
-            Log.notification(bShowProfileSettingsBox, 'ProfileSettingsController');
-
-            // Remove the previous listener
-            if($scope.ref) {
-                $scope.ref.off('value');
-            }
-
-            if($scope.getUser() && $scope.getUser().meta && $scope.getUser().meta.uid) {
-
-                // Create a firebase ref to the user
-                $scope.ref = Paths.userMetaRef($scope.getUser().meta.uid);
-
-                $scope.ref.on('value', function (snapshot) {
-
-                    $scope.validate();
-
-                    // This is a method created by the directive...
-                    $scope.setDateOfBirth(snapshot.val().dateOfBirth);
-
-                }, function (error) {
-                    if(DEBUG) console.log(error);
-                });
-
-            }
+            console.log("Show Profile");
 
         }).bind(this));
+    };
+
+    $scope.validateLocation = function () {
+        return $scope.validation[bUserLocation].valid;
+    };
+
+    $scope.validateProfileLink = function () {
+        return $scope.validation[bUserProfileLink].valid;
+    };
+
+    $scope.validateName= function () {
+        return $scope.validation[bUserName].valid;
     };
 
     $scope.toggleMuted = function () {
@@ -1833,24 +1824,34 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
 
     $scope.validate = function () {
 
-        var meta = $scope.getUser().meta;
+        var user = $scope.getUser();
 
         // Validate the user
-        var nameValid = meta.name && meta.name.length >= $scope.validation.name.minChars && meta.name.length <= $scope.validation.name.maxChars;
-        $scope.validation.name.valid = nameValid;
+        var nameValid = $scope.validateString(bUserName, user.getName());
+        var locationValid = $scope.validateString(bUserLocation, user.getLocation());
 
-        var cityValid = meta.city && meta.city.length >= $scope.validation.city.minChars && meta.city.length <= $scope.validation.city.maxChars;
-        $scope.validation.city.valid = cityValid;
+        var profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(bUserProfileLink, user.getProfileLink());
 
-        var profileLinkValid = meta.profileLink && meta.profileLink.length >= $scope.validation.profileLink.minChars && meta.profileLink.length <= $scope.validation.profileLink.maxChars;
-        profileLinkValid = $scope.isValidURL(meta.profileLink) || !Utils.unORNull(!meta.profileLink) || !meta.profileLink.length;
+        return nameValid && locationValid && profileLinkValid;
+    };
 
-        $scope.validation.profileLink.valid = profileLinkValid;
+    $scope.validateString = function (key, string) {
+       var valid = true;
 
-        var dateOfBirthValid = meta.dateOfBirth;
-        $scope.validation.dateOfBirth = dateOfBirthValid;
+       if(Utils.unORNull(string)) {
+           valid = false;
+       }
 
-        return nameValid && cityValid && dateOfBirthValid && profileLinkValid;
+       else if(string.length < $scope.validation[key].minLength) {
+           valid = false;
+       }
+
+       else if(string.length > $scope.validation[key].maxLength) {
+           valid = false;
+       }
+
+       $scope.validation[key].valid = valid;
+       return valid;
 
     };
 
@@ -1860,35 +1861,25 @@ myApp.controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'Soun
      */
     $scope.done = function () {
 
-        var dob = $scope.dateOfBirth;
-
-        $scope.user.meta.dateOfBirth = dob ? dob.getTime() : null;
-        $scope.user.meta.yearOfBirth = dob ? dob.getFullYear() : $scope.user.meta.yearOfBirth;
-
         // Is the name valid?
         if($scope.validate()) {
-            $scope.showMainBox();
-            $scope.ref.off('value');
-            $scope.ref = null;
 
+            $scope.showMainBox();
 
             // Did the user update any values?
             if($scope.dirty) {
-                $scope.user.pushMeta();
+                $scope.getUser().pushMeta();
                 $scope.dirty = false;
             }
         }
         else {
-            if(!$scope.validation.name.valid) {
-                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation.name.minChars+" - "+$scope.validation.name.maxChars+" characters long ", "Ok");
+            if(!$scope.validation[bUserName].valid) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation[bUserName].minLength+" - "+$scope.validation[bUserName].maxLength+" characters long ", "Ok");
             }
-            if(!$scope.validation.city.valid) {
-                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The city must be between "+$scope.validation.city.minChars+" - "+$scope.validation.city.maxChars+" characters long", "Ok");
+            if(!$scope.validation[bUserLocation].valid) {
+                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The location must be between "+$scope.validation[bUserLocation].minLength+" - "+$scope.validation[bUserLocation].maxLength+" characters long", "Ok");
             }
-            if(!$scope.validation.dateOfBirth.valid) {
-                $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The date of birth must be set", "Ok");
-            }
-            if(!$scope.validation.profileLink.valid) {
+            if(!$scope.validation[bUserProfileLink].valid) {
                 $scope.showNotification(bNotificationTypeAlert, "Validation failed", "The profile link must be a valid URL", "Ok");
             }
         }
@@ -1957,7 +1948,7 @@ myApp.controller('UserProfileBoxController', ['$scope', function($scope) {
     $scope.copyUserID = function () {
 
         // Get the ID
-        var id = $scope.currentUser.meta.uid;
+        var id = $scope.currentUser.uid();
 
         window.prompt("Copy to clipboard: Ctrl+C, Enter", id);
     };

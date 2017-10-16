@@ -1,6 +1,6 @@
 var myApp = angular.module('myApp.environment', []);
 
-myApp.factory('Environment', ['$rootScope', function ($rootScope) {
+myApp.factory('Environment', ['$rootScope', 'Utils', function ($rootScope, Utils) {
 
     var env = {
 
@@ -31,15 +31,20 @@ myApp.factory('Environment', ['$rootScope', function ($rootScope) {
         },
 
         partialsURL: function () {
-            return this.rootURL() + 'partials/';
+            if(this.options().partialsURL != null) {
+                return this.options().partialsURL + '/';
+            }
+            else {
+                return this.resourceRootURL() + 'partials/';
+            }
         },
 
         imagesURL: function () {
-            return this.rootURL() + 'img/';
+            return this.resourceRootURL() + 'img/';
         },
 
         audioURL: function () {
-            return this.rootURL() + 'audio/';
+            return this.resourceRootURL() + 'audio/';
         },
 
         defaultProfilePictureURL: function () {
@@ -56,6 +61,17 @@ myApp.factory('Environment', ['$rootScope', function ($rootScope) {
 
         cloudImageToken: function () {
             return this.options().cloudImageToken;
+        },
+
+        resourceRootURL: function () {
+            var url = this.options().resourceRootURL;
+            if(!Utils.unORNull(url)) {
+                if(!url[url.length - 1] == '/') {
+                    url += '/';
+                }
+                return url;
+            }
+            return this.rootURL();
         },
 
         rootPath: function () {

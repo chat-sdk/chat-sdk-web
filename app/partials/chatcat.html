@@ -2,8 +2,8 @@
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight"  >
 
         <div ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.thumbnail }}"  />
-            {{ userDrag.user.meta.name }}
+            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.getThumbnail() }}"  />
+            {{ userDrag.user.getName() }}
         </div>
 
         <div id="cc-base" >

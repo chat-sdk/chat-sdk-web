@@ -39,22 +39,25 @@
                            class="uk-width-1-1 "
                            type="text"
                            placeholder="Display name *"
-                           ng-model="user[config.disableUserNameChange ? 'dummyName' : 'meta'].name"
+                           ng-model="user.name"
+                           ng-model-options="{getterSetter: true}"
                            ng-readonly="config.disableUserNameChange"
                            ng-disabled="config.disableUserNameChange"
-                           ng-class="validation.name.valid ? '' : 'uk-form-danger'"/>
-                    <span ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.meta.name }}</span>
+                           ng-class="validateName() ? '' : 'uk-form-danger'"/>
+                    <span ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.getName() }}</span>
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1"
                               rows="3"
                               placeholder="Status"
-                              ng-model="user.meta.description"></textarea>
+                              ng-model="user.status"
+                              ng-model-options="{getterSetter: true}"></textarea>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Gender</div>
                     <select class="uk-width-1-2 uk-float-right"
-                            ng-model="user.meta.gender" required>
+                            ng-model="user.gender"
+                            ng-model-options="{ getterSetter: true}" required>
 
                         <option value="M">Male</option>
                         <option value="F">Female</option>
@@ -62,24 +65,21 @@
                     </select>
                 </div>
                 <div class="uk-form-row">
-                    <div class="uk-width-1-2 uk-float-left  uk-text-left">Date of birth</div>
-                    <!--<ng-include src=" partialsURL + 'year-of-birth-select.html'"></ng-include>-->
-                    <input class="uk-width-1-2 uk-float-right" type="text" pikaday="{{ user.meta.dateOfBirth }}">
-                </div>
-                <div class="uk-form-row">
                     <input class="uk-width-1-1"
                            type="text"
                            placeholder="City *"
-                           ng-model="user.meta.city"
-                           ng-class="validation.city.valid ? '' : 'uk-form-danger'"/>
+                           ng-model="user.location"
+                           ng-model-options="{ getterSetter: true}"
+                           ng-class="validateLocation() ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1 "
+                    <input class="uk-width-1-1 "$
                            ng-show="config.userProfileLinkEnabled"
                            type="url"
                            placeholder="Profile link... i.e. http://yoursite.com"
-                           ng-model="user.meta.profileLink"
-                           ng-class="validation.profileLink.valid ? '' : 'uk-form-danger'"/>
+                           ng-model="user.profileLink"
+                           ng-model-options="{ getterSetter: true}"
+                           ng-class="validateProfileLink() ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
                     <ng-include src=" partialsURL + 'countries-select.html'"></ng-include>
@@ -87,7 +87,9 @@
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Allow invites from</div>
                     <select class="uk-width-2-5 uk-float-right"
-                            ng-model="user.meta.allowInvites" required>
+                            ng-model="user.allowUserInvites"
+                            ng-model-options="{ getterSetter: true}"
+                            required>
 
                         <option value="Everyone">Everyone</option>
                         <option value="Friends">Friends</option>

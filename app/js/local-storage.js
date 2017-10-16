@@ -171,7 +171,7 @@ myApp.factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', 
         },
 
         updateUserFromStore: function (user) {
-            var su = this.users[user.meta.uid];
+            var su = this.users[user.uid()];
             if(su) {
                 user.deserialize(su);
                 return true;

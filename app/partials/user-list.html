@@ -1,26 +1,26 @@
 <table class="uk-table">
-    <span class="cc-section-header">{{ sectionHeader }}</span>
-    <tr ng-repeat="(id, aUser) in users" ng-mouseover="showProfileBox(aUser.meta.uid)" ng-mouseleave="showProfileBox(null)">
+    <!--<span class="cc-section-header">{{ sectionHeader }}</span>-->
+    <tr ng-repeat="(id, aUser) in users" ng-mouseover="showProfileBox(aUser.uid())" ng-mouseleave="showProfileBox(null)">
         <td style="position: relative"
             class="cc-row"
             ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'"
             draggable-user="user"
             ng-click="userClicked(aUser)">
 
-            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.thumbnail }}" title="{{ aUser.meta.uid }}"/>
+            <img class="cc-thumbnail-30 cc-user-image uk-float-left" ng-src="{{ aUser.getThumbnail() }}" title="{{ aUser.uid() }}"/>
 
-            <div class="uk-float-left cc-user-name cc-user-name" ng-class="aUser.meta.description ? 'cc-show-status' : ''" >
-                <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.meta.name }}</div>
+            <div class="uk-float-left cc-user-name cc-user-name" ng-class="aUser.getStatus() ? 'cc-show-status' : ''" >
+                <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.getName() }}</div>
                 <div class="f16 uk-float-left cc-flag" ng-show="aUser.meta.country" >
-                    <span class="flag {{ aUser.meta.country | lowercase }}"></span>
+                    <span class="flag {{ aUser.getCountryCode() | lowercase }}"></span>
                 </div>
             </div>
             <button class="uk-button uk-button-mini uk-button-danger uk-float-right" ng-show="aUser.blocked" >Unblock</button>
 
             <img class="uk-float-right cc-right-margin-5"  ng-src="{{ img_20_friend }}" ng-show="aUser.friend && !aUser.blocked" />
 
-            <div ng-show="aUser.meta.description" class="uk-float-left cc-user-subtitle cc-ellipsis cc-pointer">
-                {{ aUser.meta.description }}
+            <div ng-show="aUser.getStatus()" class="uk-float-left cc-user-subtitle cc-ellipsis cc-pointer">
+                {{ aUser.getStatus() }}
             </div>
         </td>
     </tr>

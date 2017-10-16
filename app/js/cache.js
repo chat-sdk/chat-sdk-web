@@ -94,8 +94,8 @@ myApp.factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'B
 
         // A cache of all users
         addUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.users[user.meta.uid] = user;
+            if(user && user.meta && user.uid()) {
+                this.users[user.uid()] = user;
             }
         },
 
@@ -179,7 +179,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
         buildRoomWithID: function (rid) {
 
             var room = new Room(rid);
-            room.associatedUserID = $rootScope.user.meta.uid;
+            room.associatedUserID = $rootScope.user.uid();
 
 //            room.height = bChatRoomHeight;
 //            room.width = bChatRoomWidth;
@@ -223,7 +223,7 @@ myApp.factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage',
                 if(this.rooms.hasOwnProperty(rid)) {
                     var room = this.rooms[rid];
                     // Make sure that we only return private rooms for the current user
-                    if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.meta.uid && room.usersMeta != {}) {
+                    if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.uid() && room.usersMeta != {}) {
                         rooms.push(this.rooms[rid]);
                     }
                 }
@@ -324,8 +324,8 @@ myApp.factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', functio
          */
 
         addBlockedUser: function (user) {
-            if(user && user.meta && user.meta.uid) {
-                this.blockedUsers[user.meta.uid] = user;
+            if(user && user.meta && user.uid()) {
+                this.blockedUsers[user.uid()] = user;
                 user.blocked = true;
                 $rootScope.$broadcast(bUserBlockedNotification);
             }

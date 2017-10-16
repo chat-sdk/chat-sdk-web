@@ -43,7 +43,7 @@
             <div ng-repeat="message in room.messages track by message.mid">
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.thumbnail }}" />
+                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.getThumbnail() }}" />
                         <span ng-show="message.type() == messageTypeText" class="cc-bubble" ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" ng-style="{'max-width': room.width - 80}" on-edit-message>
                             <div class="cc-enable-select" ng-bind-html="::message.text() | linky: '_blank' | emoji | newline"></div>
                         </span>
@@ -59,7 +59,7 @@
                     </div>
                     <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
                         <div class="cc-message-margin cc-ellipsis" ng-class="'uk-float-' + message.side">
-                            <span class="cc-user-name" ng-hide="message.hideName" class="uk-text-bold">{{ ::message.user.meta.name }}</span>
+                            <span class="cc-user-name" ng-hide="message.hideName" class="uk-text-bold">{{ ::message.user.getName() }}</span>
                         </div>
                         <div class="uk-float-left uk-width-1-1 time" ng-hide="message.hideTime">
                             {{ ::message.timeString }}
@@ -114,7 +114,7 @@
         <!--that results in the room data being modified that caues the room to be re-added-->
         <div class="cc-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
         <div class="cc-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
-            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.meta.name }}</div>
+            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.getName() }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
             <a ng-click="room.close()" ><img ng-src="{{ ::img_40_cross }}" /></a>
             <a ng-click="acceptInvitation()" ><img ng-src="{{ ::img_40_tick }}" /></a>
