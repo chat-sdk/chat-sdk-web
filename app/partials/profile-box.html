@@ -17,7 +17,7 @@
                 <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.getLocation() }}</div>
             </span>
             <div class="f32 uk-float-right" >
-                <span class="flag {{ currentUser.getLocation() | lowercase }}"></span>
+                <span class="flag {{ currentUser.getCountryCode() | lowercase }}"></span>
             </div>
             <span class="cc-user-id cc-pointer" ng-click="copyUserID()" >Copy ID</span>
         </div>

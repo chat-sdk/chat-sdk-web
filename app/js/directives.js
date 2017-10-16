@@ -291,17 +291,26 @@ myApp.directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPo
     };
 }]);
 
-//myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
-//    return function (scope, elm, attrs) {
-//        $document.mousemove((function (e) {
-//            //!elm.is(":hover")
-//            if(scope.currentUser && jQuery('#'+elm.attr('id')+':hover').length == 0) {
-//                // Keep the center of this box level with the mouse y
-//                elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
-//            }
-//        }).bind(this));
-//    };
-//}]);
+// This is used by the profile box - to keep it centered on the
+// mouse's y axis until we move into it
+myApp.directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
+   return function (scope, elm) {
+
+       elm.hover(function () {
+           scope.hover = true;
+       }, function () {
+           scope.hover = false;
+       });
+
+       $document.mousemove((function (e) {
+           //!elm.is(":hover")
+           if(scope.currentUser && !scope.hover) {
+               // Keep the center of this box level with the mouse y
+               elm.css({bottom: Screen.screenHeight - e.clientY - elm.height()/2});
+           }
+       }).bind(this));
+   };
+}]);
 
 myApp.directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', function ($rootScope, $document, $timeout, Screen) {
     return function (scope, elm, attrs) {
