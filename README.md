@@ -2,7 +2,7 @@
 
 ### Running on a local server 
 
-- Run 'npm install' in the root folder
+- Run `npm install` in the root folder
 
 - Inside the **app** directory run `bower install` to update the modules
 
