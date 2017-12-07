@@ -2,9 +2,11 @@
 
 ### Running on a local server 
 
-- In the termainal run `gulp` to start the Gulp script which will build the distribution and release versions of the app
+- Run 'npm install' in the root folder
 
 - Inside the **app** directory run `bower install` to update the modules
+
+- Run `gulp` to start the Gulp script which will build the distribution and release versions of the app
 
 - To test set your local web server to point to `app/dist`
 
