@@ -4,4 +4,4 @@ app/prod_test
 app/dist
 .idea
 app/bower_components
-
+app/.firebaserc

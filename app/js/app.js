@@ -38,8 +38,11 @@ var myApp = angular.module('myApp',
         'http://chatcatio-test.firebaseapp.com/partials/**',
         'http://chatcat.firebaseapp.com/partials/**',
         'http://chatcat/dist_test/partials/**',
-        'http://chatcat/dist/partials/**'
+        'http://chatcat/dist/partials/**',
+        'https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**'
     ]);
+    
+    console.log('https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**');
 
     $provide.decorator('$browser', ['$delegate', function ($delegate) {
         $delegate.onUrlChange = function () {};
