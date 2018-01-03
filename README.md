@@ -1,6 +1,6 @@
 # Chat SDK Web
 
-![Chat SDK Web Screenshot]()
+![Chat SDK Web Screenshot](https://raw.githubusercontent.com/chat-sdk/chat-sdk-web/chat_sdk_web/screenshot.png)
 
 ### Introduction
 
