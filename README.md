@@ -17,6 +17,11 @@ Features:
 - Social and anonymous login
 - Typing indicator
 
+If you're interested in trying out the Chat SDK, you can see the live demo which is hosted on Firebase Hosting. 
+
+#####[Live Demo](https://chat-sdk-v4.firebaseapp.com/)
+
+
 ### Project Setup (Important)
 
 The project uses several build tools:
