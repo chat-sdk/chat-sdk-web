@@ -19,8 +19,7 @@ Features:
 
 If you're interested in trying out the Chat SDK, you can see the live demo which is hosted on Firebase Hosting. 
 
-##### [Live Demo](https://chat-sdk-v4.firebaseapp.com/)
-
+# [Live Demo](https://chat-sdk-v4.firebaseapp.com/)
 
 ### Project Setup (Important)
 
