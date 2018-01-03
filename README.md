@@ -1,5 +1,7 @@
 # Chat SDK Web
 
+![Chat SDK Web Screenshot]()
+
 ### Introduction
 
 Chat SDK is a web version of the Chat SDK messenger written using AngularJS and powered by Firebase. 
