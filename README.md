@@ -30,7 +30,13 @@ The project uses several build tools:
 - **Bower**: Used to manage dependencies
 - **Gulp**: Used to build library
 
-The first step when you download the project is to use the terminal to navigate to the project directory. Then run `bower install`. That will install all the JavaScript dependencies. 
+Install the dependencies:
+
+```
+sudo npm install
+```
+
+Then use the terminal to navigate to the project directory. Then run `bower install`. That will install all the JavaScript dependencies. 
 
 Next you need to run `gulp` in the terminal. This will start the gulp daemon which will combine all the JavaScript source files into one single output file. It will also copy other assets like images and CSS files to the relevant ouput directories. 
 
