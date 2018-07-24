@@ -4,7 +4,7 @@
 var myApp = angular.module('myApp.firebase', ['firebase']).
     value('version', '0.1');
 
-myApp.factory('FirebaseUploadHandler', ['$q', function ($q) {
+myApp.factory('FirebaseUploadHandler', ['$q', 'firebase', function ($q, firebase) {
     return {
         uploadFile: function(file) {
             var deferred = $q.defer();
@@ -16,7 +16,10 @@ myApp.factory('FirebaseUploadHandler', ['$q', function ($q) {
             var ref = storageRef.child('web/'+ this.uuid() +'.jpg');
 
             ref.put(file).then(function(snapshot) {
-                deferred.resolve(snapshot.downloadURL);
+                ref.getDownloadURL().then(function(downloadURL) {
+                    console.log('File available at', downloadURL);
+                    deferred.resolve(downloadURL);
+                });
             });
 
             return deferred.promise;

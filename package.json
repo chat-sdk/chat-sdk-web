@@ -42,7 +42,8 @@
     "angular-sanitize": "latest",
     "angular-emoji-filter-hd": "latest",
     "howler": "latest",
-    "pikaday": "latest"
+    "pikaday": "latest",
+    "jquery": "latest"
   },
   "keywords": [
     "chat",

@@ -41,8 +41,8 @@
                            placeholder="Display name *"
                            data-ng-model="user.name"
                            data-ng-model-options="{getterSetter: true}"
-                           ng-readonly="config.disableUserNameChange"
-                           ng-disabled="config.disableUserNameChange"
+                           data-ng-readonly="config.disableUserNameChange"
+                           data-ng-disabled="config.disableUserNameChange"
                            data-ng-class="validateName() ? '' : 'uk-form-danger'"/>
                     <span data-ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.getName() }}</span>
                 </div>
@@ -51,7 +51,9 @@
                               rows="3"
                               placeholder="Status"
                               data-ng-model="user.status"
-                              data-ng-model-options="{getterSetter: true}"></textarea>
+                              data-ng-model-options="{getterSetter: true}">
+
+                    </textarea>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Gender</div>

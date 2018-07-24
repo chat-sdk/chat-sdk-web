@@ -175,8 +175,9 @@ myApp.factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths
 
             functionName = functionArguments.callee.toString().substr('function '.length);
             functionName = functionName.substr(0, functionName.indexOf('('));
-
             functionName = functionName.charAt(0).toUpperCase() + functionName.slice(1);
+            functionName = functionName.replace(" ", "");
+
             if(Utils.unORNull(value)) {
                 // Make the getter
                 functionName = "get" + functionName;

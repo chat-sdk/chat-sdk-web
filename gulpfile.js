@@ -9,7 +9,6 @@ var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
-var bower = require('gulp-bower');
 
 var changed = require('gulp-changed');
 var minifyHTML = require('gulp-minify-html');
@@ -17,8 +16,6 @@ var minifyHTML = require('gulp-minify-html');
 // include plug-ins
 var autoprefix = require('gulp-autoprefixer');
 var minifyCSS = require('gulp-minify-css');
-
-var bowerSrc = require('gulp-bower-src');
 
 var insert = require('gulp-insert');
 
@@ -107,8 +104,8 @@ gulp.task('scripts', function() {
 //        'node_modules/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
         'node_modules/jquery/dist/jquery.min.js',
 //        'node_modules/uikit/dist/js/uikit.min.js',
-        'node_modules/angular/angular.js',
-//        'node_modules/angular/angular.min.js',
+        'node_modules/@angular/core/angular.js',
+       'node_modules/angular/angular.min.js',
 //         'node_modules/angular-cookies/angular-cookies.min.js',
         'node_modules/jquery-cookie/jquery.cookie.js',
 //         'node_modules/angular-file-upload/dist/angular-file-upload.min.js',
