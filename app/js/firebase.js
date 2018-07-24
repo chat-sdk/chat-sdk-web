@@ -1,7 +1,7 @@
 /**
  * Created by benjaminsmiley-andrews on 19/07/17.
  */
-var myApp = angular.module('myApp.firebase', ['firebase', 'facebook']).
+var myApp = angular.module('myApp.firebase', ['firebase']).
     value('version', '0.1');
 
 myApp.factory('FirebaseUploadHandler', ['$q', function ($q) {

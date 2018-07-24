@@ -4,16 +4,16 @@
 
 // Demonstrate how to register services
 // In this case it is a simple value service.
-var myApp = angular.module('myApp.services', ['firebase', 'facebook']).
+var myApp = angular.module('myApp.services', ['firebase']).
   value('version', '0.1');
 
-myApp.config(['FacebookProvider', function(FacebookProvider) {
-    // Set your appId through the setAppId method or
-    // use the shortcut in the initialize method directly.
-    if(ChatSDKOptions.facebookAppID) {
-        FacebookProvider.init(ChatSDKOptions.facebookAppID);
-    }
-}]);
+// myApp.config(['FacebookProvider', function(FacebookProvider) {
+//     // Set your appId through the setAppId method or
+//     // use the shortcut in the initialize method directly.
+//     if(ChatSDKOptions.facebookAppID) {
+//         FacebookProvider.init(ChatSDKOptions.facebookAppID);
+//     }
+// }]);
 
 myApp.factory('CloudImage', ['Environment',function (Environment) {
     return {
@@ -425,8 +425,8 @@ myApp.factory('PathAnalyser', [function () {
     };
 }]);
 
-myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Facebook', 'RoomStore', 'UserStore', 'Room', 'Presence', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths',
-              function ($rootScope, $timeout, $http, $q, $firebase, Facebook, RoomStore, UserStore, Room, Presence, StateManager, Time, Upgrade, Utils, Paths) {
+myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'RoomStore', 'UserStore', 'Room', 'Presence', 'StateManager', 'Time', 'Upgrade', 'Utils', 'Paths',
+              function ($rootScope, $timeout, $http, $q, $firebase, RoomStore, UserStore, Room, Presence, StateManager, Time, Upgrade, Utils, Paths) {
 
     return {
 
@@ -509,7 +509,7 @@ myApp.factory('Auth', ['$rootScope', '$timeout', '$http', '$q', '$firebase', 'Fa
                 }
                 if(authUser.provider == "github") {
                     imageURL = userData.avatar_url;
-                    setUserProperty(bUserName, authUser.login)
+                    setUserProperty(bUserName, authUser.login);
                 }
                 if(authUser.provider == "google") {
                     imageURL = userData.picture;

@@ -228,7 +228,7 @@ myApp.factory('Utils', [function () {
 
 }]);
 
-myApp.factory('ArrayUtils', [function () {
+myApp.factory('ArrayUtils', ['Utils', function (Utils) {
 
     return {
 
@@ -303,7 +303,7 @@ myApp.factory('ArrayUtils', [function () {
                 return array;
             }
             else {
-                // Loop over all users
+                // Loop over all elements
                 var result = [];
                 var elm, t1, t2;
                 for(var i = 0; i < array.length; i++) {
@@ -311,10 +311,13 @@ myApp.factory('ArrayUtils', [function () {
                     elm = array[i];
                     // Switch to lower case and remove spaces
                     // to improve search results
-                    t1 = key.toLowerCase().replace(/ /g,'');
-                    t2 = getKey(elm).toLowerCase().replace(/ /g,'');
-                    if(t2.substring(0, t1.length) == t1) {
-                        result.push(elm);
+                    var elmKey = getKey(elm);
+                    if (!Utils.unORNull(key) && !Utils.unORNull(elmKey)) {
+                        t1 = key.toLowerCase().replace(/ /g,'');
+                        t2 = elmKey.toLowerCase().replace(/ /g,'');
+                        if(t2.length >= t1.length && t2.substring(0, t1.length) == t1) {
+                            result.push(elm);
+                        }
                     }
                 }
                 return result;

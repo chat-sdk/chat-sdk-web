@@ -56,7 +56,7 @@ It's important to have some understanding of the file structure so you can under
 To do this, lets look at the `index.html` file in more detail:
 
 ```
-<div ng-app="myApp" ><ng-include src=" partialsURL + 'chatcat.html'" ng-controller="AppController"></ng-include></div>
+<div ng-app="myApp" ><div data-ng-include src=" partialsURL + 'chatcat.html'" data-ng-controller="AppController"></div></div>
 ```
 
 This is a placeholder used by AngularJS. It loads up the base HTML for the Chat SDK and the JavaScript controller. 

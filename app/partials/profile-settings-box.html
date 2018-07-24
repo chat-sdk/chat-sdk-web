@@ -1,16 +1,16 @@
-<div ng-controller="ProfileSettingsController" id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" ng-style="{'margin-right': config.marginRight}" >
+<div data-ng-controller="ProfileSettingsController" id="cc-profile-settings-box" class="cc-box cc-root-box cc-shadow" data-ng-style="{'margin-right': config.marginRight}" >
 
     <div class="cc-clear-cache-icon" title="Clear cache">
-        <button ng-click="clearCache()" >
-            <img ng-src="{{ img_30_clear_cache }}" ng-show="!cacheCleared" />
-            <img ng-src="{{ img_30_cache_cleared }}" ng-show="cacheCleared" />
+        <button data-ng-click="clearCache()" >
+            <img data-ng-src="{{ img_30_clear_cache }}" data-ng-show="!cacheCleared" />
+            <img data-ng-src="{{ img_30_cache_cleared }}" data-ng-show="cacheCleared" />
         </button>
     </div>
 
     <div class="cc-sound-icon">
-        <button ng-click="toggleMuted()">
-            <img ng-src="{{ img_30_sound_on }}" ng-show="!muted" />
-            <img ng-src="{{ img_30_sound_off }}" ng-show="muted" />
+        <button data-ng-click="toggleMuted()">
+            <img data-ng-src="{{ img_30_sound_on }}" data-ng-show="!muted" />
+            <img data-ng-src="{{ img_30_sound_off }}" data-ng-show="muted" />
         </button>
     </div>
 
@@ -19,45 +19,45 @@
             <form class="uk-panel uk-form">
                 <div class="uk-form-row">
                         <div class="uk-container-center cc-thumbnail-100"
-                             ng-style="{'background':'url('+user.image+')'}">
+                             data-ng-style="{'background':'url('+user.image+')'}">
 
                         <input class="cc-hidden-input"
                                type="file"
-                               ngf-select="onFileSelect($files)">
+                               data-ngf-select="onFileSelect($files)">
                     </div>
                     <div class="uk-progress uk-progress-mini uk-width-4-5 uk-container-center cc-animated-200"
-                         ng-style="uploadingFile ? {} : {'height': '0', 'margin-top':'-6px'}" >
+                         data-ng-style="uploadingFile ? {} : {'height': '0', 'margin-top':'-6px'}" >
 
                         <div class="uk-progress-bar"
-                             ng-style="{'width': uploadProgress + '%', 'opacity': uploadingFile ? 1 : 0}">
+                             data-ng-style="{'width': uploadProgress + '%', 'opacity': uploadingFile ? 1 : 0}">
 
                         </div>
                     </div>
                 </div>
                 <div class="uk-form-row">
-                    <input ng-show="!config.disableUserNameChange"
+                    <input data-ng-show="!config.disableUserNameChange"
                            class="uk-width-1-1 "
                            type="text"
                            placeholder="Display name *"
-                           ng-model="user.name"
-                           ng-model-options="{getterSetter: true}"
+                           data-ng-model="user.name"
+                           data-ng-model-options="{getterSetter: true}"
                            ng-readonly="config.disableUserNameChange"
                            ng-disabled="config.disableUserNameChange"
-                           ng-class="validateName() ? '' : 'uk-form-danger'"/>
-                    <span ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.getName() }}</span>
+                           data-ng-class="validateName() ? '' : 'uk-form-danger'"/>
+                    <span data-ng-show="config.disableUserNameChange" class="uk-text-bold">{{ user.getName() }}</span>
                 </div>
                 <div class="uk-form-row">
                     <textarea class="uk-width-1-1"
                               rows="3"
                               placeholder="Status"
-                              ng-model="user.status"
-                              ng-model-options="{getterSetter: true}"></textarea>
+                              data-ng-model="user.status"
+                              data-ng-model-options="{getterSetter: true}"></textarea>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Gender</div>
                     <select class="uk-width-1-2 uk-float-right"
-                            ng-model="user.gender"
-                            ng-model-options="{ getterSetter: true}" required>
+                            data-ng-model="user.gender"
+                            data-ng-model-options="{ getterSetter: true}" required>
 
                         <option value="M">Male</option>
                         <option value="F">Female</option>
@@ -68,27 +68,27 @@
                     <input class="uk-width-1-1"
                            type="text"
                            placeholder="City *"
-                           ng-model="user.location"
-                           ng-model-options="{ getterSetter: true}"
-                           ng-class="validateLocation() ? '' : 'uk-form-danger'"/>
+                           data-ng-model="user.location"
+                           data-ng-model-options="{ getterSetter: true}"
+                           data-ng-class="validateLocation() ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
                     <input class="uk-width-1-1 "$
-                           ng-show="config.userProfileLinkEnabled"
+                           data-data-ng-show="config.userProfileLinkEnabled"
                            type="url"
                            placeholder="Profile link... i.e. http://yoursite.com"
-                           ng-model="user.profileLink"
-                           ng-model-options="{ getterSetter: true}"
-                           ng-class="validateProfileLink() ? '' : 'uk-form-danger'"/>
+                           data-ng-model="user.profileLink"
+                           data-ng-model-options="{ getterSetter: true}"
+                           data-ng-class="validateProfileLink() ? '' : 'uk-form-danger'"/>
                 </div>
                 <div class="uk-form-row">
-                    <ng-include src=" partialsURL + 'countries-select.html'"></ng-include>
+                    <div data-ng-include src=" partialsURL + 'countries-select.html'"></div>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-width-1-2 uk-float-left uk-text-left" >Allow invites from</div>
                     <select class="uk-width-2-5 uk-float-right"
-                            ng-model="user.allowUserInvites"
-                            ng-model-options="{ getterSetter: true}"
+                            data-ng-model="user.allowUserInvites"
+                            data-ng-model-options="{ getterSetter: true}"
                             required>
 
                         <option value="Everyone">Everyone</option>
@@ -100,19 +100,19 @@
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
                         <div class="uk-width-1-2"
-                             ng-show="loginMode=='simple'">
+                             data-ng-show="loginMode=='simple'">
 
                             <button class="uk-width-1-1 uk-button uk-button-danger"
-                                    ng-click="logout()">Logout</button>
+                                    data-ng-click="logout()">Logout</button>
                         </div>
-                        <div ng-class="loginMode=='simple' ? 'uk-width-1-2' : 'uk-width-1-1'">
+                        <div data-ng-class="loginMode=='simple' ? 'uk-width-1-2' : 'uk-width-1-1'">
                             <button class="uk-width-1-1 uk-button uk-button-primary"
-                                    ng-click="done()">Done</button>
+                                    data-ng-click="done()">Done</button>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <ng-include src=" partialsURL + 'notification.html'"></ng-include>
+    <div data-ng-include src=" partialsURL + 'notification.html'"></div>
 </div>

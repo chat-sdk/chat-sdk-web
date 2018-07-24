@@ -1,66 +1,66 @@
-<div id="cc-login-box" class="cc-box cc-root-box cc-shadow" ng-controller="LoginController" ng-style="{'margin-right': config.marginRight}">
+<div id="cc-login-box" class="cc-box cc-root-box cc-shadow" data-ng-controller="LoginController" data-ng-style="{'margin-right': config.marginRight}">
 
     <div class="uk-vertical-align uk-text-center uk-height-1-1">
         <div class="uk-vertical-align-middle uk-width-1-1" >
 
-            <div class="cc-box-header" ng-show="loginMode != 'clickToChat'" ng-style="{background: config.headerColor}">Login or Register</div>
+            <div class="cc-box-header" data-ng-show="loginMode != 'clickToChat'" data-ng-style="{background: config.headerColor}">Login or Register</div>
 
-            <form ng-show="loginMode == 'simple'" class="uk-panel uk-form cc-inner-margin">
+            <form data-ng-show="loginMode == 'simple'" class="uk-panel uk-form cc-inner-margin">
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="Email" ng-model="email" enter-submit="loginWithPassword()" required />
+                    <input class="uk-width-1-1" type="text" placeholder="Email" data-ng-model="email" enter-submit="loginWithPassword()" required />
                 </div>
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="password" placeholder="Password" ng-model="password" enter-submit="loginWithPassword()" required />
+                    <input class="uk-width-1-1" type="password" placeholder="Password" data-ng-model="password" enter-submit="loginWithPassword()" required />
                     {{ passwordFocus }}
                 </div>
-                <div ng-show="showError" class="uk-form-row uk-alert uk-alert-danger">
+                <div data-ng-show="showError" class="uk-form-row uk-alert uk-alert-danger">
                     {{ errorMessage }}
                 </div>
 
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
                         <div class="uk-width-1-2">
-                            <button class="uk-button uk-button-primary uk-width-1-1" ng-click="loginWithPassword()">Login</button>
+                            <button class="uk-button uk-button-primary uk-width-1-1" data-ng-click="loginWithPassword()">Login</button>
                         </div>
                         <div class="uk-width-1-2">
-                            <button class="uk-button uk-button-success uk-width-1-1"  ng-click="signUp(email, password)">Sign up</button>
+                            <button class="uk-button uk-button-success uk-width-1-1"  data-ng-click="signUp(email, password)">Sign up</button>
                         </div>
                     </div>
                 </div>
                 <div class="uk-form-row uk-text-small">
-                    <label class="uk-float-left cc-dark"><input type="checkbox" ng-model="rememberMe">&nbsp;Remember Me</label>
-                    <a class="uk-float-right uk-link uk-link-muted cc-dark " ng-click="forgotPassword(email)" >Forgot Password?</a>
+                    <label class="uk-float-left cc-dark"><input type="checkbox" data-ng-model="rememberMe">&nbsp;Remember Me</label>
+                    <a class="uk-float-right uk-link uk-link-muted cc-dark " data-ng-click="forgotPassword(email)" >Forgot Password?</a>
                 </div>
-                <div class="uk-form-row" ng-show="config.socialLoginEnabled">
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" ng-click="loginWithFacebook()"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter cc-dark" ng-click="loginWithTwitter()"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-github cc-dark" ng-click="loginWithGithub()"></a>
-                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus cc-dark" ng-click="loginWithGoogle()"></a>
+                <div class="uk-form-row" data-ng-show="config.socialLoginEnabled">
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-facebook cc-dark" data-ng-click="loginWithFacebook()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-twitter cc-dark" data-ng-click="loginWithTwitter()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-github cc-dark" data-ng-click="loginWithGithub()"></a>
+                    <a class="uk-width-1-4 uk-icon-button uk-icon-google-plus cc-dark" data-ng-click="loginWithGoogle()"></a>
                 </div>
-                <div class="uk-form-row" ng-show="config.anonymousLoginEnabled">
-                    <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" ng-click="loginWithAnonymous()">Anonymous Login</button>
+                <div class="uk-form-row" data-ng-show="config.anonymousLoginEnabled">
+                    <button class="uk-width-1-1 uk-button uk-button-danger uk-button-small" data-ng-click="loginWithAnonymous()">Anonymous Login</button>
                 </div>
             </form>
-            <form ng-show="loginMode == 'singleSignOn'" class="uk-panel uk-form cc-inner-margin">
-                <a ng-show="loginURL" ng-href="{{ loginURL }}"> Login </a>
-                <div ng-hide="loginURL"> Login </div>
+            <form data-ng-show="loginMode == 'singleSignOn'" class="uk-panel uk-form cc-inner-margin">
+                <a data-ng-show="loginURL" data-ng-href="{{ loginURL }}"> Login </a>
+                <div data-ng-hide="loginURL"> Login </div>
                 &nbsp;or
-                <a ng-show="registerURL" ng-href="{{ registerURL }}"> Register </a>
-                <div ng-hide="registerURL"> Register </div>
+                <a data-ng-show="registerURL" data-ng-href="{{ registerURL }}"> Register </a>
+                <div data-ng-hide="registerURL"> Register </div>
                 &nbsp;with {{ websiteName }} to start chatting!
             </form>
-            <form ng-show="loginMode == 'token'" class="uk-panel uk-form cc-inner-margin">
+            <form data-ng-show="loginMode == 'token'" class="uk-panel uk-form cc-inner-margin">
                 Login token not valid
             </form>
-            <form ng-show="loginMode == 'authenticating'" class="uk-panel uk-form cc-inner-margin">
-                Authenticating... <img ng-src="{{ ::img_loader }}" width="26" height="26" />
+            <form data-ng-show="loginMode == 'authenticating'" class="uk-panel uk-form cc-inner-margin">
+                Authenticating... <img data-ng-src="{{ ::img_loader }}" width="26" height="26" />
             </form>
-            <form ng-show="loginMode == 'clickToChat'" class="uk-panel uk-form cc-inner-margin">
-                <div class="cc-pointer" ng-click="startChatting()">Click to start chatting!&nbsp;&nbsp;&nbsp; <img class="cc-image-30" ng-src="{{ ::img_30_start_chatting }}" /></div>
+            <form data-ng-show="loginMode == 'clickToChat'" class="uk-panel uk-form cc-inner-margin">
+                <div class="cc-pointer" data-ng-click="startChatting()">Click to start chatting!&nbsp;&nbsp;&nbsp; <img class="cc-image-30" data-ng-src="{{ ::img_30_start_chatting }}" /></div>
             </form>
             <!--<iframe social-iframe src="https://chatcat.firebaseapp.com/partials/social.html" style="display: none" ></iframe>-->
         </div>
     </div>
 
-    <ng-include src=" partialsURL + 'notification.html'" ></ng-include>
+    <div data-ng-include src=" partialsURL + 'notification.html'" ></div>
 </div>

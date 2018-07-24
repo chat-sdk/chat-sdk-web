@@ -2,7 +2,7 @@
  * Created by benjaminsmiley-andrews on 19/07/17.
  */
 
-var myApp = angular.module('myApp.network', ['firebase', 'facebook']).
+var myApp = angular.module('myApp.network', ['firebase']).
     value('version', '0.1');
 
 myApp.factory('NetworkManager', ['$q', 'FirebaseUploadHandler', 'Interface', function ($q, FirebaseUploadHandler, Interface) {

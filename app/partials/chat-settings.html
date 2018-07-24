@@ -1,24 +1,24 @@
-<div ng-controller="ChatSettingsController">
+<div data-ng-controller="ChatSettingsController">
     <table class="uk-table">
         <tr>
             <td>Save conversation
-                <button class="uk-button uk-float-right" ng-click="saveTranscript()">
-                    <img ng-src="{{ ::img_24_save }}">
+                <button class="uk-button uk-float-right" data-ng-click="saveTranscript()">
+                    <img data-ng-src="{{ ::img_24_save }}">
                 </button>
             </td>
         </tr>
         <tr>
             <td>Copy to clipboard
-                <button class="uk-button uk-float-right" ng-click="copyTranscript()">
-                    <img ng-src="{{ ::img_24_copy }}">
+                <button class="uk-button uk-float-right" data-ng-click="copyTranscript()">
+                    <img data-ng-src="{{ ::img_24_copy }}">
                 </button>
             </td>
         </tr>
         <tr>
             <td>
                 Leave room
-                <button class="uk-button uk-float-right uk-button-danger" ng-click="leaveRoom()">
-                    <img ng-src="{{ ::img_24_cross }}">
+                <button class="uk-button uk-float-right uk-button-danger" data-ng-click="leaveRoom()">
+                    <img data-ng-src="{{ ::img_24_cross }}">
                 </button>
             </td>
         </tr>

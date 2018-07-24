@@ -1,67 +1,67 @@
 <!--The 30 in the height is to take account for the bottom bar-->
-<div class="cc-chat-box-outer" ng-show="room.active" ng-style="{right: room.offset, height: (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location animate-room>
+<div class="cc-chat-box-outer" data-ng-show="room.active" data-ng-style="{right: room.offset, height: (room.height + 30), 'z-index' : getZIndex()}" draggable-room user-drop-location animate-room>
 
-    <div class="cc-chat-box cc-shadow" ng-style="{height: room.height, width: room.width}" ng-hide="room.minimized" >
-        <div class="cc-box-header cc-pointer" ng-style="{'background-color': config.headerColor}" cc-flash="room-header">
-            <a class="uk-float-right cc-image-30" title="Hide Chat" ng-click="minimize()">
-                <img ng-src="{{ ::img_30_minimize }}" />
+    <div class="cc-chat-box cc-shadow" data-ng-style="{height: room.height, width: room.width}" data-ng-hide="room.minimized" >
+        <div class="cc-box-header cc-pointer" data-ng-style="{'background-color': config.headerColor}" cc-flash="room-header">
+            <a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="minimize()">
+                <img data-ng-src="{{ ::img_30_minimize }}" />
             </a>
             <a class="uk-float-left cc-image-30 cc-resize-cursor" title="Resize room" resize-room>
-                <img ng-src="{{ ::img_30_resize }}" />
+                <img data-ng-src="{{ ::img_30_resize }}" />
             </a>
-            <div class="cc-ellipsis uk-float-left cc-pointer" ng-style="{width: room.width - 60}">{{ room.name }}</div>
+            <div class="cc-ellipsis uk-float-left cc-pointer" data-ng-style="{width: room.width - 60}">{{ room.name }}</div>
         </div>
 
         <div class="cc-tab-container cc-bottom-shadow">
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'messages' ? {'border-bottom-color': config.headerColor} : null"
-                 ng-class="{selected: activeTab == 'messages'}"
-                 ng-click="tabClicked('messages')">
+                 data-ng-style="activeTab == 'messages' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'messages'}"
+                 data-ng-click="tabClicked('messages')">
                 MESSAGES
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
-                 ng-class="{selected: activeTab == 'users'}"
-                 ng-click="tabClicked('users')">
+                 data-ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'users'}"
+                 data-ng-click="tabClicked('users')">
                 USERS
             </div>
             <div class="cc-tab cc-tab-small cc-tab-1-3"
-                 ng-style="activeTab == 'settings' ? {'border-bottom-color': config.headerColor} : null"
-                 ng-class="{selected: activeTab == 'settings'}"
-                 ng-click="tabClicked('settings')">
+                 data-ng-style="activeTab == 'settings' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'settings'}"
+                 data-ng-click="tabClicked('settings')">
                 SETTINGS
             </div>
         </div>
 
-        <div ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" ng-style="{'height': room.height - 30 - 30}" stop-shake>
-            <ng-include ng-controller="UserListController" ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></ng-include>
-            <ng-include ng-show="activeTab == 'settings'" src="partialsURL + 'chat-settings.html'"></ng-include>
+        <div data-ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" data-ng-style="{'height': room.height - 30 - 30}" stop-shake>
+            <div data-ng-include data-ng-controller="UserListController" data-ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></div>
+            <div data-ng-include data-ng-show="activeTab == 'settings'" src="partialsURL + 'chat-settings.html'"></div>
         </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div ng-show="!showEmojis && activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake disable-drag>
-            <div ng-repeat="message in room.messages track by message.mid">
+        <div data-ng-show="!showEmojis && activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue data-ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake disable-drag>
+            <div data-ng-repeat="message in room.messages track by message.mid">
                 <div>
                     <div class="cc-message-outer">
-                        <img class="cc-thumbnail-30" ng-class="'cc-abs-' + message.side" ng-src="{{ message.user.getThumbnail() }}" />
-                        <span ng-show="message.type() == messageTypeText" class="cc-bubble" ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" ng-style="{'max-width': room.width - 80}" on-edit-message>
-                            <div class="cc-enable-select" ng-bind-html="::message.text() | linky: '_blank' | emoji | newline"></div>
+                        <img class="cc-thumbnail-30" data-ng-class="'cc-abs-' + message.side" data-ng-src="{{ message.user.getThumbnail() }}" />
+                        <span data-ng-show="message.type() == messageTypeText" class="cc-bubble" data-ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" data-ng-style="{'max-width': room.width - 80}" on-edit-message>
+                            <span class="cc-enable-select" data-ng-bind-html="::message.text() | linky: '_blank' | emoji | newline"></span>
                         </span>
-                        <span ng-show="message.type() == messageTypeImage" class="cc-bubble cc-image-bubble" ng-class="'cc-' + message.side + '-bubble'" ng-style="{'max-width': room.width - 80}" on-edit-message>
-                            <a href="{{ message.imageURL }}" target="_blank"><img ng-src="{{ ::message.thumbnailURL }}"></a></span>
+                        <span data-ng-show="message.type() == messageTypeImage" class="cc-bubble cc-image-bubble" data-ng-class="'cc-' + message.side + '-bubble'" data-ng-style="{'max-width': room.width - 80}" on-edit-message>
+                            <a href="{{ message.imageURL }}" target="_blank"><img data-ng-src="{{ ::message.thumbnailURL }}"></a></span>
                         </span>
-                        <span class="cc-flag" ng-class="'cc-' + message.side + '-flag'" ng-show="message.side == 'left'">
-                            <a class="cc-pointer" ng-click="room.toggleMessageFlag(message)">
-                                <img ng-show="!message.flagged" ng-src="{{ ::img_20_flag }}"/>
-                                <img ng-show="message.flagged" ng-src="{{ ::img_20_flagged }}"/>
+                        <span class="cc-flag" data-ng-class="'cc-' + message.side + '-flag'" data-ng-show="message.side == 'left'">
+                            <a class="cc-pointer" data-ng-click="room.toggleMessageFlag(message)">
+                                <img data-ng-show="!message.flagged" data-ng-src="{{ ::img_20_flag }}"/>
+                                <img data-ng-show="message.flagged" data-ng-src="{{ ::img_20_flagged }}"/>
                             </a>
                         </span>
                     </div>
-                    <div class="cc-message-outer uk-text-small" ng-hide="message.hideName && message.hideTime">
-                        <div class="cc-message-margin cc-ellipsis" ng-class="'uk-float-' + message.side">
-                            <span class="cc-user-name" ng-hide="message.hideName" class="uk-text-bold">{{ ::message.user.getName() }}</span>
+                    <div class="cc-message-outer uk-text-small" data-ng-hide="message.hideName && message.hideTime">
+                        <div class="cc-message-margin cc-ellipsis" data-ng-class="'uk-float-' + message.side">
+                            <span class="cc-user-name" data-ng-hide="message.hideName" class="uk-text-bold">{{ ::message.user.getName() }}</span>
                         </div>
-                        <div class="uk-float-left uk-width-1-1 time" ng-hide="message.hideTime">
+                        <div class="uk-float-left uk-width-1-1 time" data-ng-hide="message.hideTime">
                             {{ ::message.timeString }}
                         </div>
                     </div>
@@ -73,38 +73,38 @@
         </div>
 
         <div class="cc-emoji uk-overflow-container"
-             ng-show="showEmojis && activeTab == 'messages'"
-             ng-style="{'height': room.height - 30 - 30 - inputHeight}"
+             data-ng-show="showEmojis && activeTab == 'messages'"
+             data-ng-style="{'height': room.height - 30 - 30 - inputHeight}"
              stop-shake
              disable-drag>
-            <ng-include src="partialsURL + 'emojis.html'"></ng-include>
+            <div data-ng-include src="partialsURL + 'emojis.html'"></div>
         </div>
 
-        <div class="cc-chat-box-msg" ng-show="activeTab == 'messages'" disable-drag>
+        <div class="cc-chat-box-msg" data-ng-show="activeTab == 'messages'" disable-drag>
             <div class="cc-typing-indicator">
                 {{ room.typingMessage }}
             </div>
             <textarea class="cc-chat-box-msg-txt"
-                      ng-model="input.text"
+                      data-ng-model="input.text"
                       enter-submit="sendMessage()"
                       fit-text="84"
-                      ng-style="{'width': room.width - 60}"
+                      data-ng-style="{'width': room.width - 60}"
                       placeholder="Type message here..."
-                      ng-blur="setTyping(false)"
-                      ng-keyup="setTyping(true)" ></textarea>
-            <button class="cc-emoji-button" ng-click="toggleEmoticons()">
-                <img ng-src="{{ ::img_30_emojis }}">
+                      data-ng-blur="setTyping(false)"
+                      data-ng-keyup="setTyping(true)" ></textarea>
+            <button class="cc-emoji-button" data-ng-click="toggleEmoticons()">
+                <img data-ng-src="{{ ::img_30_emojis }}">
             </button>
-            <!--<button class="cc-image-button" ng-click="sendImageMessage()">-->
-                <!--<img ng-src="{{ ::img_30_image }}">-->
+            <!--<button class="cc-image-button" data-ng-click="sendImageMessage()">-->
+                <!--<img data-ng-src="{{ ::img_30_image }}">-->
             <!--</button>-->
-            <div class="cc-image-button uk-container-center" ng-show="config.imageMessagesEnabled">
+            <div class="cc-image-button uk-container-center" data-ng-show="config.imageMessagesEnabled">
                 <input class="cc-hidden-input"
                 type="file"
-                ng-file-select="sendImageMessage($files, room)"
-                ng-click="startImageUpload()">
-                <img ng-src="{{ ::img_30_image }}" ng-show="!uploadingImage">
-                <img ng-src="{{ ::img_loader }}" width="25" height="25" ng-show="uploadingImage">
+                data-file-select="sendImageMessage($files, room)"
+                data-ng-click="startImageUpload()">
+                <img data-ng-src="{{ ::img_30_image }}" data-ng-show="!uploadingImage">
+                <img data-ng-src="{{ ::img_loader }}" width="25" height="25" data-ng-show="uploadingImage">
             </div>
 
         </div>
@@ -112,28 +112,28 @@
         <!--The overlay that appears if the user hasn't accepted the invitation-->
         <!--We disable drag here because otherwise when the user clicks they also start a drag-->
         <!--that results in the room data being modified that caues the room to be re-added-->
-        <div class="cc-overlay cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" ></div>
-        <div class="cc-overlay-content cc-overlay-white" ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
+        <div class="cc-overlay cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'" ></div>
+        <div class="cc-overlay-content cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'" disable-drag>
             <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.getName() }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
-            <a ng-click="room.close()" ><img ng-src="{{ ::img_40_cross }}" /></a>
-            <a ng-click="acceptInvitation()" ><img ng-src="{{ ::img_40_tick }}" /></a>
+            <a data-ng-click="room.close()" ><img data-ng-src="{{ ::img_40_cross }}" /></a>
+            <a data-ng-click="acceptInvitation()" ><img data-ng-src="{{ ::img_40_tick }}" /></a>
         </div>
     </div>
 
-    <div ng-show="room.badge" class="cc-badge cc-shadow">
+    <div data-ng-show="room.badge" class="cc-badge cc-shadow">
         {{ room.badge }}
     </div>
 
-    <div class="cc-chat-bar" ng-click="toggleVisibility()" >
+    <div class="cc-chat-bar" data-ng-click="toggleVisibility()" >
         <div class="cc-base-text">
             <div class="cc-inner">
                 <div class="uk-float-left cc-ellipsis cc-name cc-pointer">{{ room.name }}</div>
-                <a ng-click="room.close()">
-                    <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_cross }}" disable-drag/>
+                <a data-ng-click="room.close()">
+                    <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_cross }}" disable-drag/>
                 </a>
-                <a ng-show="room.minimized">
-                    <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_maximize }}" disable-drag/>
+                <a data-ng-show="room.minimized">
+                    <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_maximize }}" disable-drag/>
                 </a>
                 <div class="uk-float-right">{{ room.onlineUserCount }}</div>
             </div>

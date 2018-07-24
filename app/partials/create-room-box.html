@@ -1,40 +1,40 @@
-<div id="cc-create-room-box" class="cc-box cc-root-box cc-shadow" ng-controller="CreateRoomController">
+<div id="cc-create-room-box" class="cc-box cc-root-box cc-shadow" data-ng-controller="CreateRoomController">
 
-    <div class="cc-box-header" ng-style="{background: config.headerColor}">Create room</div>
+    <div class="cc-box-header" data-ng-style="{background: config.headerColor}">Create room</div>
 
     <div class="uk-vertical-align uk-text-center uk-height-1-1 cc-inner-margin" >
         <div class="uk-vertical-align-middle uk-width-1-1">
 
             <form class=" uk-form">
                 <div class="uk-form-row">
-                    <input class="uk-width-1-1" type="text" placeholder="Name" ng-model="room.name" cc-focus="focusName" ng-blur="focusName = false" required />
+                    <input class="uk-width-1-1" type="text" placeholder="Name" data-ng-model="room.name" cc-focus="focusName" data-ng-blur="focusName = false" required />
                 </div>
                 <div class="uk-form-row">
-                    <textarea class="uk-width-1-1" rows="3" placeholder="Description" ng-model="room.description"></textarea>
+                    <textarea class="uk-width-1-1" rows="3" placeholder="Description" data-ng-model="room.description"></textarea>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-float-left">
                         Make room public
                     </div>
                     <div class="uk-float-right">
-                        <input type="checkbox" ng-model="public">
+                        <input type="checkbox" data-ng-model="public">
                     </div>
                 </div>
-                <div class="uk-form-row" ng-hide="public">
+                <div class="uk-form-row" data-ng-hide="public">
                     <div class="uk-float-left">
                         Member can invite other users
                     </div>
                     <div class="uk-float-right">
-                        <input type="checkbox" ng-model="room.invitesEnabled">
+                        <input type="checkbox" data-ng-model="room.invitesEnabled">
                     </div>
                 </div>
                 <div class="uk-form-row">
                     <div class="uk-grid uk-grid-small">
                         <div class="uk-width-1-2">
-                            <a class="uk-width-1-1 uk-button uk-button-danger" ng-click="back()">Back</a>
+                            <a class="uk-width-1-1 uk-button uk-button-danger" data-ng-click="back()">Back</a>
                         </div>
                         <div class="uk-width-1-2">
-                            <a class="uk-width-1-1 uk-button uk-button-success" ng-click="createRoom()">Create</a>
+                            <a class="uk-width-1-1 uk-button uk-button-success" data-ng-click="createRoom()">Create</a>
                         </div>
                     </div>
                 </div>

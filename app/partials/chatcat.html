@@ -1,55 +1,55 @@
 
 <div id="cc-app" style="display: none" cc-uncloak class="cc-disable-highlight"  >
 
-        <div ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" ng-show="userDrag.visible" ng-style="{'left':userDrag.x, 'top':userDrag.y}">
-            <img class="cc-thumbnail-20"  ng-src="{{ userDrag.user.getThumbnail() }}"  />
+        <div data-ng-controller="DraggableUserController" class="cc-user-drag cc-ellipsis" data-ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" data-ng-show="userDrag.visible" data-ng-style="{'left':userDrag.x, 'top':userDrag.y}">
+            <img class="cc-thumbnail-20"  data-ng-src="{{ userDrag.user.getThumbnail() }}"  />
             {{ userDrag.user.getName() }}
         </div>
 
         <div id="cc-base" >
 
-            <div id="cc-menu-bar" class="cc-menu-bar" ng-click="toggleMainBoxVisibility()">
+            <div id="cc-menu-bar" class="cc-menu-bar" data-ng-click="toggleMainBoxVisibility()">
                 <div class="uk-float-left cc-base-text">
                     <div class="cc-inner cc-pointer">
-                        <span ng-show="totalUserCount > 0">
+                        <span data-ng-show="totalUserCount > 0">
                             {{ totalUserCount }} <!-- {{ totalUserCount == 1 ? 'Person' : 'People' }} -->&nbsp; Online
                         </span>
-                        <!--<span ng-show="totalUserCount == 0">-->
+                        <!--<span data-ng-show="totalUserCount == 0">-->
                             <!--Chatcat Messenger-->
                         <!--</span>-->
                         <a href="https://github.com/chat-sdk/chat-sdk-web" target="_blank">
-                            <img class="uk-float-right" ng-src="{{ ::img_30_powered_by }}" />
+                            <img class="uk-float-right" data-ng-src="{{ ::img_30_powered_by }}" />
                         </a>
-                        <a ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
-                            <img class="cc-image-30 uk-float-right" ng-src="{{ shutdownImage() }}" />
+                        <a data-ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" consume-event>
+                            <img class="cc-image-30 uk-float-right" data-ng-src="{{ shutdownImage() }}" />
                         </a>
-                        <a ng-show="mainBoxMinimized">
-                            <img class="uk-float-right cc-image-30" ng-src="{{ ::img_30_maximize }}" disable-drag/>
+                        <a data-ng-show="mainBoxMinimized">
+                            <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_maximize }}" disable-drag/>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div ng-show="on">
+            <div data-ng-show="on">
 
-                <ng-include ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" partialsURL + 'login-box.html'"></ng-include>
+                <div data-ng-include data-ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" partialsURL + 'login-box.html'"></div>
 
-                <ng-include ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" partialsURL + 'profile-settings-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" partialsURL + 'main-box.html'"></ng-include>
-                <ng-include ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" partialsURL + 'create-room-box.html'"></ng-include>
+                <div data-ng-include data-ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" partialsURL + 'profile-settings-box.html'"></div>
+                <div data-ng-include data-ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" partialsURL + 'main-box.html'"></div>
+                <div data-ng-include data-ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" partialsURL + 'create-room-box.html'"></div>
 
-                <ng-include ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></ng-include>
+                <div data-ng-include data-ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></div>
 
-                <div ng-controller="ChatBarController" >
-                    <div ng-repeat="(id, room) in rooms">
-                        <div ng-controller="ChatController">
-                            <ng-include ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></ng-include>
+                <div data-ng-controller="ChatBarController" >
+                    <div data-ng-repeat="(id, room) in rooms">
+                        <div data-ng-controller="ChatController">
+                            <div data-ng-include data-ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></div>
                         </div>
                     </div>
                 </div>
 
-                <ng-include src="partialsURL + 'room-list-box.html'"></ng-include>
-                <ng-include src="partialsURL + 'profile-box.html'"></ng-include>
+                <div data-ng-include src="partialsURL + 'room-list-box.html'"></div>
+                <div data-ng-include src="partialsURL + 'profile-box.html'"></div>
             </div>
         </div>
 </div>

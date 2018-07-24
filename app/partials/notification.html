@@ -1,11 +1,11 @@
-<div class="cc-notification-outer" ng-controller="NotificationController" ng-show="notification.show" >
+<div class="cc-notification-outer" data-ng-controller="NotificationController" data-ng-show="notification.show" >
     <div class="cc-overlay" ></div>
-    <div class="cc-notification cc-shadow" ng-style="{height: (notification.message && notification.message.length) ? 100 : 60}">
+    <div class="cc-notification cc-shadow" data-ng-style="{height: (notification.message && notification.message.length) ? 100 : 60}">
         <div>
             <span class="cc-title">{{ notification.title }}</span>
             <br/>
             <!-- Waiting indicator -->
-            <img ng-show="notification.type == 'waiting'"  ng-src="{{ ::img_loader }}" width="26" height="26" />
+            <img data-ng-show="notification.type == 'waiting'"  data-ng-src="{{ ::img_loader }}" width="26" height="26" />
             <br/>
 
             <!-- Payload -->
@@ -14,7 +14,7 @@
         </div>
         <!-- Buttons -->
         <div class="button-outer">
-            <button class="uk-button uk-button-small" ng-show="notification.type == 'alert'" ng-click="submit()">{{ notification.button }}</button>
+            <button class="uk-button uk-button-small" data-ng-show="notification.type == 'alert'" data-ng-click="submit()">{{ notification.button }}</button>
         </div>
     </div>
 </div>
