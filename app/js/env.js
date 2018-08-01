@@ -31,12 +31,7 @@ myApp.factory('Environment', ['$rootScope', 'Utils', function ($rootScope, Utils
         },
 
         partialsURL: function () {
-            if(this.options().partialsURL != null) {
-                return this.options().partialsURL + '/';
-            }
-            else {
-                return this.resourceRootURL() + 'partials/';
-            }
+            return this.resourceRootURL() + 'partials/';
         },
 
         imagesURL: function () {
