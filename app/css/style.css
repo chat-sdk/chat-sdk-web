@@ -482,7 +482,7 @@ div#cc-app .cc-user-name {
 
 div#cc-app div.cc-chat-box div.cc-chat-box-msg textarea.cc-chat-box-msg-txt:focus {
     background: none repeat scroll 0 0 #f5fbfe;
-    borde-color: #99baca;
+    border-color: #99baca;
     color: #444444;
     outline: 0 none;
 }

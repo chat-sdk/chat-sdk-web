@@ -41,6 +41,7 @@ var messageType = "type";
 var messagePayload = "payload";
 var messageTime = "date";
 var messageJSON = "JSON";
+var messageJSONv2 = "json_v2";
 var messageUserName = "userName";
 var messageUserFirebaseID = "user-firebase-id";
 

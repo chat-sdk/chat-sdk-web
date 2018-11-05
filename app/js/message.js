@@ -32,7 +32,10 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
 
                 if(this.type() == bMessageTypeImage) {
                     // Get the image and thumbnail URLs
-                    var json = JSON.parse(meta[messageJSON]);
+                    var json = meta[messageJSONv2] || meta[messageJSON];
+                    if(typeof json === 'string') {
+                        json = JSON.parse(json)
+                    }
 
                     if(json) {
                         this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
@@ -165,6 +168,7 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
             json[messageImageHeight] = height;
 
             m.meta[messageJSON] = JSON.stringify(json);
+            m.meta[messageJSONv2] = json;
 
             return m;
         };

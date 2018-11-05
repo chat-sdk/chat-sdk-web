@@ -1050,27 +1050,27 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         });
     };
 
-    $scope.startImageUpload = function () {
-        $scope.uploadingImage = true;
-    };
+    $scope.onSelectImage = function (room) {
+        $scope.uploadingFile = true;
+        this.sendImageMessage(event.target.files, room)
+    }
 
     $scope.imageUploadFinished = function () {
-        $scope.uploadingImage = false;
+        $scope.uploadingFile = false;
         $scope.sendingImage = false;
     };
 
     $scope.sendImageMessage = function($files, room) {
 
-        var f = $files[0];
-        if(!f || $scope.sendingImage) {
+        if ($scope.sendingImage || $files.length === 0) {
             this.imageUploadFinished();
             return;
         }
 
-        $scope.sendingImage = true;
+        var f = $files[0];
 
-        if(f.type == "image/png" || f.type == 'image/jpeg') {
-
+        if (f.type == 'image/png' || f.type == 'image/jpeg') {
+            $scope.sendingImage = true;
         }
         else {
             $scope.showNotification(bNotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
@@ -1078,31 +1078,29 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
             return;
         }
 
-        if($files.length > 0) {
-            NetworkManager.upload.uploadFile(f).then((function(r) {
-                if(r.data && r.data.url) {
+        NetworkManager.upload.uploadFile(f).then((function (r) {
+            var url = (typeof r === 'string' ? r : r.data && r.data.url)
+            if (typeof url === 'string' && url.length > 0) {
+                var reader = new FileReader();
 
-                    var reader = new FileReader();
-
-                    // Load the image into the canvas immediately to get the dimensions
-                    reader.onload = (function() {
-                        return function(e) {
-                            var image = new Image();
-                            image.onload = function () {
-                                room.sendImageMessage($scope.getUser(), r.data.url, image.width, image.height);
-                            };
-                            image.src = e.target.result;
+                // Load the image into the canvas immediately to get the dimensions
+                reader.onload = (function () {
+                    return function (e) {
+                        var image = new Image();
+                        image.onload = function () {
+                            room.sendImageMessage($scope.getUser(), url, image.width, image.height);
                         };
-                    })(f);
-                    reader.readAsDataURL(f);
-                }
-                this.imageUploadFinished();
+                        image.src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+            }
+            this.imageUploadFinished();
 
-            }).bind(this), (function (error) {
-                $scope.showNotification(bNotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
-                this.imageUploadFinished();
-            }).bind(this));
-        }
+        }).bind(this), (function (error) {
+            $scope.showNotification(bNotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
+            this.imageUploadFinished();
+        }).bind(this));
     };
 
     $scope.getZIndex = function () {

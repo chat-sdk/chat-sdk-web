@@ -95,18 +95,12 @@
             <button class="cc-emoji-button" data-ng-click="toggleEmoticons()">
                 <img data-ng-src="{{ ::img_30_emojis }}">
             </button>
-            <!--<button class="cc-image-button" data-ng-click="sendImageMessage()">-->
-                <!--<img data-ng-src="{{ ::img_30_image }}">-->
-            <!--</button>-->
-            <div class="cc-image-button uk-container-center" data-ng-show="config.imageMessagesEnabled">
-                <input class="cc-hidden-input"
-                type="file"
-                data-file-select="sendImageMessage($files, room)"
-                data-ng-click="startImageUpload()">
-                <img data-ng-src="{{ ::img_30_image }}" data-ng-show="!uploadingImage">
-                <img data-ng-src="{{ ::img_loader }}" width="25" height="25" data-ng-show="uploadingImage">
+            <div class="cc-image-button uk-container-center" data-ng-show="enabledMessageOptionsCount() == 1 && config.imageMessagesEnabled && !uploadingFile">
+                <input class="cc-hidden-input" type="file" on-file-change="onSelectImage(room)">
+                <img data-ng-src="{{ ::img_30_image }}">
             </div>
 
+            <img class="uk-container-center" data-ng-src="{{ ::img_loader }}" width="25" height="25" data-ng-show="uploadingFile">
         </div>
 
         <!--The overlay that appears if the user hasn't accepted the invitation-->
