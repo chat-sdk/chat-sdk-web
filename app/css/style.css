@@ -576,6 +576,8 @@ div#cc-app .cc-right-bubble {
 
 div#cc-app .cc-right-text-bubble {
     background: #EEE;
+    display: flex;
+    align-items: center;
 }
 
 div#cc-app .cc-right-text-bubble:after {
@@ -616,11 +618,22 @@ div#cc-app .cc-image-bubble:after {
     border-style: none;
 }
 
-
 div#cc-app .cc-bubble img {
     border-radius: 5px;
 }
 
+div#cc-app .cc-file-bubble span {
+    margin-right: 10px;
+}
+
+div#cc-app .cc-file-bubble a {
+    flex-shrink: 0;
+}
+
+div#cc-app .cc-file-bubble a img {
+    max-height: 40px;
+    position: inherit;
+}
 
 div#cc-app div.cc-user-drag {
     position: absolute !important;
@@ -1125,6 +1138,34 @@ div#cc-app .cc-emoji-button {
     position: absolute;
     bottom: -2px;
     left: 0;
+}
+
+div#cc-app .cc-message-options {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    z-index: 500;
+}
+
+div#cc-app .cc-message-option {
+    position: relative;
+    width: 100%;
+    height: 30px;
+}
+
+div#cc-app .cc-message-option .cc-hidden-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+div#cc-app .cc-options-button {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 30px;
+    height: 30px;
 }
 
 div#cc-app .cc-image-button {

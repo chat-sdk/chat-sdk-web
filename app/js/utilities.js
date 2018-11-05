@@ -47,7 +47,9 @@ var messageUserFirebaseID = "user-firebase-id";
 
 // JSON Keys
 var messageText = "text";
+var messageFileURL = "file-url";
 var messageImageURL = "image-url";
+var messageMimeType = "mime-type";
 var messageThumbnailURL = "thumbnail-url";
 
 var messageImageWidth = "image-width";
@@ -126,6 +128,7 @@ var bUsersTab = 'users';
 var bRoomsTab = 'rooms';
 var bFriendsTab = 'friends';
 var bInboxTab = 'inbox';
+var bMessagesTab = 'messages';
 
 var bProviderTypeCustom = 'custom';
 
@@ -196,6 +199,7 @@ var bLoginModeClickToChat = "clickToChat";
 var bMessageTypeText = 0;
 var bMessageTypeLocation = 1;
 var bMessageTypeImage = 2;
+var bMessageTypeFile = 3;
 
 // Chat width
 var bChatRoomWidth = 230;
