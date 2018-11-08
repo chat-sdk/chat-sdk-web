@@ -594,6 +594,9 @@ div#cc-app .cc-left-bubble {
 
 div#cc-app .cc-left-text-bubble {
     background: #91dfff;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
 }
 
 div#cc-app .cc-left-text-bubble:after {
@@ -622,8 +625,12 @@ div#cc-app .cc-bubble img {
     border-radius: 5px;
 }
 
-div#cc-app .cc-file-bubble span {
+div#cc-app .cc-file-bubble.cc-right-text-bubble span {
     margin-right: 10px;
+}
+
+div#cc-app .cc-file-bubble.cc-left-text-bubble span {
+    margin-left: 10px;
 }
 
 div#cc-app .cc-file-bubble a {
