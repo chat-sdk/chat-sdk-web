@@ -9,6 +9,7 @@ var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
+var merge = require('gulp-merge');
 
 var changed = require('gulp-changed');
 var minifyHTML = require('gulp-minify-html');
@@ -56,7 +57,7 @@ gulp.task('minify-css', function() {
         .pipe(gulp.dest(DIST_TEST_PATH + 'css/_'));
 });
 
-gulp.task('copy', function () {
+gulp.task('copy', function (done) {
 
     gulp.src('app/img/*.*').pipe(gulp.dest( DIST_PATH + 'img'));
     gulp.src('app/img/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'img'));
@@ -68,7 +69,7 @@ gulp.task('copy', function () {
     gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_PATH + 'libs'));
     gulp.src('app/libs/**/*.*').pipe(gulp.dest( DIST_TEST_PATH + 'libs'));
 
-    gulp.src('app/chatcat_include.txt').pipe(gulp.dest( DIST_PATH )).pipe(gulp.dest( DIST_TEST_PATH ));
+    // gulp.src('app/chatcat_include.txt').pipe(gulp.dest( DIST_PATH )).pipe(gulp.dest( DIST_TEST_PATH ));
 
     // Copy the flag images
     gulp.src('app/libs/flags/images/flags/*.png').pipe(gulp.dest( DIST_PATH + 'images/flags/'));
@@ -77,6 +78,7 @@ gulp.task('copy', function () {
     gulp.src('node_modules/angular-emoji-filter-hd/dist/*.png').pipe(gulp.dest( DIST_PATH + 'css/_/'));
     gulp.src('node_modules/angular-emoji-filter-hd/dist/*.png').pipe(gulp.dest( DIST_TEST_PATH + 'css/_/'));
 
+    done();
 });
 
 // Lint Task
@@ -98,16 +100,16 @@ gulp.task('minify-html', function() {
 });
 
 // Concatenate & Minify JS
-gulp.task('scripts', function() {
+gulp.task('scripts', function(done) {
 
     var paths = [
 //        'node_modules/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
         'node_modules/jquery/dist/jquery.min.js',
 //        'node_modules/uikit/dist/js/uikit.min.js',
-        'node_modules/@angular/core/angular.js',
+//         'node_modules/@angular/core/angular.js',
        'node_modules/angular/angular.min.js',
 //         'node_modules/angular-cookies/angular-cookies.min.js',
-        'node_modules/jquery-cookie/jquery.cookie.js',
+        'node_modules/js-cookie/src/js.cookie.js',
 //         'node_modules/angular-file-upload/dist/angular-file-upload.min.js',
 //         'node_modules/angular-file-upload/dist/angular-file-upload-shim.min.js',
         'node_modules/ng-file-upload/dist/ng-file-upload.min.js',
@@ -115,7 +117,7 @@ gulp.task('scripts', function() {
 
         'node_modules/firebase/firebase.js',
         'node_modules/angularfire/dist/angularfire.min.js',
-        'node_modules/firebase-simple-login/firebase-simple-login.js',
+        // 'node_modules/firebase-simple-login/firebase-simple-login.js',
         // 'node_modules/angular-facebook/lib/angular-facebook.js',
         'node_modules/FileSaver/FileSaver.js',
         'node_modules/moment/min/moment.min.js',
@@ -129,13 +131,13 @@ gulp.task('scripts', function() {
     ];
 
     // Non-minified version
-    gulp.src(paths)
+    var t1 = gulp.src(paths)
         .pipe(concat('all.js'))
         .pipe(insert.wrap('var cc = (function () {', '}());jQuery.noConflict(true);'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
-    gulp.src(paths)
+    var t2 = gulp.src(paths)
         .pipe(concat('all.js'))
         .pipe(rename('all.min.js'))
         //	    .pipe(uglify('all.min.js', {
@@ -145,10 +147,10 @@ gulp.task('scripts', function() {
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
-    gulp.src(['node_modules/dist.js'])
-        .pipe(rename('dist.min.js'))
-        .pipe(gulp.dest(DIST_PATH + 'js'))
-        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+    // gulp.src(['node_modules/dist.js'])
+    //     .pipe(rename('dist.min.js'))
+    //     .pipe(gulp.dest(DIST_PATH + 'js'))
+    //     .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
 //     paths = [
 //     ];
@@ -158,6 +160,7 @@ gulp.task('scripts', function() {
 //         .pipe(gulp.dest(DIST_PATH + 'js'))
 //         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
+    done();
 });
 
 // gulp.task('bower', function () {
@@ -167,9 +170,14 @@ gulp.task('scripts', function() {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-    gulp.watch(['app/js/*.js','app/css/*.css', 'app/partials/*.html'], ['lint', 'scripts', 'minify-html', 'minify-css', 'copy']);
+    var series = gulp.series('lint', 'scripts', 'minify-html', 'minify-css', 'copy');
+    gulp.watch('app/js/*.js', series);
+    gulp.watch('app/css/*.css', series);
+    gulp.watch('app/partials/*.html', series);
+
+    // gulp.watch(['app/js/*.js','app/css/*.css', 'app/partials/*.html'], ['lint', 'scripts', 'minify-html', 'minify-css', 'copy']);
 });
 
 
 // Default Task
-gulp.task('default', ['lint', 'scripts', 'minify-html', 'minify-css', 'copy', 'watch']);
+gulp.task('default', gulp.series('lint', 'scripts', 'minify-html', 'minify-css', 'copy', 'watch'));
