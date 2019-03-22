@@ -30,13 +30,21 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
                     this.setType(bMessageTypeText);
                 }
 
-                if(this.type() == bMessageTypeImage) {
+                if(this.type() == bMessageTypeImage || this.type() == bMessageTypeFile) {
                     // Get the image and thumbnail URLs
-                    var json = JSON.parse(meta[messageJSON]);
+                    var json = meta[messageJSONv2] || meta[messageJSON];
+                    if(typeof json === 'string') {
+                        json = JSON.parse(json)
+                    }
 
                     if(json) {
-                        this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
-                        this.imageURL = json[messageImageURL];
+                        if(this.type() == bMessageTypeImage) {
+                            this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
+                            this.imageURL = json[messageImageURL];
+                        }
+                        if(this.type() == bMessageTypeFile) {
+                            this.fileURL = json[messageFileURL];
+                        }
                     }
                 }
 
@@ -165,6 +173,23 @@ myApp.factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Confi
             json[messageImageHeight] = height;
 
             m.meta[messageJSON] = JSON.stringify(json);
+            m.meta[messageJSONv2] = json;
+
+            return m;
+        };
+
+        Message.buildFileMeta = function (rid, uid, fileName, mimeType, fileURL) {
+
+            var m = Message.buildMeta(rid, uid, fileName, bMessageTypeFile);
+
+            var json = {};
+
+            json[messageText] = fileName;
+            json[messageMimeType] = mimeType;
+            json[messageFileURL] = fileURL;
+
+            m.meta[messageJSON] = JSON.stringify(json);
+            m.meta[messageJSONv2] = json;
 
             return m;
         };

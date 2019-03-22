@@ -13,6 +13,7 @@ myApp.controller('AppController', [
 
     $rootScope.messageTypeText = bMessageTypeText;
     $rootScope.messageTypeImage = bMessageTypeImage;
+    $rootScope.messageTypeFile = bMessageTypeFile;
 
     $scope.init = function () {
 
@@ -75,6 +76,7 @@ myApp.controller('AppController', [
          */
 
         $scope.setupImages();
+        $scope.setupFileIcons();
 
         $scope.setMainBoxMinimized(LocalStorage.getProperty(LocalStorage.mainMinimizedKey));
 
@@ -115,6 +117,7 @@ myApp.controller('AppController', [
         $rootScope.img_30_clear_cache = Environment.imagesURL() + 'cc-30-clear-cache.png';
         $rootScope.img_30_cache_cleared = Environment.imagesURL() + 'cc-30-cache-cleared.png';
         $rootScope.img_24_save = Environment.imagesURL() + 'cc-24-save.png';
+        $rootScope.img_30_save = Environment.imagesURL() + 'cc-30-save.png';
         $rootScope.img_24_copy = Environment.imagesURL() + 'cc-24-copy.png';
         $rootScope.img_24_cross = Environment.imagesURL() + 'cc-24-cross.png';
         $rootScope.img_30_image = Environment.imagesURL() + 'cc-30-image.png';
@@ -122,6 +125,45 @@ myApp.controller('AppController', [
         $rootScope.img_20_flagged = Environment.imagesURL() + 'cc-20-flagged.png';
         $rootScope.img_30_powered_by = Environment.imagesURL() + 'cc-30-powered-by.png';
         $rootScope.img_30_start_chatting = Environment.imagesURL() + 'cc-30-start-chatting.png';
+    };
+
+    $scope.setupFileIcons = function () {
+        $rootScope.img_file = Environment.imagesURL() + 'file.png';
+        $rootScope.img_file_download = Environment.imagesURL() + 'file-download.png';
+        $rootScope.img_file_aac = Environment.imagesURL() + 'file-type-aac.png';
+        $rootScope.img_file_acc = Environment.imagesURL() + 'file-type-acc.png';
+        $rootScope.img_file_ai = Environment.imagesURL() + 'file-type-ai.png';
+        $rootScope.img_file_avi = Environment.imagesURL() + 'file-type-avi.png';
+        $rootScope.img_file_bmp = Environment.imagesURL() + 'file-type-bmp.png';
+        $rootScope.img_file_f4a = Environment.imagesURL() + 'file-type-f4a.png';
+        $rootScope.img_file_gif = Environment.imagesURL() + 'file-type-gif.png';
+        $rootScope.img_file_html = Environment.imagesURL() + 'file-type-html.png';
+        $rootScope.img_file_jpeg = Environment.imagesURL() + 'file-type-jpeg.png';
+        $rootScope.img_file_jpg = Environment.imagesURL() + 'file-type-jpg.png';
+        $rootScope.img_file_jpp = Environment.imagesURL() + 'file-type-jpp.png';
+        $rootScope.img_file_json = Environment.imagesURL() + 'file-type-json.png';
+        $rootScope.img_file_m4a = Environment.imagesURL() + 'file-type-m4a.png';
+        $rootScope.img_file_midi = Environment.imagesURL() + 'file-type-midi.png';
+        $rootScope.img_file_mov = Environment.imagesURL() + 'file-type-mov.png';
+        $rootScope.img_file_mp3 = Environment.imagesURL() + 'file-type-mp3.png';
+        $rootScope.img_file_mp4 = Environment.imagesURL() + 'file-type-mp4.png';
+        $rootScope.img_file_oga = Environment.imagesURL() + 'file-type-oga.png';
+        $rootScope.img_file_ogg = Environment.imagesURL() + 'file-type-ogg.png';
+        $rootScope.img_file_pdf = Environment.imagesURL() + 'file-type-pdf.png';
+        $rootScope.img_file_psd = Environment.imagesURL() + 'file-type-psd.png';
+        $rootScope.img_file_rtf = Environment.imagesURL() + 'file-type-rtf.png';
+        $rootScope.img_file_svg = Environment.imagesURL() + 'file-type-svg.png';
+        $rootScope.img_file_tif = Environment.imagesURL() + 'file-type-tif.png';
+        $rootScope.img_file_tiff = Environment.imagesURL() + 'file-type-tiff.png';
+        $rootScope.img_file_txt = Environment.imagesURL() + 'file-type-txt.png';
+        $rootScope.img_file_wav = Environment.imagesURL() + 'file-type-wav.png';
+        $rootScope.img_file_wma = Environment.imagesURL() + 'file-type-wma.png';
+        $rootScope.img_file_xml = Environment.imagesURL() + 'file-type-xml.png';
+        $rootScope.img_file_zip = Environment.imagesURL() + 'file-type-zip.png';
+    };
+
+    $rootScope.imgForFileType = function (type) {
+        return $rootScope['img_file_' + type] || $rootScope['img_file'];
     };
 
     $scope.getUser = function () {
@@ -987,10 +1029,12 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
 }]);
 
-myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
-    function($scope, $timeout, $sce, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
+myApp.controller('ChatController', ['$scope', '$timeout', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
+    function ($scope, $timeout, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
 
     $scope.showEmojis = false;
+    $scope.showMessageOptions = false;
+
     //$scope.headerColor = $scope.config.headerColor;
     $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
 
@@ -1050,27 +1094,54 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
         });
     };
 
-    $scope.startImageUpload = function () {
-        $scope.uploadingImage = true;
+    $scope.enabledMessageOptions = function () {
+        var list = [];
+        if (Config.fileMessagesEnabled) {
+            list.push('fileMessagesEnabled');
+        }
+        if (Config.imageMessagesEnabled) {
+            list.push('imageMessagesEnabled');
+        }
+        return list;
     };
 
+    $scope.enabledMessageOptionsCount = function () {
+        return $scope.enabledMessageOptions().length;
+    };
+
+    $scope.onSelectImage = function (room) {
+        $scope.showMessageOptions = false;
+        $scope.uploadingFile = true;
+        this.sendImageMessage(event.target.files, room)
+    }
+
+    $scope.onSelectFile = function (room) {
+        $scope.showMessageOptions = false;
+        $scope.uploadingFile = true;
+        this.sendFileMessage(event.target.files, room)
+    }
+
     $scope.imageUploadFinished = function () {
-        $scope.uploadingImage = false;
+        $scope.uploadingFile = false;
         $scope.sendingImage = false;
     };
 
-    $scope.sendImageMessage = function($files, room) {
+    $scope.fileUploadFinished = function () {
+        $scope.uploadingFile = false;
+        $scope.sendingFile = false;
+    };
 
-        var f = $files[0];
-        if(!f || $scope.sendingImage) {
+    $scope.sendImageMessage = function ($files, room) {
+
+        if ($scope.sendingImage || $files.length === 0) {
             this.imageUploadFinished();
             return;
         }
 
-        $scope.sendingImage = true;
+        var f = $files[0];
 
-        if(f.type == "image/png" || f.type == 'image/jpeg') {
-
+        if (f.type == 'image/png' || f.type == 'image/jpeg') {
+            $scope.sendingImage = true;
         }
         else {
             $scope.showNotification(bNotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
@@ -1078,31 +1149,59 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
             return;
         }
 
-        if($files.length > 0) {
-            NetworkManager.upload.uploadFile(f).then((function(r) {
-                if(r.data && r.data.url) {
+        NetworkManager.upload.uploadFile(f).then((function (r) {
+            var url = (typeof r === 'string' ? r : r.data && r.data.url)
+            if (typeof url === 'string' && url.length > 0) {
+                var reader = new FileReader();
 
-                    var reader = new FileReader();
-
-                    // Load the image into the canvas immediately to get the dimensions
-                    reader.onload = (function() {
-                        return function(e) {
-                            var image = new Image();
-                            image.onload = function () {
-                                room.sendImageMessage($scope.getUser(), r.data.url, image.width, image.height);
-                            };
-                            image.src = e.target.result;
+                // Load the image into the canvas immediately to get the dimensions
+                reader.onload = (function () {
+                    return function (e) {
+                        var image = new Image();
+                        image.onload = function () {
+                            room.sendImageMessage($scope.getUser(), url, image.width, image.height);
                         };
-                    })(f);
-                    reader.readAsDataURL(f);
-                }
-                this.imageUploadFinished();
+                        image.src = e.target.result;
+                    };
+                })(f);
+                reader.readAsDataURL(f);
+            }
+            this.imageUploadFinished();
 
-            }).bind(this), (function (error) {
-                $scope.showNotification(bNotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
-                this.imageUploadFinished();
-            }).bind(this));
+        }).bind(this), (function (error) {
+            $scope.showNotification(bNotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
+            this.imageUploadFinished();
+        }).bind(this));
+    };
+
+    $scope.sendFileMessage = function ($files, room) {
+
+        if ($scope.sendingFile || $files.length === 0) {
+            this.fileUploadFinished();
+            return;
         }
+
+        var f = $files[0];
+
+        if (f.type == 'image/png' || f.type == 'image/jpeg') {
+            this.sendImageMessage($files, room);
+            return;
+        }
+        else {
+            $scope.sendingFile = true;
+        }
+
+        NetworkManager.upload.uploadFile(f).then((function (r) {
+            var url = (typeof r === 'string' ? r : r.data && r.data.url)
+            if (typeof url === 'string' && url.length > 0) {
+                room.sendFileMessage($scope.getUser(), f.name, f.type, url);
+            }
+            this.fileUploadFinished();
+
+        }).bind(this), (function (error) {
+            $scope.showNotification(bNotificationTypeAlert, 'File error', 'The file could not be sent', 'ok');
+            this.fileUploadFinished();
+        }).bind(this));
     };
 
     $scope.getZIndex = function () {
@@ -1112,9 +1211,11 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
     };
 
     $scope.sendMessage = function () {
+        console.log('sendMessage()');
         var user = $scope.getUser();
 
         $scope.showEmojis = false;
+        $scope.showMessageOptions = false;
 
         $scope.room.sendTextMessage($scope.input.text, user, bMessageTypeText);
         $scope.input.text = "";
@@ -1126,6 +1227,10 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
 
     $scope.tabClicked = function (tab) {
         $scope.activeTab = tab;
+        if (tab == bMessagesTab) {
+            $scope.showEmojis = false;
+            $scope.showMessageOptions = false;
+        }
     };
 
     $scope.chatBoxStyle = function () {
@@ -1141,8 +1246,14 @@ myApp.controller('ChatController', ['$scope','$timeout', '$sce', 'Auth', 'Screen
     };
 
     $scope.toggleEmoticons = function () {
+        $scope.showMessageOptions = false;
         $scope.showEmojis = !$scope.showEmojis;
     };
+
+    $scope.toggleMessageOptions = function () {
+        $scope.showEmojis = false;
+        $scope.showMessageOptions = !$scope.showMessageOptions;
+    }
 
     // Save the super class
     $scope.superShowProfileBox = $scope.showProfileBox;

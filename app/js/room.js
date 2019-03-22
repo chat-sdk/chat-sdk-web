@@ -489,6 +489,9 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
                 if(this.lastMessageType() == bMessageTypeImage) {
                     return "Image";
                 }
+                if(this.lastMessageType() == bMessageTypeFile) {
+                    return "File";
+                }
                 if(this.lastMessageType() == bMessageTypeLocation) {
                     return "Location";
                 }
@@ -745,6 +748,12 @@ myApp.factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message
         Room.prototype.sendImageMessage = function (user, url, width, height) {
             // Build the payload
             var message = Message.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
+            this.sendMessage(message, user);
+        };
+
+        Room.prototype.sendFileMessage = function (user, fileName, mimeType, fileURL) {
+            // Build the payload
+            var message = Message.buildFileMeta(this.rid(), user.uid(), fileName, mimeType, fileURL);
             this.sendMessage(message, user);
         };
 
