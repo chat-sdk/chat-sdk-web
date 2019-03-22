@@ -186,11 +186,11 @@ var bEditMessageNotification = 'bEditMessageNotification';
 
 var bConfigUpdatedNotification = "bConfigUpdatedNotification";
 
-var bLoginModeSimple = "simple";
-var bLoginModeSingleSignOn = "singleSignOn";
-var bLoginModeToken = "token";
-var bLoginModeAuthenticating = "authenticating";
-var bLoginModeClickToChat = "clickToChat";
+var LoginModeSimple = "simple";
+// var bLoginModeSingleSignOn = "singleSignOn";
+// var bLoginModeToken = "token";
+var LoginModeAuthenticating = "authenticating";
+var LoginModeClickToChat = "clickToChat";
 
 var bMessageTypeText = 0;
 var bMessageTypeLocation = 1;
@@ -222,7 +222,7 @@ myApp.factory('Utils', [function () {
         },
 
         empty: function (object) {
-            return this.unORNull(object) || object.length == 0;
+            return this.unORNull(object) || object.length === 0;
         }
     }
 

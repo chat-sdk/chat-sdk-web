@@ -7,13 +7,13 @@ var myApp = angular.module('myApp.firebase', ['firebase']).
 myApp.factory('FirebaseUploadHandler', ['$q', 'firebase', function ($q, firebase) {
     return {
         uploadFile: function(file) {
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             // Create a root reference
-            var storageRef = firebase.storage().ref();
+            let storageRef = firebase.storage().ref();
 
             // Create a reference to 'mountains.jpg'
-            var ref = storageRef.child('web/'+ this.uuid() +'.jpg');
+            let ref = storageRef.child('web/'+ this.uuid() +'.jpg');
 
             ref.put(file).then(function(snapshot) {
                 ref.getDownloadURL().then(function(downloadURL) {

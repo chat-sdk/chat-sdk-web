@@ -24,7 +24,9 @@ var myApp = angular.module('myApp',
         'myApp.firebase',
         'myApp.network',
         'myApp.environment',
-        'myApp.paths'
+        'myApp.paths',
+        'myApp.autoLogin',
+        'myApp.auth'
     ]
 ).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([

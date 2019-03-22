@@ -5,8 +5,8 @@
 var myApp = angular.module('myApp.controllers', ['firebase', 'ngFileUpload',  'ngSanitize', 'emoji']);
 
 myApp.controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Authentication', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Authentication, StateManager, RoomOpenQueue, NetworkManager, Environment) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
     $scope.totalUserCount = 0;
     $scope.friendsEnabled = true;
@@ -21,7 +21,7 @@ myApp.controller('AppController', [
         // in the options
         //CC_OPTIONS.showOnPaths = "*ccwp, *p*";
         if(Environment.showOnPaths()) {
-            var paths = Environment.showOnPaths();
+            let paths = Environment.showOnPaths();
             if(!PathAnalyser.shouldShowChatOnPath(paths)) {
                 return;
             }
@@ -29,7 +29,7 @@ myApp.controller('AppController', [
 
         Paths.setCID(Environment.rootPath());
 
-        // Start the config listner to get the current
+        // Start the config listener to get the current
         // settings from Firebase
         Config.startConfigListener().then(function () {
 
@@ -136,7 +136,7 @@ myApp.controller('AppController', [
     };
 
     $scope.showLoginBox = function (mode) {
-        $rootScope.loginMode = mode ? mode : Authentication.mode;
+        $rootScope.loginMode = mode ? mode : Auth.mode;
         $scope.activeBox = bLoginBox;
         $timeout(function() {
             $scope.$digest();
@@ -345,21 +345,9 @@ myApp.controller('AppController', [
     };
 
     /**
-     * Log the user out
-     */
-//    $scope. = function () {
-//
-//        // This will be handled by the logout listener anyway
-//        Paths.firebase().unauth();
-//
-//        $scope.showLoginBox();
-//    };
-
-    /**
      *
      */
     $scope.logout = function () {
-
 
         // Now we need to
         Presence.goOffline();
@@ -399,7 +387,7 @@ myApp.controller('AppController', [
 
         LocalStorage.clearToken();
 
-        Authentication.logout();
+        Auth.logout();
 
         $timeout(function () {
             $rootScope.$digest();
@@ -742,8 +730,8 @@ myApp.controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsCon
     $scope.init();
 }]);
 
-myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Authentication', 'Credential',
-    function($rootScope, $scope, $timeout, Auth, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Authentication, Credential) {
+myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential',
+    function($rootScope, $scope, $timeout, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Auth, Credential) {
 
     /**
      * Initialize the login controller
@@ -754,9 +742,11 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         $scope.rememberMe = true;
 
-        var lastVisited = LocalStorage.getLastVisited();
+        let lastVisited = LocalStorage.getLastVisited();
+
+        // We don't want to load the messenger straightaway to save bandwidth.
         if(Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
-            $scope.showLoginBox(bLoginModeClickToChat);
+            $scope.showLoginBox(LoginModeClickToChat);
         }
         else {
             $scope.startChatting();
@@ -766,9 +756,9 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
     $scope.startChatting = function() {
         LocalStorage.setLastVisited();
-        $scope.showLoginBox(bLoginModeAuthenticating);
+        $scope.showLoginBox(LoginModeAuthenticating);
 
-        if(Authentication.isAuthenticated()) {
+        if(Auth.isAuthenticated()) {
             $scope.handleAuthData(firebase.auth().currentUser);
         }
         else {
@@ -797,7 +787,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
     };
 
     $scope.handleAuthData = function (authData) {
-        $rootScope.loginMode = Authentication.mode;
+        $rootScope.loginMode = Auth.mode;
 
         console.log(authData);
 
@@ -856,7 +846,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
         // Hide the overlay
         $scope.showNotification(bNotificationTypeWaiting, "Logging in", "For social login make sure to enable popups!");
 
-        Authentication.authenticate(credential).then(function (result) {
+        Auth.authenticate(credential).then(function (result) {
 
         }).catch(function (error) {
             $scope.hideNotification();
@@ -870,7 +860,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
     $scope.forgotPassword  = function (email) {
 
-        Authentication.resetPasswordByEmail(email).then(function () {
+        Auth.resetPasswordByEmail(email).then(function () {
             $scope.showNotification(bNotificationTypeAlert, "Email sent",
                 "Instructions have been sent. Please check your Junk folder!", "ok");
             $scope.setError(null);
@@ -895,7 +885,7 @@ myApp.controller('LoginController', ['$rootScope', '$scope', '$timeout','Auth', 
 
         // First create the super
 
-        Authentication.signUp(email, password).then((function () {
+        Auth.signUp(email, password).then((function () {
             $scope.email = email;
             $scope.password = password;
             $scope.loginWithPassword();
