@@ -92,6 +92,9 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
         friends: [],
         friendsSet: setByDefault,
 
+        fileMessagesEnabled: false,
+        fileMessagesEnabledSet: setByDefault,
+
         imageMessagesEnabled: false,
         imageMessagesEnabledSet: setByDefault,
 
@@ -141,6 +144,7 @@ myApp.factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', funct
             this.setValue("publicRoomsEnabled", config, setBy);
             this.setValue("friendsEnabled", config, setBy);
             this.setValue("clearCacheTimestamp", config, setBy);
+            this.setValue("fileMessagesEnabled", config, setBy);
             this.setValue("imageMessagesEnabled", config, setBy);
             this.setValue("marginRight", config, setBy);
 

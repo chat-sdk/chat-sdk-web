@@ -1,7 +1,8 @@
+.DS_Store
+.idea
 node_modules
 app/dist_test
 app/prod_test
 app/dist
-.idea
 app/bower_components
 app/.firebaserc

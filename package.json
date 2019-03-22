@@ -25,7 +25,8 @@
     "gulp-require-modules": "^1.1.2",
     "gulp-uglify": "^3.0.0",
     "gulp-merge": "^0.1.0",
-    "jshint": "^2.10.2"
+    "jshint": "^2.10.2",
+    "gulp-typescript": "latest"
   },
   "dependencies": {
     "FileSaver": "latest",
