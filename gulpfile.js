@@ -19,6 +19,7 @@ var autoprefix = require('gulp-autoprefixer');
 var minifyCSS = require('gulp-minify-css');
 
 var insert = require('gulp-insert');
+var ts = require('gulp-typescript');
 
 // Setup paths
 var DIST_PATH = 'app/dist/';
@@ -127,17 +128,32 @@ gulp.task('scripts', function(done) {
         'node_modules/howler/dist/howler.min.js',
         'app/libs/sha256.js',
         'app/libs/cc-emoji.js',
-        'app/js/*.js'
+        'app/js/*.js',
+        'app/js/**/*.js'
     ];
+    
+//     var src = [
+//         'app/js/*.ts'
+//     ];
+//     
+//     gulp.src(src)
+//         .pipe(concat('all_2.js'))
+//         .pipe(ts({
+//         	noImplicitAny: true,
+//         	outFile: 'output.js'
+//         }))
+//         .pipe(gulp.dest(DIST_PATH + 'js'))
+//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+    
 
     // Non-minified version
-    var t1 = gulp.src(paths)
+    gulp.src(paths)
         .pipe(concat('all.js'))
         .pipe(insert.wrap('var cc = (function () {', '}());jQuery.noConflict(true);'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
-    var t2 = gulp.src(paths)
+    gulp.src(paths)
         .pipe(concat('all.js'))
         .pipe(rename('all.min.js'))
         //	    .pipe(uglify('all.min.js', {

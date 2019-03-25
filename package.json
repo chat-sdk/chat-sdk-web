@@ -47,7 +47,8 @@
     "npm-install-all": "^1.1.21",
     "pikaday": "latest",
     "uikit": "latest",
-    "js-cookie": "latest"
+    "js-cookie": "latest",
+    "typescript": "latest"
   },
   "keywords": [
     "chat",
