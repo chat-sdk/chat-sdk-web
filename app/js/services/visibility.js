@@ -18,7 +18,7 @@ angular.module('myApp.services').factory('Visibility', ['$rootScope', function (
 
         changed: function (event) {
             this.isHidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
-            $rootScope.$broadcast(bVisibilityChangedNotification, this.isHidden);
+            $rootScope.$broadcast(VisibilityChangedNotification, this.isHidden);
         },
 
         getIsHidden: function () {

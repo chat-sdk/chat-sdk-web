@@ -26,7 +26,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
 
                     if(this.addOnlineUser(user)) {
                         // Update the user's rooms
-                        $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
+                        $rootScope.$broadcast(UserOnlineStateChangedNotification, user);
                     }
                 }
 
@@ -44,7 +44,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
                     this.removeOnlineUser(user);
                 }
 
-                $rootScope.$broadcast(bUserOnlineStateChangedNotification, user);
+                $rootScope.$broadcast(UserOnlineStateChangedNotification, user);
 
             }).bind(this));
         },
@@ -80,7 +80,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
                 if(!$rootScope.user || user.uid() != $rootScope.user.uid()) {
                     user.online = true;
                     this.onlineUsers[user.uid()] = user;
-                    $rootScope.$broadcast(bOnlineUserAddedNotification);
+                    $rootScope.$broadcast(OnlineUserAddedNotification);
                     return true;
                 }
             }
@@ -99,7 +99,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
                 if(user) {
                     user.online = false;
                     delete this.onlineUsers[uid];
-                    $rootScope.$broadcast(bOnlineUserRemovedNotification);
+                    $rootScope.$broadcast(OnlineUserRemovedNotification);
                 }
             }
         },

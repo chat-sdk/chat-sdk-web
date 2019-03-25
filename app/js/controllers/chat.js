@@ -29,34 +29,34 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             };
 
             // When the user value changes update the user interface
-            $scope.$on(bUserValueChangedNotification, function (event, user) {
-                Log.notification(bUserValueChangedNotification, 'ChatController');
+            $scope.$on(UserValueChangedNotification, function (event, user) {
+                Log.notification(UserValueChangedNotification, 'ChatController');
                 if($scope.room.containsUser(user)) {
                     digest();
                 }
             });
 
-            $scope.$on(bRoomPositionUpdatedNotification, function(event, room) {
-                Log.notification(bRoomPositionUpdatedNotification, 'ChatController');
+            $scope.$on(RoomPositionUpdatedNotification, function(event, room) {
+                Log.notification(RoomPositionUpdatedNotification, 'ChatController');
                 if($scope.room == room) {
                     // Update the room's active status
                     digest();
                 }
             });
-            $scope.$on(bRoomSizeUpdatedNotification, function(event, room) {
-                Log.notification(bRoomSizeUpdatedNotification, 'ChatController');
+            $scope.$on(RoomSizeUpdatedNotification, function(event, room) {
+                Log.notification(RoomSizeUpdatedNotification, 'ChatController');
                 if($scope.room == room) {
                     digest();
                 }
             });
-            $scope.$on(bLazyLoadedMessagesNotification, function(event, room, callback) {
-                Log.notification(bLazyLoadedMessagesNotification, 'ChatController');
+            $scope.$on(LazyLoadedMessagesNotification, function(event, room, callback) {
+                Log.notification(LazyLoadedMessagesNotification, 'ChatController');
                 if($scope.room == room) {
                     digest(callback);
                 }
             });
-            $scope.$on(bChatUpdatedNotification, function (event, room) {
-                Log.notification(bChatUpdatedNotification, 'CreateRoomController');
+            $scope.$on(ChatUpdatedNotification, function (event, room) {
+                Log.notification(ChatUpdatedNotification, 'CreateRoomController');
                 if($scope.room == room) {
                     digest();
                 }
@@ -186,7 +186,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             $scope.showEmojis = false;
             $scope.showMessageOptions = false;
 
-            $scope.room.sendTextMessage($scope.input.text, user, bMessageTypeText);
+            $scope.room.sendTextMessage($scope.input.text, user, MessageTypeText);
             $scope.input.text = "";
         };
 
@@ -196,7 +196,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
         $scope.tabClicked = function (tab) {
             $scope.activeTab = tab;
-            if (tab == bMessagesTab) {
+            if (tab == MessagesTab) {
                 $scope.showEmojis = false;
                 $scope.showMessageOptions = false;
             }
@@ -234,9 +234,9 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             var x = $scope.room.offset + $scope.room.width;
 
             var facesLeft = true;
-            if ($scope.room.offset + bProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
+            if ($scope.room.offset + ProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
                 facesLeft = false;
-                x = $scope.room.offset - bProfileBoxWidth;
+                x = $scope.room.offset - ProfileBoxWidth;
             }
 
             $scope.profileBoxStyle.right = x;
@@ -269,8 +269,8 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
         $scope.wasDragged = function () {
             // We don't want the chat crossing the min point
-            if($scope.room.offset < $scope.mainBoxWidth + bChatRoomSpacing) {
-                $scope.room.setOffset($scope.mainBoxWidth + bChatRoomSpacing);
+            if($scope.room.offset < $scope.mainBoxWidth + ChatRoomSpacing) {
+                $scope.room.setOffset($scope.mainBoxWidth + ChatRoomSpacing);
             }
             $scope.boxWasDragged = true;
         };

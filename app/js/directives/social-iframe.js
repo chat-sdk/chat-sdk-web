@@ -1,7 +1,7 @@
 angular.module('myApp.directives').directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", function ($rootScope, $document, $window, Paths) {
     return function (scope, element, attr) {
 
-        $rootScope.$on(bStartSocialLoginNotification, function (event, data, callback) {
+        $rootScope.$on(StartSocialLoginNotification, function (event, data, callback) {
 
             //element.load(function () {
 

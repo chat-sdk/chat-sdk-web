@@ -11,7 +11,7 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
         $scope.init = function () {
 
             // Work out how many tabs there are
-            $scope.$on(bConfigUpdatedNotification, function () {
+            $scope.$on(ConfigUpdatedNotification, function () {
                 $scope.updateConfig();
             });
             $scope.updateConfig();
@@ -19,37 +19,37 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
             // Setup the search variable - if we don't do this
             // Angular can't set search.text
             $scope.search = {};
-            $scope.search[bUsersTab] = "";
-            $scope.search[bRoomsTab] = "";
-            $scope.search[bFriendsTab] = "";
+            $scope.search[UsersTab] = "";
+            $scope.search[RoomsTab] = "";
+            $scope.search[FriendsTab] = "";
 
             // This is used by sub views for their layouts
-            $scope.boxWidth = bMainBoxWidth;
+            $scope.boxWidth = MainBoxWidth;
 
             // We don't want people deleting rooms from this view
             $scope.canCloseRoom = false;
 
             // When the user value changes update the user interface
-            $scope.$on(bUserValueChangedNotification, function () {
-                Log.notification(bUserValueChangedNotification, "MainBoxController");
+            $scope.$on(UserValueChangedNotification, function () {
+                Log.notification(UserValueChangedNotification, "MainBoxController");
                 $timeout(function () {
                     $scope.$digest();
                 });
             });
 
             $scope.updateMainBoxSize();
-            $scope.$on(bScreenSizeChangedNotification, function () {
-                Log.notification(bScreenSizeChangedNotification, "MainBoxController");
+            $scope.$on(ScreenSizeChangedNotification, function () {
+                Log.notification(ScreenSizeChangedNotification, "MainBoxController");
                 $scope.updateMainBoxSize();
             });
 
-            $scope.$on(bRoomBadgeChangedNotification, function () {
-                Log.notification(bRoomBadgeChangedNotification, "MainBoxController");
+            $scope.$on(RoomBadgeChangedNotification, function () {
+                Log.notification(RoomBadgeChangedNotification, "MainBoxController");
                 $scope.updateInboxCount();
             });
 
-            $scope.$on(bLoginCompleteNotification, function () {
-                Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+            $scope.$on(LoginCompleteNotification, function () {
+                Log.notification(RoomRemovedNotification, 'InboxRoomsListController');
                 $scope.updateInboxCount();
             });
 
@@ -64,13 +64,13 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
 
             // Make the users tab start clicked
             if(Config.onlineUsersEnabled) {
-                $scope.tabClicked(bUsersTab);
+                $scope.tabClicked(UsersTab);
             }
             else if(Config.publicRoomsEnabled) {
-                $scope.tabClicked(bRoomsTab);
+                $scope.tabClicked(RoomsTab);
             }
             else {
-                $scope.tabClicked(bInboxTab);
+                $scope.tabClicked(InboxTab);
             }
 
             $timeout(function () {
@@ -100,8 +100,8 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
         };
 
         $scope.updateMainBoxSize = function () {
-            $scope.mainBoxHeight = Math.max(Screen.screenHeight * 0.5, bMainBoxHeight);
-            $scope.mainBoxWidth = bMainBoxWidth;
+            $scope.mainBoxHeight = Math.max(Screen.screenHeight * 0.5, MainBoxHeight);
+            $scope.mainBoxWidth = MainBoxWidth;
             $timeout(function () {
                 $scope.$digest();
             });
@@ -123,16 +123,16 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
             // Save current search text
             //$scope.search
 
-            if(tab == bUsersTab) {
+            if(tab == UsersTab) {
                 $scope.title = "Who's online";
             }
-            if(tab == bRoomsTab) {
+            if(tab == RoomsTab) {
                 $scope.title = "Chat rooms";
             }
-            if(tab == bFriendsTab) {
+            if(tab == FriendsTab) {
                 $scope.title = "My friends";
             }
-            if(tab == bInboxTab) {
+            if(tab == InboxTab) {
                 $scope.title = "Inbox";
             }
         };

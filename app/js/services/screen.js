@@ -23,7 +23,7 @@ angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$
             this.screenWidth = $document.width();
             this.screenHeight = $window.innerHeight;
 
-            $rootScope.$broadcast(bScreenSizeChangedNotification);
+            $rootScope.$broadcast(ScreenSizeChangedNotification);
         }
 
     };

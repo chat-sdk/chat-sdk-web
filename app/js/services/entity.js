@@ -92,7 +92,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
         },
 
         stateRef: function (key) {
-            return this.ref().child(bUpdatedPath).child(key);
+            return this.ref().child(UpdatedPath).child(key);
         },
 
         updateState: function (key) {
@@ -129,7 +129,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
     };
 
     Entity.stateRef = function (path, id, key) {
-        return this.ref(path, id).child(bUpdatedPath).child(key);
+        return this.ref(path, id).child(UpdatedPath).child(key);
     };
 
     Entity.updateState = function (path, id, key) {

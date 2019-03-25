@@ -7,7 +7,7 @@ angular.module('myApp.directives').directive('ccFlash', ['$timeout', 'Config', f
         let originalTag = element.attr('cc-flash');
         let animating = false;
 
-        scope.$on(bRoomFlashHeaderNotification, function (event, room, color, period, tag) {
+        scope.$on(RoomFlashHeaderNotification, function (event, room, color, period, tag) {
             if(scope.room == room && color && period && !animating) {
                 if(!tag || tag == originalTag) {
                     animating = true;

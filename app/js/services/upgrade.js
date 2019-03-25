@@ -13,7 +13,7 @@ angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q
                 }
                 // Now remove the friends reference
                 var deferred = $q.defer();
-                var ref = Paths.userMetaRef(user.uid()).child(bFriendsPath);
+                var ref = Paths.userMetaRef(user.uid()).child(FriendsPath);
                 ref.remove((function (error) {
                     if(error) {
                         deferred.reject(error);
@@ -33,7 +33,7 @@ angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q
                 }
                 // Now remove the friends reference
                 deferred = $q.defer();
-                ref = Paths.userMetaRef(user.uid()).child(bBlockedPath);
+                ref = Paths.userMetaRef(user.uid()).child(BlockedPath);
                 ref.remove(function (error) {
                     if(error) {
                         deferred.reject(error);

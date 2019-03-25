@@ -59,8 +59,8 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
                 var room = new Room(rid);
                 room.associatedUserID = $rootScope.user.uid();
 
-//            room.height = bChatRoomHeight;
-//            room.width = bChatRoomWidth;
+//            room.height = ChatRoomHeight;
+//            room.width = ChatRoomWidth;
 
                 // Update the room from the saved state
                 LocalStorage.updateRoomFromStore(room);

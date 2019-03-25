@@ -185,7 +185,7 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
                 }
                 // If they only allow invites from friends
                 // the other user must be a friend
-                if($rootScope.user.allowInvitesFrom(bUserAllowInvitesFriends) && !FriendsConnector.isFriend(invitedByUser) && invitedByUser != $rootScope.user) {
+                if($rootScope.user.allowInvitesFrom(UserAllowInvitesFriends) && !FriendsConnector.isFriend(invitedByUser) && invitedByUser != $rootScope.user) {
                     return;
                 }
 
@@ -214,9 +214,9 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
             var room = RoomStore.getRoomWithID(rid);
             room.close();
 
-            if(room.type() == bRoomType1to1){
+            if(room.type() == RoomType1to1){
                 RoomStore.removeRoom(room);
-                $rootScope.$broadcast(bRoomRemovedNotification);
+                $rootScope.$broadcast(RoomRemovedNotification);
             }
         }
 

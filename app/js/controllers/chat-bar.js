@@ -4,21 +4,21 @@ angular.module('myApp.controllers').controller('ChatBarController', ['$scope', '
 
     $scope.init = function () {
 
-        $scope.$on(bRoomOpenedNotification, $scope.updateList);
-        $scope.$on(bRoomClosedNotification, $scope.updateList);
+        $scope.$on(RoomOpenedNotification, $scope.updateList);
+        $scope.$on(RoomClosedNotification, $scope.updateList);
 
-        $scope.$on(bUpdateRoomActiveStatusNotification, function () {
-            Log.notification(bUpdateRoomActiveStatusNotification, 'ChatBarController');
+        $scope.$on(UpdateRoomActiveStatusNotification, function () {
+            Log.notification(UpdateRoomActiveStatusNotification, 'ChatBarController');
             $scope.updateList();
         });
 
-        $scope.$on(bLogoutNotification, $scope.updateList);
+        $scope.$on(LogoutNotification, $scope.updateList);
 
     };
 
     $scope.updateList = function () {
 
-        Log.notification(bRoomOpenedNotification + "/" + bRoomClosedNotification, 'ChatBarController');
+        Log.notification(RoomOpenedNotification + "/" + RoomClosedNotification, 'ChatBarController');
 
         // Only include rooms that are active
         $scope.rooms = Cache.activeRooms();

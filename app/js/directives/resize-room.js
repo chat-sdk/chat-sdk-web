@@ -18,15 +18,15 @@ angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeo
 
                 // Min width
                 scope.room.width += lastClientX - e.clientX;
-                scope.room.width = Math.max(scope.room.width, bChatRoomWidth);
-                scope.room.width = Math.min(scope.room.width, RoomPositionManager.effectiveScreenWidth() - scope.room.offset - bChatRoomSpacing);
+                scope.room.width = Math.max(scope.room.width, ChatRoomWidth);
+                scope.room.width = Math.min(scope.room.width, RoomPositionManager.effectiveScreenWidth() - scope.room.offset - ChatRoomSpacing);
 
                 lastClientX = e.clientX;
 
                 // Min height
                 scope.room.height += lastClientY - e.clientY;
-                scope.room.height = Math.max(scope.room.height, bChatRoomHeight);
-                scope.room.height = Math.min(scope.room.height, Screen.screenHeight - bChatRoomTopMargin);
+                scope.room.height = Math.max(scope.room.height, ChatRoomHeight);
+                scope.room.height = Math.min(scope.room.height, Screen.screenHeight - ChatRoomTopMargin);
 
                 lastClientY = e.clientY;
 
@@ -47,7 +47,7 @@ angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeo
                     room = rooms[i];
                     if(room != scope.room) {
                         room.setOffset(RoomPositionManager.offsetForSlot(i));
-                        $rootScope.$broadcast(bRoomPositionUpdatedNotification, room);
+                        $rootScope.$broadcast(RoomPositionUpdatedNotification, room);
                         RoomPositionManager.updateAllRoomActiveStatus();
                     }
                 }

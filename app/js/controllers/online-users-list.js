@@ -5,38 +5,38 @@ angular.module('myApp.controllers').controller('OnlineUsersListController', ['$s
 
     $scope.init = function () {
 
-        $scope.$on(bOnlineUserAddedNotification, (function () {
-            Log.notification(bOnlineUserAddedNotification, 'OnlineUsersListController');
+        $scope.$on(OnlineUserAddedNotification, (function () {
+            Log.notification(OnlineUserAddedNotification, 'OnlineUsersListController');
             $scope.updateList();
 
         }).bind(this));
 
-        $scope.$on(bOnlineUserRemovedNotification, function () {
-            Log.notification(bOnlineUserRemovedNotification, 'OnlineUsersListController');
+        $scope.$on(OnlineUserRemovedNotification, function () {
+            Log.notification(OnlineUserRemovedNotification, 'OnlineUsersListController');
             $scope.updateList();
         });
 
-        $scope.$on(bUserBlockedNotification, function () {
-            Log.notification(bUserBlockedNotification, 'OnlineUsersListController');
+        $scope.$on(UserBlockedNotification, function () {
+            Log.notification(UserBlockedNotification, 'OnlineUsersListController');
             $scope.updateList();
         });
 
-        $scope.$on(bUserUnblockedNotification, function () {
-            Log.notification(bUserUnblockedNotification, 'OnlineUsersListController');
+        $scope.$on(UserUnblockedNotification, function () {
+            Log.notification(UserUnblockedNotification, 'OnlineUsersListController');
             $scope.updateList();
         });
 
-        $scope.$on(bFriendAddedNotification, function () {
-            Log.notification(bFriendAddedNotification, 'OnlineUsersListController');
+        $scope.$on(FriendAddedNotification, function () {
+            Log.notification(FriendAddedNotification, 'OnlineUsersListController');
             $scope.updateList();
         });
 
-        $scope.$on(bFriendRemovedNotification, function () {
-            Log.notification(bFriendAddedNotification, 'OnlineUsersListController');
+        $scope.$on(FriendRemovedNotification, function () {
+            Log.notification(FriendAddedNotification, 'OnlineUsersListController');
             $scope.updateList();
         });
 
-        $scope.$on(bLogoutNotification, $scope.updateList);
+        $scope.$on(LogoutNotification, $scope.updateList);
 
         $scope.$watchCollection('search', $scope.updateList);
 

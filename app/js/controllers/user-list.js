@@ -5,35 +5,35 @@ angular.module('myApp.controllers').controller('UserListController', ['$scope', 
 
     $scope.init = function () {
 
-        $scope.$on(bFriendAddedNotification, function () {
-            Log.notification(bFriendAddedNotification, 'UserListController');
+        $scope.$on(FriendAddedNotification, function () {
+            Log.notification(FriendAddedNotification, 'UserListController');
             $scope.updateList();
         });
 
-        $scope.$on(bFriendRemovedNotification, function () {
-            Log.notification(bFriendAddedNotification, 'UserListController');
+        $scope.$on(FriendRemovedNotification, function () {
+            Log.notification(FriendAddedNotification, 'UserListController');
             $scope.updateList();
         });
 
-        $scope.$on(bUserBlockedNotification, function () {
-            Log.notification(bUserBlockedNotification, 'UserListController');
+        $scope.$on(UserBlockedNotification, function () {
+            Log.notification(UserBlockedNotification, 'UserListController');
             $scope.updateList();
         });
 
-        $scope.$on(bUserUnblockedNotification, function () {
-            Log.notification(bUserUnblockedNotification, 'UserListController');
+        $scope.$on(UserUnblockedNotification, function () {
+            Log.notification(UserUnblockedNotification, 'UserListController');
             $scope.updateList();
         });
 
         // TODO: A bit hacky
-        $scope.$on(bRoomUpdatedNotification, function (event, room) {
-            Log.notification(bRoomUpdatedNotification, 'UserListController');
+        $scope.$on(RoomUpdatedNotification, function (event, room) {
+            Log.notification(RoomUpdatedNotification, 'UserListController');
             if(room == $scope.room) {
                 $scope.updateList();
             }
         });
 
-        $scope.$on(bLogoutNotification, $scope.updateList);
+        $scope.$on(LogoutNotification, $scope.updateList);
 
         $scope.$watchCollection('search', $scope.updateList);
 

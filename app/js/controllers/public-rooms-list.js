@@ -5,8 +5,8 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
 
     $scope.init = function () {
 
-        $scope.$on(bPublicRoomAddedNotification, (function (event, room) {
-            Log.notification(bPublicRoomAddedNotification, 'PublicRoomsListController');
+        $scope.$on(PublicRoomAddedNotification, (function (event, room) {
+            Log.notification(PublicRoomAddedNotification, 'PublicRoomsListController');
             // Add the room and sort the list
             if(!ArrayUtils.contains($scope.allRooms, room)) {
                 $scope.allRooms.push(room);
@@ -15,8 +15,8 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
 
         }).bind(this));
 
-        $scope.$on(bPublicRoomRemovedNotification, function (event, room) {
-            Log.notification(bPublicRoomRemovedNotification, 'PublicRoomsListController');
+        $scope.$on(PublicRoomRemovedNotification, function (event, room) {
+            Log.notification(PublicRoomRemovedNotification, 'PublicRoomsListController');
 
             ArrayUtils.remove($scope.allRooms, room);
             $scope.updateList();
@@ -24,9 +24,9 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
         });
 
         // Update the list if the user count on a room changes
-        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+        $scope.$on(RoomUpdatedNotification, $scope.updateList);
 
-        $scope.$on(bLogoutNotification, $scope.updateList);
+        $scope.$on(LogoutNotification, $scope.updateList);
 
         $scope.$watchCollection('search', $scope.updateList);
     };
@@ -34,7 +34,7 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
 
     $scope.updateList = function () {
 
-        Log.notification(bLogoutNotification, 'PublicRoomsListController');
+        Log.notification(LogoutNotification, 'PublicRoomsListController');
 
         $scope.allRooms.sort(function(a, b) {
 

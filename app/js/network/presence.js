@@ -36,7 +36,7 @@ angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 
                 // Take the user online
                 this.goOnline();
 
-                $rootScope.$on(bVisibilityChangedNotification, (function (event, hidden) {
+                $rootScope.$on(VisibilityChangedNotification, (function (event, hidden) {
 
 
                     if(this.inactiveTimerPromise) {
@@ -121,7 +121,7 @@ angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 
                             // We need to set ourself as a member again
                             room = rooms[i];
                             if(room.isPublic())
-                                promises.push(room.join(bUserStatusMember));
+                                promises.push(room.join(UserStatusMember));
 
                         }
 

@@ -6,24 +6,24 @@ angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope
         $scope.roomBackgroundColor = '#FFF';
 
         $scope.init = function () {
-            $scope.boxWidth = bRoomListBoxWidth;
-            $scope.boxHeight = bRoomListBoxHeight;
+            $scope.boxWidth = RoomListBoxWidth;
+            $scope.boxHeight = RoomListBoxHeight;
             $scope.canCloseRoom = true;
 
             // Is the more box minimized?
             $scope.setMoreBoxMinimized(LocalStorage.getProperty(LocalStorage.moreMinimizedKey));
 
             // Update the list when a room changes
-            $scope.$on(bUpdateRoomActiveStatusNotification, $scope.updateList);
-            $scope.$on(bRoomUpdatedNotification, $scope.updateList);
-            $scope.$on(bLogoutNotification, $scope.updateList);
+            $scope.$on(UpdateRoomActiveStatusNotification, $scope.updateList);
+            $scope.$on(RoomUpdatedNotification, $scope.updateList);
+            $scope.$on(LogoutNotification, $scope.updateList);
 
 
         };
 
         $scope.updateList = function () {
 
-            Log.notification(bUpdateRoomActiveStatusNotification, 'RoomListBoxController');
+            Log.notification(UpdateRoomActiveStatusNotification, 'RoomListBoxController');
 
             $scope.rooms = Cache.inactiveRooms();
 
@@ -90,7 +90,7 @@ angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope
                     break;
                 }
             }
-            $rootScope.$broadcast(bUpdateRoomActiveStatusNotification);
+            $rootScope.$broadcast(UpdateRoomActiveStatusNotification);
 
         };
 

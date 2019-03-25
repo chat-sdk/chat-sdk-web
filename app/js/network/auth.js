@@ -81,7 +81,7 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     // Used to log in using a remote partial i.e. if you wanted to log in using one social account
                     // across multiple domains
 
-                    //$rootScope.$broadcast(bStartSocialLoginNotification, {
+                    //$rootScope.$broadcast(StartSocialLoginNotification, {
                     //    action: credential.getType(),
                     //    config: bFirebaseConfig,
                     //    scope: scope,
@@ -159,15 +159,15 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 //                }
 
                     // Set the user's name
-                    setUserProperty(bUserName, userData.name);
-                    setUserProperty(bUserName, bDefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
+                    setUserProperty(UserName, userData.name);
+                    setUserProperty(UserName, DefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
 
                     var imageURL = null;
 
                     /** SOCIAL INFORMATION **/
                     if(authUser.provider === "facebook") {
 
-                        setUserProperty(bUserGender, userData.gender === "male" ? "M": "F");
+                        setUserProperty(UserGender, userData.gender === "male" ? "M": "F");
 
                         // Make an API request to Facebook to get an appropriately sized
                         // photo
@@ -185,40 +185,40 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                             imageURL = userData.profile_image_url.replace("normal", "bigger");
                         }
 
-                        setUserProperty(bUserStatus, userData.description);
-                        setUserProperty(bUserLocation, userData.location);
+                        setUserProperty(UserStatus, userData.description);
+                        setUserProperty(UserLocation, userData.location);
 
                     }
                     if(authUser.provider === "github") {
                         imageURL = userData.avatar_url;
-                        setUserProperty(bUserName, authUser.login);
+                        setUserProperty(UserName, authUser.login);
                     }
                     if(authUser.provider === "google") {
                         imageURL = userData.picture;
-                        setUserProperty(bUserGender, userData.gender === "male" ? "M": "F");
+                        setUserProperty(UserGender, userData.gender === "male" ? "M": "F");
                     }
                     if(authUser.provider === "anonymous") {
 
                     }
                     if(authUser.provider === "custom") {
 
-                        setUserProperty(bUserStatus, userData[bUserStatus]);
-                        setUserProperty(bUserLocation, userData[bUserLocation]);
-                        setUserProperty(bUserGender, userData[bUserGender]);
-                        setUserProperty(bUserCountryCode, userData[bUserCountryCode]);
+                        setUserProperty(UserStatus, userData[UserStatus]);
+                        setUserProperty(UserLocation, userData[UserLocation]);
+                        setUserProperty(UserGender, userData[UserGender]);
+                        setUserProperty(UserCountryCode, userData[UserCountryCode]);
                         // TODO: Depricated
-                        setUserProperty(bUserHomepageLink, userData[bUserHomepageLink], true);
-                        setUserProperty(bUserHomepageText, userData[bUserHomepageText], true);
+                        setUserProperty(UserHomepageLink, userData[UserHomepageLink], true);
+                        setUserProperty(UserHomepageText, userData[UserHomepageText], true);
 
-                        if(userData[bUserProfileHTML] && userData[bUserProfileHTML].length > 0) {
-                            setUserProperty(bUserProfileHTML, userData[bUserProfileHTML], true);
+                        if(userData[UserProfileHTML] && userData[UserProfileHTML].length > 0) {
+                            setUserProperty(UserProfileHTML, userData[UserProfileHTML], true);
                         }
                         else {
                             user.setProfileHTML("");
                         }
 
-                        if(userData[bUserImageURL]) {
-                            imageURL = userData[bUserImageURL];
+                        if(userData[UserImageURL]) {
+                            imageURL = userData[UserImageURL];
                         }
                     }
 
@@ -227,7 +227,7 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     }
 
                     // If they don't have a profile picture load it from the social network
-                    if(setUserProperty(bUserImageURL, imageURL)) {
+                    if(setUserProperty(UserImageURL, imageURL)) {
                         user.setImageURL(imageURL);
                         user.setImage(imageURL);
                     }
@@ -242,8 +242,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
                             // The first time the user logs on
                             // try to guess which city and country they're from
-                            changed = setUserProperty(bUserLocation, r.data.city);
-                            changed = changed || setUserProperty(bUserCountryCode, r.data.country_code);
+                            changed = setUserProperty(UserLocation, r.data.city);
+                            changed = changed || setUserProperty(UserCountryCode, r.data.country_code);
 
                             if(changed) {
                                 user.pushMeta();

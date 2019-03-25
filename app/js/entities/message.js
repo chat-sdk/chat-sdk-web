@@ -25,10 +25,10 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             if(meta) {
 
                 if(!this.type()) {
-                    this.setType(bMessageTypeText);
+                    this.setType(MessageTypeText);
                 }
 
-                if(this.type() == bMessageTypeImage || this.type() == bMessageTypeFile) {
+                if(this.type() == MessageTypeImage || this.type() == MessageTypeFile) {
                     // Get the image and thumbnail URLs
                     var json = meta[messageJSONv2] || meta[messageJSON];
                     if(typeof json === 'string') {
@@ -36,11 +36,11 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
                     }
 
                     if(json) {
-                        if(this.type() == bMessageTypeImage) {
+                        if(this.type() == MessageTypeImage) {
                             this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
                             this.imageURL = json[messageImageURL];
                         }
-                        if(this.type() == bMessageTypeFile) {
+                        if(this.type() == MessageTypeFile) {
                             this.fileURL = json[messageFileURL];
                         }
                     }
@@ -160,7 +160,7 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
 
             var text = imageURL+','+imageURL+',W'+width+"&H"+height;
 
-            var m = Message.buildMeta(rid, uid, text, bMessageTypeImage);
+            var m = Message.buildMeta(rid, uid, text, MessageTypeImage);
 
             var json = {};
 
@@ -178,7 +178,7 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
 
         Message.buildFileMeta = function (rid, uid, fileName, mimeType, fileURL) {
 
-            var m = Message.buildMeta(rid, uid, fileName, bMessageTypeFile);
+            var m = Message.buildMeta(rid, uid, fileName, MessageTypeFile);
 
             var json = {};
 

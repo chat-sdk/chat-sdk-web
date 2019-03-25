@@ -156,7 +156,7 @@ angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$
 
             $rootScope.config = this;
 
-            $rootScope.$broadcast(bConfigUpdatedNotification);
+            $rootScope.$broadcast(ConfigUpdatedNotification);
             $timeout(function () {
                 $rootScope.$digest()
             });

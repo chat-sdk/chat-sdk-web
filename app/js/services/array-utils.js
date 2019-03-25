@@ -8,7 +8,7 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
             for(var i = 0; i < rooms.length; i++) {
                 var room = rooms[i];
                 if(room.containsOnlyUsers(users)) {
-                    if((users.length == 2 && room.type() == bRoomType1to1) || (users.length != 2 && room.type() == bRoomTypeGroup)) {
+                    if((users.length == 2 && room.type() == RoomType1to1) || (users.length != 2 && room.type() == RoomTypeGroup)) {
                         roomsWithUsers.push(room);
                     }
                 }

@@ -20,7 +20,7 @@ angular.module('myApp.directives').directive('userDropLocation', ['$rootScope', 
 
                 // This isn't really needed since it's handled with security rules
                 //if(!scope.room.userIsMember($rootScope.userDrag.user)) {
-                Room.addUserToRoom(scope.room.rid(), $rootScope.userDrag.user, bUserStatusMember).then(function () {
+                Room.addUserToRoom(scope.room.rid(), $rootScope.userDrag.user, UserStatusMember).then(function () {
                     // Update the room's type
                     scope.room.updateType();
                 }, function (error) {

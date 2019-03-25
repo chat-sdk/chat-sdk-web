@@ -69,7 +69,7 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
             if(user && user.uid()) {
                 this.friends[user.uid()] = user;
                 user.friend = true;
-                $rootScope.$broadcast(bFriendAddedNotification);
+                $rootScope.$broadcast(FriendAddedNotification);
             }
         },
 
@@ -96,7 +96,7 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
                 if(user) {
                     user.friend = false;
                     delete this.friends[uid];
-                    $rootScope.$broadcast(bFriendRemovedNotification);
+                    $rootScope.$broadcast(FriendRemovedNotification);
                 }
             }
         }

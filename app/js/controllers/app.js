@@ -5,9 +5,9 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;
 
-        $rootScope.messageTypeText = bMessageTypeText;
-        $rootScope.messageTypeImage = bMessageTypeImage;
-        $rootScope.messageTypeFile = bMessageTypeFile;
+        $rootScope.messageTypeText = MessageTypeText;
+        $rootScope.messageTypeImage = MessageTypeImage;
+        $rootScope.messageTypeFile = MessageTypeFile;
 
         $scope.init = function () {
 
@@ -74,8 +74,8 @@ angular.module('myApp.controllers').controller('AppController', [
 
             $scope.setMainBoxMinimized(LocalStorage.getProperty(LocalStorage.mainMinimizedKey));
 
-            $scope.$on(bUserOnlineStateChangedNotification, function () {
-                Log.notification(bUserOnlineStateChangedNotification, "AppController");
+            $scope.$on(UserOnlineStateChangedNotification, function () {
+                Log.notification(UserOnlineStateChangedNotification, "AppController");
                 $scope.updateTotalUserCount();
                 $timeout(function () {
                     $scope.$digest();
@@ -173,7 +173,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
         $scope.showLoginBox = function (mode) {
             $rootScope.loginMode = mode ? mode : Auth.mode;
-            $scope.activeBox = bLoginBox;
+            $scope.activeBox = LoginBox;
             $timeout(function() {
                 $scope.$digest();
             });
@@ -183,22 +183,22 @@ angular.module('myApp.controllers').controller('AppController', [
          * Show the profile settings
          */
         $scope.showProfileSettingsBox = function () {
-            $scope.activeBox = bProfileSettingsBox;
+            $scope.activeBox = ProfileSettingsBox;
 
             // This will allow us to setup validation after the user
             // has been loaded
-            $scope.$broadcast(bShowProfileSettingsBox);
+            $scope.$broadcast(ShowProfileSettingsBox);
         };
 
         /**
          * Show the main box
          */
         $scope.showMainBox = function () {
-            $scope.activeBox = bMainBox;
+            $scope.activeBox = MainBox;
         };
 
         $scope.showErrorBox = function (message) {
-            $scope.activeBox = bErrorBox;
+            $scope.activeBox = ErrorBox;
             $scope.errorBoxMessage = message;
             $timeout(function() {
                 $scope.$digest();
@@ -209,8 +209,8 @@ angular.module('myApp.controllers').controller('AppController', [
          * Show the create public room box
          */
         $scope.showCreateRoomBox = function () {
-            $scope.activeBox = bCreateRoomBox;
-            $scope.$broadcast(bShowCreateChatBox);
+            $scope.activeBox = CreateRoomBox;
+            $scope.$broadcast(ShowCreateChatBox);
         };
 
         $scope.toggleMainBoxVisibility = function() {
@@ -248,7 +248,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
             $scope.profileBoxStyle = {
                 right: 250,
-                width: bProfileBoxWidth,
+                width: ProfileBoxWidth,
                 'border-top-left-radius': 4,
                 'border-bottom-left-radius': 4,
                 'border-top-right-radius': 0,
@@ -357,7 +357,7 @@ angular.module('myApp.controllers').controller('AppController', [
                 var rooms = Cache.getPrivateRoomsWithUsers($rootScope.user, user);
                 if (rooms.length) {
                     var r = rooms[0];
-                    if(r.type() == bRoomType1to1) {
+                    if(r.type() == RoomType1to1) {
                         r.flashHeader();
                         // The room is already open! Do nothing
                         return;
@@ -419,7 +419,7 @@ angular.module('myApp.controllers').controller('AppController', [
             $scope.email = "";
             $scope.password = "";
 
-            $rootScope.$broadcast(bLogoutNotification);
+            $rootScope.$broadcast(LogoutNotification);
 
             LocalStorage.clearToken();
 

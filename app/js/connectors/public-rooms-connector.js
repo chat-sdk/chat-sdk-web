@@ -16,14 +16,14 @@ angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 
 
                         room.on().then(function () {
 
-                            $rootScope.$broadcast(bPublicRoomAddedNotification, room);
+                            $rootScope.$broadcast(PublicRoomAddedNotification, room);
 
                             // Check to see if the room is marked as public
                             // TODO: Depricated code fix for old customers who didn't have
                             // public room flagged
 //                        if(!room.meta.isPublic && !room.meta.type) {
 //                            var ref = Paths.roomMetaRef(room.rid());
-//                            ref.update({type: bRoomTypePublic});
+//                            ref.update({type: RoomTypePublic});
 //                        }
 
                             //RoomStore.addRoom(room);
@@ -37,7 +37,7 @@ angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 
                 publicRoomsRef.on('child_removed', (function (snapshot) {
 
                     var room = RoomStore.getOrCreateRoomWithID(snapshot.key);
-                    $rootScope.$broadcast(bPublicRoomRemovedNotification, room);
+                    $rootScope.$broadcast(PublicRoomRemovedNotification, room);
 
 
                 }).bind(this));

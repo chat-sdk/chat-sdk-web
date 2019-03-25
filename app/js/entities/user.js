@@ -5,10 +5,10 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
             this.setImageURL(Environment.defaultProfilePictureURL());
             this.setUID(uid);
-            this.setAllowInvites(bUserAllowInvitesEveryone);
+            this.setAllowInvites(UserAllowInvitesEveryone);
 
             //this._id = uid
-            this.entity = new Entity(bUsersPath, uid);
+            this.entity = new Entity(UsersPath, uid);
         }
 
         User.prototype.getMeta = function() {
@@ -31,11 +31,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getName  = function () {
-            return this.getMetaValue(bUserName);
+            return this.getMetaValue(UserName);
         };
 
         User.prototype.setName  = function (name) {
-            return this.setMetaValue(bUserName, name);
+            return this.setMetaValue(UserName, name);
         };
 
         User.prototype.name = function name (value) {
@@ -43,11 +43,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getStatus  = function () {
-            return this.getMetaValue(bUserStatus);
+            return this.getMetaValue(UserStatus);
         };
 
         User.prototype.setStatus  = function (status) {
-            return this.setMetaValue(bUserStatus, status);
+            return this.setMetaValue(UserStatus, status);
         };
 
         // For Angular getterSetter binding
@@ -56,11 +56,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getLocation  = function () {
-            return this.getMetaValue(bUserLocation);
+            return this.getMetaValue(UserLocation);
         };
 
         User.prototype.setLocation  = function (location) {
-            return this.setMetaValue(bUserLocation, location);
+            return this.setMetaValue(UserLocation, location);
         };
 
         User.prototype.location = function location (value) {
@@ -68,11 +68,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getCountryCode  = function () {
-            return this.getMetaValue(bUserCountryCode);
+            return this.getMetaValue(UserCountryCode);
         };
 
         User.prototype.setCountryCode  = function (countryCode) {
-            return this.setMetaValue(bUserCountryCode, countryCode);
+            return this.setMetaValue(UserCountryCode, countryCode);
         };
 
         User.prototype.countryCode = function countryCode (value) {
@@ -80,11 +80,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getGender  = function () {
-            return this.getMetaValue(bUserGender);
+            return this.getMetaValue(UserGender);
         };
 
         User.prototype.setGender  = function (gender) {
-            return this.setMetaValue(bUserGender, gender);
+            return this.setMetaValue(UserGender, gender);
         };
 
         User.prototype.gender = function gender (value) {
@@ -92,11 +92,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getProfileLink  = function () {
-            return this.getMetaValue(bUserProfileLink);
+            return this.getMetaValue(UserProfileLink);
         };
 
         User.prototype.setProfileLink  = function (profileLink) {
-            return this.setMetaValue(bUserProfileLink, profileLink);
+            return this.setMetaValue(UserProfileLink, profileLink);
         };
 
         User.prototype.profileLink = function profileLink (value) {
@@ -104,11 +104,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getHomepageLink  = function () {
-            return this.getMetaValue(bUserHomepageLink);
+            return this.getMetaValue(UserHomepageLink);
         };
 
         User.prototype.setHomepageLink  = function (homepageLink) {
-            return this.setMetaValue(bUserHomepageLink, homepageLink);
+            return this.setMetaValue(UserHomepageLink, homepageLink);
         };
 
         User.prototype.homepageLink = function homepageLink (value) {
@@ -116,11 +116,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getHomepageText  = function () {
-            return this.getMetaValue(bUserHomepageText);
+            return this.getMetaValue(UserHomepageText);
         };
 
         User.prototype.setHomepageText  = function (homepageText) {
-            return this.setMetaValue(bUserHomepageText, homepageText);
+            return this.setMetaValue(UserHomepageText, homepageText);
         };
 
         User.prototype.homepageText = function homepageText (value) {
@@ -128,11 +128,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getProfileHTML  = function () {
-            return this.getMetaValue(bUserProfileHTML);
+            return this.getMetaValue(UserProfileHTML);
         };
 
         User.prototype.setProfileHTML  = function (profileHTML) {
-            return this.setMetaValue(bUserProfileHTML, profileHTML);
+            return this.setMetaValue(UserProfileHTML, profileHTML);
         };
 
         User.prototype.profileHTML = function profileHTML (value) {
@@ -140,11 +140,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getAllowInvites  = function () {
-            return this.getMetaValue(bUserAllowInvites);
+            return this.getMetaValue(UserAllowInvites);
         };
 
         User.prototype.setAllowInvites  = function (allowInvites) {
-            return this.setMetaValue(bUserAllowInvites, allowInvites);
+            return this.setMetaValue(UserAllowInvites, allowInvites);
         };
 
         User.prototype.allowInvites = function allowInvites (value) {
@@ -152,11 +152,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.getImageURL = function () {
-            return this.getMetaValue(bUserImageURL);
+            return this.getMetaValue(UserImageURL);
         };
 
         User.prototype.setImageURL = function(imageURL) {
-            this.setMetaValue(bUserImageURL, imageURL);
+            this.setMetaValue(UserImageURL, imageURL);
         };
 
         User.prototype.imageURL = function imageURL (value) {
@@ -190,7 +190,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         User.prototype.on = function () {
 
-            if(this.entity.pathIsOn[bMetaKey]) {
+            if(this.entity.pathIsOn[MetaKey]) {
                 return;
             }
 
@@ -199,15 +199,15 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                 if(!Utils.unORNull(snapshot.val())) {
                     this.online = snapshot.val();
                     if(this.online) {
-                        $rootScope.$broadcast(bOnlineUserAddedNotification);
+                        $rootScope.$broadcast(OnlineUserAddedNotification);
                     }
                     else {
-                        $rootScope.$broadcast(bOnlineUserRemovedNotification);
+                        $rootScope.$broadcast(OnlineUserRemovedNotification);
                     }
                 }
             }).bind(this));
 
-            return this.entity.pathOn(bMetaKey, (function (val) {
+            return this.entity.pathOn(MetaKey, (function (val) {
                 if(val) {
                     this.meta = val;
 
@@ -218,14 +218,14 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                     // - Main box
                     // - Every chat room that includes the user
                     // - User settings popup
-                    $rootScope.$broadcast(bUserValueChangedNotification, this);
+                    $rootScope.$broadcast(UserValueChangedNotification, this);
                 }
             }).bind(this));
         };
 
         // Stop listening to the Firebase location
         User.prototype.off = function () {
-            this.entity.pathOff(bMetaKey);
+            this.entity.pathOff(MetaKey);
             Paths.userOnlineRef(this.uid()).off();
         };
 
@@ -237,7 +237,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             ref.update(this.meta, (function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(bMetaKey);
+                    this.entity.updateState(MetaKey);
                 }
                 else {
                     deferred.reject(error);
@@ -260,10 +260,10 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             }
 
             var allowInvites = this.allowInvites();
-            if(Utils.unORNull(allowInvites) || allowInvites == bUserAllowInvitesEveryone) {
+            if(Utils.unORNull(allowInvites) || allowInvites == UserAllowInvitesEveryone) {
                 return true;
             }
-    //        else if (allowInvites == bUserAllowInvitesFriends) {
+    //        else if (allowInvites == UserAllowInvitesFriends) {
     //            return FriendsConnector.isFriend(invitingUser);
     //        }
             else {
@@ -283,7 +283,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             // Compare to the old URL
             var imageChanged = imageURL != this.imageURL();
             if(imageChanged) {
-                this.setMetaValue(bUserImageURL, imageURL);
+                this.setMetaValue(UserImageURL, imageURL);
                 this.setImageURL(imageURL);
                 this.setImage(imageURL, false);
                 this.pushMeta();
@@ -344,14 +344,14 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             ref.update(data, (function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(bRoomsPath);
+                    this.entity.updateState(RoomsPath);
                 }
                 else {
                     deferred.reject(error);
                 }
             }).bind(this));
 
-            //if(type == bRoomTypePublic) {
+            //if(type == RoomTypePublic) {
             //    ref.onDisconnect().remove();
             //}
 
@@ -370,7 +370,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             ref.remove((function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(bRoomsPath);
+                    this.entity.updateState(RoomsPath);
                 }
                 else {
                     deferred.reject(error);
@@ -396,7 +396,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             ref.update(data, (function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(bFriendsPath);
+                    this.entity.updateState(FriendsPath);
                 }
                 else {
                     deferred.reject(error);
@@ -419,7 +419,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             // added initially
             friend.removeFriend();
             friend.removeFriend = null;
-            this.entity.updateState(bFriendsPath);
+            this.entity.updateState(FriendsPath);
         };
 
         User.prototype.blockUserWithUID = function (uid) {
@@ -436,7 +436,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                     deferred.resolve();
                 }
             }).bind(this));
-            this.entity.updateState(bBlockedPath);
+            this.entity.updateState(BlockedPath);
             return deferred.promise;
         };
 
@@ -447,7 +447,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             var ref = Paths.userRoomsRef(this.uid()).child(rid);
 
             var data = {};
-            data[bReadKey] = firebase.database.ServerValue.TIMESTAMP;
+            data[ReadKey] = firebase.database.ServerValue.TIMESTAMP;
 
             ref.update(data, function (error) {
                 if(!error) {
@@ -470,7 +470,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         User.prototype.unblockUser = function (block) {
             block.unblock();
             block.unblock = null;
-            this.entity.updateState(bBlockedPath);
+            this.entity.updateState(BlockedPath);
         };
 
         User.prototype.serialize = function () {
@@ -487,7 +487,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                 this.entity.deserialize(su._super);
                 this.meta = su.meta;
                 //this.setThumbnail(su.thumbnail);
-                this.setImage(su.meta[bUserImageURL]);
+                this.setImage(su.meta[UserImageURL]);
             }
         };
 

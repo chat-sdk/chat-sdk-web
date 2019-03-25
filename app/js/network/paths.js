@@ -31,16 +31,16 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         usersRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("usersRef");
-            return this.firebase().child(bUsersPath);
+            return this.firebase().child(UsersPath);
         },
 
         configRef: function () {
-            return this.firebase().child(bConfigKey);
+            return this.firebase().child(ConfigKey);
         },
 
         timeRef: function (uid) {
             if(FIREBASE_REF_DEBUG) console.log("timeRef");
-            return this.firebase().child(bTimeKey).child(uid);
+            return this.firebase().child(TimeKey).child(uid);
         },
 
         userRef: function (fid) {
@@ -50,21 +50,21 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         userMetaRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userMetaRef");
-            return this.userRef(fid).child(bMetaKey);
+            return this.userRef(fid).child(MetaKey);
         },
 
         userImageRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userImageRef");
-            return this.userRef(fid).child(bImageKey);
+            return this.userRef(fid).child(ImageKey);
         },
 
         userStateRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userStateRef");
-            return this.userRef(fid).child(bUpdatedPath);
+            return this.userRef(fid).child(UpdatedPath);
         },
 
         userOnlineRef: function (fid) {
-            return this.userRef(fid).child(bOnlineKey);
+            return this.userRef(fid).child(OnlineKey);
         },
 
 
@@ -75,17 +75,17 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         userFriendsRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userFriendsRef");
-            return this.userRef(fid).child(bFriendsPath);
+            return this.userRef(fid).child(FriendsPath);
         },
 
         userBlockedRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userBlockedRef");
-            return this.userRef(fid).child(bBlockedPath);
+            return this.userRef(fid).child(BlockedPath);
         },
 
         onlineUsersRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("onlineUsersRef");
-            return this.firebase().child(bOnlineKey);
+            return this.firebase().child(OnlineKey);
         },
 
         onlineUserRef: function (fid) {
@@ -96,12 +96,12 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         roomsRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("roomsRef");
-            return this.firebase().child(bRoomsPath);
+            return this.firebase().child(RoomsPath);
         },
 
         publicRoomsRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("publicRoomsRef");
-            return this.firebase().child(bPublicRoomsPath);
+            return this.firebase().child(PublicRoomsPath);
         },
 
         publicRoomRef: function (rid) {
@@ -116,42 +116,42 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         roomMetaRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomMetaRef");
-            return this.roomRef(fid).child(bDetailsKey);
+            return this.roomRef(fid).child(DetailsKey);
         },
 
         roomLastMessageRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
-            return this.roomRef(fid).child(bLastMessagePath);
+            return this.roomRef(fid).child(LastMessagePath);
         },
 
         roomStateRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomStateRef");
-            return this.roomRef(fid).child(bUpdatedPath);
+            return this.roomRef(fid).child(UpdatedPath);
         },
 
         roomMessagesRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomMessagesRef");
-            return this.roomRef(fid).child(bMessagesPath);
+            return this.roomRef(fid).child(MessagesPath);
         },
 
         roomUsersRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomUsersRef");
-            return this.roomRef(fid).child(bUsersMetaPath);
+            return this.roomRef(fid).child(UsersMetaPath);
         },
 
         roomTypingRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("roomTypingRef");
-            return this.roomRef(fid).child(bTypingPath);
+            return this.roomRef(fid).child(TypingPath);
         },
 
         userRoomsRef: function (fid) {
             if(FIREBASE_REF_DEBUG) console.log("userRoomsRef");
-            return this.userRef(fid).child(bRoomsPath);
+            return this.userRef(fid).child(RoomsPath);
         },
 
         messageUsersRef: function (rid, mid) {
             if(FIREBASE_REF_DEBUG) console.log("messageUsersRef");
-            return this.messageRef(rid, mid).child(bUsersPath);
+            return this.messageRef(rid, mid).child(UsersPath);
         },
 
         messageRef: function (rid, mid) {
@@ -161,11 +161,11 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
 
         onlineUserCountRef: function () {
             if(FIREBASE_REF_DEBUG) console.log("onlineUserCountRef");
-            return this.firebase().child(bOnlineUserCountKey);
+            return this.firebase().child(OnlineUserCountKey);
         },
 
         flaggedMessageRef: function (tid, mid) {
-            return this.firebase().child(bFlaggedPath).child(bRoomsPath).child(tid).child(bMessagesPath).child(mid);
+            return this.firebase().child(FlaggedPath).child(RoomsPath).child(tid).child(MessagesPath).child(mid);
         }
 
     };

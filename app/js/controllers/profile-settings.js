@@ -13,19 +13,19 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
 
             $scope.validation = {};
 
-            $scope.validation[bUserName] = {
+            $scope.validation[UserName] = {
                 minLength: 2,
                 maxLength: 50,
                 valid: true
             };
 
-            $scope.validation[bUserLocation] = {
+            $scope.validation[UserLocation] = {
                 minLength: 0,
                 maxLength: 50,
                 valid: true
             };
 
-            $scope.validation[bUserProfileLink] = {
+            $scope.validation[UserProfileLink] = {
                 minLength: 0,
                 maxLength: 100,
                 valid: true
@@ -37,7 +37,7 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
 
             // When the box will be opened we need to add a listener to the
             // user
-            $scope.$on(bShowProfileSettingsBox, (function () {
+            $scope.$on(ShowProfileSettingsBox, (function () {
 
                 console.log("Show Profile");
 
@@ -45,15 +45,15 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
         };
 
         $scope.validateLocation = function () {
-            return $scope.validation[bUserLocation].valid;
+            return $scope.validation[UserLocation].valid;
         };
 
         $scope.validateProfileLink = function () {
-            return $scope.validation[bUserProfileLink].valid;
+            return $scope.validation[UserProfileLink].valid;
         };
 
         $scope.validateName= function () {
-            return $scope.validation[bUserName].valid;
+            return $scope.validation[UserName].valid;
         };
 
         $scope.toggleMuted = function () {
@@ -119,10 +119,10 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
             var user = $scope.getUser();
 
             // Validate the user
-            var nameValid = $scope.validateString(bUserName, user.getName());
-            var locationValid = $scope.validateString(bUserLocation, user.getLocation());
+            var nameValid = $scope.validateString(UserName, user.getName());
+            var locationValid = $scope.validateString(UserLocation, user.getLocation());
 
-            var profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(bUserProfileLink, user.getProfileLink());
+            var profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(UserProfileLink, user.getProfileLink());
 
             return nameValid && locationValid && profileLinkValid;
         };
@@ -165,13 +165,13 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
                 }
             }
             else {
-                if(!$scope.validation[bUserName].valid) {
-                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation[bUserName].minLength+" - "+$scope.validation[bUserName].maxLength+" characters long ", "Ok");
+                if(!$scope.validation[UserName].valid) {
+                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation[UserName].minLength+" - "+$scope.validation[UserName].maxLength+" characters long ", "Ok");
                 }
-                if(!$scope.validation[bUserLocation].valid) {
-                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The location must be between "+$scope.validation[bUserLocation].minLength+" - "+$scope.validation[bUserLocation].maxLength+" characters long", "Ok");
+                if(!$scope.validation[UserLocation].valid) {
+                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The location must be between "+$scope.validation[UserLocation].minLength+" - "+$scope.validation[UserLocation].maxLength+" characters long", "Ok");
                 }
-                if(!$scope.validation[bUserProfileLink].valid) {
+                if(!$scope.validation[UserProfileLink].valid) {
                     $scope.showNotification(NotificationTypeAlert, "Validation failed", "The profile link must be a valid URL", "Ok");
                 }
             }

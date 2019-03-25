@@ -1,9 +1,9 @@
 angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
     return function (scope, elm) {
 
-        scope.$on(bAnimateRoomNotification, (function (event, args) {
+        scope.$on(AnimateRoomNotification, (function (event, args) {
 
-            Log.notification(bAnimateRoomNotification, 'animateRoom');
+            Log.notification(AnimateRoomNotification, 'animateRoom');
 
             if(args.room == scope.room) {
 

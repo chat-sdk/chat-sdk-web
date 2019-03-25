@@ -6,8 +6,8 @@ angular.module('myApp.controllers').controller('CreateRoomController', ['$scope'
         $scope.init = function () {
             $scope.clearForm();
 
-            $scope.$on(bShowCreateChatBox, function () {
-                Log.notification(bShowCreateChatBox, 'CreateRoomController');
+            $scope.$on(ShowCreateChatBox, function () {
+                Log.notification(ShowCreateChatBox, 'CreateRoomController');
                 $scope.focusName = true;
             });
 
@@ -29,7 +29,7 @@ angular.module('myApp.controllers').controller('CreateRoomController', ['$scope'
                     $scope.room.name,
                     $scope.room.description,
                     $scope.room.invitesEnabled,
-                    bRoomType1to1
+                    RoomType1to1
                 );
             }
 

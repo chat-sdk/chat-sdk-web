@@ -54,8 +54,8 @@ angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$d
                 lastClientX = e.clientX;
 
                 // Apply constraints
-                scope.room.offset = Math.max(scope.room.offset, bMainBoxWidth + bChatRoomSpacing);
-                scope.room.offset = Math.min(scope.room.offset, RoomPositionManager.effectiveScreenWidth() - scope.room.width - bChatRoomSpacing);
+                scope.room.offset = Math.max(scope.room.offset, MainBoxWidth + ChatRoomSpacing);
+                scope.room.offset = Math.min(scope.room.offset, RoomPositionManager.effectiveScreenWidth() - scope.room.width - ChatRoomSpacing);
 
                 scope.wasDragged();
 
@@ -75,7 +75,7 @@ angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$d
 
                 scope.dragging = false;
 
-                $rootScope.$broadcast(bAnimateRoomNotification, {
+                $rootScope.$broadcast(AnimateRoomNotification, {
                     room: scope.room
                 });
 

@@ -18,23 +18,22 @@ let Day = Hour * 24;
 let LastVisitedTimeout = Hour;
 
 // Paths
-let bUsersPath = "users";
-let bUsersMetaPath = "users";
-let bRoomsPath = "threads";
-let bPublicRoomsPath = "public-threads";
-let bMessagesPath = 'messages';
-let bFlaggedPath = 'flagged';
-let bTypingPath = 'typing';
-let bFriendsPath = 'friends';
-let bBlockedPath = 'blocked';
-let bUpdatedPath = 'updated';
-let bOnlineUserCountKey = 'onlineUserCount';
-let bLastMessagePath = "lastMessage";
-let bFlaggedMessagesPath = "flagged";
-let bCreatorEntityID = "creator-entity-id";
-let bDate = "date";
-let bMessage = "message";
-let bSenderEntityID = "sender-entity-id";
+let UsersPath = "users";
+let UsersMetaPath = "users";
+let RoomsPath = "threads";
+let PublicRoomsPath = "public-threads";
+let MessagesPath = 'messages';
+let FlaggedPath = 'flagged';
+let TypingPath = 'typing';
+let FriendsPath = 'friends';
+let BlockedPath = 'blocked';
+let UpdatedPath = 'updated';
+let OnlineUserCountKey = 'onlineUserCount';
+let LastMessagePath = "lastMessage";
+let FlaggedMessagesPath = "flagged";
+
+let SenderEntityID = "sender-entity-id";
+let CreatorEntityID = "creator-entity-id";
 
 let messageUID = "user-firebase-id";
 //let messageRID = "rid";
@@ -67,125 +66,124 @@ let roomDescription = "description";
 let roomWeight = "weight";
 let roomType = "type_v4";
 let roomTypeV3 = "type";
-let roomCreatorEntityID = bCreatorEntityID;
+let roomCreatorEntityID = CreatorEntityID;
 
+let ReadKey = 'read';
+let DateKey = "date";
+let MessageKey = "message";
+let MetaKey = "meta";
+let DetailsKey = "details";
+let ImageKey = "image";
+let TimeKey = "time";
+let UserCountKey = "user-count";
+let ConfigKey = "config";
 
+let OnlineKey = "online";
+let TypeKey = "type";
 
-let bReadKey = 'read';
-
-let bMetaKey = "meta";
-let bDetailsKey = "details";
-let bImageKey = "image";
-let bTimeKey = "time";
-let bUserCountKey = "user-count";
-let bConfigKey = "config";
-
-let bOnlineKey = "online";
-let bTypeKey = "type";
-
-let bUserName = "name";
-let bUserCountryCode = "country-code";
-let bUserLocation = "location";
-let bUserImageURL = "pictureURL";
-let bUserGender = "gender";
-let bUserStatus = "status";
-let bUserProfileLink = "profile-link";
-let bUserHomepageLink = "homepage-link";
-let bUserHomepageText = "homepage_text";
-let bUserProfileHTML = "profile-html";
-let bUserAllowInvites = "allow-invites";
+let UserName = "name";
+let UserCountryCode = "country-code";
+let UserLocation = "location";
+let UserImageURL = "pictureURL";
+let UserGender = "gender";
+let UserStatus = "status";
+let UserProfileLink = "profile-link";
+let UserHomepageLink = "homepage-link";
+let UserHomepageText = "homepage_text";
+let UserProfileHTML = "profile-html";
+let UserAllowInvites = "allow-invites";
 
 // TODO:
-let bDefaultUserPrefix = "ChatSDK";
+let DefaultUserPrefix = "ChatSDK";
 
-let bUserStatusOwner = 'owner';
-let bUserStatusMember = 'member';
+let UserStatusOwner = 'owner';
+let UserStatusMember = 'member';
 //let bUserStatusInvited = 'invited'; // Depricated
 let bUserStatusClosed = 'closed';
 
-//let bRoomType1to1 = '1to1';
-//let bRoomTypeGroup = 'group';
-//let bRoomTypePublic = 'public';
-//let bRoomTypeInvalid = 'invalid';
+//let RoomType1to1 = '1to1';
+//let RoomTypeGroup = 'group';
+//let RoomTypePublic = 'public';
+//let RoomTypeInvalid = 'invalid';
 
-let bRoomTypeInvalid = 0x0;
-let bRoomTypeGroup = 0x1;
-let bRoomType1to1 = 0x2;
-let bRoomTypePublic = 0x4;
+let RoomTypeInvalid = 0x0;
+let RoomTypeGroup = 0x1;
+let RoomType1to1 = 0x2;
+let RoomTypePublic = 0x4;
 
-let bRoomTypePrivateV3 = 0;
-let bRoomTypePublicV3 = 1;
+let RoomTypePrivateV3 = 0;
+let RoomTypePublicV3 = 1;
 
-let bUserAllowInvitesEveryone = 'Everyone';
-let bUserAllowInvitesFriends = 'Friends';
-let bUserAllowInvitesNobody = 'Nobody';
+let UserAllowInvitesEveryone = 'Everyone';
+let UserAllowInvitesFriends = 'Friends';
+let UserAllowInvitesNobody = 'Nobody';
 
 // Tabs
-let bUsersTab = 'users';
-let bRoomsTab = 'rooms';
-let bFriendsTab = 'friends';
-let bInboxTab = 'inbox';
-let bMessagesTab = 'messages';
+let UsersTab = 'users';
+let RoomsTab = 'rooms';
+let FriendsTab = 'friends';
+let InboxTab = 'inbox';
+let MessagesTab = 'messages';
 
-let bProviderTypeCustom = 'custom';
+let ProviderTypeCustom = 'custom';
 
-let bProfileSettingsBox = 'profileSettingsBox';
-let bLoginBox = 'loginBox';
-let bMainBox = 'mainBox';
-let bCreateRoomBox = 'createRoomBox';
-let bErrorBox = 'errorBox';
+let ProfileSettingsBox = 'profileSettingsBox';
+let LoginBox = 'loginBox';
+let MainBox = 'mainBox';
+let CreateRoomBox = 'createRoomBox';
+let ErrorBox = 'errorBox';
 
-let bShowProfileSettingsBox = 'showProfileSettingsBox';
-let bShowCreateChatBox = 'showCreateChatBox';
+let ShowProfileSettingsBox = 'showProfileSettingsBox';
+let ShowCreateChatBox = 'showCreateChatBox';
 
-let bVisibilityChangedNotification = 'bVisibilityChangedNotification';
+let VisibilityChangedNotification = 'VisibilityChangedNotification';
 
-let bPublicRoomAddedNotification = 'bPublicRoomAddedNotification';
-let bPublicRoomRemovedNotification = 'bPublicRoomRemovedNotification';
+let PublicRoomAddedNotification = 'PublicRoomAddedNotification';
+let PublicRoomRemovedNotification = 'PublicRoomRemovedNotification';
 
-let bRoomAddedNotification = 'bRoomAddedNotification';
-let bRoomRemovedNotification = 'bRoomRemovedNotification';
+let RoomAddedNotification = 'RoomAddedNotification';
+let RoomRemovedNotification = 'RoomRemovedNotification';
 
-let bRoomOpenedNotification = 'bRoomOpenedNotification';
-let bRoomClosedNotification = 'bRoomClosedNotification';
+let RoomOpenedNotification = 'RoomOpenedNotification';
+let RoomClosedNotification = 'RoomClosedNotification';
 
-let bAnimateRoomNotification = 'bAnimateRoomNotification';
+let AnimateRoomNotification = 'AnimateRoomNotification';
 
-let bRoomUpdatedNotification = 'bRoomUpdatedNotification';
-let bRoomPositionUpdatedNotification = 'bRoomPositionUpdatedNotification';
-let bRoomSizeUpdatedNotification = 'bRoomSizeUpdatedNotification';
-let bUpdateRoomActiveStatusNotification = 'bUpdateRoomActiveStatusNotification';
+let RoomUpdatedNotification = 'RoomUpdatedNotification';
+let RoomPositionUpdatedNotification = 'RoomPositionUpdatedNotification';
+let RoomSizeUpdatedNotification = 'RoomSizeUpdatedNotification';
+let UpdateRoomActiveStatusNotification = 'UpdateRoomActiveStatusNotification';
 
-let bLazyLoadedMessagesNotification = 'bLazyLoadedMessagesNotification';
+let LazyLoadedMessagesNotification = 'LazyLoadedMessagesNotification';
 
-let bChatUpdatedNotification = 'bChatUpdatedNotification';
+let ChatUpdatedNotification = 'ChatUpdatedNotification';
 
-let bUserOnlineStateChangedNotification = 'bUserOnlineStateChangedNotification';
-let bUserValueChangedNotification = 'bUserValueChangedNotification';
+let UserOnlineStateChangedNotification = 'UserOnlineStateChangedNotification';
+let UserValueChangedNotification = 'UserValueChangedNotification';
 
-let bScreenSizeChangedNotification = 'bScreenSizeChangedNotification';
+let ScreenSizeChangedNotification = 'ScreenSizeChangedNotification';
 
-let bLoginCompleteNotification = 'bLoginCompleteNotification';
-let bLogoutNotification = 'bLogoutNotification';
+let LoginCompleteNotification = 'LoginCompleteNotification';
+let LogoutNotification = 'LogoutNotification';
 
-let bStartSocialLoginNotification = 'bStartSocialLoginNotification';
+let StartSocialLoginNotification = 'StartSocialLoginNotification';
 
-let bRoomFlashHeaderNotification = 'bRoomFlashHeaderNotification';
-let bRoomBadgeChangedNotification = 'bRoomBadgeChangedNotification';
+let RoomFlashHeaderNotification = 'RoomFlashHeaderNotification';
+let RoomBadgeChangedNotification = 'RoomBadgeChangedNotification';
 
-let bOnlineUserAddedNotification = 'bOnlineUserAddedNotification';
-let bOnlineUserRemovedNotification = 'bOnlineUserRemovedNotification';
+let OnlineUserAddedNotification = 'OnlineUserAddedNotification';
+let OnlineUserRemovedNotification = 'OnlineUserRemovedNotification';
 
-let bUserBlockedNotification = 'bUserBlockedNotification';
-let bUserUnblockedNotification = 'bUserUnblockedNotification';
+let UserBlockedNotification = 'UserBlockedNotification';
+let UserUnblockedNotification = 'UserUnblockedNotification';
 
-let bFriendAddedNotification = 'bFriendAddedNotification';
-let bFriendRemovedNotification = 'bFriendRemovedNotification';
+let FriendAddedNotification = 'FriendAddedNotification';
+let FriendRemovedNotification = 'FriendRemovedNotification';
 
-let bDeleteMessageNotification = 'bDeleteMessageNotification';
-let bEditMessageNotification = 'bEditMessageNotification';
+let DeleteMessageNotification = 'DeleteMessageNotification';
+let EditMessageNotification = 'EditMessageNotification';
 
-let bConfigUpdatedNotification = "bConfigUpdatedNotification";
+let ConfigUpdatedNotification = "ConfigUpdatedNotification";
 
 let LoginModeSimple = "simple";
 // let bLoginModeSingleSignOn = "singleSignOn";
@@ -193,25 +191,25 @@ let LoginModeSimple = "simple";
 let LoginModeAuthenticating = "authenticating";
 let LoginModeClickToChat = "clickToChat";
 
-let bMessageTypeText = 0;
-let bMessageTypeLocation = 1;
-let bMessageTypeImage = 2;
-let bMessageTypeFile = 3;
+let MessageTypeText = 0;
+let MessageTypeLocation = 1;
+let MessageTypeImage = 2;
+let MessageTypeFile = 3;
 
 // Chat width
-let bChatRoomWidth = 230;
-let bChatRoomHeight = 300;
+let ChatRoomWidth = 230;
+let ChatRoomHeight = 300;
 
-let bChatRoomTopMargin = 60;
-let bChatRoomSpacing = 15;
+let ChatRoomTopMargin = 60;
+let ChatRoomSpacing = 15;
 
-let bMainBoxWidth = 250;
-let bMainBoxHeight = 300;
+let MainBoxWidth = 250;
+let MainBoxHeight = 300;
 
-let bRoomListBoxWidth = 200;
-let bRoomListBoxHeight = 300;
+let RoomListBoxWidth = 200;
+let RoomListBoxHeight = 300;
 
-let bProfileBoxWidth = 300;
+let ProfileBoxWidth = 300;
 
 // Notifications
 

@@ -5,27 +5,27 @@ angular.module('myApp.controllers').controller('InboxRoomsListController', ['$sc
 
     $scope.init = function () {
 
-        $scope.$on(bRoomAddedNotification, (function () {
-            Log.notification(bRoomAddedNotification, 'InboxRoomsListController');
+        $scope.$on(RoomAddedNotification, (function () {
+            Log.notification(RoomAddedNotification, 'InboxRoomsListController');
             $scope.updateList();
 
         }).bind(this));
 
-        $scope.$on(bRoomRemovedNotification, function () {
-            Log.notification(bRoomRemovedNotification, 'InboxRoomsListController');
+        $scope.$on(RoomRemovedNotification, function () {
+            Log.notification(RoomRemovedNotification, 'InboxRoomsListController');
             $scope.updateList();
         });
 
-        $scope.$on(bLoginCompleteNotification, function () {
-            Log.notification(bLoginCompleteNotification, 'InboxRoomsListController');
+        $scope.$on(LoginCompleteNotification, function () {
+            Log.notification(LoginCompleteNotification, 'InboxRoomsListController');
             RoomStore.loadPrivateRoomsToMemory();
             $scope.updateList();
         });
 
         // Update the list if the user count on a room changes
-        $scope.$on(bRoomUpdatedNotification, $scope.updateList);
+        $scope.$on(RoomUpdatedNotification, $scope.updateList);
 
-        $scope.$on(bLogoutNotification, $scope.updateList);
+        $scope.$on(LogoutNotification, $scope.updateList);
 
         $scope.$watchCollection('search', $scope.updateList);
 

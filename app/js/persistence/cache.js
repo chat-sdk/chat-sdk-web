@@ -67,7 +67,7 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
             if(user && user.meta && user.uid()) {
                 this.blockedUsers[user.uid()] = user;
                 user.blocked = true;
-                $rootScope.$broadcast(bUserBlockedNotification);
+                $rootScope.$broadcast(UserBlockedNotification);
             }
         },
 
@@ -81,7 +81,7 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
                 if(user) {
                     user.blocked = false;
                     delete this.blockedUsers[uid];
-                    $rootScope.$broadcast(bUserUnblockedNotification);
+                    $rootScope.$broadcast(UserUnblockedNotification);
                 }
             }
         },

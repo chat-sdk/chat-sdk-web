@@ -193,7 +193,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
                     $scope.showMainBox();
                 }
 
-                $rootScope.$broadcast(bLoginCompleteNotification);
+                $rootScope.$broadcast(LoginCompleteNotification);
                 $scope.hideNotification();
 
             }, function(error) {
