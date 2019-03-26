@@ -44,7 +44,7 @@ angular.module('myApp.services').factory('PathAnalyser', [function () {
 
         shouldShowChatOnPath: function (paths) {
             // Check to see if we should load the chat on this page?
-            var matches = false;
+            let matches = false;
 
             paths = paths.split(',');
 
