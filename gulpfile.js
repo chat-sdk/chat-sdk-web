@@ -103,65 +103,72 @@ gulp.task('minify-html', function() {
 // Concatenate & Minify JS
 gulp.task('scripts', function(done) {
 
-    var paths = [
-//        'node_modules/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js',
+    var lib = [
         'node_modules/jquery/dist/jquery.min.js',
-//        'node_modules/uikit/dist/js/uikit.min.js',
-//         'node_modules/@angular/core/angular.js',
        'node_modules/angular/angular.min.js',
-//         'node_modules/angular-cookies/angular-cookies.min.js',
         'node_modules/js-cookie/src/js.cookie.js',
-//         'node_modules/angular-file-upload/dist/angular-file-upload.min.js',
-//         'node_modules/angular-file-upload/dist/angular-file-upload-shim.min.js',
         'node_modules/ng-file-upload/dist/ng-file-upload.min.js',
         'node_modules/ng-file-upload/dist/ng-file-upload-shim.min.js',
-
         'node_modules/firebase/firebase.js',
         'node_modules/angularfire/dist/angularfire.min.js',
-        // 'node_modules/firebase-simple-login/firebase-simple-login.js',
-        // 'node_modules/angular-facebook/lib/angular-facebook.js',
         'node_modules/FileSaver/FileSaver.js',
         'node_modules/moment/min/moment.min.js',
         'node_modules/angular-sanitize/angular-sanitize.min.js',
-        //'node_modules/angular-emoji-filter-hd/lib/cc-emoji.js',
         'node_modules/pikaday/pikaday.js',
         'node_modules/howler/dist/howler.min.js',
         'app/libs/sha256.js',
-        'app/libs/cc-emoji.js',
-        'app/js/*.js',
-        'app/js/**/*.js'
+        'app/libs/cc-emoji.js'
     ];
     
-//     var src = [
-//         'app/js/*.ts'
-//     ];
-//     
-//     gulp.src(src)
+    var app = [
+        'app/js/*.js',
+        'app/js/**/*.js'
+    ]
+    
+    var src = [
+        'app/js/*.ts',
+        'app/js/**/*.ts',
+    ];
+    
+    gulp.src(src)
 //         .pipe(concat('all_2.js'))
-//         .pipe(ts({
-//         	noImplicitAny: true,
-//         	outFile: 'output.js'
-//         }))
-//         .pipe(gulp.dest(DIST_PATH + 'js'))
-//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+        .pipe(ts({
+        	noImplicitAny: true,
+        	outFile: 'output.js'
+        }))
+        .pipe(gulp.dest(DIST_PATH + 'js'))
+        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
     
 
     // Non-minified version
-    gulp.src(paths)
-        .pipe(concat('all.js'))
+    gulp.src(lib)
+//         .pipe(ts({
+//         	noImplicitAny: true
+//         }))
+        .pipe(concat('lib.js'))
+//         .pipe(insert.wrap('var cc = (function () {', '}());jQuery.noConflict(true);'))
+        .pipe(gulp.dest(DIST_PATH + 'js'))
+        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+
+    gulp.src(app)
+//         .pipe(ts({
+//         	noImplicitAny: true
+//         }))
+        .pipe(concat('app.js'))
         .pipe(insert.wrap('var cc = (function () {', '}());jQuery.noConflict(true);'))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
-    gulp.src(paths)
-        .pipe(concat('all.js'))
-        .pipe(rename('all.min.js'))
-        //	    .pipe(uglify('all.min.js', {
-        //    	  outSourceMap: true
-        //    	}))
-        .pipe(insert.wrap('var cc = (function () {', '}()); jQuery.noConflict(true);'))
-        .pipe(gulp.dest(DIST_PATH + 'js'))
-        .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+
+//     gulp.src(paths)
+//         .pipe(concat('all.js'))
+//         .pipe(rename('all.min.js'))
+//         //	    .pipe(uglify('all.min.js', {
+//         //    	  outSourceMap: true
+//         //    	}))
+//         .pipe(insert.wrap('var cc = (function () {', '}()); jQuery.noConflict(true);'))
+//         .pipe(gulp.dest(DIST_PATH + 'js'))
+//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
     // gulp.src(['node_modules/dist.js'])
     //     .pipe(rename('dist.min.js'))
@@ -186,10 +193,17 @@ gulp.task('scripts', function(done) {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-    var series = gulp.series('lint', 'scripts', 'minify-html', 'minify-css', 'copy');
-    gulp.watch('app/js/*.js', series);
-    gulp.watch('app/css/*.css', series);
-    gulp.watch('app/partials/*.html', series);
+    var scripts = gulp.series('lint', 'scripts', 'copy');
+    var html = gulp.series('minify-html', 'copy');
+    var css = gulp.series('minify-css', 'copy');
+    
+//     gulp.watch(gulp.series('app/js/*.js', 'app/js/**/*.js', 'app/js/*.ts', 'app/js/**/*.ts'), scripts);
+    gulp.watch('app/js/*.js', scripts);
+    gulp.watch('app/js/**/*.js', scripts);
+    gulp.watch('app/js/*.ts', scripts);
+    gulp.watch('app/js/**/*.ts', scripts);
+    gulp.watch('app/css/*.css', css);
+    gulp.watch('app/partials/*.html', html);
 
     // gulp.watch(['app/js/*.js','app/css/*.css', 'app/partials/*.html'], ['lint', 'scripts', 'minify-html', 'minify-css', 'copy']);
 });

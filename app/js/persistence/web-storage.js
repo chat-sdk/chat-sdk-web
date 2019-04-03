@@ -1,6 +1,6 @@
 angular.module('myApp.services').factory('WebStorage', ['$window', function ($window) {
-    'use strict';
-    var WebStorage = {
+    // 'use strict';
+    let WebStorage = {
 
         ls: null,
         key: 'cc_web_storage_',

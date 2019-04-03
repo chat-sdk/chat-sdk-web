@@ -1,6 +1,6 @@
 (function () {
 
-    "use strict";
+    // "use strict";
 
     var emojis = [
             "bowtie", "smile", "laughing", "blush", "smiley", "relaxed",

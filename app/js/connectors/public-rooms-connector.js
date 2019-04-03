@@ -7,9 +7,9 @@ angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 
                 // Start listening to Firebase
                 publicRoomsRef.on('child_added', (function (snapshot) {
 
-                    var rid = snapshot.key;
+                    let rid = snapshot.key;
                     if(rid) {
-                        var room = RoomStore.getOrCreateRoomWithID(rid);
+                        let room = RoomStore.getOrCreateRoomWithID(rid);
 
                         // TODO: Remove this
                         //room.newPanel = snapshot.val().newPanel;
@@ -44,7 +44,7 @@ angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 
             },
 
             off: function () {
-                var publicRoomsRef = Paths.publicRoomsRef();
+                let publicRoomsRef = Paths.publicRoomsRef();
 
                 publicRoomsRef.off('child_added');
                 publicRoomsRef.off('child_removed');

@@ -1,5 +1,5 @@
-angular.module('myApp.controllers').controller('LoginController', ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential',
-    function($rootScope, $scope, $timeout, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Auth, Credential) {
+angular.module('myApp.controllers').controller('LoginController', ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Utils', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential', 'AutoLogin',
+    function($rootScope, $scope, $timeout, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Utils, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Auth, Credential, AutoLogin) {
 
         /**
          * Initialize the login controller
@@ -10,48 +10,41 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
 
             $scope.rememberMe = true;
 
-            let lastVisited = LocalStorage.getLastVisited();
+            $scope.showLoginBox(LoginModeAuthenticating);
 
-            // We don't want to load the messenger straightaway to save bandwidth.
-            if(Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
-                $scope.showLoginBox(LoginModeClickToChat);
-            }
-            else {
-                $scope.startChatting();
-            }
+            firebase.auth().onAuthStateChanged(function() {
+                $scope.authenticate(null);
+            });
 
         };
 
         $scope.startChatting = function() {
             LocalStorage.setLastVisited();
+            $scope.authenticate(null);
+        };
+
+        $scope.authenticate = function (credential) {
             $scope.showLoginBox(LoginModeAuthenticating);
 
-            if(Auth.isAuthenticated()) {
-                $scope.handleAuthData(firebase.auth().currentUser);
-            }
-            else {
-                $scope.showLoginBox();
+            let loginMode = LoginModeSimple;
+            let lastVisited = LocalStorage.getLastVisited();
+
+            // We don't want to load the messenger straightaway to save bandwidth.
+            // This will check when they last accessed the chat. If it was less than the timeout time ago,
+            // then the click to chat box will be displayed. Clicking that will reset the timer
+            if(Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
+                loginMode = LoginModeClickToChat;
             }
 
-            firebase.auth().onAuthStateChanged(function(user) {
-                if(user) {
-                    $scope.handleAuthData(user);
+            Auth.authenticate(credential).then((function (authUser) {
+                $scope.handleAuthData(authUser);
+            }).bind(this)).catch((function (error) {
+                if (!Utils.unORNull(error)) {
+                    $scope.handleLoginError(error);
+                } else {
+                    $scope.showLoginBox(loginMode);
                 }
-                else {
-                    $scope.showLoginBox();
-                }
-            });
-
-            //Authentication.startAuthListener().then(function(authData) {
-            //    Authentication.setAuthListener($scope.handleAuthData);
-            //    $scope.handleAuthData(authData);
-            //}, function (error) {
-            //    Authentication.setAuthListener($scope.handleAuthData);
-            //    //$scope.logout();
-            //    //$scope.hideNotification();
-            //    $scope.showLoginBox();
-            //    console.log(error);
-            //});
+            }).bind(this));
         };
 
         $scope.handleAuthData = function (authData) {
@@ -61,7 +54,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
 
             $rootScope.auth = authData;
             if(authData) {
-                $scope.handleUserLogin(authData, false);
+                $scope.handleLoginComplete(authData, false);
             }
             else {
                 $scope.showLoginBox();
@@ -114,8 +107,8 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             // Hide the overlay
             $scope.showNotification(NotificationTypeWaiting, "Logging in", "For social login make sure to enable popups!");
 
-            Auth.authenticate(credential).then(function (result) {
-
+            Auth.authenticate(credential).then(function (authData) {
+                $scope.handleAuthData(authData);
             }).catch(function (error) {
                 $scope.hideNotification();
                 $scope.handleLoginError(error);
@@ -171,7 +164,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
          * @param firstLogin - Has the user just signed up?
          */
 
-        $scope.handleUserLogin = function (userData, firstLogin) {
+        $scope.handleLoginComplete = function (userData, firstLogin) {
 
             // Write a record to the firebase to record this API key
             $scope.showNotification(NotificationTypeWaiting, "Opening Chat...");
@@ -184,21 +177,16 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             // This allows us to clear the cache remotely
             LocalStorage.clearCacheWithTimestamp(Config.clearCacheTimestamp);
 
-            Auth.bindUser(userData).then(function() {
-                // We have the user's ID so we can get the user's object
-                if(firstLogin) {
-                    $scope.showProfileSettingsBox();
-                }
-                else {
-                    $scope.showMainBox();
-                }
+            // We have the user's ID so we can get the user's object
+            if(firstLogin) {
+                $scope.showProfileSettingsBox();
+            }
+            else {
+                $scope.showMainBox();
+            }
 
-                $rootScope.$broadcast(LoginCompleteNotification);
-                $scope.hideNotification();
-
-            }, function(error) {
-                $scope.showNotification(NotificationTypeAlert, 'Login Error', error, 'Ok');
-            });
+            $rootScope.$broadcast(LoginCompleteNotification);
+            $scope.hideNotification();
 
         };
 

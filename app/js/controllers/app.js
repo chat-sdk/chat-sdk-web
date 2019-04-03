@@ -1,6 +1,6 @@
 angular.module('myApp.controllers').controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Auth', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Auth, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
+    function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;

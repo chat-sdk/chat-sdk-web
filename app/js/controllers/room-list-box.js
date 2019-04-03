@@ -77,6 +77,7 @@ angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope
                     room.setOffset(offset);
                     room.width = width;
                     room.height = height;
+
                     //room.setSizeToDefault();
                     room.setActive(true);
                     room.badge = null;

@@ -215,3 +215,7 @@ let ProfileBoxWidth = 300;
 
 let NotificationTypeWaiting = 'waiting';
 let NotificationTypeAlert = 'alert';
+
+let UsernameKey = 'username';
+let PasswordKey = 'password';
+let RoomIDKey = 'roomID';

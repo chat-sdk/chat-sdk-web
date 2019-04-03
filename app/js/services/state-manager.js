@@ -70,7 +70,7 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
              * Rooms
              */
 
-            var roomsRef = Paths.userRoomsRef(uid);
+            let roomsRef = Paths.userRoomsRef(uid);
 
             roomsRef.on('child_added', (function (snapshot) {
                 if(snapshot.val()) {
@@ -80,7 +80,7 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
             }).bind(this));
 
             roomsRef.on('child_removed', (function (snapshot) {
-                var rid = snapshot.key;
+                let rid = snapshot.key;
                 if(rid) {
                     this.impl_roomRemoved(rid);
                 }
@@ -121,21 +121,21 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
 
             this.onUserID = null;
 
-            var roomsRef = Paths.userRoomsRef(uid);
+            let roomsRef = Paths.userRoomsRef(uid);
 
             roomsRef.off('child_added');
             roomsRef.off('child_removed');
 
             FriendsConnector.off(uid);
 
-            var blockedUsersRef = Paths.userBlockedRef(uid);
+            let blockedUsersRef = Paths.userBlockedRef(uid);
 
             blockedUsersRef.off('child_added');
             blockedUsersRef.off('child_removed');
 
             // Switch the rooms off
             for(var i = 0; i < Cache.rooms.length; i++) {
-                var room = Cache.rooms[i];
+                let room = Cache.rooms[i];
                 room.off();
             }
 
@@ -143,7 +143,7 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
 
         impl_blockedAdded: function (snapshot) {
 
-            var uid = snapshot.val().uid;
+            let uid = snapshot.val().uid;
             if(uid) {
                 var user = UserStore.getOrCreateUserWithID(uid);
 
@@ -190,7 +190,7 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
                 }
 
                 // Does the room already exist?
-                var room = RoomStore.getOrCreateRoomWithID(rid);
+                let room = RoomStore.getOrCreateRoomWithID(rid);
 
                 // If you clear the cache without this all the messages
                 // would show up as unread...
@@ -211,10 +211,10 @@ angular.module('myApp.services').factory('StateManager', ['$rootScope', 'Friends
 
         impl_roomRemoved: function (rid) {
 
-            var room = RoomStore.getRoomWithID(rid);
+            let room = RoomStore.getRoomWithID(rid);
             room.close();
 
-            if(room.type() == RoomType1to1){
+            if(room.type() === RoomType1to1){
                 RoomStore.removeRoom(room);
                 $rootScope.$broadcast(RoomRemovedNotification);
             }

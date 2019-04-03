@@ -160,12 +160,12 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.on = function () {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             if(!this.isOn && this.rid()) {
                 this.isOn = true;
 
-                var on = (function () {
+                let on = (function () {
                     // When a user changes online state update the room
                     this.userOnlineStateChangedNotificationOff = $rootScope.$on(UserOnlineStateChangedNotification, (function (event, user) {
                         Log.notification(UserOnlineStateChangedNotification, 'Room');
@@ -212,7 +212,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.open = function (slot, duration) {
 
-            var open = (function () {
+            let open = (function () {
 
                 // Add the room to the UI
                 RoomPositionManager.insertRoom(this, slot, duration);
@@ -1524,7 +1524,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             var deferred = $q.defer();
 
-            if(!rid) {
+            if(Utils.unORNull(rid)) {
                 rid = Paths.roomsRef().push().key;
             }
             var roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, type, weight);

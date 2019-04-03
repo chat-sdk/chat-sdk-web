@@ -1,5 +1,8 @@
-function greeter(person) {
-    return "Hello, " + person;
+class Person {
+
+    name: string;
+
 }
-let user = "Ben";
-greeter(user);
+
+var person: Person;
+person.name = "James1";

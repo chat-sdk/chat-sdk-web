@@ -1,5 +1,5 @@
-angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time',
-    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time) {
+angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin',
+    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin) {
         let Auth = {
 
             mode: LoginModeSimple,
@@ -12,91 +12,74 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                 return this;
             },
 
-            // setAuthListener: function (callback) {
-            //     this.authListener = callback;
-            // },
-            //
-            // modeIs: function (mode) {
-            //     return this.mode == mode;
-            // },
-
-
             authenticate: function (credential) {
                 let deferred = $q.defer();
 
-                let handleSuccess = function (authData) {
-                    Config.setConfig(Config.setByInclude, Environment.options());
-                    deferred.resolve(authData);
-                };
+                let promise = null;
 
-                let handleError = function (error) {
-                    deferred.reject(error);
-                };
+                // Try to authenticate using auto login
+                let autoLoginCredential = AutoLogin.getCredentials();
+                if (!Utils.unORNull(autoLoginCredential)) {
+                    credential = autoLoginCredential;
+                }
 
                 if(this.isAuthenticated()) {
-                    handleSuccess(firebase.auth().currentUser);
-                    return deferred.promise;
+                    deferred.resolve({
+                        user: firebase.auth().currentUser
+                    });
+                    promise = deferred.promise;
                 }
-
-                if(credential.getType() == credential.Email) {
-                    firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword()).then(handleSuccess).catch(handleError);
+                else if (Utils.unORNull(credential)) {
+                    deferred.reject();
+                    promise = deferred.promise;
                 }
-                else if(credential.getType() == credential.Anonymous) {
-                    firebase.auth().signInAnonymously().then(handleSuccess).catch(handleError);
+                else if(credential.getType() === credential.Email) {
+                    promise = firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword());
                 }
-                else if(credential.getType() == credential.CustomToken) {
-                    firebase.auth().signInWithCustomToken(credential.getToken()).then(handleSuccess).catch(handleError);
+                else if(credential.getType() === credential.Anonymous) {
+                    promise = firebase.auth().signInAnonymously();
+                }
+                else if(credential.getType() === credential.CustomToken) {
+                    promise = firebase.auth().signInWithCustomToken(credential.getToken());
                 }
                 else {
 
                     var scopes = null;
                     var provider = null;
 
-                    if(credential.getType() == credential.Facebook) {
+                    if(credential.getType() === credential.Facebook) {
                         provider = new firebase.auth.FacebookAuthProvider();
                         scopes = "email,user_likes";
                     }
-                    if(credential.getType() == credential.Github) {
+                    if(credential.getType() === credential.Github) {
                         provider = new firebase.auth.GithubAuthProvider();
                         scopes = "user,gist";
                     }
-                    if(credential.getType() == credential.Google) {
+                    if(credential.getType() === credential.Google) {
                         provider = new firebase.auth.GoogleAuthProvider();
                         scopes = "email";
                     }
-                    if(credential.getType() == credential.Twitter) {
+                    if(credential.getType() === credential.Twitter) {
                         provider = new firebase.auth.TwitterAuthProvider();
                     }
 
                     scopes = scopes.split(',');
-                    for(var scope in scopes) {
+                    for(let scope in scopes) {
                         if(scopes.hasOwnProperty(scope)) {
                             provider.addScope(scope);
                         }
                     }
 
-                    firebase.auth().signInWithPopup (provider).then(handleSuccess).catch(handleError);
+                    promise = firebase.auth().signInWithPopup (provider);
 
-
-                    // Used to log in using a remote partial i.e. if you wanted to log in using one social account
-                    // across multiple domains
-
-                    //$rootScope.$broadcast(StartSocialLoginNotification, {
-                    //    action: credential.getType(),
-                    //    config: bFirebaseConfig,
-                    //    scope: scope,
-                    //    remember: "sessionOnly"
-                    //}, function (data) {
-                    //    if(data.authData) {
-                    //        firebase.auth().signInWithCustomToken(data.authData.token).then(handleSuccess).catch(handleError);
-                    //    }
-                    //    else {
-                    //        deferred.reject("Social login failed");
-                    //    }
-                    //});
                 }
 
-                return deferred.promise;
+                return promise.then((function (authData) {
+
+                    Config.setConfig(Config.setByInclude, Environment.options());
+                    return this.bindUser(authData.user);
+
+                }).bind(this));
             },
 
             isAuthenticated: function () {
@@ -123,19 +106,19 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
              */
             bindUser: function (authUser) {
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 // Set the user's ID
                 Paths.userMetaRef(authUser.uid).update({uid: authUser.uid});
 
                 this.bindUserWithUID(authUser.uid).then((function () {
 
-                    var user = $rootScope.user;
+                    let user = $rootScope.user;
 
-                    var oldMeta = angular.copy(user.meta);
+                    let oldMeta = angular.copy(user.meta);
 
-                    var setUserProperty = (function (property, value, force) {
-                        if((!user.meta[property] || user.meta[property].length == 0 || force) && value && value.length > 0) {
+                    let setUserProperty = (function (property, value, force) {
+                        if((!user.meta[property] || user.meta[property].length === 0 || force) && value && value.length > 0) {
                             user.meta[property] = value;
                             return true;
                         }
@@ -143,26 +126,23 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     }).bind(this);
 
                     // Get the third party data
-                    var userData = {name: null};
+                    let userData = {name: null};
 
-                    var p = authUser.provider;
-                    if(p == "facebook" || p == "twitter" || p == "google" || p == "github") {
+                    let p = authUser.provider;
+                    if(p === "facebook" || p === "twitter" || p === "google" || p === "github") {
                         if(authUser[p] && authUser[p].cachedUserProfile) {
                             userData = authUser[p].cachedUserProfile;
                         }
                     }
-                    else if (p == "custom" && authUser.thirdPartyData) {
+                    else if (p === "custom" && authUser.thirdPartyData) {
                         userData = authUser.thirdPartyData;
                     }
-//                else {
-//                    userData = {name: null}
-//                }
 
                     // Set the user's name
                     setUserProperty(UserName, userData.name);
                     setUserProperty(UserName, DefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
 
-                    var imageURL = null;
+                    let imageURL = null;
 
                     /** SOCIAL INFORMATION **/
                     if(authUser.provider === "facebook") {
@@ -206,7 +186,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                         setUserProperty(UserLocation, userData[UserLocation]);
                         setUserProperty(UserGender, userData[UserGender]);
                         setUserProperty(UserCountryCode, userData[UserCountryCode]);
-                        // TODO: Depricated
+
+                        // TODO: Deprecated
                         setUserProperty(UserHomepageLink, userData[UserHomepageLink], true);
                         setUserProperty(UserHomepageText, userData[UserHomepageText], true);
 
@@ -269,16 +250,17 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
                     /** Tidy up existing rooms **/
 
-                    /** Create static rooms **/
-                    //this.addStaticRooms();
-
                     // Start listening to online user list and public rooms list
                     StateManager.on();
 
                     // Start listening to user
                     StateManager.userOn(authUser.uid);
 
-                    deferred.resolve();
+                    // If the user has specified a room id in the URL via a get parameter
+                    // then try to join that room
+                    AutoLogin.tryToJoinRoom();
+
+                    deferred.resolve(authUser);
 
                 }).bind(this), function (error) {
                     deferred.reject(error);
@@ -289,13 +271,13 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
             bindUserWithUID: function (uid) {
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 // Create the user
                 // TODO: if we do this we'll also be listening for meta updates...
                 $rootScope.user = UserStore.getOrCreateUserWithID(uid, true);
-                var userPromise = $rootScope.user.on();
-                var timePromise = Time.start(uid);
+                let userPromise = $rootScope.user.on();
+                let timePromise = Time.start(uid);
 
                 $q.all([userPromise, timePromise]).then(function () {
                     if (!$rootScope.user.getName()) {

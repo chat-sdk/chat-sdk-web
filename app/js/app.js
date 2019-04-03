@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 
 // Declare app level module which depends on filters, and services
@@ -29,7 +29,9 @@ var myApp = angular.module('myApp',
 
     $provide.decorator('$browser', ['$delegate', function ($delegate) {
         $delegate.onUrlChange = function () {};
-        $delegate.url = function () { return ""};
+        $delegate.url = function () {
+            return "";
+        };
         return $delegate;
     }]);
 

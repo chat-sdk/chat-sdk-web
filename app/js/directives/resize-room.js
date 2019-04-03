@@ -1,11 +1,11 @@
-angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', function ($rootScope, $timeout, $document, Screen, RoomPositionManager) {
+angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', 'Utils', function ($rootScope, $timeout, $document, Screen, RoomPositionManager, Utils) {
     return function (scope, elm, attrs) {
 
         var lastClientX = 0;
         var lastClientY = 0;
 
         elm.mousedown((function (e) {
-            stopDefault(e);
+            Utils.stopDefault(e);
             scope.resizing = true;
             lastClientX = e.clientX;
             lastClientY = e.clientY;
@@ -14,7 +14,7 @@ angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeo
         $document.mousemove((function (e) {
             if(scope.resizing) {
 
-                stopDefault(e);
+                Utils.stopDefault(e);
 
                 // Min width
                 scope.room.width += lastClientX - e.clientX;

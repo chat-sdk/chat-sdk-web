@@ -491,7 +491,5 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             }
         };
 
-
         return User;
-
 }]);
