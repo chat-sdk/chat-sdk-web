@@ -2,6 +2,7 @@ angular.module('myApp.services').factory('Partials', ['$http', '$templateCache',
     return {
         load: function () {
             $http.get(Environment.partialsURL() + 'chat-room.html', {cache:$templateCache});
+            $http.get(Environment.partialsURL() + 'chat-room-embed.html', {cache:$templateCache});
             $http.get(Environment.partialsURL() + 'chat-settings.html', {cache:$templateCache});
             $http.get(Environment.partialsURL() + 'countries-select.html', {cache:$templateCache});
             $http.get(Environment.partialsURL() + 'create-room-box.html', {cache:$templateCache});

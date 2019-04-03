@@ -1,5 +1,5 @@
-angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
-    function ($scope, $timeout, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
+angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager', 'RoomStore',
+    function ($scope, $timeout, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager, RoomStore) {
 
         $scope.showEmojis = false;
         $scope.showMessageOptions = false;
@@ -8,6 +8,8 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
         $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
 
         $scope.init = function (room) {
+
+            // let room = RoomStore.getRoomWithID(rid);
 
             $scope.input = {};
             $scope.room = room;
@@ -276,7 +278,11 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
         };
 
         $scope.getAllUsers = function () {
-            return ArrayUtils.objectToArray($scope.room.getUsers());
+            if (!Utils.unORNull($scope.room)) {
+                return ArrayUtils.objectToArray($scope.room.getUsers());
+            } else {
+                return [];
+            }
         };
 
         $scope.searchKeyword = function () {

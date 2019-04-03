@@ -7,7 +7,7 @@
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>ChatCat.io</title>
+    <title>Chat SDK</title>
     <meta name="description" content="">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,30 +20,30 @@
 <div id="text" class="uk-panel uk-panel-box" style="margin: 30px; width: 400px">
     <img src="img/live-beta.png">
     <p>
-        Welcome to the Chatcat live beta! Here you can test the latest version of our powerful real-time chat client.
+        Welcome to the Chat SDK Web! Here you can test the latest version of our powerful real-time chat client.
     </p>
     <p>
         Login using your email and password or your social account!
     </p>
     <p>
-        If you'd like to help us to beta test the app, start by creating an account at <a href="http://www.chatcat.io/home">www.chatcat.io</a> then send us an email at <a href="mailto:support@chatcat.io">support@chatcat.io</a> letting
-        us know the domain of your website and we'll get back to you with instructions on how to start testing Chatcat.
+        If you'd like to help us to beta test the app, start by creating an account at <a href="https://sdk.chat">sdk.chat</a> then send us an email at <a href="mailto:team@sdk.chat">team@sdk.chat</a> letting
+        us know the domain of your website and we'll get back to you with instructions on how to start testing Chat SDK.
     </p>
     <p>
-        If you find any bugs or have any suggestions let us know at <a href="mailto:support@chatcat.io">support@chatcat.io</a>.
-    </p>
-    <p>
-        If you have any queries about migrating from Envolve to Chatcat feel free to send us an email.
+        If you find any bugs or have any suggestions let us know at <a href="mailto:team@sdk.chat">team@sdk.chat</a>.
     </p>
 </div>
 
-
 <div data-ng-app="myApp" ><ng-include src=" partialsURL + 'chatcat.html'" ng-controller="AppController"></ng-include>
 
-    <ng-include src="partialsURL + chat-room.html"></ng-include>
-    <div style="background: red; width: 100px; height: 100px">
-        Hello
+    <div id="cc-app" data-ng-controller="ChatEmbedController" data-ng-init="init('-LbYNPoI2IlvvG1SFgz8')" style="background: red; width: 400px; height: 600px">
+        <div data-ng-repeat="(id, room) in rooms">
+            <div data-ng-controller="ChatController">
+                <div data-ng-include data-ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></div>
+            </div>
+        </div>
     </div>
+
 </div>
 <script type="text/javascript">
 
@@ -59,7 +59,7 @@
 			messagingSenderId: "1088435112418"
 		},
 		
-		rootPath: '19_03_web',
+		rootPath: '19_05_web',
 		
 		facebookAppID: '735373466519297',
 		
