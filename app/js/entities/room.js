@@ -1669,14 +1669,14 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.addUserToRoom = function (rid, user, status, type) {
 
-            var data = {
+            let data = {
                 status: status,
                 time: firebase.database.ServerValue.TIMESTAMP
             };
 
-            var d1 = $q.defer();
+            let d1 = $q.defer();
 
-            var ref = Paths.roomUsersRef(rid).child(user.uid());
+            let ref = Paths.roomUsersRef(rid).child(user.uid());
             ref.update(data, function (error) {
                 if(!error) {
                     d1.resolve();
@@ -1690,12 +1690,12 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 ref.onDisconnect().remove();
             }
 
-            var promises = [
+            let promises = [
                 d1.promise,
                 user.addRoomWithRID(rid, type)
             ];
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             $q.all(promises).then(function () {
                 Entity.updateState(RoomsPath, rid, UsersMetaPath);

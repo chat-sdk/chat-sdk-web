@@ -12,9 +12,20 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
 
             $scope.showLoginBox(LoginModeAuthenticating);
 
-            firebase.auth().onAuthStateChanged(function() {
-                $scope.authenticate(null);
+            if (AutoLogin.autoLoginEnabled()) {
+                firebase.auth().signOut();
+            }
+
+            firebase.auth().onAuthStateChanged(function(authData) {
+                if (!Auth.isAuthenticating()) {
+                    $scope.authenticate(null);
+                }
             });
+
+
+           //  Auth.setAuthListener((function (authData) {
+           //      $scope.authenticate(null);
+           // }).bind(this));
 
         };
 
@@ -26,6 +37,19 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
         $scope.authenticate = function (credential) {
             $scope.showLoginBox(LoginModeAuthenticating);
 
+            Auth.authenticate(credential).then((function (authUser) {
+                $scope.handleAuthData(authUser);
+            }).bind(this)).catch((function (error) {
+                if (!Utils.unORNull(error)) {
+                    $scope.handleLoginError(error);
+                } else {
+                    $scope.showLoginBox($scope.getLoginMode());
+                }
+            }).bind(this));
+        };
+
+        $scope.getLoginMode = function () {
+
             let loginMode = LoginModeSimple;
             let lastVisited = LocalStorage.getLastVisited();
 
@@ -35,16 +59,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             if(Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > Config.clickToChatTimeout && Config.clickToChatTimeout > 0) {
                 loginMode = LoginModeClickToChat;
             }
-
-            Auth.authenticate(credential).then((function (authUser) {
-                $scope.handleAuthData(authUser);
-            }).bind(this)).catch((function (error) {
-                if (!Utils.unORNull(error)) {
-                    $scope.handleLoginError(error);
-                } else {
-                    $scope.showLoginBox(loginMode);
-                }
-            }).bind(this));
+            return loginMode;
         };
 
         $scope.handleAuthData = function (authData) {

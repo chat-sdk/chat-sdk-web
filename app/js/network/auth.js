@@ -4,7 +4,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
             mode: LoginModeSimple,
             getToken: null,
-            authListener: null,
+            // authListener: null,
+            authenticating: false,
 
             init: function () {
 
@@ -12,8 +13,22 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                 return this;
             },
 
+            // setAuthListener: function (listener) {
+            //     this.authListener = listener;
+            // },
+
+            isAuthenticating: function () {
+                return this.authenticating;
+            },
+
             authenticate: function (credential) {
+
                 let deferred = $q.defer();
+                if (this.authenticating) {
+                    deferred.reject("Already authenticating");
+                    return deferred.promise;
+                }
+                this.authenticating = true;
 
                 let promise = null;
 
@@ -21,6 +36,7 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                 let autoLoginCredential = AutoLogin.getCredentials();
                 if (!Utils.unORNull(autoLoginCredential)) {
                     credential = autoLoginCredential;
+                    // this.logout();
                 }
 
                 if(this.isAuthenticated()) {
@@ -73,6 +89,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     promise = firebase.auth().signInWithPopup (provider);
 
                 }
+
+                this.authenticating = false;
 
                 return promise.then((function (authData) {
 

@@ -1203,3 +1203,14 @@ div#cc-app .cc-clear-cache-icon {
     left: 4px;
     z-index: 200;
 }
+
+/* Embedded Chat Room */
+
+/*div#cc-app div.cc-chat-box-embed {*/
+    /*width: 100%;*/
+    /*height: 100%;*/
+    /*border-top-left-radius: 0 !important;*/
+    /*border-top-right-radius: 0 !important;*/
+    /*border-bottom-left-radius: 0 !important;*/
+
+/*}*/

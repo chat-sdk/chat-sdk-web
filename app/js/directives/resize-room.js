@@ -1,8 +1,8 @@
 angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', 'Utils', function ($rootScope, $timeout, $document, Screen, RoomPositionManager, Utils) {
     return function (scope, elm, attrs) {
 
-        var lastClientX = 0;
-        var lastClientY = 0;
+        let lastClientX = 0;
+        let lastClientY = 0;
 
         elm.mousedown((function (e) {
             Utils.stopDefault(e);
@@ -39,11 +39,11 @@ angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeo
                 RoomPositionManager.setDirty();
 
                 // Update the rooms to the left
-                var rooms = RoomPositionManager.getRooms();
+                let rooms = RoomPositionManager.getRooms();
 
                 // Only loop from this room's position onwards
-                var room;
-                for(var i = rooms.indexOf(scope.room); i < rooms.length; i++) {
+                let room;
+                for(let i = rooms.indexOf(scope.room); i < rooms.length; i++) {
                     room = rooms[i];
                     if(room != scope.room) {
                         room.setOffset(RoomPositionManager.offsetForSlot(i));

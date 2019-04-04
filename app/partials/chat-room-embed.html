@@ -1,9 +1,8 @@
 <!--The 30 in the height is to take account for the bottom bar-->
-<div class="cc-chat-box-outer" >
-
-    <div class="cc-chat-box cc-shadow" data-ng-style="{height: room.height, width: room.width}" >
+<div>
+    <div class="cc-chat-box-embed cc-chat-box cc-shadow" data-ng-style="{'width': room.width, 'height': room.height}" >
         <div class="cc-box-header cc-pointer" data-ng-style="{'background-color': config.headerColor}" cc-flash="room-header">
-            <div class="cc-ellipsis uk-float-left cc-pointer" data-ng-style="{width: room.width - 60}">{{ room.name }}</div>
+            <div class="cc-ellipsis uk-float-left cc-pointer" data-ng-style="{width: room.width}">{{ room.name }}</div>
         </div>
 
         <div class="cc-tab-container cc-bottom-shadow">
@@ -27,13 +26,13 @@
             </div>
         </div>
 
-        <div data-ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" data-ng-style="{'height': room.height - 30 - 30}" stop-shake>
+        <div data-ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" data-ng-style="{'height': room.height - 30 - 30}">
             <div data-ng-include data-ng-controller="UserListController" data-ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></div>
             <div data-ng-include data-ng-show="activeTab == 'settings'" src="partialsURL + 'chat-settings.html'"></div>
         </div>
 
         <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
-        <div data-ng-show="!showEmojis && !showMessageOptions  && activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue data-ng-style="{'height': room.height - 30 - 30 - inputHeight}" stop-shake>
+        <div data-ng-show="!showEmojis && !showMessageOptions  && activeTab == 'messages'" class="cc-chat-box-msgs" infinite-scroll="loadMoreMessages()" scroll-glue data-ng-style="{'height': room.height - 30 - 30 - inputHeight}">
             <div data-ng-repeat="message in room.messages track by message.mid">
                 <div>
                     <div class="cc-message-outer">
@@ -72,15 +71,13 @@
 
         <div class="cc-emoji uk-overflow-container"
              data-ng-show="showEmojis && activeTab == 'messages'"
-             data-ng-style="{'height': room.height - 30 - 30 - inputHeight}"
-             stop-shake>
+             data-ng-style="{'height': room.height - 30 - 30 - inputHeight}">
             <div data-ng-include src="partialsURL + 'emojis.html'"></div>
         </div>
 
         <div class="cc-message-options uk-overflow-container"
              data-ng-show="showMessageOptions && activeTab == 'messages'"
-             data-ng-style="{'height': room.height - 30 - 30 - inputHeight}"
-             stop-shake>
+             data-ng-style="{'height': room.height - 30 - 30 - inputHeight}">
             <div class="cc-message-option uk-container-center" data-ng-show="config.imageMessagesEnabled">
                 <input class="cc-hidden-input" type="file" on-file-change="onSelectImage(room)">
                 <img data-ng-src="{{ ::img_30_image }}">
@@ -133,32 +130,13 @@
 
         <!--The overlay that appears if the user hasn't accepted the invitation-->
         <!--We disable drag here because otherwise when the user clicks they also start a drag-->
-        <!--that results in the room data being modified that caues the room to be re-added-->
+        <!--that results in the room data being modified that causes the room to be re-added-->
         <div class="cc-overlay cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'" ></div>
         <div class="cc-overlay-content cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'">
             <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.getName() }}</div>
             <div class="uk-width-1-1 subtitle">Invited you to chat</div>
             <a data-ng-click="room.close()" ><img data-ng-src="{{ ::img_40_cross }}" /></a>
             <a data-ng-click="acceptInvitation()" ><img data-ng-src="{{ ::img_40_tick }}" /></a>
-        </div>
-    </div>
-
-    <div data-ng-show="room.badge" class="cc-badge cc-shadow">
-        {{ room.badge }}
-    </div>
-
-    <div class="cc-chat-bar" data-ng-click="toggleVisibility()" >
-        <div class="cc-base-text">
-            <div class="cc-inner">
-                <div class="uk-float-left cc-ellipsis cc-name cc-pointer">{{ room.name }}</div>
-                <a data-ng-click="room.close()">
-                    <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_cross }}" />
-                </a>
-                <a data-ng-show="room.minimized">
-                    <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_maximize }}" />
-                </a>
-                <div class="uk-float-right">{{ room.onlineUserCount }}</div>
-            </div>
         </div>
     </div>
 </div>

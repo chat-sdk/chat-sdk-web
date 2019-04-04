@@ -5,6 +5,9 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;
 
+        // Used to hide chat box
+        $scope.hidden = ChatSDKOptions.hideMainBox;
+
         $rootScope.messageTypeText = MessageTypeText;
         $rootScope.messageTypeImage = MessageTypeImage;
         $rootScope.messageTypeFile = MessageTypeFile;
