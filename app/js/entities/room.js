@@ -478,7 +478,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         Room.prototype.lastMessageText = function () {
             if(this.lastMessageExists()) {
                 if(this.lastMessageType() == MessageTypeText) {
-                    return this.lastMessageMeta[messagePayload];
+                    return this.lastMessageMeta[messageJSONv2][messageText];
                 }
                 if(this.lastMessageType() == MessageTypeImage) {
                     return "Image";
@@ -1218,13 +1218,13 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.addMessageMeta = function (mid, val, serialization, silent) {
 
-            if(!val || !val[messagePayload] || val[messagePayload].length === 0) {
-                return false;
-            }
+            // if(!val || !val[messagePayload] || val[messagePayload].length === 0) {
+            //     return false;
+            // }
 
             // Check that the message doesn't already exist
             for(var i = 0; i < this.messages.length; i++) {
-                if(this.messages[i].mid == mid) {
+                if(this.messages[i].mid === mid) {
                     return false;
                 }
             }
@@ -1232,7 +1232,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             if(this.lastMessage) {
                 // Sometimes we get double messages
                 // check that this message hasn't been added already
-                if(this.lastMessage.mid == mid) {
+                if(this.lastMessage.mid === mid) {
                     return false;
                 }
             }

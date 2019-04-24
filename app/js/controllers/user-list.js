@@ -28,7 +28,7 @@ angular.module('myApp.controllers').controller('UserListController', ['$scope', 
         // TODO: A bit hacky
         $scope.$on(RoomUpdatedNotification, function (event, room) {
             Log.notification(RoomUpdatedNotification, 'UserListController');
-            if(room == $scope.room) {
+            if(room === $scope.room) {
                 $scope.updateList();
             }
         });
@@ -60,11 +60,11 @@ angular.module('myApp.controllers').controller('UserListController', ['$scope', 
             var aOnline = OnlineConnector.onlineUsers[user1.uid()];
             var bOnline = OnlineConnector.onlineUsers[user2.uid()];
 
-            if(aOnline != bOnline) {
+            if(aOnline !== bOnline) {
                 return aOnline ? 1 : -1;
             }
             else {
-                if(user1.getName() != user2.getName()) {
+                if(user1.getName() !== user2.getName()) {
                     return user1.getName() > user2.getName() ? 1 : -1;
                 }
                 return 0;

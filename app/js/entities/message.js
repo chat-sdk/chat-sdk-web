@@ -30,10 +30,7 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
 
                 if(this.type() == MessageTypeImage || this.type() == MessageTypeFile) {
                     // Get the image and thumbnail URLs
-                    var json = meta[messageJSONv2] || meta[messageJSON];
-                    if(typeof json === 'string') {
-                        json = JSON.parse(json)
-                    }
+                    let json = meta[messageJSONv2];
 
                     if(json) {
                         if(this.type() == MessageTypeImage) {
@@ -111,11 +108,27 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             },
 
             setText: function (text) {
-                this.setMetaValue(messagePayload, text);
+                this.setJSONValue(messageText, text);
             },
 
             text: function() {
-                return this.metaValue(messagePayload);
+                return this.getJSONValue(messageText);
+            },
+
+            getMetaValue: function (key) {
+                return this.meta[key];
+            },
+
+            setMetaValue: function (key, value) {
+                this.meta[key] = value;
+            },
+
+            getJSONValue: function (key) {
+                return this.getMetaValue(messageJSONv2)[key];
+            },
+
+            setJSONValue: function (key, value) {
+                this.getMetaValue(messageJSONv2)[key] = value;
             },
 
             type: function () {
@@ -153,6 +166,8 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             }
 
 
+
+
         };
 
         // Static methods
@@ -170,7 +185,6 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             json[messageImageWidth] = width;
             json[messageImageHeight] = height;
 
-            m.meta[messageJSON] = JSON.stringify(json);
             m.meta[messageJSONv2] = json;
 
             return m;
@@ -186,7 +200,6 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             json[messageMimeType] = mimeType;
             json[messageFileURL] = fileURL;
 
-            m.meta[messageJSON] = JSON.stringify(json);
             m.meta[messageJSONv2] = json;
 
             return m;
@@ -198,13 +211,11 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             };
 
             m.meta[messageUID] = uid;
-            m.meta[messagePayload] = text;
-            m.meta[messageJSON] = {};
 
             var json = {};
             json[messageText] = text;
 
-            m.meta[messageJSON] = JSON.stringify(json);
+            m.meta[messageJSONv2] = json;
             m.meta[messageType] = type;
             m.meta[messageTime] = firebase.database.ServerValue.TIMESTAMP;
 
