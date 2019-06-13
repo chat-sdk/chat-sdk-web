@@ -133,8 +133,9 @@ gulp.task('scripts', function(done) {
     gulp.src(src)
 //         .pipe(concat('all_2.js'))
         .pipe(ts({
-        	noImplicitAny: true,
-        	outFile: 'output.js'
+        	noImplicitAny: false,
+        	outFile: 'appts.js',
+        	module: "amd"
         }))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));

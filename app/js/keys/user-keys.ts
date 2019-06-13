@@ -1,0 +1,11 @@
+export let UserName = "name";
+export let UserCountryCode = "country-code";
+export let UserLocation = "location";
+export let UserImageURL = "pictureURL";
+export let UserGender = "gender";
+export let UserStatus = "status";
+export let UserProfileLink = "profile-link";
+export let UserHomepageLink = "homepage-link";
+export let UserHomepageText = "homepage_text";
+export let UserProfileHTML = "profile-html";
+export let UserAllowInvites = "allow-invites";

@@ -1,11 +1,27 @@
+import * as PathKeys from "../keys/path-keys";
+import * as Dimensions from "../keys/dimensions";
+import * as NotificationKeys from "../keys/notification-keys";
+import * as RoomNameKeys from "../keys/room-name-keys";
+import * as RoomKeys from "../keys/room-keys";
+import * as RoomType from "../keys/room-type";
+import * as UserStatus from "../keys/user-status";
+import * as UserKeys from "../keys/user-keys";
+import * as Keys from "../keys/keys";
+import * as MessageKeys from "../keys/message-keys";
+import * as MessageType from "../keys/message-type";
+import * as Defines from "../services/defines";
+
+import firebase = require( "firebase/app" );
+
+
 angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
     function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 
-            this.entity = new Entity(RoomsPath, rid);
+            this.entity = new Entity(PathKeys.RoomsPath, rid);
 
-            this.meta = Room.roomMeta(rid, name, description, userCreated, invitesEnabled, type);
+            this.meta = Room.roomMeta(rid, name, description, userCreated, invitesEnabled, type, 0);
 
             this.users = {};
             this.usersMeta = {};
@@ -20,8 +36,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.offset = 0; // The x offset
             this.dragDirection = 0; // drag direction +ve / -ve
 
-            this.width = ChatRoomWidth;
-            this.height = ChatRoomHeight;
+            this.width = Dimensions.ChatRoomWidth;
+            this.height = Dimensions.ChatRoomHeight;
             this.zIndex = null;
             this.active = true; // in side list or not
             this.minimized = false;
@@ -79,7 +95,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.setImage(this.meta.image);
             this.updateOnlineUserCount();
             if(Utils.unORNull(silent) || silent == false) {
-                $rootScope.$broadcast(RoomUpdatedNotification, this);
+                $rootScope.$broadcast(NotificationKeys.RoomUpdatedNotification, this);
             }
         };
 
@@ -139,16 +155,16 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             // Ben Smiley
             if(!this.name || !this.name.length) {
                 if (this.isPublic()) {
-                    this.name = RoomDefaultNamePublic;
+                    this.name = RoomNameKeys.RoomDefaultNamePublic;
                 }
                 else if (this.userCount() == 1) {
-                    this.name = RoomDefaultNameEmpty;
+                    this.name = RoomNameKeys.RoomDefaultNameEmpty;
                 }
-                else if (this.type() == RoomTypeGroup) {
-                    this.name = RoomDefaultNameGroup;
+                else if (this.type() == RoomType.RoomTypeGroup) {
+                    this.name = RoomNameKeys.RoomDefaultNameGroup;
                 }
                 else {
-                    this.name = RoomDefaultName1To1;
+                    this.name = RoomNameKeys.RoomDefaultName1To1;
                 }
             }
 
@@ -167,8 +183,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                 let on = (function () {
                     // When a user changes online state update the room
-                    this.userOnlineStateChangedNotificationOff = $rootScope.$on(UserOnlineStateChangedNotification, (function (event, user) {
-                        Log.notification(UserOnlineStateChangedNotification, 'Room');
+                    this.userOnlineStateChangedNotificationOff = $rootScope.$on(NotificationKeys.UserOnlineStateChangedNotification, (function (event, user) {
+                        Log.notification(NotificationKeys.UserOnlineStateChangedNotification, 'Room');
 
                         // If the user is a member of this room, update the room
                         this.update();
@@ -185,7 +201,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.metaOn().then((function () {
 
                     switch (this.type()) {
-                        case RoomType1to1:
+                        case RoomType.RoomType1to1:
                             this.deleted = false;
                             this.userDeletedDate().then((function(timestamp) {
                                 if(timestamp) {
@@ -195,8 +211,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                                 on();
                             }).bind(this));
                             break;
-                        case RoomTypePublic:
-                        case RoomTypeGroup:
+                        case RoomType.RoomTypePublic:
+                        case RoomType.RoomTypeGroup:
                             on();
                             break;
                         default:
@@ -224,21 +240,21 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.typingOn();
 
                 // Update the interface
-                $rootScope.$broadcast(RoomAddedNotification);
+                $rootScope.$broadcast(NotificationKeys.RoomAddedNotification);
 
             }).bind(this);
 
             switch (this.type()) {
-                case RoomTypePublic:
-                    this.join(UserStatusMember).then((function ()
+                case RoomType.RoomTypePublic:
+                    this.join(UserStatus.UserStatusMember).then((function ()
                     {
                         open();
                     }).bind(this), function (error) {
                         console.log(error);
                     });
                     break;
-                case RoomTypeGroup:
-                case RoomType1to1:
+                case RoomType.RoomTypeGroup:
+                case RoomType.RoomType1to1:
                     open();
             }
         };
@@ -255,7 +271,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = this.type();
 
             switch (type) {
-                case RoomTypePublic:
+                case RoomType.RoomTypePublic:
                 {
                     this.removeUser($rootScope.user);
                     $rootScope.user.removeRoom(this);
@@ -271,15 +287,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = this.type();
 
             switch (type) {
-                case RoomType1to1:
+                case RoomType.RoomType1to1:
                 {
-                    setStatusForUser(this, $rootScope.user, bUserStatusClosed, true);
+                    setStatusForUser(this, $rootScope.user, UserStatus.UserStatusClosed, true);
                     this.deleted = true;
-                    $rootScope.$broadcast(RoomRemovedNotification);
+                    $rootScope.$broadcast(NotificationKeys.RoomRemovedNotification);
                     this.deleteMessages();
                     break;
                 }
-                case RoomTypeGroup:
+                case RoomType.RoomTypeGroup:
                 {
                     var promises = [
                         this.removeUser($rootScope.user),
@@ -291,7 +307,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                     }).bind(this));
 
                     this.deleted = true;
-                    $rootScope.$broadcast(RoomRemovedNotification);
+                    $rootScope.$broadcast(NotificationKeys.RoomRemovedNotification);
                     this.deleteMessages();
                     break;
                 }
@@ -323,17 +339,17 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = null;
 
             if(this.isPublic()) {
-                type = RoomTypePublic;
+                type = RoomType.RoomTypePublic;
             }
             else {
                 if(this.userCount() <= 1) {
-                    type = RoomTypeInvalid;
+                    type = RoomType.RoomTypeInvalid;
                 }
                 else if (this.userCount() == 2) {
-                    type = RoomType1to1;
+                    type = RoomType.RoomType1to1;
                 }
                 else {
-                    type = RoomTypeGroup;
+                    type = RoomType.RoomTypeGroup;
                 }
             }
 
@@ -344,7 +360,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = this.calculatedType();
             if(type != this.type()) {
                 // One important thing is that we can't go from group -> 1to1
-                if(this.type() != RoomTypeGroup) {
+                if(this.type() != RoomType.RoomTypeGroup) {
                     Room.updateRoomType(this.rid(), type);
                 }
             }
@@ -354,7 +370,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         Room.prototype.permanentDelete = function () {
             this.off();
             this.removeUser($rootScope.user);
-            this.entity.updateState(UsersMetaPath);
+            this.entity.updateState(PathKeys.UsersMetaPath);
             $rootScope.user.removeRoom(this);
         };
 
@@ -385,10 +401,10 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var ref = Paths.flaggedMessageRef(this.rid(), message.mid);
 
             var data = {};
-            data[CreatorEntityID] = $rootScope.user.uid();
-            data[DateKey] = firebase.database.ServerValue.TIMESTAMP;
-            data[MessageKey] = message.text();
-            data[SenderEntityID] = message.meta[messageUserFirebaseID];
+            data[Keys.CreatorEntityID] = $rootScope.user.uid();
+            data[Keys.DateKey] = firebase.database.ServerValue.TIMESTAMP;
+            data[Keys.MessageKey] = message.text();
+            data[Keys.SenderEntityID] = message.meta[MessageKeys.messageUserFirebaseID];
 
             ref.set(data, (function (error) {
                 if(!error) {
@@ -396,7 +412,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
                 else {
                     message.flagged = false;
-                    $rootScope.$broadcast(ChatUpdatedNotification, this);
+                    $rootScope.$broadcast(NotificationKeys.ChatUpdatedNotification, this);
 
                     deferred.reject(error);
                 }
@@ -418,7 +434,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
                 else {
                     message.flagged = true;
-                    $rootScope.$broadcast(ChatUpdatedNotification, this);
+                    $rootScope.$broadcast(NotificationKeys.ChatUpdatedNotification, this);
                     deferred.reject(error);
                 }
             }).bind(this));
@@ -428,11 +444,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.isPublic = function () {
             //return this.meta.isPublic;
-            return this.type() == RoomTypePublic;
+            return this.type() == RoomType.RoomTypePublic;
         };
 
         Room.prototype.type = function () {
-            return this.metaValue(roomType);
+            return this.metaValue(RoomKeys.roomType);
         };
 
         Room.prototype.rid = function () {
@@ -454,7 +470,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.created = function () {
-            return this.metaValue(roomCreated);
+            return this.metaValue(RoomKeys.roomCreated);
         };
 
         Room.prototype.lastMessageExists = function () {
@@ -463,30 +479,30 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.lastMessageType = function () {
             if(this.lastMessageExists()) {
-                return this.lastMessageMeta[messageType];
+                return this.lastMessageMeta[MessageKeys.messageType];
             }
             return null;
         };
 
         Room.prototype.lastMessageUserName = function () {
             if(this.lastMessageExists()) {
-                return this.lastMessageMeta[messageUserName];
+                return this.lastMessageMeta[MessageKeys.messageUserName];
             }
             return null;
         };
 
         Room.prototype.lastMessageText = function () {
             if(this.lastMessageExists()) {
-                if(this.lastMessageType() == MessageTypeText) {
-                    return this.lastMessageMeta[messageJSONv2][messageText];
+                if(this.lastMessageType() == MessageType.MessageTypeText) {
+                    return this.lastMessageMeta[MessageKeys.messageJSONv2][MessageKeys.messageText];
                 }
-                if(this.lastMessageType() == MessageTypeImage) {
+                if(this.lastMessageType() == MessageType.MessageTypeImage) {
                     return "Image";
                 }
-                if(this.lastMessageType() == MessageTypeFile) {
+                if(this.lastMessageType() == MessageType.MessageTypeFile) {
                     return "File";
                 }
-                if(this.lastMessageType() == MessageTypeLocation) {
+                if(this.lastMessageType() == MessageType.MessageTypeLocation) {
                     return "Location";
                 }
             }
@@ -540,8 +556,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.setSizeToDefault = function () {
-            this.width = ChatRoomWidth;
-            this.height = ChatRoomHeight;
+            this.width = Dimensions.ChatRoomWidth;
+            this.height = Dimensions.ChatRoomHeight;
         };
 
         Room.prototype.flashHeader = function () {
@@ -550,8 +566,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             // to the front
             // Or flash the side bar
             if(RoomPositionManager.roomIsOpen(this)) {
-                $rootScope.$broadcast(RoomFlashHeaderNotification, this, '#555', 500, 'room-header');
-                $rootScope.$broadcast(RoomFlashHeaderNotification, this, '#CCC', 500, 'room-list');
+                $rootScope.$broadcast(NotificationKeys.RoomFlashHeaderNotification, this, '#555', 500, 'room-header');
+                $rootScope.$broadcast(NotificationKeys.RoomFlashHeaderNotification, this, '#CCC', 500, 'room-list');
                 return true;
             }
             return false;
@@ -611,7 +627,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             for(var key in this.usersMeta) {
                 if(this.usersMeta.hasOwnProperty(key)) {
                     data = this.usersMeta[key];
-                    if(data.status == UserStatusOwner) {
+                    if(data.status == UserStatus.UserStatusOwner) {
                         break;
                     }
                 }
@@ -623,7 +639,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
 //        Room.prototype.isClosed = function () {
-//            return this.getUserStatus($rootScope.user) == bUserStatusClosed;
+//            return this.getUserStatus($rootScope.user) == UserStatusClosed;
 //        };
 
         Room.prototype.containsUser = function (user) {
@@ -631,7 +647,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.acceptInvitation = function () {
-            return setStatusForUser(this, $rootScope.user, UserStatusMember, true);
+            return setStatusForUser(this, $rootScope.user, UserStatus.UserStatusMember, true);
         };
 
         // Update the timestamp on the user status
@@ -694,7 +710,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
             }
             for(var i = 0; i < users.length; i++) {
-                if(this.usersMeta[users[i].meta[userUID]]) {
+                if(this.usersMeta[users[i].meta[Keys.userUID]]) {
                     usersInRoom++;
                 }
             }
@@ -789,7 +805,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.updateUserStatusTime(user);
 
                 // Avoid a clash..
-                var p2 = this.entity.updateState(MessagesPath);
+                var p2 = this.entity.updateState(PathKeys.MessagesPath);
 
                 return $q.all([
                     deferred.promise, p1, p2
@@ -902,7 +918,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                     this.loadingMoreMessages = false;
 
-                    $rootScope.$broadcast(LazyLoadedMessagesNotification, this, callback);
+                    $rootScope.$broadcast(NotificationKeys.LazyLoadedMessagesNotification, this, callback);
 
                 }).bind(this);
 
@@ -997,7 +1013,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.setImage = function (image, isData) {
 
-            this.showImage = this.type() == RoomTypePublic;
+            this.showImage = this.type() == RoomType.RoomTypePublic;
 
             if(!image) {
                 image = Environment.defaultRoomPictureURL();
@@ -1020,7 +1036,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             ref.update(this.meta, (function (error) {
                 if(!error) {
                     deferred.resolve();
-                    this.entity.updateState(DetailsKey);
+                    this.entity.updateState(Keys.DetailsKey);
                 }
                 else {
                     deferred.reject(error);
@@ -1031,7 +1047,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.sendBadgeChangedNotification = function () {
-            $rootScope.$broadcast(RoomBadgeChangedNotification, this);
+            $rootScope.$broadcast(NotificationKeys.RoomBadgeChangedNotification, this);
         };
 
         Room.prototype.transcript = function () {
@@ -1134,7 +1150,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
          * room meta data
          */
         Room.prototype.metaOn = function () {
-            return this.entity.pathOn(DetailsKey, (function (val) {
+            return this.entity.pathOn(Keys.DetailsKey, (function (val) {
                 if(val) {
                     this.meta = val;
                     this.update();
@@ -1143,17 +1159,17 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.metaOff = function () {
-            this.entity.pathOff(DetailsKey);
+            this.entity.pathOff(Keys.DetailsKey);
         };
 
         Room.prototype.addUserMeta = function (meta) {
             // We only display users who have been active
             // recently
             if(Room.userIsActiveWithInfo(meta)) {
-                this.usersMeta[meta[userUID]] = meta;
+                this.usersMeta[meta[Keys.userUID]] = meta;
 
                 // Add the user object
-                var user = UserStore.getOrCreateUserWithID(meta[userUID]);
+                var user = UserStore.getOrCreateUserWithID(meta[Keys.userUID]);
                 this.users[user.uid()] = user;
 
                 this.update(false);
@@ -1161,8 +1177,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.removeUserMeta = function (meta) {
-            delete this.usersMeta[meta[userUID]];
-            delete this.users[meta[userUID]];
+            delete this.usersMeta[meta[Keys.userUID]];
+            delete this.users[meta[Keys.userUID]];
             this.update(false);
         };
 
@@ -1198,7 +1214,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var ref = Paths.roomUsersRef(this.rid()).child($rootScope.user.uid());
             ref.once('value',function (snapshot) {
                 var val = snapshot.val();
-                if(val && val.status == bUserStatusClosed) {
+                if(val && val.status == UserStatus.UserStatusClosed) {
                     deferred.resolve(val.time);
                 }
                 else {
@@ -1305,7 +1321,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.updateUnreadMessageCounter = function (messageMeta) {
-            if(this.shouldIncrementUnreadMessageBadge() && (messageMeta[messageTime] > this.readTimestamp || !this.readTimestamp)) {
+            if(this.shouldIncrementUnreadMessageBadge() && (messageMeta[MessageKeys.messageTime] > this.readTimestamp || !this.readTimestamp)) {
                 // If this is the first badge then this.badge will
                 // undefined - so set it to one
                 if (!this.badge) {
@@ -1355,7 +1371,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             // Add listen to messages added to this thread
             ref.on('child_added', (function (snapshot) {
 
-                if(Cache.isBlockedUser(snapshot.val()[messageUID])) {
+                if(Cache.isBlockedUser(snapshot.val()[MessageKeys.messageUID])) {
                     return;
                 }
 
@@ -1370,9 +1386,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                         if (Visibility.getIsHidden()) {
                             // Only make a sound for messages that were recieved less than
                             // 30 seconds ago
-                            if (DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val()[messageTime]);
-                            if (DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
-                            if (Math.abs(Time.now() - snapshot.val()[messageTime]) / 1000 < 30) {
+                            if (Defines.DEBUG) console.log("Now: " + new Date().getTime() + ", Time now: " + Time.now() + ", Message: " + snapshot.val()[MessageKeys.messageTime]);
+                            if (Defines.DEBUG) console.log("Diff: " + Math.abs(Time.now() - snapshot.val().time));
+                            if (Math.abs(Time.now() - snapshot.val()[MessageKeys.messageTime]) / 1000 < 30) {
                                 SoundEffects.messageReceived();
                             }
                         }
@@ -1431,7 +1447,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.updateTyping();
 
                 // Send a notification to the chat room
-                $rootScope.$broadcast(ChatUpdatedNotification, this);
+                $rootScope.$broadcast(NotificationKeys.ChatUpdatedNotification, this);
             }).bind(this));
 
             ref.on('child_removed', (function (snapshot) {
@@ -1440,7 +1456,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.updateTyping();
 
                 // Send a notification to the chat room
-                $rootScope.$broadcast(ChatUpdatedNotification, this);
+                $rootScope.$broadcast(NotificationKeys.ChatUpdatedNotification, this);
             }).bind(this));
 
         };
@@ -1458,10 +1474,10 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                     // If the message comes in then we should make sure
                     // the room is un deleted
-                    if(!Cache.isBlockedUser(this.lastMessageMeta[messageUID])) {
+                    if(!Cache.isBlockedUser(this.lastMessageMeta[MessageKeys.messageUID])) {
                         if(this.deleted) {
                             this.deleted = false;
-                            $rootScope.$broadcast(RoomAddedNotification, this);
+                            $rootScope.$broadcast(NotificationKeys.RoomAddedNotification, this);
                         }
                     }
 
@@ -1508,7 +1524,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 //
 //            return deferred.promise;
             var userStatus = this.getUserStatus(user);
-            return userStatus == UserStatusMember || userStatus == UserStatusOwner;
+            return userStatus == UserStatus.UserStatusMember || userStatus == UserStatus.UserStatusOwner;
 
         };
 
@@ -1528,7 +1544,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 rid = Paths.roomsRef().push().key;
             }
             var roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
-            roomMeta[roomCreatorEntityID] = $rootScope.user.uid();
+            roomMeta[RoomKeys.roomCreatorEntityID] = $rootScope.user.uid();
 
             var roomMetaRef = Paths.roomMetaRef(rid);
 
@@ -1540,16 +1556,16 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
                 else {
 
-                    this.addUserToRoom(rid, $rootScope.user, UserStatusOwner, type);
+                    this.addUserToRoom(rid, $rootScope.user, UserStatus.UserStatusOwner, type);
 
-                    if(type == RoomTypePublic) {
+                    if(type == RoomType.RoomTypePublic) {
                         var ref = Paths.publicRoomRef(rid);
 
                         var data = {};
 
-                        data[roomCreated] = firebase.database.ServerValue.TIMESTAMP;
-                        data[roomRID] = rid;
-                        data[roomUserCreated] = true;
+                        data[RoomKeys.roomCreated] = firebase.database.ServerValue.TIMESTAMP;
+                        data[RoomKeys.roomRID] = rid;
+                        data[RoomKeys.roomUserCreated] = true;
 
                         ref.set(data, (function (error) {
                             if(!error) {
@@ -1565,7 +1581,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                     }
                 }
 
-                Entity.updateState(RoomsPath, rid, DetailsKey);
+                Entity.updateState(PathKeys.RoomsPath, rid, Keys.DetailsKey);
 
             }).bind(this));
 
@@ -1581,7 +1597,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var ref = Paths.roomMetaRef(rid);
 
             var data = {};
-            data[TypeKey] = type;
+            data[Keys.TypeKey] = type;
 
             ref.update(data, (function (error) {
                 if(!error) {
@@ -1596,7 +1612,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.createPublicRoom = function (name, description, weight) {
-            return this.createRoom(name, description, true, RoomTypePublic, weight);
+            return this.createRoom(name, description, true, RoomType.RoomTypePublic, weight);
         };
 
         Room.createPrivateRoom = function (users) {
@@ -1604,13 +1620,13 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var deferred = $q.defer();
 
             // Since we're calling create room we will be added automatically
-            this.createRoom(null, null, true, users.length == 1 ? RoomType1to1 : RoomTypeGroup).then((function (rid) {
+            this.createRoom(null, null, true, users.length == 1 ? RoomType.RoomType1to1 : RoomType.RoomTypeGroup).then((function (rid) {
 
                 var promises = [];
 
                 for (var i = 0; i < users.length; i++) {
                     promises.push(
-                        this.addUserToRoom(rid, users[i], UserStatusMember)
+                        this.addUserToRoom(rid, users[i], UserStatus.UserStatusMember)
                     );
                 }
 
@@ -1652,7 +1668,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             ref.update(data, (function (error) {
                 if(!error) {
-                    room.entity.updateState(UsersMetaPath);
+                    room.entity.updateState(PathKeys.UsersMetaPath);
                     deferred.resolve();
                 }
                 else {
@@ -1686,7 +1702,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
             });
 
-            if(type == RoomTypePublic) {
+            if(type == RoomType.RoomTypePublic) {
                 ref.onDisconnect().remove();
             }
 
@@ -1698,7 +1714,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             let deferred = $q.defer();
 
             $q.all(promises).then(function () {
-                Entity.updateState(RoomsPath, rid, UsersMetaPath);
+                Entity.updateState(PathKeys.RoomsPath, rid, PathKeys.UsersMetaPath);
 
                 deferred.resolve();
 
@@ -1718,16 +1734,16 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         Room.roomMeta = function (rid, name, description, userCreated, invitesEnabled, type, weight) {
 
             var m = {};
-            m[roomRID] = rid ? rid : null;
-            m[roomName] = name ? name : null;
-            m[roomInvitesEnabled] = !Utils.unORNull(invitesEnabled) ? invitesEnabled : true;
-            m[roomDescription] = description ? description : null;
-            m[roomUserCreated] = !Utils.unORNull(userCreated) ? userCreated : true;
-            m[roomCreated] = firebase.database.ServerValue.TIMESTAMP;
-            m[roomWeight] = weight ? weight : 0;
-            m[roomType] = type;
+            m[RoomKeys.roomRID] = rid ? rid : null;
+            m[RoomKeys.roomName] = name ? name : null;
+            m[RoomKeys.roomInvitesEnabled] = !Utils.unORNull(invitesEnabled) ? invitesEnabled : true;
+            m[RoomKeys.roomDescription] = description ? description : null;
+            m[RoomKeys.roomUserCreated] = !Utils.unORNull(userCreated) ? userCreated : true;
+            m[RoomKeys.roomCreated] = firebase.database.ServerValue.TIMESTAMP;
+            m[RoomKeys.roomWeight] = weight ? weight : 0;
+            m[RoomKeys.roomType] = type;
             // A fix for legacy v3 users
-            m[roomTypeV3] = type == RoomTypePublic ? RoomTypePublicV3 : RoomTypePrivateV3;
+            m[RoomKeys.roomTypeV3] = type == RoomType.RoomTypePublic ? RoomType.RoomTypePublicV3 : RoomType.RoomTypePrivateV3;
 
             return m;
         };
@@ -1736,7 +1752,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             // TODO: For the time being assume that users that
             // don't have this information are active
             if(info && info.status && info.time) {
-                if(info.status != bUserStatusClosed) {
+                if(info.status != UserStatus.UserStatusClosed) {
                     return Time.secondsSince(info.time) < 60 * 60 * 24;
                 }
             }

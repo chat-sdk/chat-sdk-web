@@ -1,6 +1,9 @@
 /**
  * Created by benjaminsmiley-andrews on 09/10/2014.
  */
+import * as MessageType from "../keys/message-type";
+import * as MessageKeys from "../keys/message-keys";
+import firebase = require( "firebase" );
 
 angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
     function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
@@ -25,20 +28,20 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             if(meta) {
 
                 if(!this.type()) {
-                    this.setType(MessageTypeText);
+                    this.setType(MessageType.MessageTypeText);
                 }
 
-                if(this.type() == MessageTypeImage || this.type() == MessageTypeFile) {
+                if(this.type() == MessageType.MessageTypeImage || this.type() == MessageType.MessageTypeFile) {
                     // Get the image and thumbnail URLs
-                    let json = meta[messageJSONv2];
+                    let json = meta[MessageKeys.messageJSONv2];
 
                     if(json) {
-                        if(this.type() == MessageTypeImage) {
-                            this.thumbnailURL = CloudImage.cloudImage(json[messageImageURL], 200, 200);
-                            this.imageURL = json[messageImageURL];
+                        if(this.type() == MessageType.MessageTypeImage) {
+                            this.thumbnailURL = CloudImage.cloudImage(json[MessageKeys.messageImageURL], 200, 200);
+                            this.imageURL = json[MessageKeys.messageImageURL];
                         }
-                        if(this.type() == MessageTypeFile) {
-                            this.fileURL = json[messageFileURL];
+                        if(this.type() == MessageType.MessageTypeFile) {
+                            this.fileURL = json[MessageKeys.messageFileURL];
                         }
                     }
                 }
@@ -100,51 +103,47 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
             },
 
             setTime: function (time) {
-                this.setMetaValue(messageTime, time);
+                this.setMetaValue(MessageKeys.messageTime, time);
             },
 
             time: function () {
-                return this.metaValue(messageTime);
+                return this.metaValue(MessageKeys.messageTime);
             },
 
             setText: function (text) {
-                this.setJSONValue(messageText, text);
+                this.setJSONValue(MessageKeys.messageText, text);
             },
 
             text: function() {
-                return this.getJSONValue(messageText);
+                return this.getJSONValue(MessageKeys.messageText);
             },
 
             getMetaValue: function (key) {
                 return this.meta[key];
             },
 
-            setMetaValue: function (key, value) {
-                this.meta[key] = value;
-            },
-
             getJSONValue: function (key) {
-                return this.getMetaValue(messageJSONv2)[key];
+                return this.getMetaValue(MessageKeys.messageJSONv2)[key];
             },
 
             setJSONValue: function (key, value) {
-                this.getMetaValue(messageJSONv2)[key] = value;
+                this.getMetaValue(MessageKeys.messageJSONv2)[key] = value;
             },
 
             type: function () {
-                return this.metaValue(messageType);
+                return this.metaValue(MessageKeys.messageType);
             },
 
             setType: function (type) {
-                this.setMetaValue(messageType, type);
+                this.setMetaValue(MessageKeys.messageType, type);
             },
 
             uid: function () {
-                return this.metaValue(messageUID);
+                return this.metaValue(MessageKeys.messageUID);
             },
 
             setUID: function (uid) {
-                this.setMetaValue(messageUID, uid);
+                this.setMetaValue(MessageKeys.messageUID, uid);
             },
 
             metaValue: function (key) {
@@ -175,32 +174,32 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
 
             var text = imageURL+','+imageURL+',W'+width+"&H"+height;
 
-            var m = Message.buildMeta(rid, uid, text, MessageTypeImage);
+            var m = Message.buildMeta(rid, uid, text, MessageType.MessageTypeImage);
 
             var json = {};
 
-            json[messageText] = text;
-            json[messageImageURL] = imageURL;
-            json[messageThumbnailURL] = thumbnailURL;
-            json[messageImageWidth] = width;
-            json[messageImageHeight] = height;
+            json[MessageKeys.messageText] = text;
+            json[MessageKeys.messageImageURL] = imageURL;
+            json[MessageKeys.messageThumbnailURL] = thumbnailURL;
+            json[MessageKeys.messageImageWidth] = width;
+            json[MessageKeys.messageImageHeight] = height;
 
-            m.meta[messageJSONv2] = json;
+            m.meta[MessageKeys.messageJSONv2] = json;
 
             return m;
         };
 
         Message.buildFileMeta = function (rid, uid, fileName, mimeType, fileURL) {
 
-            var m = Message.buildMeta(rid, uid, fileName, MessageTypeFile);
+            var m = Message.buildMeta(rid, uid, fileName, MessageType.MessageTypeFile);
 
             var json = {};
 
-            json[messageText] = fileName;
-            json[messageMimeType] = mimeType;
-            json[messageFileURL] = fileURL;
+            json[MessageKeys.messageText] = fileName;
+            json[MessageKeys.messageMimeType] = mimeType;
+            json[MessageKeys.messageFileURL] = fileURL;
 
-            m.meta[messageJSONv2] = json;
+            m.meta[MessageKeys.messageJSONv2] = json;
 
             return m;
         };
@@ -210,14 +209,14 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
                 meta: {}
             };
 
-            m.meta[messageUID] = uid;
+            m.meta[MessageKeys.messageUID] = uid;
 
             var json = {};
-            json[messageText] = text;
+            json[MessageKeys.messageText] = text;
 
-            m.meta[messageJSONv2] = json;
-            m.meta[messageType] = type;
-            m.meta[messageTime] = firebase.database.ServerValue.TIMESTAMP;
+            m.meta[MessageKeys.messageJSONv2] = json;
+            m.meta[MessageKeys.messageType] = type;
+            m.meta[MessageKeys.messageTime] = firebase.database.ServerValue.TIMESTAMP;
 
             return m;
         };

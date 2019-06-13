@@ -1,8 +1,6 @@
-class Person {
-
-    name: string;
-
-}
-
-var person: Person;
-person.name = "James1";
+// class Person {
+//     name: string;
+// }
+//
+// var person: Person;
+// person.name = "James1";
