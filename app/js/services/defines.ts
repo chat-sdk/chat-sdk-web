@@ -1,7 +1,5 @@
-
 export let DEBUG = false;
 export let FIREBASE_REF_DEBUG = false;
-
 
 export let DefaultAvatarProvider = "http://flathash.com";
 

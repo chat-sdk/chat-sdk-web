@@ -1,4 +1,4 @@
-angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
+angular.module('myApp.services').factory('Time', ['$q', 'Paths', 'firebase', 'moment', function ($q, Paths, firebase, moment) {
     return {
 
         localTime: null,

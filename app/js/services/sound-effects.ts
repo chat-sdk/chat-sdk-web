@@ -1,4 +1,4 @@
-angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalStorage, Environment) {
+angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', 'Howl', function (LocalStorage, Environment, Howl) {
     return {
 
         messageReceivedSoundNumber: 1,

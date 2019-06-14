@@ -3,9 +3,10 @@ import * as UserKeys from "../keys/user-keys";
 import * as PathKeys from "../keys/path-keys";
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Keys from "../keys/keys";
+import * as firebase from 'firebase';
 
-angular.module('myApp.services').factory('User', ['$rootScope', 'firebase', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment',
-    function ($rootScope, firebase, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment) {
+angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment',
+    function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment) {
 
         function User (uid) {
 
@@ -448,11 +449,12 @@ angular.module('myApp.services').factory('User', ['$rootScope', 'firebase', '$ti
 
         User.prototype.markRoomReadTime = function (rid) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userRoomsRef(this.uid()).child(rid);
+            let ref = Paths.userRoomsRef(this.uid()).child(rid);
 
-            var data = {};
+            let data = {};
+
             data[Keys.ReadKey] = firebase.database.ServerValue.TIMESTAMP;
 
             ref.update(data, function (error) {

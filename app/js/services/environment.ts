@@ -1,3 +1,5 @@
+
+
 angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', function ($rootScope, Utils) {
 
     var env = {
@@ -59,7 +61,7 @@ angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', 
         resourceRootURL: function () {
             var url = this.options().resourceRootURL;
             if(!Utils.unORNull(url)) {
-                if(!url[url.length - 1] == '/') {
+                if(!(url[url.length - 1] == '/')) {
                     url += '/';
                 }
                 return url;

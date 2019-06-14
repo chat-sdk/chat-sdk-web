@@ -1,7 +1,9 @@
+import * as Defines from "./defines";
+
 angular.module('myApp.services').factory('Log', [function () {
     return {
         notification: function (notification, context) {
-            if(DEBUG) {
+            if(Defines.DEBUG) {
                 if(!context)
                     context = "";
                 else

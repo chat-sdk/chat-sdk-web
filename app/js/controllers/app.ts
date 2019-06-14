@@ -3,17 +3,16 @@ import * as NotificationKeys from "../keys/notification-keys";
 import * as RoomType from "../keys/room-type";
 import * as MessageType from "../keys/message-type";
 import * as Defines from "../services/defines";
-import * as Options from "../services/options"
 
 angular.module('myApp.controllers').controller('AppController', [
-    '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
-    function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
+    '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
+    function($rootScope, $scope, $timeout, $window, $sce, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;
 
         // Used to hide chat box
-        $scope.hidden = Options.html.hideMainBox;
+        $scope.hidden = ChatSDKOptions.hideMainBox;
 
         $rootScope.messageTypeText = MessageType.MessageTypeText;
         $rootScope.messageTypeImage = MessageType.MessageTypeImage;

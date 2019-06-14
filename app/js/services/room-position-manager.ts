@@ -2,6 +2,9 @@
  * This service keeps track of the slot positions
  * while the rooms are moving around
  */
+import * as NotificationKeys from "../keys/notification-keys";
+import * as Dimensions from "../keys/dimensions";
+
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen', 'ArrayUtils',
     function ($rootScope, $timeout, $document, $window, LocalStorage, Cache, Screen, ArrayUtils) {
 
@@ -14,7 +17,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
             init: function () {
 
                 this.updateAllRoomActiveStatus();
-                $rootScope.$on(ScreenSizeChangedNotification, (function () {
+                $rootScope.$on(NotificationKeys.ScreenSizeChangedNotification, (function () {
                     this.updateAllRoomActiveStatus();
                 }).bind(this));
 
@@ -39,7 +42,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                         if(room.offset + room.width > this.slotPositions[nextSlot] + nextRoom.width/2) {
                             this.setDirty();
                             room.slot = nextSlot;
-                            $rootScope.$broadcast(AnimateRoomNotification, {
+                            $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                                 room: nextRoom,
                                 slot: nextSlot - 1
                             });
@@ -57,7 +60,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                         if(room.offset < this.slotPositions[nextSlot] + nextRoom.width / 2) {
                             this.setDirty();
                             room.slot = nextSlot;
-                            $rootScope.$broadcast(AnimateRoomNotification, {
+                            $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                                 room: nextRoom,
                                 slot: nextSlot + 1
                             });
@@ -100,17 +103,17 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 // Recalculate
                 this.calculateSlotPositions();
 
-                $rootScope.$broadcast(RoomPositionUpdatedNotification, room);
+                $rootScope.$broadcast(NotificationKeys.RoomPositionUpdatedNotification, room);
 
                 for(i = slot; i < this.rooms.length; i++) {
-                    $rootScope.$broadcast(AnimateRoomNotification, {
+                    $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                         room: this.rooms[i],
                         duration: duration
                     });
                 }
 
                 room.updateOffsetFromSlot();
-                $rootScope.$broadcast(RoomOpenedNotification, room);
+                $rootScope.$broadcast(NotificationKeys.RoomOpenedNotification, room);
 
                 this.updateAllRoomActiveStatus();
 
@@ -135,7 +138,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 this.autoPosition(300);
                 this.updateAllRoomActiveStatus();
 
-                $rootScope.$broadcast(RoomClosedNotification, room);
+                $rootScope.$broadcast(NotificationKeys.RoomClosedNotification, room);
 
             },
 
@@ -166,7 +169,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 // Animate all rooms into position
                 for(var i = 0; i < this.rooms.length; i++) {
                     if(this.rooms[i].active && duration > 0) {
-                        $rootScope.$broadcast(AnimateRoomNotification, {
+                        $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                             room: this.rooms[i],
                             duration: duration
                         });
@@ -204,7 +207,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                     }
                 }
                 if(digest) {
-                    $rootScope.$broadcast(UpdateRoomActiveStatusNotification);
+                    $rootScope.$broadcast(NotificationKeys.UpdateRoomActiveStatusNotification);
                 }
             },
 
@@ -215,7 +218,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 if(this.rooms.length) {
                     for(var i = Math.max(this.rooms.indexOf(room), 0); i < this.rooms.length; i++) {
                         if(this.rooms[i].active && duration > 0) {
-                            $rootScope.$broadcast(AnimateRoomNotification, {
+                            $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                                 room: this.rooms[i],
                                 duration: duration
                             });
@@ -250,7 +253,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 // the rooms list will be hidden which will
                 // give us extra space
                 if(lastRoom.width + this.slotPositions[lastRoom.slot] > Screen.screenWidth) {
-                    width -= RoomListBoxWidth;
+                    width -= Dimensions.RoomListBoxWidth;
                 }
 
                 return width;
@@ -289,13 +292,13 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 this.slotPositions = [];
 
                 // Work out the positions
-                var p = MainBoxWidth + ChatRoomSpacing;
+                var p = Dimensions.MainBoxWidth + Dimensions.ChatRoomSpacing;
                 for(var i = 0; i < this.rooms.length; i++) {
 
                     this.slotPositions.push(p);
 
-                    p += this.rooms[i].minimized ? ChatRoomWidth : this.rooms[i].width;
-                    p += ChatRoomSpacing;
+                    p += this.rooms[i].minimized ? Dimensions.ChatRoomWidth : this.rooms[i].width;
+                    p += Dimensions.ChatRoomSpacing;
                 }
 
 //            for(var i in this.slotPositions) {

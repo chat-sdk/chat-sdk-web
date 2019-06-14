@@ -1,4 +1,6 @@
-angular.module('myApp.services').factory('Visibility', ['$rootScope', function ($rootScope) {
+import {VisibilityChangedNotification} from "../keys/notification-keys";
+
+angular.module('myApp.services').factory('Visibility', ['$rootScope', '$document', function ($rootScope, $document) {
 
     var Visibility = {
 
@@ -17,7 +19,7 @@ angular.module('myApp.services').factory('Visibility', ['$rootScope', function (
         },
 
         changed: function (event) {
-            this.isHidden = document.hidden || document.webkitHidden || document.mozHidden || document.msHidden;
+            this.isHidden = $document.hidden || $document.webkitHidden || $document.mozHidden || $document.msHidden;
             $rootScope.$broadcast(VisibilityChangedNotification, this.isHidden);
         },
 

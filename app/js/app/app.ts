@@ -1,6 +1,5 @@
 // Declare app level module which depends on filters, and services
-
-let myApp = angular.module('myApp',
+export let myApp = angular.module('myApp',
     [
         'myApp.filters',
         'myApp.services',
@@ -31,7 +30,10 @@ let myApp = angular.module('myApp',
         };
         return $delegate;
     }]);
-}]).run(['Config', 'Environment', function (Config, Environment) {
-    Config.setConfig(Config.setByInclude, Environment.options());
 }]);
+
+// TODO: Add this back?
+//     .run(['Config', 'Environment', function (Config, Environment) {
+//     Config.setConfig(Config.setByInclude, Environment.options());
+// }]);
 

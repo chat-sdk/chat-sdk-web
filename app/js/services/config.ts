@@ -1,5 +1,5 @@
-import * as Defines from "./defines";
 import * as NotificationKeys from "../keys/notification-keys";
+import * as Defines from "../services/defines"
 
 angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', function ($rootScope, $timeout, $q, Paths, Utils) {
 

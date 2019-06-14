@@ -185,6 +185,13 @@ gulp.task('scripts', function(done) {
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
+	gulp.src([
+		DIST_PATH + 'js/appts.js',
+		DIST_PATH + 'js/app.js',
+			])
+		.pipe(concat('combine.js')) 
+        .pipe(gulp.dest(DIST_PATH + 'js'))
+// 
 
 //     gulp.src(paths)
 //         .pipe(concat('all.js'))

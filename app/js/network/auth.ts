@@ -1,8 +1,22 @@
-angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin',
-    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin) {
+import * as PathKeys from "../keys/path-keys";
+import * as Dimensions from "../keys/dimensions";
+import * as NotificationKeys from "../keys/notification-keys";
+import * as RoomNameKeys from "../keys/room-name-keys";
+import * as RoomKeys from "../keys/room-keys";
+import * as RoomType from "../keys/room-type";
+// import * as UserStatus from "../keys/user-status";
+import * as Keys from "../keys/keys";
+import * as MessageKeys from "../keys/message-keys";
+import * as UserKeys from "../keys/user-keys";
+import * as MessageType from "../keys/message-type";
+import * as Defines from "../services/defines";
+import * as LoginModeKeys from "../keys/login-mode-keys";
+
+angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin', 'firebase', 'Facebook',
+    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin, firebase, Facebook) {
         let Auth = {
 
-            mode: LoginModeSimple,
+            mode: LoginModeKeys.LoginModeSimple,
             getToken: null,
             // authListener: null,
             authenticating: false,
@@ -144,7 +158,16 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     }).bind(this);
 
                     // Get the third party data
-                    let userData = {name: null};
+                    let userData = {
+                        id: null,
+                        name: null,
+                        gender: null,
+                        profile_image_url: null,
+                        description: null,
+                        location: null,
+                        avatar_url: null,
+                        picture: null
+                    };
 
                     let p = authUser.provider;
                     if(p === "facebook" || p === "twitter" || p === "google" || p === "github") {
@@ -157,15 +180,15 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     }
 
                     // Set the user's name
-                    setUserProperty(UserName, userData.name);
-                    setUserProperty(UserName, DefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
+                    setUserProperty(UserKeys.UserName, userData.name);
+                    setUserProperty(UserKeys.UserName, Defines.DefaultUserPrefix + Math.floor(Math.random() * 1000 + 1));
 
                     let imageURL = null;
 
                     /** SOCIAL INFORMATION **/
                     if(authUser.provider === "facebook") {
 
-                        setUserProperty(UserGender, userData.gender === "male" ? "M": "F");
+                        setUserProperty(UserKeys.UserGender, userData.gender === "male" ? "M": "F");
 
                         // Make an API request to Facebook to get an appropriately sized
                         // photo
@@ -183,50 +206,50 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                             imageURL = userData.profile_image_url.replace("normal", "bigger");
                         }
 
-                        setUserProperty(UserStatus, userData.description);
-                        setUserProperty(UserLocation, userData.location);
+                        setUserProperty(UserKeys.UserStatus, userData.description);
+                        setUserProperty(UserKeys.UserLocation, userData.location);
 
                     }
                     if(authUser.provider === "github") {
                         imageURL = userData.avatar_url;
-                        setUserProperty(UserName, authUser.login);
+                        setUserProperty(UserKeys.UserName, authUser.login);
                     }
                     if(authUser.provider === "google") {
                         imageURL = userData.picture;
-                        setUserProperty(UserGender, userData.gender === "male" ? "M": "F");
+                        setUserProperty(UserKeys.UserGender, userData.gender === "male" ? "M": "F");
                     }
                     if(authUser.provider === "anonymous") {
 
                     }
                     if(authUser.provider === "custom") {
 
-                        setUserProperty(UserStatus, userData[UserStatus]);
-                        setUserProperty(UserLocation, userData[UserLocation]);
-                        setUserProperty(UserGender, userData[UserGender]);
-                        setUserProperty(UserCountryCode, userData[UserCountryCode]);
+                        setUserProperty(UserKeys.UserStatus, userData[UserKeys.UserStatus]);
+                        setUserProperty(UserKeys.UserLocation, userData[UserKeys.UserLocation]);
+                        setUserProperty(UserKeys.UserGender, userData[UserKeys.UserGender]);
+                        setUserProperty(UserKeys.UserCountryCode, userData[UserKeys.UserCountryCode]);
 
                         // TODO: Deprecated
-                        setUserProperty(UserHomepageLink, userData[UserHomepageLink], true);
-                        setUserProperty(UserHomepageText, userData[UserHomepageText], true);
+                        setUserProperty(UserKeys.UserHomepageLink, userData[UserKeys.UserHomepageLink], true);
+                        setUserProperty(UserKeys.UserHomepageText, userData[UserKeys.UserHomepageText], true);
 
-                        if(userData[UserProfileHTML] && userData[UserProfileHTML].length > 0) {
-                            setUserProperty(UserProfileHTML, userData[UserProfileHTML], true);
+                        if(userData[UserKeys.UserProfileHTML] && userData[UserKeys.UserProfileHTML].length > 0) {
+                            setUserProperty(UserKeys.UserProfileHTML, userData[UserKeys.UserProfileHTML], true);
                         }
                         else {
                             user.setProfileHTML("");
                         }
 
-                        if(userData[UserImageURL]) {
-                            imageURL = userData[UserImageURL];
+                        if(userData[UserKeys.UserImageURL]) {
+                            imageURL = userData[UserKeys.UserImageURL];
                         }
                     }
 
                     if(!imageURL) {
-                        imageURL = DefaultAvatarProvider + "/" + user.getName() + ".png";
+                        imageURL = Defines.DefaultAvatarProvider + "/" + user.getName() + ".png";
                     }
 
                     // If they don't have a profile picture load it from the social network
-                    if(setUserProperty(UserImageURL, imageURL)) {
+                    if(setUserProperty(UserKeys.UserImageURL, imageURL)) {
                         user.setImageURL(imageURL);
                         user.setImage(imageURL);
                     }
@@ -241,8 +264,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
                             // The first time the user logs on
                             // try to guess which city and country they're from
-                            changed = setUserProperty(UserLocation, r.data.city);
-                            changed = changed || setUserProperty(UserCountryCode, r.data.country_code);
+                            changed = setUserProperty(UserKeys.UserLocation, r.data.city);
+                            changed = changed || setUserProperty(UserKeys.UserCountryCode, r.data.country_code);
 
                             if(changed) {
                                 user.pushMeta();

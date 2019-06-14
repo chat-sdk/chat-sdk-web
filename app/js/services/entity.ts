@@ -1,4 +1,7 @@
-angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q, Paths) {
+import * as PathKeys from "../keys/path-keys";
+import * as Defines from "./defines";
+
+angular.module('myApp.services').factory('Entity', ['$q', 'firebase', 'Paths', function ($q, firebase, Paths) {
 
     function Entity (path, id) {
         this._path = path;
@@ -42,8 +45,8 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
 
                 var time = snapshot.val();
 
-                if(DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
-                if(DEBUG) console.log('Time: ' + time + ' State time: ' + this.state[key]);
+                if(Defines.DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
+                if(Defines.DEBUG) console.log('Time: ' + time + ' State time: ' + this.state[key]);
 
                 // If the state isn't set either locally or remotely
                 // or if it is set but the timestamp is lower than the remove value
@@ -92,7 +95,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
         },
 
         stateRef: function (key) {
-            return this.ref().child(UpdatedPath).child(key);
+            return this.ref().child(PathKeys.UpdatedPath).child(key);
         },
 
         updateState: function (key) {
@@ -129,7 +132,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
     };
 
     Entity.stateRef = function (path, id, key) {
-        return this.ref(path, id).child(UpdatedPath).child(key);
+        return this.ref(path, id).child(PathKeys.UpdatedPath).child(key);
     };
 
     Entity.updateState = function (path, id, key) {
