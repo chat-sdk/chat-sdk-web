@@ -34,7 +34,7 @@
     </p>
 </div>
 
-<div data-ng-app="myApp" id="cc-app" ng-controller="AppController"><ng-include src=" partialsURL + 'chatsdk.html'" ></ng-include>
+<div data-ng-app="myApp" id="cc-app" data-ng-controller="AppController"><ng-include src=" partialsURL + 'chatsdk.html'" ></ng-include>
 
     <!--<div data-ng-controller="ChatEmbedController" data-ng-init="init('1234', 300, 400)" style="background: white; width: 300px; height: 400px">-->
         <!--<div data-ng-repeat="(id, room) in rooms">-->
@@ -92,9 +92,6 @@
         fileMessagesEnabled: true,
 
         hideMainBox: false
-
-
-
     }
 
 //    var ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");

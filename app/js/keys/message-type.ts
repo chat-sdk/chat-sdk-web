@@ -1,4 +1,4 @@
-export let MessageTypeText = 0;
-export let MessageTypeLocation = 1;
-export let MessageTypeImage = 2;
-export let MessageTypeFile = 3;
+export const MessageTypeText = 0;
+export const MessageTypeLocation = 1;
+export const MessageTypeImage = 2;
+export const MessageTypeFile = 3;

@@ -3,7 +3,11 @@ declare global {
     const angular: typeof _angular_;
 }
 
-// import * as _firebase_ from "firebase/app"
 // declare global {
-//     const firebase_: typeof _firebase_;
+//     const ChatSDKOptions: {
+//         firebaseConfig: {
+//             authDomain: ""
+//         },
+//         hideMainBox: false
+//     };
 // }

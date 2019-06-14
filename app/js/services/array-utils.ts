@@ -1,3 +1,6 @@
+import * as RoomType from "../keys/room-type";
+import * as MessageKeys from "../keys/message-keys";
+
 angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils) {
 
     return {
@@ -8,7 +11,7 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
             for(var i = 0; i < rooms.length; i++) {
                 var room = rooms[i];
                 if(room.containsOnlyUsers(users)) {
-                    if((users.length == 2 && room.type() == RoomType1to1) || (users.length != 2 && room.type() == RoomTypeGroup)) {
+                    if((users.length == 2 && room.type() == RoomType.RoomType1to1) || (users.length != 2 && room.type() == RoomType.RoomTypeGroup)) {
                         roomsWithUsers.push(room);
                     }
                 }
@@ -18,8 +21,8 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
 
         roomsSortedByMostRecent: function (rooms) {
             rooms.sort(function (a, b) {
-                var at = a.lastMessageMeta ? a.lastMessageMeta[messageTime] : a.created();
-                var bt = b.lastMessageMeta ? b.lastMessageMeta[messageTime] : b.created();
+                var at = a.lastMessageMeta ? a.lastMessageMeta[MessageKeys.messageTime] : a.created();
+                var bt = b.lastMessageMeta ? b.lastMessageMeta[MessageKeys.messageTime] : b.created();
 
                 return bt - at;
             });

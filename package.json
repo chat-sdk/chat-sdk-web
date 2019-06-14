@@ -27,29 +27,29 @@
     "gulp-require-modules": "^1.1.4",
     "gulp-typescript": "latest",
     "gulp-uglify": "^3.0.2",
-    "jshint": "^2.10.2"
+    "jshint": "^2.10.2",
+    "gulp-dependency-install": "0.0.8",
+    "typescript": "^3.5.1",
+    "gulp-install": "^1.1.0",
+    "npm-install-all": "^1.1.21"
   },
   "dependencies": {
     "FileSaver": "latest",
-    "angular": "latest",
+    "angular": "^1.7.8",
     "angular-emoji-filter-hd": "latest",
     "angular-loader": "latest",
     "angular-mocks": "latest",
     "angular-sanitize": "latest",
-    "angularfire": "latest",
     "firebase": "^6.1.1",
-    "gulp-dependency-install": "0.0.8",
-    "gulp-install": "^1.1.0",
     "howler": "^2.1.2",
     "html5-boilerplate": "^7.2.0",
     "jquery": "^3.4.1",
     "js-cookie": "latest",
     "moment": "latest",
     "ng-file-upload": "latest",
-    "npm-install-all": "^1.1.21",
     "pikaday": "latest",
-    "typescript": "^3.5.1",
-    "uikit": "^3.1.5"
+    "uikit": "^3.1.5",
+    "requirejs": "latest"
   },
   "keywords": [
     "chat",

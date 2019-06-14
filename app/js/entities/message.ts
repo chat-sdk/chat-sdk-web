@@ -3,10 +3,9 @@
  */
 import * as MessageType from "../keys/message-type";
 import * as MessageKeys from "../keys/message-keys";
-import firebase = require( "firebase" );
 
-angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
-    function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
+angular.module('myApp.services').factory('Message', ['$rootScope', 'firebase', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
+    function ($rootScope, firebase, $q, $sce, UserStore, User, Config, Time, CloudImage) {
 
         var bMessageSideRight = 'right';
         var bMessageSideLeft = 'left';

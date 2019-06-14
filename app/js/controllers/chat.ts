@@ -1,5 +1,18 @@
-angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager', 'RoomStore',
-    function ($scope, $timeout, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager, RoomStore) {
+import * as PathKeys from "../keys/path-keys";
+import * as Dimensions from "../keys/dimensions";
+import * as NotificationKeys from "../keys/notification-keys";
+import * as RoomNameKeys from "../keys/room-name-keys";
+import * as RoomKeys from "../keys/room-keys";
+import * as RoomType from "../keys/room-type";
+import * as UserStatus from "../keys/user-status";
+import * as Keys from "../keys/keys";
+import * as MessageKeys from "../keys/message-keys";
+import * as MessageType from "../keys/message-type";
+import * as Defines from "../services/defines";
+import * as TabKeys from "../keys/tab-keys";
+
+angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
+    function ($scope, $timeout, $window, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
 
         $scope.showEmojis = false;
         $scope.showMessageOptions = false;
@@ -31,36 +44,36 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             };
 
             // When the user value changes update the user interface
-            $scope.$on(UserValueChangedNotification, function (event, user) {
-                Log.notification(UserValueChangedNotification, 'ChatController');
+            $scope.$on(NotificationKeys.UserValueChangedNotification, function (event, user) {
+                Log.notification(NotificationKeys.UserValueChangedNotification, 'ChatController');
                 if($scope.room.containsUser(user)) {
-                    digest();
+                    digest(null);
                 }
             });
 
-            $scope.$on(RoomPositionUpdatedNotification, function(event, room) {
-                Log.notification(RoomPositionUpdatedNotification, 'ChatController');
+            $scope.$on(NotificationKeys.RoomPositionUpdatedNotification, function(event, room) {
+                Log.notification(NotificationKeys.RoomPositionUpdatedNotification, 'ChatController');
                 if($scope.room == room) {
                     // Update the room's active status
-                    digest();
+                    digest(null);
                 }
             });
-            $scope.$on(RoomSizeUpdatedNotification, function(event, room) {
-                Log.notification(RoomSizeUpdatedNotification, 'ChatController');
+            $scope.$on(NotificationKeys.RoomSizeUpdatedNotification, function(event, room) {
+                Log.notification(NotificationKeys.RoomSizeUpdatedNotification, 'ChatController');
                 if($scope.room == room) {
-                    digest();
+                    digest(null);
                 }
             });
-            $scope.$on(LazyLoadedMessagesNotification, function(event, room, callback) {
-                Log.notification(LazyLoadedMessagesNotification, 'ChatController');
+            $scope.$on(NotificationKeys.LazyLoadedMessagesNotification, function(event, room, callback) {
+                Log.notification(NotificationKeys.LazyLoadedMessagesNotification, 'ChatController');
                 if($scope.room == room) {
                     digest(callback);
                 }
             });
-            $scope.$on(ChatUpdatedNotification, function (event, room) {
-                Log.notification(ChatUpdatedNotification, 'CreateRoomController');
+            $scope.$on(NotificationKeys.ChatUpdatedNotification, function (event, room) {
+                Log.notification(NotificationKeys.ChatUpdatedNotification, 'CreateRoomController');
                 if($scope.room == room) {
-                    digest();
+                    digest(null);
                 }
             });
         };
@@ -83,14 +96,14 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
         $scope.onSelectImage = function (room) {
             $scope.showMessageOptions = false;
             $scope.uploadingFile = true;
-            this.sendImageMessage(event.target.files, room)
-        }
+            this.sendImageMessage($window.event.target.files, room)
+        };
 
         $scope.onSelectFile = function (room) {
             $scope.showMessageOptions = false;
             $scope.uploadingFile = true;
-            this.sendFileMessage(event.target.files, room)
-        }
+            this.sendFileMessage($window.event.target.files, room)
+        };
 
         $scope.imageUploadFinished = function () {
             $scope.uploadingFile = false;
@@ -115,7 +128,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 $scope.sendingImage = true;
             }
             else {
-                $scope.showNotification(NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
                 this.imageUploadFinished();
                 return;
             }
@@ -134,13 +147,13 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                             };
                             image.src = e.target.result;
                         };
-                    })(f);
+                    })();
                     reader.readAsDataURL(f);
                 }
                 this.imageUploadFinished();
 
             }).bind(this), (function (error) {
-                $scope.showNotification(NotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
+                $scope.showNotification(Defines.NotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
                 this.imageUploadFinished();
             }).bind(this));
         };
@@ -170,7 +183,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 this.fileUploadFinished();
 
             }).bind(this), (function (error) {
-                $scope.showNotification(NotificationTypeAlert, 'File error', 'The file could not be sent', 'ok');
+                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'The file could not be sent', 'ok');
                 this.fileUploadFinished();
             }).bind(this));
         };
@@ -188,7 +201,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             $scope.showEmojis = false;
             $scope.showMessageOptions = false;
 
-            $scope.room.sendTextMessage($scope.input.text, user, MessageTypeText);
+            $scope.room.sendTextMessage($scope.input.text, user, MessageType.MessageTypeText);
             $scope.input.text = "";
         };
 
@@ -198,7 +211,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
         $scope.tabClicked = function (tab) {
             $scope.activeTab = tab;
-            if (tab == MessagesTab) {
+            if (tab == TabKeys.MessagesTab) {
                 $scope.showEmojis = false;
                 $scope.showMessageOptions = false;
             }
@@ -236,9 +249,9 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             var x = $scope.room.offset + $scope.room.width;
 
             var facesLeft = true;
-            if ($scope.room.offset + ProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
+            if ($scope.room.offset + Dimensions.ProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
                 facesLeft = false;
-                x = $scope.room.offset - ProfileBoxWidth;
+                x = $scope.room.offset - Dimensions.ProfileBoxWidth;
             }
 
             $scope.profileBoxStyle.right = x;
@@ -271,8 +284,8 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
         $scope.wasDragged = function () {
             // We don't want the chat crossing the min point
-            if($scope.room.offset < $scope.mainBoxWidth + ChatRoomSpacing) {
-                $scope.room.setOffset($scope.mainBoxWidth + ChatRoomSpacing);
+            if($scope.room.offset < $scope.mainBoxWidth + Dimensions.ChatRoomSpacing) {
+                $scope.room.setOffset($scope.mainBoxWidth + Dimensions.ChatRoomSpacing);
             }
             $scope.boxWasDragged = true;
         };

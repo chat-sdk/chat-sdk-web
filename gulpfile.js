@@ -110,28 +110,43 @@ gulp.task('scripts', function(done) {
         'node_modules/ng-file-upload/dist/ng-file-upload.min.js',
         'node_modules/ng-file-upload/dist/ng-file-upload-shim.min.js',
         'node_modules/firebase/firebase.js',
-        'node_modules/angularfire/dist/angularfire.min.js',
+//         'node_modules/angularfire/dist/angularfire.min.js',
         'node_modules/FileSaver/FileSaver.js',
         'node_modules/moment/min/moment.min.js',
         'node_modules/angular-sanitize/angular-sanitize.min.js',
         'node_modules/pikaday/pikaday.js',
         'node_modules/howler/dist/howler.min.js',
         'app/libs/sha256.js',
-        'app/libs/cc-emoji.js'
+        'app/libs/cc-emoji.js',
+        'node_modules/requirejs/require.js'
     ];
     
     var app = [
         'app/js/*.js',
-        'app/js/**/*.js'
+        'app/js/**/*.js',
     ]
     
     var src = [
         'app/js/*.ts',
-        'app/js/**/*.ts',
+        'app/js/**/*.ts'
+//         '!app/js/entities/*.ts'
     ];
+
+//     var modules = [
+//         'app/js/keys/*.ts',
+//     ];
+
+//     gulp.src(modules)
+//         .pipe(ts({
+//         	noImplicitAny: false,
+//         	outFile: 'modulests.js',
+//         	module: "amd"
+//         }))
+//         .pipe(gulp.dest(DIST_PATH + 'js'))
+//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+
     
     gulp.src(src)
-//         .pipe(concat('all_2.js'))
         .pipe(ts({
         	noImplicitAny: false,
         	outFile: 'appts.js',
@@ -139,6 +154,15 @@ gulp.task('scripts', function(done) {
         }))
         .pipe(gulp.dest(DIST_PATH + 'js'))
         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
+
+    
+//     gulp.src(src)
+//         .pipe(ts({
+//         	noImplicitAny: false,
+//         	outFile: 'appts.js'
+//         }))
+//         .pipe(gulp.dest(DIST_PATH + 'js'))
+//         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
     
 
     // Non-minified version

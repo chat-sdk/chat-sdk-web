@@ -1,8 +1,6 @@
-// 'use strict';
-
-
 // Declare app level module which depends on filters, and services
-var myApp = angular.module('myApp',
+
+let myApp = angular.module('myApp',
     [
         'myApp.filters',
         'myApp.services',
@@ -24,8 +22,6 @@ var myApp = angular.module('myApp',
         'http://chatcat/dist/partials/**',
         'https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**'
     ]);
-    
-    console.log('https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**');
 
     $provide.decorator('$browser', ['$delegate', function ($delegate) {
         $delegate.onUrlChange = function () {};
@@ -34,11 +30,6 @@ var myApp = angular.module('myApp',
         };
         return $delegate;
     }]);
-
-    // The blacklist overrides the whitelist so the open redirect here is blocked.
-//    $sceDelegateProvider.resourceUrlBlacklist([
-//        'http://myapp.example.com/clickThru**'
-//    ]);
 }]).run(['Config', 'Environment', function (Config, Environment) {
     Config.setConfig(Config.setByInclude, Environment.options());
 }]);

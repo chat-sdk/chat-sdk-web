@@ -1,3 +1,10 @@
+import * as Dimensions from "../keys/dimensions";
+import * as NotificationKeys from "../keys/notification-keys";
+import * as RoomType from "../keys/room-type";
+import * as MessageType from "../keys/message-type";
+import * as Defines from "../services/defines";
+import * as Options from "../services/options"
+
 angular.module('myApp.controllers').controller('AppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', '$firebase', 'Upload', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
     function($rootScope, $scope, $timeout, $window, $sce, $firebase, Upload, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, Room, Config, Log, Partials, RoomPositionManager, Utils, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
@@ -6,11 +13,11 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.friendsEnabled = true;
 
         // Used to hide chat box
-        $scope.hidden = ChatSDKOptions.hideMainBox;
+        $scope.hidden = Options.html.hideMainBox;
 
-        $rootScope.messageTypeText = MessageTypeText;
-        $rootScope.messageTypeImage = MessageTypeImage;
-        $rootScope.messageTypeFile = MessageTypeFile;
+        $rootScope.messageTypeText = MessageType.MessageTypeText;
+        $rootScope.messageTypeImage = MessageType.MessageTypeImage;
+        $rootScope.messageTypeFile = MessageType.MessageTypeFile;
 
         $scope.init = function () {
 
@@ -58,12 +65,12 @@ angular.module('myApp.controllers').controller('AppController', [
              * Single Sign on
              */
 
-            var loginURL = Config.loginURL;
+            let loginURL = Config.loginURL;
             if(loginURL && loginURL.length > 0) {
                 $rootScope.loginURL = loginURL;
             }
 
-            var registerURL = Config.registerURL;
+            let registerURL = Config.registerURL;
             if(registerURL && registerURL.length > 0) {
                 $rootScope.registerURL = registerURL;
             }
@@ -77,8 +84,8 @@ angular.module('myApp.controllers').controller('AppController', [
 
             $scope.setMainBoxMinimized(LocalStorage.getProperty(LocalStorage.mainMinimizedKey));
 
-            $scope.$on(UserOnlineStateChangedNotification, function () {
-                Log.notification(UserOnlineStateChangedNotification, "AppController");
+            $scope.$on(NotificationKeys.UserOnlineStateChangedNotification, function () {
+                Log.notification(NotificationKeys.UserOnlineStateChangedNotification, "AppController");
                 $scope.updateTotalUserCount();
                 $timeout(function () {
                     $scope.$digest();
@@ -176,7 +183,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
         $scope.showLoginBox = function (mode) {
             $rootScope.loginMode = mode ? mode : Auth.mode;
-            $scope.activeBox = LoginBox;
+            $scope.activeBox = Defines.LoginBox;
             $timeout(function() {
                 $scope.$digest();
             });
@@ -186,22 +193,22 @@ angular.module('myApp.controllers').controller('AppController', [
          * Show the profile settings
          */
         $scope.showProfileSettingsBox = function () {
-            $scope.activeBox = ProfileSettingsBox;
+            $scope.activeBox = Defines.ProfileSettingsBox;
 
             // This will allow us to setup validation after the user
             // has been loaded
-            $scope.$broadcast(ShowProfileSettingsBox);
+            $scope.$broadcast(Defines.ShowProfileSettingsBox);
         };
 
         /**
          * Show the main box
          */
         $scope.showMainBox = function () {
-            $scope.activeBox = MainBox;
+            $scope.activeBox = Defines.MainBox;
         };
 
         $scope.showErrorBox = function (message) {
-            $scope.activeBox = ErrorBox;
+            $scope.activeBox = Defines.ErrorBox;
             $scope.errorBoxMessage = message;
             $timeout(function() {
                 $scope.$digest();
@@ -212,8 +219,8 @@ angular.module('myApp.controllers').controller('AppController', [
          * Show the create public room box
          */
         $scope.showCreateRoomBox = function () {
-            $scope.activeBox = CreateRoomBox;
-            $scope.$broadcast(ShowCreateChatBox);
+            $scope.activeBox = Defines.CreateRoomBox;
+            $scope.$broadcast(Defines.ShowCreateChatBox);
         };
 
         $scope.toggleMainBoxVisibility = function() {
@@ -251,7 +258,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
             $scope.profileBoxStyle = {
                 right: 250,
-                width: ProfileBoxWidth,
+                width: Dimensions.ProfileBoxWidth,
                 'border-top-left-radius': 4,
                 'border-bottom-left-radius': 4,
                 'border-top-right-radius': 0,
@@ -271,7 +278,7 @@ angular.module('myApp.controllers').controller('AppController', [
             else {
                 $scope.cancelTimer();
                 $scope.currentUser = UserStore.getUserWithID(uid);
-                var profileHTML = $scope.currentUser.getProfileHTML();
+                let profileHTML = $scope.currentUser.getProfileHTML();
                 $scope.currentUserHTML = !profileHTML ? null : $sce.trustAsHtml(profileHTML);
             }
         };
@@ -357,10 +364,10 @@ angular.module('myApp.controllers').controller('AppController', [
             }
             else {
                 // Check to see if there's an open room with the two users
-                var rooms = Cache.getPrivateRoomsWithUsers($rootScope.user, user);
+                let rooms = Cache.getPrivateRoomsWithUsers($rootScope.user, user);
                 if (rooms.length) {
-                    var r = rooms[0];
-                    if(r.type() == RoomType1to1) {
+                    let r = rooms[0];
+                    if(r.type() == RoomType.RoomType1to1) {
                         r.flashHeader();
                         // The room is already open! Do nothing
                         return;
@@ -369,14 +376,14 @@ angular.module('myApp.controllers').controller('AppController', [
                 else {
                     rooms = RoomStore.getPrivateRoomsWithUsers($rootScope.user, user);
                     if(rooms.length) {
-                        var room = rooms[0];
+                        let room = rooms[0];
                         room.open(0, 300);
                         return;
                     }
                 }
                 Room.createPrivateRoom([user]).then(function (rid) {
                     RoomOpenQueue.addRoomWithID(rid);
-                    //var room = RoomStore.getOrCreateRoomWithID(rid);
+                    //let room = RoomStore.getOrCreateRoomWithID(rid);
                 }, function (error) {
                     console.log(error);
                 });
@@ -422,7 +429,7 @@ angular.module('myApp.controllers').controller('AppController', [
             $scope.email = "";
             $scope.password = "";
 
-            $rootScope.$broadcast(LogoutNotification);
+            $rootScope.$broadcast(NotificationKeys.LogoutNotification);
 
             LocalStorage.clearToken();
 
@@ -467,7 +474,7 @@ angular.module('myApp.controllers').controller('AppController', [
             $scope.uploadingFile = false;
             $scope.uploadProgress = 0;
 
-            var f = $files[0];
+            let f = $files[0];
             if(!f) {
                 return;
             }
@@ -476,7 +483,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
             }
             else {
-                $scope.showNotification(NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
                 return;
             }
 
@@ -497,25 +504,25 @@ angular.module('myApp.controllers').controller('AppController', [
                 //}).bind(this));
             }
 
-            var reader = new FileReader();
+            let reader = new FileReader();
 
             // Load the image into the canvas immediately - so the user
             // doesn't have to wait for it to upload
             reader.onload = (function() {
                 return function(e) {
 
-                    var image = new Image();
+                    let image = new Image();
 
                     image.onload = function () {
 
                         // Resize the image
-                        var canvas = document.createElement('canvas'),
+                        let canvas = document.createElement('canvas'),
                             max_size = 100,
                             width = image.width,
                             height = image.height;
 
-                        var x = 0;
-                        var y = 0;
+                        let x = 0;
+                        let y = 0;
 
                         if (width > height) {
                             x = (width - height)/2;
@@ -524,14 +531,14 @@ angular.module('myApp.controllers').controller('AppController', [
                             y = (height - width)/2;
                         }
 
-                        //var size = width - 2 * x;
+                        //let size = width - 2 * x;
 
                         // First rescale the image to be square
                         canvas.width = max_size;
                         canvas.height = max_size;
                         canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
 
-                        var imageDataURL = canvas.toDataURL('image/jpeg');
+                        let imageDataURL = canvas.toDataURL('image/jpeg');
 
                         // Set the user's image
                         $scope.$apply(function () {
@@ -541,7 +548,7 @@ angular.module('myApp.controllers').controller('AppController', [
                     };
                     image.src = e.target.result;
                 };
-            })(f);
+            })();
 
             reader.readAsDataURL(f);
 
