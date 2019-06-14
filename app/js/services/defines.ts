@@ -13,9 +13,6 @@ export let Day = Hour * 24;
 // Show the click to chat box if the user has visited more than x hours
 export let LastVisitedTimeout = Hour;
 
-
-
-
 // TODO:
 export let DefaultUserPrefix = "ChatSDK";
 

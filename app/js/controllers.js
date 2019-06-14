@@ -1,1 +1,0 @@
-angular.module('myApp.controllers', ['firebase', 'ngFileUpload',  'ngSanitize', 'emoji']);

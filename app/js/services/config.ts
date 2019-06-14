@@ -1,3 +1,6 @@
+import * as Defines from "./defines";
+import * as NotificationKeys from "../keys/notification-keys";
+
 angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', function ($rootScope, $timeout, $q, Paths, Utils) {
 
     // Priorities for setting
@@ -102,7 +105,7 @@ angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$
         disableUserInfoPopup: false,
         disableUserInfoPopupSet: setByDefault,
 
-        clickToChatTimeout: LastVisitedTimeout,
+        clickToChatTimeout: Defines.LastVisitedTimeout,
         clickToChatTimeoutSet: setByDefault,
 
         userProfileLinkEnabled: false,
@@ -156,7 +159,7 @@ angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$
 
             $rootScope.config = this;
 
-            $rootScope.$broadcast(ConfigUpdatedNotification);
+            $rootScope.$broadcast(NotificationKeys.ConfigUpdatedNotification);
             $timeout(function () {
                 $rootScope.$digest()
             });

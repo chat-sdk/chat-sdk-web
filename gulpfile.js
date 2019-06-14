@@ -105,8 +105,9 @@ gulp.task('scripts', function(done) {
 
     var lib = [
         'node_modules/jquery/dist/jquery.min.js',
-       'node_modules/angular/angular.min.js',
-        'node_modules/js-cookie/src/js.cookie.js',
+//        'node_modules/angular/angular.min.js',
+   		'node_modules/angular/angular.js',
+     'node_modules/js-cookie/src/js.cookie.js',
         'node_modules/ng-file-upload/dist/ng-file-upload.min.js',
         'node_modules/ng-file-upload/dist/ng-file-upload-shim.min.js',
         'node_modules/firebase/firebase.js',

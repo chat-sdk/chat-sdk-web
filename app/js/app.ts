@@ -19,8 +19,9 @@ let myApp = angular.module('myApp',
         'http://chatcatio-test.firebaseapp.com/partials/**',
         'http://chatcat.firebaseapp.com/partials/**',
         'http://chatcat/dist_test/partials/**',
-        'http://chatcat/dist/partials/**',
-        'https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**'
+        'http://chatcat/dist/partials/**'
+        // TODO: Put this back in
+        // 'https://' + ChatSDKOptions.firebaseConfig.authDomain + '/partials/**'
     ]);
 
     $provide.decorator('$browser', ['$delegate', function ($delegate) {
