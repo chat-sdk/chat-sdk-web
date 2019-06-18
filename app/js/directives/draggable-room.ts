@@ -30,7 +30,7 @@ angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$d
 
             scope.room.zIndex = 1000;
 
-            elm.stop(true, false);
+            $(elm).stop(true, false);
 
             scope.startDrag();
 
