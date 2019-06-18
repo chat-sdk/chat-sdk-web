@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 angular.module('myApp.services').factory('Marquee', ['$window', '$interval', function ($window, $interval) {
     var Marquee = {
 

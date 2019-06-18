@@ -1,3 +1,5 @@
+import * as angular from 'angular'
+
 angular.module('myApp.directives').directive('ccFocus', function () {
     return {
         restrict: 'A',

@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 import * as PathKeys from "../keys/path-keys";
 import * as Dimensions from "../keys/dimensions";
 import * as NotificationKeys from "../keys/notification-keys";
@@ -8,7 +9,7 @@ import * as UserStatus from "../keys/user-status";
 import * as Keys from "../keys/keys";
 import * as MessageKeys from "../keys/message-keys";
 import * as MessageType from "../keys/message-type";
-import * as Defines from "../services/defines";
+import * as Defines from "../keys/defines";
 import * as TabKeys from "../keys/tab-keys";
 
 angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',

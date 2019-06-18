@@ -1,3 +1,7 @@
+import * as angular from 'angular'
+import {ChatRoomSpacing, MainBoxWidth} from "../keys/dimensions";
+import {AnimateRoomNotification} from "../keys/notification-keys";
+
 angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPositionManager', 'Utils', function ($rootScope, $document, $timeout, RoomPositionManager, Utils) {
 
     return function (scope, elm, attrs) {

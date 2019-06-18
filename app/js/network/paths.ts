@@ -1,6 +1,22 @@
 /**
  * Created by benjaminsmiley-andrews on 24/07/17.
  */
+
+import * as angular from 'angular'
+import * as firebase from 'firebase';
+
+import {FIREBASE_REF_DEBUG} from "../keys/defines";
+import {
+    BlockedPath, FlaggedPath,
+    FriendsPath,
+    LastMessagePath, MessagesPath, OnlineUserCountKey,
+    PublicRoomsPath,
+    RoomsPath, TypingPath,
+    UpdatedPath, UsersMetaPath,
+    UsersPath
+} from "../keys/path-keys";
+import {ConfigKey, DetailsKey, ImageKey, MetaKey, OnlineKey, TimeKey} from "../keys/keys";
+
 angular.module('myApp.services').factory('Paths', ['Environment', function (Environment) {
 
     return {

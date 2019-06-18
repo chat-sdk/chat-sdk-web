@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 
 angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', function ($rootScope, $timeout, $document, $window, LocalStorage) {
@@ -21,8 +22,9 @@ angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$
             return this;
         },
 
+        // TODO: Check this
         updateScreenSize: function () {
-            this.screenWidth = $document.width();
+            this.screenWidth = $window.innerWidth;//$document.width();
             this.screenHeight = $window.innerHeight;
 
             $rootScope.$broadcast(NotificationKeys.ScreenSizeChangedNotification);

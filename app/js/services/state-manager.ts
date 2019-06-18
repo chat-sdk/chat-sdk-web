@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 import {UserAllowInvitesFriends} from "../keys/allow-invite-type";
 import {RoomType1to1} from "../keys/room-type";
 import {RoomRemovedNotification} from "../keys/notification-keys";

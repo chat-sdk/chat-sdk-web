@@ -1,4 +1,7 @@
-angular.module('myApp.services').factory('FirebaseUploadHandler', ['$q', 'firebase', function ($q, firebase) {
+import * as angular from 'angular'
+import * as firebase from 'firebase';
+
+angular.module('myApp.services').factory('FirebaseUploadHandler', ['$q', function ($q) {
     return {
         uploadFile: function(file) {
             let deferred = $q.defer();

@@ -1,4 +1,5 @@
-
+import * as angular from 'angular'
+import {ChatSDKConfig} from "../app/config";
 
 angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', function ($rootScope, Utils) {
 
@@ -14,7 +15,7 @@ angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', 
         },
 
         options: function () {
-            return ChatSDKOptions;
+            return ChatSDKConfig;
         },
 
         showOnPaths: function () {

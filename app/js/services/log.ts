@@ -1,4 +1,5 @@
-import * as Defines from "./defines";
+import * as angular from 'angular'
+import * as Defines from "../keys/defines";
 
 angular.module('myApp.services').factory('Log', [function () {
     return {

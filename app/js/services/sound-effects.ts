@@ -1,4 +1,7 @@
-angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', 'Howl', function (LocalStorage, Environment, Howl) {
+import * as angular from 'angular'
+import * as Howl from 'howler'
+
+angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalStorage, Environment) {
     return {
 
         messageReceivedSoundNumber: 1,

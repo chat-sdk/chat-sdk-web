@@ -1,4 +1,4 @@
-angular.module('myApp.services').factory('AutoLogin', ["$window", "Credential", "Room", "RoomStore", "Utils", function ($window, Credential, Room, RoomStore, Utils) {
+angular.module('myApp.services').factory('AutoLogin', ["$window", "Credential", "Room", "RoomStore", "Utils", "Environment", function ($window, Credential, Room, RoomStore, Utils, Environment) {
     return {
 
         username: "",
@@ -32,14 +32,14 @@ angular.module('myApp.services').factory('AutoLogin', ["$window", "Credential", 
             }
 
             // If the parameters aren't set, check the config options
-            if (this.username === "" && !Utils.unORNull(ChatSDKOptions.username)) {
-                this.username = ChatSDKOptions.username;
+            if (this.username === "" && !Utils.unORNull(Environment.options().username)) {
+                this.username = Environment.options().username;
             }
-            if (this.password === "" && !Utils.unORNull(ChatSDKOptions.password)) {
-                this.password = ChatSDKOptions.password;
+            if (this.password === "" && !Utils.unORNull(Environment.options().password)) {
+                this.password = Environment.options().password;
             }
-            if (this.roomID === "" && !Utils.unORNull(ChatSDKOptions.roomID)) {
-                this.roomID = ChatSDKOptions.roomID;
+            if (this.roomID === "" && !Utils.unORNull(Environment.options().roomID)) {
+                this.roomID = Environment.options().roomID;
             }
 
             this.updated = true;

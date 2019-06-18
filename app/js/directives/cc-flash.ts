@@ -1,3 +1,6 @@
+import * as angular from 'angular'
+import {RoomFlashHeaderNotification} from "../keys/notification-keys";
+
 angular.module('myApp.directives').directive('ccFlash', ['$timeout', 'Config', function ($timeout, Config) {
     return function (scope, element, attr) {
 

@@ -1,4 +1,8 @@
-angular.module('myApp.services').factory('Time', ['$q', 'Paths', 'firebase', 'moment', function ($q, Paths, firebase, moment) {
+import * as angular from 'angular'
+import * as firebase from 'firebase';
+import * as moment from 'moment';
+
+angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
     return {
 
         localTime: null,

@@ -1,11 +1,11 @@
-/**
- * Created by benjaminsmiley-andrews on 09/10/2014.
- */
+import * as angular from 'angular'
+import * as firebase from 'firebase';
+
 import * as MessageType from "../keys/message-type";
 import * as MessageKeys from "../keys/message-keys";
 
-angular.module('myApp.services').factory('Message', ['$rootScope', 'firebase', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
-    function ($rootScope, firebase, $q, $sce, UserStore, User, Config, Time, CloudImage) {
+angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
+    function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
 
         var bMessageSideRight = 'right';
         var bMessageSideLeft = 'left';

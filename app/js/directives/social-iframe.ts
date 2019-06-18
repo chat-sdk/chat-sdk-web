@@ -1,3 +1,6 @@
+import * as angular from 'angular'
+import {StartSocialLoginNotification} from "../keys/notification-keys";
+
 angular.module('myApp.directives').directive('socialIframe', ["$rootScope", "$document", "$window", "Paths", function ($rootScope, $document, $window, Paths) {
     return function (scope, element, attr) {
 

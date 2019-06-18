@@ -1,3 +1,5 @@
+import * as angular from 'angular'
+
 angular.module('myApp.directives').directive('disableDrag', ['$rootScope','$document', function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 

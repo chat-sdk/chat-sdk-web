@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 import * as RoomType from "../keys/room-type";
 import * as MessageKeys from "../keys/message-keys";
 

@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 import * as PathKeys from "../keys/path-keys";
 
 angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q, Paths) {

@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 /**
  * This service allows us to flag a room to be opened. This
  * is useful because when we create a new room it's turned

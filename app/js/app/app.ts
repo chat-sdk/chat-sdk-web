@@ -1,3 +1,22 @@
+require('jquery');
+import * as $ from 'jquery'
+
+import * as angular from 'angular'
+
+// declare global {
+//     interface Window { $: any, jQuery: any; }
+// }
+//
+// window.$ = $;
+// window.jQuery = $;
+
+// import * as controllers from 'controllers'
+
+import '../app/controllers'
+import '../app/directives'
+import '../app/filters'
+import '../app/services'
+
 // Declare app level module which depends on filters, and services
 export let myApp = angular.module('myApp',
     [
@@ -36,4 +55,7 @@ export let myApp = angular.module('myApp',
 //     .run(['Config', 'Environment', function (Config, Environment) {
 //     Config.setConfig(Config.setByInclude, Environment.options());
 // }]);
+
+angular.bootstrap(document.getElementById("cc-app"), ['myApp']);
+
 

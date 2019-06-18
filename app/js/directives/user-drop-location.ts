@@ -1,3 +1,7 @@
+import * as angular from 'angular'
+import {UserStatusMember} from "../keys/user-status";
+import {NotificationTypeAlert} from "../keys/defines";
+
 angular.module('myApp.directives').directive('userDropLocation', ['$rootScope', 'Room', function ($rootScope, Room) {
     return function (scope, elm, attrs) {
 

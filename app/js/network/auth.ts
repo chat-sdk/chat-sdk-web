@@ -1,19 +1,12 @@
-import * as PathKeys from "../keys/path-keys";
-import * as Dimensions from "../keys/dimensions";
-import * as NotificationKeys from "../keys/notification-keys";
-import * as RoomNameKeys from "../keys/room-name-keys";
-import * as RoomKeys from "../keys/room-keys";
-import * as RoomType from "../keys/room-type";
-// import * as UserStatus from "../keys/user-status";
-import * as Keys from "../keys/keys";
-import * as MessageKeys from "../keys/message-keys";
+import * as firebase from 'firebase';
+
+import * as angular from 'angular'
 import * as UserKeys from "../keys/user-keys";
-import * as MessageType from "../keys/message-type";
-import * as Defines from "../services/defines";
+import * as Defines from "../keys/defines";
 import * as LoginModeKeys from "../keys/login-mode-keys";
 
-angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin', 'firebase', 'Facebook',
-    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin, firebase, Facebook) {
+angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin',
+    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin) {
         let Auth = {
 
             mode: LoginModeKeys.LoginModeSimple,
@@ -193,9 +186,7 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                         // Make an API request to Facebook to get an appropriately sized
                         // photo
                         if(!user.hasImage()) {
-                            Facebook.api('http://graph.facebook.com/'+userData.id+'/picture?width=300', function(response) {
-                                user.updateImageURL(response.data.url);
-                            });
+                            user.updateImageURL('http://graph.facebook.com/'+userData.id+'/picture?width=300');
                         }
                     }
                     if(authUser.provider === "twitter") {

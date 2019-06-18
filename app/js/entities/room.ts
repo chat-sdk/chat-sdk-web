@@ -1,3 +1,6 @@
+import * as angular from 'angular'
+import * as firebase from 'firebase';
+
 import * as PathKeys from "../keys/path-keys";
 import * as Dimensions from "../keys/dimensions";
 import * as NotificationKeys from "../keys/notification-keys";
@@ -8,10 +11,10 @@ import * as UserStatus from "../keys/user-status";
 import * as Keys from "../keys/keys";
 import * as MessageKeys from "../keys/message-keys";
 import * as MessageType from "../keys/message-type";
-import * as Defines from "../services/defines";
+import * as Defines from "../keys/defines";
 
-angular.module('myApp.services').factory('Room', ['$rootScope', 'firebase','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
-    function ($rootScope, firebase, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
+angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
+    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 

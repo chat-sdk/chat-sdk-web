@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 angular.module('myApp.services').factory('Partials', ['$http', '$templateCache', 'Environment', function ($http, $templateCache, Environment) {
     return {
         load: function () {

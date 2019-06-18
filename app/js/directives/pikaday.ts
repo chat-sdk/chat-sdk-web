@@ -1,3 +1,6 @@
+import * as angular from 'angular'
+import * as Pikaday from 'Pikaday'
+
 // Not used now - was used to show date of birth picker
 angular.module('myApp.directives').directive('pikaday', ["$rootScope", function ($rootScope) {
     return function (scope, element, attr) {

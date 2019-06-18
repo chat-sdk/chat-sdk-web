@@ -1,8 +1,9 @@
+import * as angular from 'angular'
 import * as Dimensions from "../keys/dimensions";
 import * as NotificationKeys from "../keys/notification-keys";
 import * as RoomType from "../keys/room-type";
 import * as MessageType from "../keys/message-type";
-import * as Defines from "../services/defines";
+import * as Defines from "../keys/defines";
 
 angular.module('myApp.controllers').controller('AppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'Room', 'Config', 'Log', 'Partials', 'RoomPositionManager', 'Utils', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
@@ -12,7 +13,7 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.friendsEnabled = true;
 
         // Used to hide chat box
-        $scope.hidden = ChatSDKOptions.hideMainBox;
+        $scope.hidden = Environment.options().hideMainBox;
 
         $rootScope.messageTypeText = MessageType.MessageTypeText;
         $rootScope.messageTypeImage = MessageType.MessageTypeImage;

@@ -1,3 +1,5 @@
+import * as angular from 'angular'
+
 angular.module('myApp.directives').directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', 'Utils', function ($rootScope, $document, $timeout, Screen, Utils) {
     return function (scope, elm, attrs) {
 

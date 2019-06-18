@@ -1,13 +1,15 @@
-const ChatSDKOptions = {
+const FirebaseConfig = {
+    apiKey: "AIzaSyASm9RYrr3u_Bc22eglk0OtsC2GnnTQp_c",
+    authDomain: "chat-sdk-v4.firebaseapp.com",
+    databaseURL: "https://chat-sdk-v4.firebaseio.com",
+    projectId: "chat-sdk-v4",
+    storageBucket: "chat-sdk-v4.appspot.com",
+    messagingSenderId: "1088435112418"
+};
 
-    firebaseConfig: {
-        apiKey: "AIzaSyASm9RYrr3u_Bc22eglk0OtsC2GnnTQp_c",
-        authDomain: "chat-sdk-v4.firebaseapp.com",
-        databaseURL: "https://chat-sdk-v4.firebaseio.com",
-        projectId: "chat-sdk-v4",
-        storageBucket: "chat-sdk-v4.appspot.com",
-        messagingSenderId: "1088435112418"
-    },
+export const ChatSDKConfig = {
+
+    firebaseConfig: FirebaseConfig,
 
     rootPath: '19_05_web_test',
 

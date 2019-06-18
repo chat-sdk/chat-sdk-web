@@ -1,5 +1,7 @@
 // This is used by the profile box - to keep it centered on the
 // mouse's y axis until we move into it
+import * as angular from 'angular'
+
 angular.module('myApp.directives').directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
     return function (scope, elm) {
 

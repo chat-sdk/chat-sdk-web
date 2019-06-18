@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 angular.module('myApp.services').factory('PathAnalyser', [function () {
 
     return {

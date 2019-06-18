@@ -216,6 +216,15 @@ gulp.task('scripts', function(done) {
 //         .pipe(gulp.dest(DIST_PATH + 'js'))
 //         .pipe(gulp.dest(DIST_TEST_PATH + 'js'));
 
+	// Precompile modules
+	// This is helpful because actually angular will require all of the controllers...
+	// All of the directives...
+	// Etc...
+    
+    gulp.src(['app/js/app/imports.ts', 'app/js/controllers/*.ts'])
+    	.pipe(concat('controllers.ts'))
+    	.pipe(gulp.dest('app/js/precompile'))
+
     done();
 });
 

@@ -1,3 +1,5 @@
+import * as angular from 'angular'
+
 angular.module('myApp.directives').directive('infiniteScroll', [function() {
 
         return function(scope, elem, attrs) {

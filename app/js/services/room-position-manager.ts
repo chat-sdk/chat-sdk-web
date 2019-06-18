@@ -2,6 +2,7 @@
  * This service keeps track of the slot positions
  * while the rooms are moving around
  */
+import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Dimensions from "../keys/dimensions";
 

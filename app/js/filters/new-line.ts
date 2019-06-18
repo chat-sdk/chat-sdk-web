@@ -1,3 +1,4 @@
+import * as angular from 'angular'
 angular.module('myApp.filters').filter('newline', function () {
     return function(text) {
         text = String(text);

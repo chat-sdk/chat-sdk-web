@@ -1,7 +1,10 @@
-import * as PathKeys from "../keys/path-keys";
-import * as Defines from "./defines";
+import * as angular from 'angular'
+import * as firebase from 'firebase';
 
-angular.module('myApp.services').factory('Entity', ['$q', 'firebase', 'Paths', function ($q, firebase, Paths) {
+import * as PathKeys from "../keys/path-keys";
+import * as Defines from "../keys/defines";
+
+angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q, Paths) {
 
     function Entity (path, id) {
         this._path = path;

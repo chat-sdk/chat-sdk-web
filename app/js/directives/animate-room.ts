@@ -1,3 +1,6 @@
+import * as angular from 'angular'
+import {AnimateRoomNotification} from "../keys/notification-keys";
+
 angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
     return function (scope, elm) {
 
