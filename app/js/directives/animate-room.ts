@@ -1,5 +1,6 @@
 import * as angular from 'angular'
 import {AnimateRoomNotification} from "../keys/notification-keys";
+import $ from 'jQuery'
 
 angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
     return function (scope, elm) {
@@ -18,7 +19,7 @@ angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPo
                 var toOffset = RoomPositionManager.offsetForSlot(scope.room.slot);
 
                 // Stop the previous animation
-                elm.stop(true, false);
+                $(elm).stop(true, false);
 
                 var completion = function () {
                     scope.room.setOffset(toOffset);
@@ -37,7 +38,7 @@ angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPo
                 }
                 else {
                     // Animate the chat room into position
-                    elm.animate({right: toOffset}, !Utils.unORNull(args.duration) ? args.duration : 300, function () {
+                    $(elm).animate({right: toOffset}, !Utils.unORNull(args.duration) ? args.duration : 300, function () {
                         completion();
                     });
                 }

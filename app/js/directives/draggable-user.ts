@@ -1,11 +1,12 @@
 import * as angular from 'angular'
+import $ from 'jQuery'
 
 angular.module('myApp.directives').directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', 'Utils', function ($rootScope, $document, $timeout, Screen, Utils) {
     return function (scope, elm, attrs) {
 
         $rootScope.userDrag = {};
 
-        elm.mousedown((function(e) {
+        $(elm).mousedown((function(e) {
             // Set the current user
             $rootScope.userDrag = {
                 user: scope.aUser,

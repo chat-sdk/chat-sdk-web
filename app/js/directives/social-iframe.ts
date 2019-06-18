@@ -1,3 +1,4 @@
+import $ from 'jQuery'
 import * as angular from 'angular'
 import {StartSocialLoginNotification} from "../keys/notification-keys";
 
@@ -30,7 +31,7 @@ angular.module('myApp.directives').directive('socialIframe', ["$rootScope", "$do
 //                    }
             });
 
-            element.get(0).contentWindow.postMessage(JSON.stringify(data), "*");
+            $(element).get(0).contentWindow.postMessage(JSON.stringify(data), "*");
             //});
         });
     };

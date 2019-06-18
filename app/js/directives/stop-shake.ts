@@ -1,4 +1,5 @@
 import * as angular from 'angular'
+import $ from 'jQuery'
 
 /**
  * #54
@@ -10,7 +11,7 @@ import * as angular from 'angular'
 angular.module('myApp.directives').directive('stopShake', ['$rootScope', '$document',function ($rootScope, $document) {
     return function (scope, elm, attrs) {
 
-        elm.scroll(function () {
+        $(elm).scroll(function () {
             $rootScope.disableDrag = true;
         });
 

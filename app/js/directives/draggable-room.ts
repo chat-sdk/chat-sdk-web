@@ -1,4 +1,6 @@
 import * as angular from 'angular'
+import $ from 'jQuery'
+
 import {ChatRoomSpacing, MainBoxWidth} from "../keys/dimensions";
 import {AnimateRoomNotification} from "../keys/notification-keys";
 
@@ -14,7 +16,7 @@ angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$d
         // rooms will be moved position manually
         scope.room.draggable = true;
 
-        elm.mousedown((function (e) {
+        $(elm).mousedown((function (e) {
 
             // If the user clicked in the text box
             // then don't drag

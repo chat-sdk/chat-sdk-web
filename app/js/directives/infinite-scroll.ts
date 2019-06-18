@@ -1,3 +1,4 @@
+import $ from 'jQuery'
 import * as angular from 'angular'
 
 angular.module('myApp.directives').directive('infiniteScroll', [function() {
@@ -7,8 +8,8 @@ angular.module('myApp.directives').directive('infiniteScroll', [function() {
             var handler = (function () {
 
                 var scrollHeight = elem.prop('scrollHeight');
-                var scrollTop = elem.scrollTop();
-                var height = elem.height();
+                var scrollTop = $(elem).scrollTop();
+                var height = $(elem).height();
 
                 var top = scrollTop;
                 var bottom = scrollHeight - scrollTop - height;
@@ -16,7 +17,7 @@ angular.module('myApp.directives').directive('infiniteScroll', [function() {
                 if(top < 1 && scrollHeight > height) {
                     scope.room.loadMoreMessages(function () {
                         // Set the bottom distance based on the new height
-                        elem.scrollTop(elem.prop('scrollHeight') - height - bottom);
+                        $(elem).scrollTop(elem.prop('scrollHeight') - height - bottom);
                     });
                 }
             }).bind(this);
