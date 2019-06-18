@@ -48,7 +48,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.name = function name (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getName();
+            } else {
+                this.setName(value);
+            }
         };
 
         User.prototype.getStatus  = function () {
@@ -61,7 +65,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         // For Angular getterSetter binding
         User.prototype.status = function status (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getStatus();
+            } else {
+                this.setStatus(value);
+            }
         };
 
         User.prototype.getLocation  = function () {
@@ -73,7 +81,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.location = function location (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getLocation();
+            } else {
+                this.setLocation(value);
+            }
         };
 
         User.prototype.getCountryCode  = function () {
@@ -85,7 +97,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.countryCode = function countryCode (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getCountryCode();
+            } else {
+                this.setCountryCode(value);
+            }
         };
 
         User.prototype.getGender  = function () {
@@ -97,7 +113,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.gender = function gender (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getGender();
+            } else {
+                this.setGender(value);
+            }
         };
 
         User.prototype.getProfileLink  = function () {
@@ -109,7 +129,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.profileLink = function profileLink (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getProfileLink();
+            } else {
+                this.setProfileLink(value);
+            }
         };
 
         User.prototype.getHomepageLink  = function () {
@@ -121,7 +145,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.homepageLink = function homepageLink (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getHomepageLink();
+            } else {
+                this.setHomepageLink(value);
+            }
         };
 
         User.prototype.getHomepageText  = function () {
@@ -133,7 +161,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.homepageText = function homepageText (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getHomepageText();
+            } else {
+                this.setHomepageText(value);
+            }
         };
 
         User.prototype.getProfileHTML  = function () {
@@ -145,7 +177,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.profileHTML = function profileHTML (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getProfileHTML();
+            } else {
+                this.setProfileHTML(value);
+            }
         };
 
         User.prototype.getAllowInvites  = function () {
@@ -157,7 +193,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.allowInvites = function allowInvites (value) {
-            return this.handleAngularGetterSetter(arguments, value);
+            if (Utils.unORNull(value)) {
+                return this.getAllowInvites();
+            } else {
+                this.setAllowInvites(value);
+            }
         };
 
         User.prototype.getImageURL = function () {
@@ -169,31 +209,10 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.imageURL = function imageURL (value) {
-            return this.handleAngularGetterSetter(arguments, value);
-        };
-
-        // This should be called with the function 'arguments' variable. Then we can
-        // extract the function name and call the function dynamically
-        User.prototype.handleAngularGetterSetter = function (functionArguments, value) {
-
-            let functionName = functionArguments.callee.toString().substr('function '.length);
-            functionName = functionName.substr(0, functionName.indexOf('('));
-            functionName = functionName.charAt(0).toUpperCase() + functionName.slice(1);
-            functionName = functionName.replace(" ", "");
-
-            if(Utils.unORNull(value)) {
-                // Make the getter
-                functionName = "get" + functionName;
-                if(typeof this[functionName] === 'function') {
-                    return this[functionName]();
-                }
-            }
-            else {
-                // Make the setter
-                functionName = "set" + functionName;
-                if(typeof this[functionName] === 'function') {
-                    return this[functionName](value);
-                }
+            if (Utils.unORNull(value)) {
+                return this.getImageURL();
+            } else {
+                this.setImageURL(value);
             }
         };
 
@@ -268,7 +287,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                 return true;
             }
 
-            var allowInvites = this.allowInvites();
+            let allowInvites = this.allowInvites();
             if(Utils.unORNull(allowInvites) || allowInvites == AllowInviteType.UserAllowInvitesEveryone) {
                 return true;
             }

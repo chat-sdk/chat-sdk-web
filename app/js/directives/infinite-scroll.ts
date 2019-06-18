@@ -1,9 +1,10 @@
-import $ from 'jQuery'
+import * as $ from 'jquery'
 import * as angular from 'angular'
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('infiniteScroll', [function() {
 
-        return function(scope, elem, attrs) {
+        return function(scope: RoomScope, elem, attrs) {
 
             var handler = (function () {
 

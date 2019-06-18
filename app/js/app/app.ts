@@ -1,16 +1,4 @@
-require('jquery');
-import * as $ from 'jquery'
-
 import * as angular from 'angular'
-
-// declare global {
-//     interface Window { $: any, jQuery: any; }
-// }
-//
-// window.$ = $;
-// window.jQuery = $;
-
-// import * as controllers from 'controllers'
 
 import '../app/controllers'
 import '../app/directives'
@@ -23,7 +11,8 @@ export let myApp = angular.module('myApp',
         'myApp.filters',
         'myApp.services',
         'myApp.directives',
-        'myApp.controllers'
+        'myApp.controllers',
+        require('angular-sanitize')
     ]
 ).config(['$sceDelegateProvider', '$provide', function($sceDelegateProvider, $provide) {
     $sceDelegateProvider.resourceUrlWhitelist([
@@ -49,12 +38,9 @@ export let myApp = angular.module('myApp',
         };
         return $delegate;
     }]);
+}]).run(['Config', 'Environment', function (Config, Environment) {
+    Config.setConfig(Config.setByInclude, Environment.options());
 }]);
-
-// TODO: Add this back?
-//     .run(['Config', 'Environment', function (Config, Environment) {
-//     Config.setConfig(Config.setByInclude, Environment.options());
-// }]);
 
 angular.bootstrap(document.getElementById("cc-app"), ['myApp']);
 

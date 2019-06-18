@@ -1,11 +1,12 @@
 import * as angular from 'angular'
-import $ from 'jQuery'
+import * as $ from 'jquery'
 
 import {ChatRoomHeight, ChatRoomSpacing, ChatRoomTopMargin, ChatRoomWidth} from "../keys/dimensions";
 import {RoomPositionUpdatedNotification} from "../keys/notification-keys";
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', 'Utils', function ($rootScope, $timeout, $document, Screen, RoomPositionManager, Utils) {
-    return function (scope, elm, attrs) {
+    return function (scope: RoomScope, elm, attrs) {
 
         let lastClientX = 0;
         let lastClientY = 0;

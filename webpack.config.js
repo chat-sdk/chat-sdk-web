@@ -38,10 +38,11 @@ module.exports = {
     new webpack.DefinePlugin({
 
     }),
-//     new webpack.ProvidePlugin({
-//     	"window.jQuery": "jquery",
-//     	"$": "jquery",
-//         "jQuery": "jquery"
-//     })
+    new webpack.ProvidePlugin({
+    	"window.jQuery": "jquery",
+    	$: "jquery",
+        jQuery: "jquery",
+        jquery: "jquery",
+    })
   ]
 }

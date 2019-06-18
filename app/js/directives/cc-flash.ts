@@ -1,10 +1,9 @@
 import * as angular from 'angular'
 import {RoomFlashHeaderNotification} from "../keys/notification-keys";
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('ccFlash', ['$timeout', 'Config', function ($timeout, Config) {
-    return function (scope, element, attr) {
-
-//        var originalColor = Config.headerColor;
+    return function (scope: RoomScope, element, attr) {
 
         let originalColor = element.css('background-color');
         let originalTag = element.attr('cc-flash');

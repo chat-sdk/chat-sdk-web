@@ -1,8 +1,9 @@
 import * as angular from 'angular'
-import $ from 'jQuery'
+import * as $ from 'jquery'
+import {UserListScope} from "../controllers/user-list";
 
 angular.module('myApp.directives').directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', 'Utils', function ($rootScope, $document, $timeout, Screen, Utils) {
-    return function (scope, elm, attrs) {
+    return function (scope: UserListScope, elm, attrs) {
 
         $rootScope.userDrag = {};
 

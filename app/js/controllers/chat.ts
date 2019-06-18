@@ -12,6 +12,19 @@ import * as MessageType from "../keys/message-type";
 import * as Defines from "../keys/defines";
 import * as TabKeys from "../keys/tab-keys";
 
+export interface RoomScope extends ng.IScope {
+    room: any,
+    resizing: any,
+    dragging: any,
+    startDrag: any,
+    wasDragged: any,
+    inputHeight: any,
+}
+
+export interface MessageScope extends ng.IScope {
+    message: any,
+}
+
 angular.module('myApp.controllers').controller('ChatController', ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'Log', 'Utils', 'ArrayUtils', 'NetworkManager',
     function ($scope, $timeout, $window, $sce, Config, Auth, Screen, RoomPositionManager, Log, Utils, ArrayUtils, NetworkManager) {
 

@@ -1,10 +1,11 @@
 import * as angular from 'angular'
 import {UserStatusMember} from "../keys/user-status";
 import {NotificationTypeAlert} from "../keys/defines";
-import $ from 'jQuery'
+import * as $ from 'jquery'
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('userDropLocation', ['$rootScope', 'Room', function ($rootScope, Room) {
-    return function (scope, elm, attrs) {
+    return function (scope: RoomScope, elm, attrs) {
 
         $(elm).mouseenter(function(e) {
             if($rootScope.userDrag && $rootScope.userDrag.dragging) {

@@ -1,9 +1,11 @@
 import * as angular from 'angular'
+import * as $ from 'jquery'
+
 import {AnimateRoomNotification} from "../keys/notification-keys";
-import $ from 'jQuery'
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
-    return function (scope, elm) {
+    return function (scope: RoomScope, elm) {
 
         scope.$on(AnimateRoomNotification, (function (event, args) {
 

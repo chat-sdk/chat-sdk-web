@@ -1,4 +1,4 @@
-import $ from 'jQuery'
+import * as $ from 'jquery'
 import * as angular from 'angular'
 import {StartSocialLoginNotification} from "../keys/notification-keys";
 

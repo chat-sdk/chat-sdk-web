@@ -1,5 +1,5 @@
 import * as angular from 'angular'
-import $ from 'jQuery'
+import * as $ from 'jquery'
 
 angular.module('myApp.directives').directive('consumeEvent', ['Utils', function (Utils) {
     return function (scope, elm, attrs) {

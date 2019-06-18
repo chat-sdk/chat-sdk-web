@@ -12,6 +12,8 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;
 
+        console.log("Start controller!");
+
         // Used to hide chat box
         $scope.hidden = Environment.options().hideMainBox;
 

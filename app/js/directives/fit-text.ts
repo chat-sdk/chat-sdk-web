@@ -1,8 +1,9 @@
 import * as angular from 'angular'
+import {RoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('fitText', function () {
 
-    return function(scope, element, attr) {
+    return function(scope: RoomScope, element, attr) {
 
         element.bind('keyup', function(e) {
             //jQuery(element).height(0);

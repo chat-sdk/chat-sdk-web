@@ -27,6 +27,7 @@ import '../services/time'
 import '../services/upgrade'
 import '../services/utils'
 import '../services/visibility'
+import '../services/emoji'
 
 // Persistence
 import '../persistence/cache'

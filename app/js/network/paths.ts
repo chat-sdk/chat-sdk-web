@@ -22,8 +22,8 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
     return {
 
         cid: null,
-        initialized: false,
         database: null,
+        date: new Date(),
 
         setCID: function (cid) {
             if(FIREBASE_REF_DEBUG) console.log("setCID: " + cid);
@@ -31,10 +31,9 @@ angular.module('myApp.services').factory('Paths', ['Environment', function (Envi
         },
 
         firebase: function () {
-            if(!this.initialized) {
+            if(firebase.apps.length == 0) {
                 firebase.initializeApp(Environment.firebaseConfig());
                 this.database = firebase.database();
-                this.initialized = true;
             }
             if(FIREBASE_REF_DEBUG) console.log("firebase");
             if(this.cid) {

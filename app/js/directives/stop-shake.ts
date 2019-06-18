@@ -1,5 +1,5 @@
 import * as angular from 'angular'
-import $ from 'jQuery'
+import * as $ from 'jquery'
 
 /**
  * #54
