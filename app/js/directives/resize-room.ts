@@ -1,8 +1,8 @@
 import * as angular from 'angular'
+import $ from 'jQuery'
+
 import {ChatRoomHeight, ChatRoomSpacing, ChatRoomTopMargin, ChatRoomWidth} from "../keys/dimensions";
 import {RoomPositionUpdatedNotification} from "../keys/notification-keys";
-
-import $ from 'jQuery'
 
 angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeout', '$document', 'Screen', 'RoomPositionManager', 'Utils', function ($rootScope, $timeout, $document, Screen, RoomPositionManager, Utils) {
     return function (scope, elm, attrs) {
@@ -12,7 +12,7 @@ angular.module('myApp.directives').directive('resizeRoom',['$rootScope', '$timeo
 
         // $.element(elm).mousedown
 
-        elm.mousedown((function (e) {
+        $(elm).mousedown((function (e) {
             Utils.stopDefault(e);
             scope.resizing = true;
             lastClientX = e.clientX;
