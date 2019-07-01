@@ -22,8 +22,8 @@ angular.module('myApp.services').factory('UserStore', ['$rootScope', '$timeout',
                 LocalStorage.sync();
             },
 
-            getOrCreateUserWithID: function(uid, cancelOn) {
-                var user = this.getUserWithID(uid);
+            getOrCreateUserWithID: function(uid: string, cancelOn?: boolean) {
+                let user = this.getUserWithID(uid);
                 if(!user) {
                     user = this.buildUserWithID(uid);
                     this.addUser(user);

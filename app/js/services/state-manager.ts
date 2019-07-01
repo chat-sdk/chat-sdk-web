@@ -38,7 +38,7 @@ angular.module('myApp.services').service('StateManager', ['$rootScope', 'Friends
         },
 
         /**
-         * Stop listenering to Firebase
+         * Stop listening to Firebase
          */
         off: function () {
 

@@ -1,4 +1,6 @@
 import * as angular from 'angular'
+import * as firebase from 'firebase';
+
 import {DEBUG} from "../keys/defines";
 import {
     OnlineUserAddedNotification,
@@ -19,18 +21,18 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
             }
             this.isOn = true;
 
-            var onlineUsersRef = Paths.onlineUsersRef();
+            let onlineUsersRef = Paths.onlineUsersRef();
 
-            onlineUsersRef.on("child_added", (function (snapshot) {
+            onlineUsersRef.on("child_added", (function (snapshot: firebase.database.DataSnapshot) {
 
                 if(DEBUG) console.log('Online: ' + snapshot.val().uid);
 
                 // Get the UID of the added user
-                var uid = null;
+                let uid = null;
                 if (snapshot && snapshot.val()) {
                     uid = snapshot.val().uid;
 
-                    var user = UserStore.getOrCreateUserWithID(uid);
+                    let user = UserStore.getOrCreateUserWithID(uid);
 
                     if(this.addOnlineUser(user)) {
                         // Update the user's rooms
@@ -40,11 +42,11 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
 
             }).bind(this));
 
-            onlineUsersRef.on("child_removed", (function (snapshot) {
+            onlineUsersRef.on("child_removed", (function (snapshot: firebase.database.DataSnapshot) {
 
                 console.log('Offline: ' + snapshot.val().uid);
 
-                var user = UserStore.getOrCreateUserWithID(snapshot.val().uid);
+                let user = UserStore.getOrCreateUserWithID(snapshot.val().uid);
 
                 user.off();
 
@@ -65,7 +67,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
             // having the user.blocked is useful because it means
             // that the partials don't have to call a function
             // however when you logout you want the flags to be reset
-            for(var key in this.onlineUsers) {
+            for(let key in this.onlineUsers) {
                 if(this.onlineUsers.hasOwnProperty(key)) {
                     this.onlineUsers[key].blocked = false;
                     this.onlineUsers[key].friend = false;
@@ -73,7 +75,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
             }
             this.onlineUsers = {};
 
-            var onlineUsersRef = Paths.onlineUsersRef();
+            let onlineUsersRef = Paths.onlineUsersRef();
 
             onlineUsersRef.off('child_added');
             onlineUsersRef.off('child_removed');
@@ -103,7 +105,7 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
 
         removeOnlineUserWithID: function (uid) {
             if(uid) {
-                var user = this.onlineUsers[uid];
+                let user = this.onlineUsers[uid];
                 if(user) {
                     user.online = false;
                     delete this.onlineUsers[uid];
@@ -113,8 +115,8 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
         },
 
         onlineUserCount: function () {
-            var i = 0;
-            for(var key in this.onlineUsers) {
+            let i = 0;
+            for(let key in this.onlineUsers) {
                 if(this.onlineUsers.hasOwnProperty(key)) {
                     i++;
                 }

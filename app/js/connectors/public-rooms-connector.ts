@@ -5,7 +5,8 @@ angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 
     function ($rootScope, Room, RoomStore, Paths) {
         return {
             on: function () {
-                var publicRoomsRef = Paths.publicRoomsRef();
+
+                const publicRoomsRef = Paths.publicRoomsRef();
 
                 // Start listening to Firebase
                 publicRoomsRef.on('child_added', (function (snapshot) {

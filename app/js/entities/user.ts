@@ -415,10 +415,10 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.addFriendWithUID = function (uid) {
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userFriendsRef(this.uid());
-            var data = {};
+            let ref = Paths.userFriendsRef(this.uid());
+            let data = {};
             data[uid] = {uid: uid};
 
             ref.update(data, (function (error) {

@@ -11,7 +11,7 @@ export const ChatSDKConfig = {
 
     firebaseConfig: FirebaseConfig,
 
-    rootPath: '19_05_web_test',
+    rootPath: 'modules_test_june_19',
 
     facebookAppID: '735373466519297',
 
