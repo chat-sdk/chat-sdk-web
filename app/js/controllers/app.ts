@@ -413,7 +413,7 @@ angular.module('myApp.controllers').controller('AppController', [
 
             RoomPositionManager.closeAllRooms();
 
-            // Nullify the user
+            NetworkManager.auth.setCurrentUserID(null);
             $rootScope.user = null;
 
             // Clear the cache down

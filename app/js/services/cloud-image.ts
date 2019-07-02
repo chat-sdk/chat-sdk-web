@@ -1,17 +1,22 @@
 import * as angular from 'angular'
 
 export interface ICloudImage {
-
+    cloudImage(url: string, w: number, h: number): string
 }
 
-angular.module('myApp.services').factory('CloudImage', ['Environment',function (Environment) {
-    return {
-        // Cloud Image
-        cloudImageToken: Environment.cloudImageToken(),
+class CloudImage implements ICloudImage {
 
-        cloudImage: function(url, w, h) {
-            return 'http://' + this.cloudImageToken + '.cloudimg.io/s/crop/'+w+'x'+h+'/' + url;
-        }
+    private cloudImageToken: string;
 
-    };
-}]);
+    static $inject = ['Environment'];
+
+    constructor(Environment) {
+        this.cloudImageToken = Environment.cloudImageToken();
+    }
+
+    cloudImage(url: string, w: number, h: number): string {
+        return 'http://' + this.cloudImageToken + '.cloudimg.io/s/crop/'+w+'x'+h+'/' + url;
+    }
+}
+
+angular.module('myApp.controllers').service('CloudImage', CloudImage);

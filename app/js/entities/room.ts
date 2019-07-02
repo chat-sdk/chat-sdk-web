@@ -32,8 +32,8 @@ export interface IRoom {
     rid(): string
 }
 
-angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
-    function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
+angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','MessageFactory','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
+    function ($rootScope, $timeout, $q, $window, Config, MessageFactory, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
 
         function Room (rid, name, invitesEnabled, description, userCreated, type, weight) {
 
@@ -770,20 +770,20 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.sendImageMessage = function (user, url, width, height) {
             // Build the payload
-            var message = Message.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
+            var message = MessageFactory.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
             this.sendMessage(message, user);
         };
 
         Room.prototype.sendFileMessage = function (user, fileName, mimeType, fileURL) {
             // Build the payload
-            var message = Message.buildFileMeta(this.rid(), user.uid(), fileName, mimeType, fileURL);
+            var message = MessageFactory.buildFileMeta(this.rid(), user.uid(), fileName, mimeType, fileURL);
             this.sendMessage(message, user);
         };
 
         Room.prototype.sendTextMessage = function (text, user, type) {
             if(!text || text.length === 0)
                 return;
-            var message = Message.buildMeta(this.rid(), user.uid(), text, type);
+            var message = MessageFactory.buildMeta(this.rid(), user.uid(), text, type);
             this.sendMessage(message, user);
         };
 
@@ -924,7 +924,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 ref.on('child_added', (function (snapshot) {
                     const val = snapshot.val();
                     if(val) {
-                        const message = new Message(snapshot.key, val);
+                        const message = MessageFactory.getInstance(snapshot.key, val);
                         messages.push(message);
                         if(messages.length == numberOfMessages) {
                             finishQuery();
@@ -1247,7 +1247,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             }
 
             // Create the message object
-            var message = new Message(mid, val);
+            const message = MessageFactory.getInstance(mid, val);
             if(serialization) {
                 message.deserialize(serialization);
             }
@@ -1265,7 +1265,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 // Get the previous message if it exists
                 if(this.lastMessage) {
 
-                    var lastMessage = this.lastMessage;
+                    const lastMessage = this.lastMessage;
 
                     // We hide the name on the last message if it is sent by the
                     // same message as this message i.e.

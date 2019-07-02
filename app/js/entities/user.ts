@@ -8,11 +8,13 @@ import * as NotificationKeys from "../keys/notification-keys";
 import * as Keys from "../keys/keys";
 
 export interface IUser {
-
+    online: boolean
+    uid(): string
+    isMe(): boolean
 }
 
-angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment',
-    function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment) {
+angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment', 'NetworkManager',
+    function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment, NetworkManager) {
 
         function User (uid) {
 
@@ -295,9 +297,6 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             if(Utils.unORNull(allowInvites) || allowInvites == AllowInviteType.UserAllowInvitesEveryone) {
                 return true;
             }
-    //        else if (allowInvites == UserAllowInvitesFriends) {
-    //            return FriendsConnector.isFriend(invitingUser);
-    //        }
             else {
                 return false;
             }
@@ -337,8 +336,8 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
             }
         };
 
-        User.prototype.isMe = function () {
-            return this.uid() == $rootScope.user.uid();
+        User.prototype.isMe = function (): boolean {
+            return this.uid() === NetworkManager.auth.currentUserID();
         };
 
         User.prototype.getThumbnail = function () {

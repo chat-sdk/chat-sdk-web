@@ -1,231 +1,13 @@
 import * as angular from 'angular'
 import * as firebase from 'firebase';
 
-import * as MessageType from "../keys/message-type";
 import * as MessageKeys from "../keys/message-keys";
 import {IUserStore} from "../persistence/user-store";
 import {IUser} from "./user";
 import {IConfig} from "../services/config";
 import {ITime} from "../services/time";
 import {ICloudImage} from "../services/cloud-image";
-
-angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
-    function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
-
-        const bMessageSideRight = 'right';
-        const bMessageSideLeft = 'left';
-
-        function Message(mid, meta) {
-
-            this.setMID(mid);
-            this.meta = meta;
-
-            // Which side is the message on? 'left' or 'right'?
-            this.side = null;
-            this.timeString = null;
-            this.user = null;
-            this.flagged = false;
-
-            this.read = false;
-
-            if(meta) {
-
-                if(!this.type()) {
-                    this.setType(MessageType.MessageTypeText);
-                }
-
-                if(this.type() == MessageType.MessageTypeImage || this.type() == MessageType.MessageTypeFile) {
-                    // Get the image and thumbnail URLs
-                    let json = meta[MessageKeys.messageJSONv2];
-
-                    if(json) {
-                        if(this.type() == MessageType.MessageTypeImage) {
-                            this.thumbnailURL = CloudImage.cloudImage(json[MessageKeys.messageImageURL], 200, 200);
-                            this.imageURL = json[MessageKeys.messageImageURL];
-                        }
-                        if(this.type() == MessageType.MessageTypeFile) {
-                            this.fileURL = json[MessageKeys.messageFileURL];
-                        }
-                    }
-                }
-
-                // Our messages are on the right - other user's messages are
-                // on the left
-                this.side = this.uid() == $rootScope.user.uid() ? bMessageSideRight : bMessageSideLeft;
-
-                this.timeString = Time.formatTimestamp(this.time(), Config.clockType);
-
-                // Set the user
-                if(this.uid()) {
-
-                    // We need to set the user here
-                    if(this.uid() == $rootScope.user.uid()) {
-                        this.user = $rootScope.user;
-                    }
-                    else {
-                        this.user = UserStore.getOrCreateUserWithID(this.uid());
-                    }
-                }
-            }
-        }
-
-        Message.prototype = {
-
-            markRead: function (uid) {
-                this.read = true;
-            },
-
-            serialize: function () {
-                return {
-                    meta: this.meta,
-                    mid: this.mid,
-                    read: this.read,
-                    flagged: this.flagged
-                }
-            },
-
-            deserialize: function (sm) {
-                this.mid = sm.mid;
-                this.meta = sm.meta;
-                this.read = sm.read;
-                this.flagged = sm.flagged;
-            },
-
-            shouldHideUser: function (nextMessage) {
-                return this.uid() == nextMessage.uid();
-            },
-
-            shouldHideDate: function (nextMessage) {
-                // Last message date
-                var lastDate = new Date(nextMessage.time());
-                var newDate = new Date(this.time());
-
-                // If messages have the same day, hour and minute
-                // hide the time
-                return lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
-            },
-
-            setTime: function (time) {
-                this.setMetaValue(MessageKeys.messageTime, time);
-            },
-
-            time: function () {
-                return this.metaValue(MessageKeys.messageTime);
-            },
-
-            setText: function (text) {
-                this.setJSONValue(MessageKeys.messageText, text);
-            },
-
-            text: function() {
-                return this.getJSONValue(MessageKeys.messageText);
-            },
-
-            getMetaValue: function (key) {
-                return this.meta[key];
-            },
-
-            getJSONValue: function (key) {
-                return this.getMetaValue(MessageKeys.messageJSONv2)[key];
-            },
-
-            setJSONValue: function (key, value) {
-                this.getMetaValue(MessageKeys.messageJSONv2)[key] = value;
-            },
-
-            type: function () {
-                return this.metaValue(MessageKeys.messageType);
-            },
-
-            setType: function (type) {
-                this.setMetaValue(MessageKeys.messageType, type);
-            },
-
-            uid: function () {
-                return this.metaValue(MessageKeys.messageUID);
-            },
-
-            setUID: function (uid) {
-                this.setMetaValue(MessageKeys.messageUID, uid);
-            },
-
-            metaValue: function (key) {
-                if(this.meta) {
-                    return this.meta[key];
-                }
-                return null;
-            },
-
-            setMetaValue: function (key, value) {
-                if(!this.meta) {
-                    this.meta = {};
-                }
-                this.meta[key] = value;
-            },
-
-            setMID: function (mid) {
-                this.mid = mid;
-            }
-
-
-
-
-        };
-
-        // Static methods
-        Message.buildImageMeta = function (rid, uid, imageURL, thumbnailURL, width, height) {
-
-            var text = imageURL+','+imageURL+',W'+width+"&H"+height;
-
-            var m = Message.buildMeta(rid, uid, text, MessageType.MessageTypeImage);
-
-            var json = {};
-
-            json[MessageKeys.messageText] = text;
-            json[MessageKeys.messageImageURL] = imageURL;
-            json[MessageKeys.messageThumbnailURL] = thumbnailURL;
-            json[MessageKeys.messageImageWidth] = width;
-            json[MessageKeys.messageImageHeight] = height;
-
-            m.meta[MessageKeys.messageJSONv2] = json;
-
-            return m;
-        };
-
-        Message.buildFileMeta = function (rid, uid, fileName, mimeType, fileURL) {
-
-            var m = Message.buildMeta(rid, uid, fileName, MessageType.MessageTypeFile);
-
-            var json = {};
-
-            json[MessageKeys.messageText] = fileName;
-            json[MessageKeys.messageMimeType] = mimeType;
-            json[MessageKeys.messageFileURL] = fileURL;
-
-            m.meta[MessageKeys.messageJSONv2] = json;
-
-            return m;
-        };
-
-        Message.buildMeta = function (rid, uid, text, type) {
-            var m = {
-                meta: {}
-            };
-
-            m.meta[MessageKeys.messageUID] = uid;
-
-            var json = {};
-            json[MessageKeys.messageText] = text;
-
-            m.meta[MessageKeys.messageJSONv2] = json;
-            m.meta[MessageKeys.messageType] = type;
-            m.meta[MessageKeys.messageTime] = firebase.database.ServerValue.TIMESTAMP;
-
-            return m;
-        };
-
-        return Message;
-}]);
+import {MessageType} from "../keys/message-type";
 
 export interface IMessage {
 
@@ -233,9 +15,240 @@ export interface IMessage {
 
 class Message implements IMessage {
 
-    $inject = ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage'];
+    private mid: string;
+    private meta = new Map<string, any>();
+    private read = false;
+    public flagged = false;
+    public side: MessageSide;
+    public user: IUser;
+    public imageURL: string;
+    public thumbnailURL: string;
+    public fileURL: string;
+    public timeString: string;
 
-    constructor($rootScope: ng.IScope, $q: ng.IQService, $sce: ng.ISCEService, UserStore: IUserStore, User: IUser, Config: IConfig, Time: ITime, CloudImage: ICloudImage) {
+    constructor (mid: string, meta: Map<string, any>) {
+        this.mid = mid;
+        this.meta = meta;
+    }
 
+    markRead(uid) {
+        this.read = true;
+    }
+
+    serialize() {
+        return {
+            meta: this.meta,
+            mid: this.mid,
+            read: this.read,
+            flagged: this.flagged
+        }
+    }
+
+    deserialize(sm) {
+        this.mid = sm.mid;
+        this.meta = sm.meta;
+        this.read = sm.read;
+        this.flagged = sm.flagged;
+    }
+
+    shouldHideUser(nextMessage) {
+        return this.uid() == nextMessage.uid();
+    }
+
+    shouldHideDate(nextMessage) {
+        // Last message date
+        var lastDate = new Date(nextMessage.time());
+        var newDate = new Date(this.time());
+
+        // If messages have the same day, hour and minute
+        // hide the time
+        return lastDate.getDay() == newDate.getDay() && lastDate.getHours() == newDate.getHours() && lastDate.getMinutes() == newDate.getMinutes();
+    }
+
+    setTime(time) {
+        this.setMetaValue(MessageKeys.messageTime, time);
+    }
+
+    time() {
+        return this.metaValue(MessageKeys.messageTime);
+    }
+
+    setText(text) {
+        this.setJSONValue(MessageKeys.messageText, text);
+    }
+
+    text() {
+        return this.getJSONValue(MessageKeys.messageText);
+    }
+
+    getMetaValue(key) {
+        return this.meta[key];
+    }
+
+    getJSONValue(key) {
+        return this.getMetaValue(MessageKeys.messageJSONv2)[key];
+    }
+
+    setJSONValue(key, value) {
+        this.getMetaValue(MessageKeys.messageJSONv2)[key] = value;
+    }
+
+    type(): MessageType {
+        return this.metaValue(MessageKeys.messageType);
+    }
+
+    setType(type) {
+        this.setMetaValue(MessageKeys.messageType, type);
+    }
+
+    uid() {
+        return this.metaValue(MessageKeys.messageUID);
+    }
+
+    setUID(uid) {
+        this.setMetaValue(MessageKeys.messageUID, uid);
+    }
+
+    metaValue(key) {
+        if(this.meta) {
+            return this.meta[key];
+        }
+        return null;
+    }
+
+    setMetaValue(key, value) {
+        this.meta[key] = value;
+    }
+
+    setMID(mid) {
+        this.mid = mid;
     }
 }
+
+export enum MessageSide {
+    Right = 'right',
+    Left = 'left'
+}
+
+export interface IMessageFactory {
+    getInstance(mid: string, meta: Map<string, any>): IMessage
+}
+
+class MessageFactory implements IMessageFactory {
+
+    $inject = ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage'];
+
+    private CloudImage: ICloudImage;
+    private $rootScope;
+    private UserStore: IUserStore;
+    private Config: IConfig;
+    private Time: ITime;
+
+    constructor($rootScope: ng.IScope, $q: ng.IQService, $sce: ng.ISCEService, UserStore: IUserStore, User: IUser, Config: IConfig, Time: ITime, CloudImage: ICloudImage) {
+        this.CloudImage = CloudImage;
+        this.$rootScope = $rootScope;
+        this.UserStore = UserStore;
+        this.Config = Config;
+        this.Time = Time;
+    }
+
+    getInstance(mid: string, meta: Map<string, any>): IMessage {
+
+        const message = new Message(mid, meta);
+
+        if(meta) {
+
+            if(!message.type()) {
+                message.setType(MessageType.Text);
+            }
+
+            if(message.type() == MessageType.Image || message.type() == MessageType.File) {
+                // Get the image and thumbnail URLs
+                let json = meta[MessageKeys.messageJSONv2];
+
+                if(json) {
+                    if(message.type() == MessageType.Image) {
+                        message.thumbnailURL = this.CloudImage.cloudImage(json[MessageKeys.messageImageURL], 200, 200);
+                        message.imageURL = json[MessageKeys.messageImageURL];
+                    }
+                    if(message.type() == MessageType.File) {
+                        message.fileURL = json[MessageKeys.messageFileURL];
+                    }
+                }
+            }
+
+            // Our messages are on the right - other user's messages are
+            // on the left
+            message.side = message.uid() == this.$rootScope.user.uid() ? MessageSide.Right : MessageSide.Left;
+
+            message.timeString = this.Time.formatTimestamp(message.time(), this.Config.clockType);
+
+            // Set the user
+            if(message.uid()) {
+
+                // We need to set the user here
+                if(message.uid() == this.$rootScope.user.uid()) {
+                    message.user = this.$rootScope.user;
+                }
+                else {
+                    message.user = this.UserStore.getOrCreateUserWithID(message.uid());
+                }
+            }
+
+            return message;
+        }
+    }
+
+    buildImageMeta(rid, uid, imageURL, thumbnailURL, width, height) {
+
+        var text = imageURL+','+imageURL+',W'+width+"&H"+height;
+
+        var m = this.buildMeta(rid, uid, text, MessageType.Image);
+
+        var json = {};
+
+        json[MessageKeys.messageText] = text;
+        json[MessageKeys.messageImageURL] = imageURL;
+        json[MessageKeys.messageThumbnailURL] = thumbnailURL;
+        json[MessageKeys.messageImageWidth] = width;
+        json[MessageKeys.messageImageHeight] = height;
+
+        m.meta[MessageKeys.messageJSONv2] = json;
+
+        return m;
+    }
+
+    buildFileMeta(rid, uid, fileName, mimeType, fileURL) {
+
+        var m = this.buildMeta(rid, uid, fileName, MessageType.File);
+
+        var json = {};
+
+        json[MessageKeys.messageText] = fileName;
+        json[MessageKeys.messageMimeType] = mimeType;
+        json[MessageKeys.messageFileURL] = fileURL;
+
+        m.meta[MessageKeys.messageJSONv2] = json;
+
+        return m;
+    }
+
+    buildMeta (rid, uid, text, type) {
+        const m = {
+            meta: {}
+        };
+
+        m.meta[MessageKeys.messageUID] = uid;
+
+        const json = {};
+        json[MessageKeys.messageText] = text;
+
+        m.meta[MessageKeys.messageJSONv2] = json;
+        m.meta[MessageKeys.messageType] = type;
+        m.meta[MessageKeys.messageTime] = firebase.database.ServerValue.TIMESTAMP;
+
+        return m;
+    }
+}
+
+angular.module('myApp.services').service('MessageFactory', MessageFactory);

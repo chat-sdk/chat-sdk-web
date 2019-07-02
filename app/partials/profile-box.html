@@ -1,4 +1,4 @@
-<div data-ng-controller="UserProfileBoxController"
+<div data-ng-controller="UserProfileBoxController as upbc"
      id="cc-profile-box"
      class="cc-shadow-diffuse"
      data-ng-style="profileBoxStyle"
@@ -19,7 +19,7 @@
             <div class="f32 uk-float-right" >
                 <span class="flag {{ currentUser.getCountryCode() | lowercase }}"></span>
             </div>
-            <span class="cc-user-id cc-pointer" data-ng-click="copyUserID()" >Copy ID</span>
+            <span class="cc-user-id cc-pointer" data-ng-click="upbc.copyUserID()" >Copy ID</span>
         </div>
         <div class="uk-grid">
             <div class="uk-text-justify uk-text-small cc-profile-description">

@@ -3,7 +3,7 @@ import * as firebase from 'firebase';
 import * as moment from 'moment';
 
 export interface ITime {
-
+    formatTimestamp (timestamp: number, type: string): string
 }
 
 angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
@@ -66,7 +66,7 @@ angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, P
             return Math.abs(this.now() - time)/1000;
         },
 
-        formatTimestamp: function (timestamp, type) {
+        formatTimestamp: function (timestamp: number, type: string): string {
             try {
                 if(type == '24hour') {
                     return moment(timestamp).format('HH:mm');
@@ -78,11 +78,11 @@ angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, P
             // In some cases (maktab.pk) a javascript conflict seems to stop moment working
             // TODO: Investigate this
             catch (e) {
-                var date = new Date(timestamp);
+                const date = new Date(timestamp);
                 // hours part from the timestamp
-                var hours = date.getHours();
+                const hours = date.getHours();
                 // minutes part from the timestamp
-                var minutes = "0" + date.getMinutes();
+                const minutes = "0" + date.getMinutes();
                 // will display time in 10:30:23 format
                 return hours + ':' + minutes.substr(minutes.length-2);
             }

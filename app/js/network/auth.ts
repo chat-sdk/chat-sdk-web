@@ -9,8 +9,8 @@ export interface IAuth {
 
 }
 
-angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin',
-    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin) {
+angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin', 'NetworkManager',
+    function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin, NetworkManager) {
         let Auth = {
 
             mode: LoginModeKeys.LoginModeSimple,
@@ -311,7 +311,9 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
                 // Create the user
                 // TODO: if we do this we'll also be listening for meta updates...
-                $rootScope.user = UserStore.getOrCreateUserWithID(uid, true);
+                NetworkManager.auth.setCurrentUserID(uid);
+                $rootScope.user = UserStore.currentUser();
+
                 let userPromise = $rootScope.user.on();
                 let timePromise = Time.start(uid);
 

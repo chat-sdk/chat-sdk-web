@@ -45,6 +45,7 @@ import '../network/network-manager'
 import '../network/paths'
 import '../network/presence'
 import '../network/single-sign-on'
+import '../network/abstract-authentication-handler'
 
 // Connectors
 import '../connectors/friend-connector'

@@ -7,6 +7,7 @@ import {
     OnlineUserRemovedNotification,
     UserOnlineStateChangedNotification
 } from "../keys/notification-keys";
+import {IUser} from "../entities/user";
 
 angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User', 'UserStore', 'Paths', 'Utils', function ($rootScope, User, UserStore, Paths, Utils) {
     return {
@@ -85,9 +86,9 @@ angular.module('myApp.services').factory('OnlineConnector', ['$rootScope', 'User
          * Online users
          */
 
-        addOnlineUser: function (user) {
+        addOnlineUser: function (user: IUser) {
             if(user && user.uid()) {
-                if(!$rootScope.user || user.uid() != $rootScope.user.uid()) {
+                if(!user.isMe()) {
                     user.online = true;
                     this.onlineUsers[user.uid()] = user;
                     $rootScope.$broadcast(OnlineUserAddedNotification);
