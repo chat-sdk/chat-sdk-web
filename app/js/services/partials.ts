@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface IPartials {
+
+}
+
 angular.module('myApp.services').factory('Partials', ['$http', '$templateCache', 'Environment', function ($http, $templateCache, Environment) {
     return {
         load: function () {

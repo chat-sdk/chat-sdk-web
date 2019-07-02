@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface IBeforeUnload {
+
+}
+
 angular.module('myApp.services').factory('BeforeUnload', ['$window', function ($window) {
     var BeforeUnload = {
 

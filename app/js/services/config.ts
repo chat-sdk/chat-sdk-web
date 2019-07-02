@@ -2,6 +2,10 @@ import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Defines from "../keys/defines"
 
+export interface IConfig {
+
+}
+
 angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', function ($rootScope, $timeout, $q, Paths, Utils) {
 
     // Priorities for setting

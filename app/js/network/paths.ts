@@ -17,6 +17,10 @@ import {
 } from "../keys/path-keys";
 import {ConfigKey, DetailsKey, ImageKey, MetaKey, OnlineKey, TimeKey} from "../keys/keys";
 
+export interface IPaths {
+
+}
+
 angular.module('myApp.services').factory('Paths', ['Environment', function (Environment) {
 
     return {

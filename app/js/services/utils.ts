@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface IUtils {
+
+}
+
 angular.module('myApp.services').factory('Utils', [function () {
 
     return {

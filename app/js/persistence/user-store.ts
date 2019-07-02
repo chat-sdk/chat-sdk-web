@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface IUserStore {
+
+}
+
 angular.module('myApp.services').factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'BeforeUnload',
     function ($rootScope, $timeout, LocalStorage, User, BeforeUnload) {
         var UserStore = {

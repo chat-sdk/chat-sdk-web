@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface ICloudImage {
+
+}
+
 angular.module('myApp.services').factory('CloudImage', ['Environment',function (Environment) {
     return {
         // Cloud Image

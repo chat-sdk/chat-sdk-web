@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface IMarquee {
+
+}
+
 angular.module('myApp.services').factory('Marquee', ['$window', '$interval', function ($window, $interval) {
     var Marquee = {
 

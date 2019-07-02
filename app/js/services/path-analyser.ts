@@ -1,4 +1,9 @@
 import * as angular from 'angular'
+
+export interface IPathAnalyser {
+
+}
+
 angular.module('myApp.services').factory('PathAnalyser', [function () {
 
     return {

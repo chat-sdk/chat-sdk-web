@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface IWebStorage {
+
+}
+
 angular.module('myApp.services').factory('WebStorage', ['$window', function ($window) {
     let WebStorage = {
 

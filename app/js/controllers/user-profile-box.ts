@@ -1,6 +1,6 @@
 import * as angular from 'angular'
 
-export interface ProfileBoxScope extends ng.IScope {
+export interface IProfileBoxScope extends ng.IScope {
     hover: any,
     currentUser: any,
 }

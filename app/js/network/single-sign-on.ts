@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface ISingleSignOn {
+
+}
+
 angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$http', 'Config', 'LocalStorage', 'Utils',
     function ($rootScope, $q, $http, Config, LocalStorage, Utils) {
 

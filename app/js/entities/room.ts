@@ -6,12 +6,31 @@ import * as Dimensions from "../keys/dimensions";
 import * as NotificationKeys from "../keys/notification-keys";
 import * as RoomNameKeys from "../keys/room-name-keys";
 import * as RoomKeys from "../keys/room-keys";
-import * as RoomType from "../keys/room-type";
 import * as UserStatus from "../keys/user-status";
 import * as Keys from "../keys/keys";
 import * as MessageKeys from "../keys/message-keys";
 import * as MessageType from "../keys/message-type";
 import * as Defines from "../keys/defines";
+import {RoomType} from "../keys/room-type";
+
+export interface IRoom {
+    name: string
+    isOpen: boolean
+    slot: number
+    height: number
+    width: number
+    offset: number
+    type: RoomType
+    dragDirection: number
+    zIndex: number
+    draggable: boolean
+    transcript(): string
+    setOffset(offset: number)
+    updateOffsetFromSlot()
+    updateType()
+    loadMoreMessages(callback: () => void, numberOfMessages?: number): void
+    rid(): string
+}
 
 angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','Message','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
     function ($rootScope, $timeout, $q, $window, Config, Message, Cache, UserStore, User, Presence, RoomPositionManager, SoundEffects, Visibility, Log, Time, Entity, Utils, Paths, CloudImage, Marquee, Environment) {
@@ -159,7 +178,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 else if (this.userCount() == 1) {
                     this.name = RoomNameKeys.RoomDefaultNameEmpty;
                 }
-                else if (this.type() == RoomType.RoomTypeGroup) {
+                else if (this.type() == RoomType.Group) {
                     this.name = RoomNameKeys.RoomDefaultNameGroup;
                 }
                 else {
@@ -200,7 +219,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.metaOn().then((function () {
 
                     switch (this.type()) {
-                        case RoomType.RoomType1to1:
+                        case RoomType.OneToOne:
                             this.deleted = false;
                             this.userDeletedDate().then((function(timestamp) {
                                 if(timestamp) {
@@ -210,8 +229,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                                 on();
                             }).bind(this));
                             break;
-                        case RoomType.RoomTypePublic:
-                        case RoomType.RoomTypeGroup:
+                        case RoomType.Public:
+                        case RoomType.Group:
                             on();
                             break;
                         default:
@@ -225,7 +244,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             return deferred.promise;
         };
 
-        Room.prototype.open = function (slot, duration) {
+        Room.prototype.open = function (slot: number, duration) {
 
             let open = (function () {
 
@@ -244,7 +263,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             }).bind(this);
 
             switch (this.type()) {
-                case RoomType.RoomTypePublic:
+                case RoomType.Public:
                     this.join(UserStatus.UserStatusMember).then((function ()
                     {
                         open();
@@ -252,8 +271,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                         console.log(error);
                     });
                     break;
-                case RoomType.RoomTypeGroup:
-                case RoomType.RoomType1to1:
+                case RoomType.Group:
+                case RoomType.OneToOne:
                     open();
             }
         };
@@ -270,7 +289,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = this.type();
 
             switch (type) {
-                case RoomType.RoomTypePublic:
+                case RoomType.Public:
                 {
                     this.removeUser($rootScope.user);
                     $rootScope.user.removeRoom(this);
@@ -286,7 +305,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = this.type();
 
             switch (type) {
-                case RoomType.RoomType1to1:
+                case RoomType.OneToOne:
                 {
                     setStatusForUser(this, $rootScope.user, UserStatus.UserStatusClosed, true);
                     this.deleted = true;
@@ -294,7 +313,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                     this.deleteMessages();
                     break;
                 }
-                case RoomType.RoomTypeGroup:
+                case RoomType.Group:
                 {
                     var promises = [
                         this.removeUser($rootScope.user),
@@ -338,17 +357,17 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var type = null;
 
             if(this.isPublic()) {
-                type = RoomType.RoomTypePublic;
+                type = RoomType.Public;
             }
             else {
                 if(this.userCount() <= 1) {
-                    type = RoomType.RoomTypeInvalid;
+                    type = RoomType.Invalid;
                 }
                 else if (this.userCount() == 2) {
-                    type = RoomType.RoomType1to1;
+                    type = RoomType.OneToOne;
                 }
                 else {
-                    type = RoomType.RoomTypeGroup;
+                    type = RoomType.Group;
                 }
             }
 
@@ -356,10 +375,10 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.updateType = function () {
-            var type = this.calculatedType();
+            const type = this.calculatedType();
             if(type != this.type()) {
                 // One important thing is that we can't go from group -> 1to1
-                if(this.type() != RoomType.RoomTypeGroup) {
+                if(this.type() != RoomType.Group) {
                     Room.updateRoomType(this.rid(), type);
                 }
             }
@@ -443,7 +462,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.isPublic = function () {
             //return this.meta.isPublic;
-            return this.type() == RoomType.RoomTypePublic;
+            return this.type() == RoomType.Public;
         };
 
         Room.prototype.type = function () {
@@ -690,9 +709,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.userCount = function () {
-            var i = 0;
-            for(var key in this.usersMeta) {
-                if(this.usersMeta.hasOwnProperty(key)) {
+            let i = 0;
+            for(let key in this.users) {
+                if(this.users.hasOwnProperty(key)) {
                     i++;
                 }
             }
@@ -700,16 +719,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.containsOnlyUsers = function (users) {
-            var usersInRoom = 0;
-            var totalUsers = 0;
+            let usersInRoom = 0;
+            const totalUsers = this.userCount();
 
-            for(var key in this.users) {
-                if(this.users.hasOwnProperty(key)) {
-                    totalUsers++;
-                }
-            }
-            for(var i = 0; i < users.length; i++) {
-                if(this.usersMeta[users[i].meta[Keys.userUID]]) {
+            for(let i = 0; i < users.length; i++) {
+                if(this.users[users[i].uid()]) {
                     usersInRoom++;
                 }
             }
@@ -742,7 +756,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.setOffset(RoomPositionManager.offsetForSlot(this.slot));
         };
 
-        Room.prototype.setOffset = function(offset) {
+        Room.prototype.setOffset = function(offset: number) : void {
             this.offset = offset;
         };
 
@@ -845,30 +859,10 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
             });
 
-            //var deferred2 = $q.defer();
-            //
-            //// Also set the last-message-added property
-            //var roomMetaRef = Paths.roomMetaRef(this.rid());
-            //var data = {};
-            //data[bLastMessageAddedDatePath] = firebase.database.ServerValue.TIMESTAMP;
-            //roomMetaRef.update(data, function (error) {
-            //    if(!error) {
-            //        deferred2.resolve(null);
-            //    }
-            //    else {
-            //        deferred2.reject(error);
-            //    }
-            //});
-
-
             return deferred.promise;
         };
 
-        Room.prototype.loadMoreMessages = function (callback, numberOfMessages) {
-
-            if(!numberOfMessages) {
-                numberOfMessages = 10;
-            }
+        Room.prototype.loadMoreMessages = function (callback: () => void, numberOfMessages: number = 10): void {
 
             if(this.loadingMoreMessages) {
                 return;
@@ -881,9 +875,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.loadingMoreMessages = true;
 
                 // Also get the messages from the room
-                var ref = Paths.roomMessagesRef(this.rid()).orderByPriority();
+                let ref = Paths.roomMessagesRef(this.rid()).orderByPriority();
 
-                var time = new Date().getTime();
+                let time = new Date().getTime();
                 if(this.messages.length) {
                     time = this.messages[0].time();
                 }
@@ -892,9 +886,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 ref = ref.limitToLast(numberOfMessages);
 
                 // Store the messages locally
-                var messages = [];
+                const messages = [];
 
-                var finishQuery = (function () {
+                const finishQuery = (function () {
 
                     $timeout.cancel(this.loadingTimer);
 
@@ -903,8 +897,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                     // Add messages to front of global list
                     // Ignore the last message - it's a duplicate
-                    var lastMessage = null;
-                    for(var i = messages.length - 2; i >= 0; i--) {
+                    let lastMessage = null;
+                    for(let i = messages.length - 2; i >= 0; i--) {
                         if(this.messages.length > 0) {
                             lastMessage = this.messages[0];
                         }
@@ -928,9 +922,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }, 1000);
 
                 ref.on('child_added', (function (snapshot) {
-                    var val = snapshot.val();
+                    const val = snapshot.val();
                     if(val) {
-                        var message = new Message(snapshot.key, val);
+                        const message = new Message(snapshot.key, val);
                         messages.push(message);
                         if(messages.length == numberOfMessages) {
                             finishQuery();
@@ -1012,7 +1006,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.setImage = function (image, isData) {
 
-            this.showImage = this.type() == RoomType.RoomTypePublic;
+            this.showImage = this.type() == RoomType.Public;
 
             if(!image) {
                 image = Environment.defaultRoomPictureURL();
@@ -1049,9 +1043,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             $rootScope.$broadcast(NotificationKeys.RoomBadgeChangedNotification, this);
         };
 
-        Room.prototype.transcript = function () {
+        Room.prototype.transcript = function () : string {
 
-            var transcript = "";
+            let transcript: string = "";
 
             for(var i in this.messages) {
                 if(this.messages.hasOwnProperty(i)) {
@@ -1557,7 +1551,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                     this.addUserToRoom(rid, $rootScope.user, UserStatus.UserStatusOwner, type);
 
-                    if(type == RoomType.RoomTypePublic) {
+                    if(type == RoomType.Public) {
                         var ref = Paths.publicRoomRef(rid);
 
                         var data = {};
@@ -1611,7 +1605,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.createPublicRoom = function (name, description, weight) {
-            return this.createRoom(name, description, true, RoomType.RoomTypePublic, weight);
+            return this.createRoom(name, description, true, RoomType.Public, weight);
         };
 
         Room.createPrivateRoom = function (users) {
@@ -1619,7 +1613,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             var deferred = $q.defer();
 
             // Since we're calling create room we will be added automatically
-            this.createRoom(null, null, true, users.length == 1 ? RoomType.RoomType1to1 : RoomType.RoomTypeGroup).then((function (rid) {
+            this.createRoom(null, null, true, users.length == 1 ? RoomType.OneToOne : RoomType.Group).then((function (rid) {
 
                 var promises = [];
 
@@ -1701,7 +1695,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
             });
 
-            if(type == RoomType.RoomTypePublic) {
+            if(type == RoomType.Public) {
                 ref.onDisconnect().remove();
             }
 
@@ -1732,7 +1726,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.roomMeta = function (rid, name, description, userCreated, invitesEnabled, type, weight) {
 
-            var m = {};
+            const m = {};
+            // TODO: Is this used?
             m[RoomKeys.roomRID] = rid ? rid : null;
             m[RoomKeys.roomName] = name ? name : null;
             m[RoomKeys.roomInvitesEnabled] = !Utils.unORNull(invitesEnabled) ? invitesEnabled : true;
@@ -1741,8 +1736,6 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             m[RoomKeys.roomCreated] = firebase.database.ServerValue.TIMESTAMP;
             m[RoomKeys.roomWeight] = weight ? weight : 0;
             m[RoomKeys.roomType] = type;
-            // A fix for legacy v3 users
-            m[RoomKeys.roomTypeV3] = type == RoomType.RoomTypePublic ? RoomType.RoomTypePublicV3 : RoomType.RoomTypePrivateV3;
 
             return m;
         };

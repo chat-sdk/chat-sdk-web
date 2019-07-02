@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface ICredential {
+
+}
+
 angular.module('myApp.services').factory('Credential', [
     function () {
 

@@ -3,6 +3,10 @@ import {UserAllowInvitesFriends} from "../keys/allow-invite-type";
 import {RoomType1to1} from "../keys/room-type";
 import {RoomRemovedNotification} from "../keys/notification-keys";
 
+export interface IStateManager {
+
+}
+
 angular.module('myApp.services').service('StateManager', ['$rootScope', 'FriendsConnector', 'Config', 'Room', 'User', 'Cache', 'RoomStore', 'UserStore', 'RoomPositionManager', 'OnlineConnector', 'PublicRoomsConnector', 'Paths', 'RoomOpenQueue',
     function ($rootScope, FriendsConnector, Config, Room, User, Cache, RoomStore, UserStore, RoomPositionManager, OnlineConnector, PublicRoomsConnector, Paths, RoomOpenQueue) {
     return {

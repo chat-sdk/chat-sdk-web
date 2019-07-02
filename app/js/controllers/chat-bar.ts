@@ -6,36 +6,59 @@ import {
     UpdateRoomActiveStatusNotification
 } from "../keys/notification-keys";
 
-angular.module('myApp.controllers').controller('ChatBarController', ['$scope', '$timeout', 'Cache', 'Log', function($scope, $timeout, Cache, Log) {
+import {IRoomListScope} from "./room-list-box";
+import {ICache} from "../persistence/cache";
+import {ILog} from "../services/log";
+import {IRoom} from "../entities/room";
 
-    $scope.rooms = [];
+export interface IChatBarController {
+    rooms: IRoom []
+    updateList(): void
+}
 
-    $scope.init = function () {
+class ChatBarController implements IChatBarController{
 
-        $scope.$on(RoomOpenedNotification, $scope.updateList);
-        $scope.$on(RoomClosedNotification, $scope.updateList);
+    static $inject = ['$scope', '$timeout', 'Cache', 'Log'];
 
-        $scope.$on(UpdateRoomActiveStatusNotification, function () {
-            Log.notification(UpdateRoomActiveStatusNotification, 'ChatBarController');
-            $scope.updateList();
+    public rooms: IRoom [] = [];
+
+    private Log: ILog;
+    private $scope: IRoomListScope;
+    private $timeout: ng.ITimeoutService;
+    private Cache: ICache;
+
+    constructor ($scope: IRoomListScope, $timeout: ng.ITimeoutService, Cache: ICache, Log: ILog) {
+
+        this.$scope = $scope;
+        this.Log = Log;
+        this.$timeout = $timeout;
+        this.Cache = Cache;
+
+        const updateList = () => {
+            this.updateList();
+        };
+
+        $scope.$on(RoomOpenedNotification, updateList);
+        $scope.$on(RoomClosedNotification, updateList);
+        $scope.$on(LogoutNotification, updateList);
+
+        $scope.$on(UpdateRoomActiveStatusNotification, () => {
+            this.Log.notification(UpdateRoomActiveStatusNotification, 'ChatBarController');
+            updateList();
         });
+    }
 
-        $scope.$on(LogoutNotification, $scope.updateList);
-
-    };
-
-    $scope.updateList = function () {
-
-        Log.notification(RoomOpenedNotification + "/" + RoomClosedNotification, 'ChatBarController');
+    updateList(): void {
+        this.Log.notification(RoomOpenedNotification + "/" + RoomClosedNotification, 'ChatBarController');
 
         // Only include rooms that are active
-        $scope.rooms = Cache.activeRooms();
+        this.rooms = this.Cache.activeRooms();
 
-        $timeout(function () {
-            $scope.$digest();
-        });
-    };
+        this.$timeout(() => {
+            this.$scope.$digest();
+        })
+    }
 
-    $scope.init();
+}
 
-}]);
+angular.module('myApp.controllers').controller('ChatBarController', ChatBarController);

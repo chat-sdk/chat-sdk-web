@@ -2,10 +2,10 @@
 // mouse's y axis until we move into it
 import * as $ from 'jquery'
 import * as angular from 'angular'
-import {ProfileBoxScope} from "../controllers/user-profile-box";
+import {IProfileBoxScope} from "../controllers/user-profile-box";
 
 angular.module('myApp.directives').directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
-    return function (scope: ProfileBoxScope, elm) {
+    return function (scope: IProfileBoxScope, elm) {
 
         $(elm).hover(function () {
             scope.hover = true;

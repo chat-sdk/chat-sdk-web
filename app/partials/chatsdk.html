@@ -40,9 +40,9 @@
 
                 <div data-ng-include data-ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></div>
 
-                <div data-ng-controller="ChatBarController" >
-                    <div data-ng-repeat="(id, room) in rooms">
-                        <div data-ng-controller="ChatController">
+                <div data-ng-controller="ChatBarController as cbc" >
+                    <div data-ng-repeat="(id, room) in cbc.rooms">
+                        <div data-ng-controller="ChatController as cc">
                             <div data-ng-include data-ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></div>
                         </div>
                     </div>

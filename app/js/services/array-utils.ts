@@ -2,6 +2,10 @@ import * as angular from 'angular'
 import * as RoomType from "../keys/room-type";
 import * as MessageKeys from "../keys/message-keys";
 
+export interface IArrayUtils {
+
+}
+
 angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils) {
 
     return {

@@ -2,6 +2,10 @@ import * as angular from 'angular'
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
+export interface ITime {
+
+}
+
 angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
     return {
 

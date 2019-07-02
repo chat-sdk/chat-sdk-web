@@ -7,6 +7,10 @@ import * as PathKeys from "../keys/path-keys";
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Keys from "../keys/keys";
 
+export interface IUser {
+
+}
+
 angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Environment',
     function ($rootScope, $timeout, $q, Entity, Utils, Paths, CloudImage, Environment) {
 

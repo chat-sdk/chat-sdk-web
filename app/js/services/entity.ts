@@ -4,6 +4,10 @@ import * as firebase from 'firebase';
 import * as PathKeys from "../keys/path-keys";
 import * as Defines from "../keys/defines";
 
+export interface IEntity {
+
+}
+
 angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q, Paths) {
 
     function Entity (path, id) {

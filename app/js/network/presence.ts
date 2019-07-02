@@ -8,6 +8,11 @@ import {UserStatusMember} from "../keys/user-status";
  * status
  * We need to call visibility to make sure it's initilized
  */
+
+export interface IPresence {
+
+}
+
 angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q',
     function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
         var Presence = {

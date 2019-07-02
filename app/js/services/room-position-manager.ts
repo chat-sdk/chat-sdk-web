@@ -5,6 +5,11 @@
 import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Dimensions from "../keys/dimensions";
+import {IRoom} from "../entities/room";
+
+export interface IRoomPositionManager {
+
+}
 
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen', 'ArrayUtils',
     function ($rootScope, $timeout, $document, $window, LocalStorage, Cache, Screen, ArrayUtils) {
@@ -70,7 +75,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 }
             },
 
-            insertRoom: function (room, slot, duration) {
+            insertRoom: function (room: IRoom, slot: number, duration) {
 
                 // If the room is already added then return
                 if(this.roomIsOpen(room)) {

@@ -2,6 +2,10 @@ import * as angular from 'angular'
 import {PasswordKey, RoomIDKey, UsernameKey} from "../keys/keys";
 import {RoomTypeGroup} from "../keys/room-type";
 
+export interface IAutoLogin {
+
+}
+
 angular.module('myApp.services').factory('AutoLogin', ["$window", "Credential", "Room", "RoomStore", "Utils", "Environment", function ($window, Credential, Room, RoomStore, Utils, Environment) {
     return {
 

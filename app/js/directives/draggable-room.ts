@@ -3,11 +3,11 @@ import * as $ from 'jquery'
 
 import {ChatRoomSpacing, MainBoxWidth} from "../keys/dimensions";
 import {AnimateRoomNotification} from "../keys/notification-keys";
-import {RoomScope} from "../controllers/chat";
+import {IRoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPositionManager', 'Utils', function ($rootScope, $document, $timeout, RoomPositionManager, Utils) {
 
-    return function (scope: RoomScope, elm, attrs) {
+    return function (scope: IRoomScope, elm, attrs) {
 
         let lastClientX = 0;
 

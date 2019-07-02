@@ -1,9 +1,14 @@
 import * as angular from 'angular'
 import {UserBlockedNotification, UserUnblockedNotification} from "../keys/notification-keys";
+import {IRoom} from "../entities/room";
 
 /**
  * Temporary cache i.e. current rooms etc...
  */
+
+export interface ICache {
+    activeRooms(): IRoom []
+}
 
 angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', function ($rootScope, $timeout, ArrayUtils, Utils) {
     var Cache = {
@@ -42,8 +47,8 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
         },
 
         activeRooms: function () {
-            var ar = [];
-            for(var i =0; i < this.rooms.length; i++) {
+            let ar = [];
+            for(let i =0; i < this.rooms.length; i++) {
                 if(this.rooms[i].active) {
                     ar.push(this.rooms[i]);
                 }
@@ -52,8 +57,8 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
         },
 
         inactiveRooms: function () {
-            var ar = [];
-            for(var i =0; i < this.rooms.length; i++) {
+            let ar = [];
+            for(let i =0; i < this.rooms.length; i++) {
                 if(!this.rooms[i].active) {
                     ar.push(this.rooms[i]);
                 }
@@ -81,7 +86,7 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
 
         removeBlockedUserWithID: function (uid) {
             if(uid) {
-                var user = this.blockedUsers[uid];
+                const user = this.blockedUsers[uid];
                 if(user) {
                     user.blocked = false;
                     delete this.blockedUsers[uid];
@@ -107,14 +112,14 @@ angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'Ar
 
 
         getPrivateRoomsWithUsers: function (user1, user2) {
-            var rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2]);
+            const rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2]);
             return ArrayUtils.roomsSortedByMostRecent(rooms);
         },
 
         getPrivateRooms: function () {
-            var rooms = [];
-            for(var i = 0; i < this.rooms.length; i++) {
-                var room = this.rooms[i];
+            const rooms = [];
+            for(let i = 0; i < this.rooms.length; i++) {
+                const room = this.rooms[i];
                 if(!room.isPublic()) {
                     rooms.push(room);
                 }

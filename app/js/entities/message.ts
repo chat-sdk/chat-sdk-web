@@ -3,13 +3,17 @@ import * as firebase from 'firebase';
 
 import * as MessageType from "../keys/message-type";
 import * as MessageKeys from "../keys/message-keys";
+import {IUserStore} from "../persistence/user-store";
+import {IUser} from "./user";
+import {IConfig} from "../services/config";
+import {ITime} from "../services/time";
+import {ICloudImage} from "../services/cloud-image";
 
 angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage',
     function ($rootScope, $q, $sce, UserStore, User, Config, Time, CloudImage) {
 
-        var bMessageSideRight = 'right';
-        var bMessageSideLeft = 'left';
-
+        const bMessageSideRight = 'right';
+        const bMessageSideLeft = 'left';
 
         function Message(mid, meta) {
 
@@ -222,3 +226,16 @@ angular.module('myApp.services').factory('Message', ['$rootScope', '$q', '$sce',
 
         return Message;
 }]);
+
+export interface IMessage {
+
+}
+
+class Message implements IMessage {
+
+    $inject = ['$rootScope', '$q', '$sce','UserStore', 'User', 'Config', 'Time', 'CloudImage'];
+
+    constructor($rootScope: ng.IScope, $q: ng.IQService, $sce: ng.ISCEService, UserStore: IUserStore, User: IUser, Config: IConfig, Time: ITime, CloudImage: ICloudImage) {
+
+    }
+}

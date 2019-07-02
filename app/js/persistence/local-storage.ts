@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface ILocalStorage {
+
+}
+
 angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeout', 'WebStorage', 'Utils', function ($rootScope, $timeout, WebStorage, Utils) {
     let LocalStorage = {
 

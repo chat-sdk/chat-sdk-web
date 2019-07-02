@@ -5,6 +5,10 @@ import * as UserKeys from "../keys/user-keys";
 import * as Defines from "../keys/defines";
 import * as LoginModeKeys from "../keys/login-mode-keys";
 
+export interface IAuth {
+
+}
+
 angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$timeout', 'Config', 'Paths', 'Credential', 'Environment', 'UserStore', 'Presence', 'StateManager', 'Time', 'Utils', 'AutoLogin',
     function ($rootScope, $q, $http, $timeout, Config, Paths, Credential, Environment, UserStore, Presence, StateManager, Time, Utils, AutoLogin) {
         let Auth = {
@@ -247,32 +251,32 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
 
                     /** LOCATION **/
                     // Get the user's city and country from their IP
-                    if(!user.getCountryCode() || !user.getLocation()) {
-
-                        $http.get('http://freegeoip.net/json/').then((function (r) {
-
-                            var changed = false;
-
-                            // The first time the user logs on
-                            // try to guess which city and country they're from
-                            changed = setUserProperty(UserKeys.UserLocation, r.data.city);
-                            changed = changed || setUserProperty(UserKeys.UserCountryCode, r.data.country_code);
-
-                            if(changed) {
-                                user.pushMeta();
-
-                                // Digest to update the interface
-                                // TODO: Don't do a root digest
-                                $timeout(function() {
-                                    $rootScope.$digest();
-                                });
-                            }
-
-                        }).bind(this), function (error) {
-
-                        });
-
-                    }
+                    // if(!user.getCountryCode() || !user.getLocation()) {
+                    //
+                    //     $http.get('http://freegeoip.net/json/').then((function (r) {
+                    //
+                    //         var changed = false;
+                    //
+                    //         // The first time the user logs on
+                    //         // try to guess which city and country they're from
+                    //         changed = setUserProperty(UserKeys.UserLocation, r.data.city);
+                    //         changed = changed || setUserProperty(UserKeys.UserCountryCode, r.data.country_code);
+                    //
+                    //         if(changed) {
+                    //             user.pushMeta();
+                    //
+                    //             // Digest to update the interface
+                    //             // TODO: Don't do a root digest
+                    //             $timeout(function() {
+                    //                 $rootScope.$digest();
+                    //             });
+                    //         }
+                    //
+                    //     }).bind(this), function (error) {
+                    //
+                    //     });
+                    //
+                    // }
 
                     if(!angular.equals(user.meta, oldMeta)) {
                         user.pushMeta();

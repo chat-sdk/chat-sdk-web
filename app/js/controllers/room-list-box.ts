@@ -5,6 +5,12 @@ import {
     RoomUpdatedNotification,
     UpdateRoomActiveStatusNotification
 } from "../keys/notification-keys";
+import {IRoom} from "../entities/room";
+
+export interface IRoomListScope extends ng.IScope {
+    rooms: IRoom [],
+    updateList(): void,
+}
 
 angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'LocalStorage', 'RoomPositionManager', 'Log',
     function($scope, $rootScope, $timeout, Auth, Cache, LocalStorage, RoomPositionManager, Log) {

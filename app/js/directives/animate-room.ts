@@ -2,10 +2,10 @@ import * as angular from 'angular'
 import * as $ from 'jquery'
 
 import {AnimateRoomNotification} from "../keys/notification-keys";
-import {RoomScope} from "../controllers/chat";
+import {IRoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPositionManager', 'Log', 'Utils', function ($timeout, RoomPositionManager, Log, Utils) {
-    return function (scope: RoomScope, elm) {
+    return function (scope: IRoomScope, elm) {
 
         scope.$on(AnimateRoomNotification, (function (event, args) {
 
@@ -18,7 +18,7 @@ angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPo
                 }
 
                 // Get the final offset
-                var toOffset = RoomPositionManager.offsetForSlot(scope.room.slot);
+                const toOffset = RoomPositionManager.offsetForSlot(scope.room.slot);
 
                 // Stop the previous animation
                 $(elm).stop(true, false);

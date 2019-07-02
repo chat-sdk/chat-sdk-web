@@ -11,14 +11,18 @@ import * as MessageKeys from "../keys/message-keys";
 import * as MessageType from "../keys/message-type";
 import * as Defines from "../keys/defines";
 import * as TabKeys from "../keys/tab-keys";
+import {IRoom} from "../entities/room";
 
-export interface RoomScope extends ng.IScope {
-    room: any,
-    resizing: any,
-    dragging: any,
-    startDrag: any,
-    wasDragged: any,
-    inputHeight: any,
+export interface IRoomScope extends ng.IScope {
+    room: IRoom
+    resizing: any
+    dragging: any
+    startDrag: any
+    wasDragged: any
+    inputHeight: any
+    input: any
+    emojis: string[]
+    leaveRoom()
 }
 
 export interface MessageScope extends ng.IScope {

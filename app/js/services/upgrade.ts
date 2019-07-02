@@ -1,6 +1,10 @@
 import * as angular from 'angular'
 import * as PathKeys from "../keys/path-keys";
 
+export interface IUpgrade {
+
+}
+
 angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q, Paths) {
     return {
         // This should be called after the user has selected

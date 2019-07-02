@@ -1,5 +1,9 @@
 import * as angular from 'angular'
 
+export interface IRoomStore {
+
+}
+
 angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload', 'ArrayUtils',
     function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload, ArrayUtils) {
         var RoomStore = {

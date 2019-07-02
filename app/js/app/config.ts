@@ -43,6 +43,8 @@ export const ChatSDKConfig = {
 
     fileMessagesEnabled: true,
 
-    hideMainBox: false
+    hideMainBox: false,
+
+    // resourceRootURL: 'http://test.com',
 };
 

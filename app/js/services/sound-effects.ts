@@ -1,6 +1,10 @@
 import * as angular from 'angular'
 import * as Howl from 'howler'
 
+export interface ISoundEffects {
+
+}
+
 angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalStorage, Environment) {
     return {
 

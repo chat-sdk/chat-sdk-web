@@ -1,18 +1,21 @@
 import * as angular from 'angular'
+import {IUploadHandler} from "./upload-handler";
+import {IFirebaseUploadHandler} from "./firebase-upload-handler";
 
-angular.module('myApp.services').factory('NetworkManager', ['$q', 'FirebaseUploadHandler', 'Interface', function ($q, FirebaseUploadHandler, Interface) {
-    let nm = {
+export interface INetworkManager {
+    upload: IUploadHandler
+}
 
-        init: function () {
-            this.upload = FirebaseUploadHandler;
-        },
+class NetworkManager implements INetworkManager {
 
-        // This defines the file upload interface.
-        upload: {
-            uploadFile: function () {  Interface.log(arguments.callee.name, true) }
-        }
+    static $inject = ['FirebaseUploadHandler'];
 
-    };
-    nm.init();
-    return nm;
-}]);
+    upload: IUploadHandler;
+
+    constructor (FirebaseUploadHandler: IFirebaseUploadHandler) {
+        this.upload = FirebaseUploadHandler
+    }
+
+}
+
+angular.module('myApp.services').service('NetworkManager', NetworkManager);

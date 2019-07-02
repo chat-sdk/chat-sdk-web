@@ -6,6 +6,11 @@ import * as angular from 'angular'
  * to flag it to be opened from anywhere and then let
  * that function open it
  */
+
+export interface IRoomOpenQueue {
+
+}
+
 angular.module('myApp.services').factory('RoomOpenQueue', [function () {
     return {
 

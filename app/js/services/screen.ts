@@ -1,6 +1,10 @@
 import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 
+export interface IScreen {
+
+}
+
 angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', function ($rootScope, $timeout, $document, $window, LocalStorage) {
 
     let screen = {

@@ -1,6 +1,10 @@
 import * as angular from 'angular'
 import {ChatSDKConfig} from "../app/config";
 
+export interface IEnvironment {
+
+}
+
 angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', function ($rootScope, Utils) {
 
     var env = {
@@ -60,7 +64,7 @@ angular.module('myApp.services').factory('Environment', ['$rootScope', 'Utils', 
         },
 
         resourceRootURL: function () {
-            var url = this.options().resourceRootURL;
+            let url = this.options().resourceRootURL;
             if(!Utils.unORNull(url)) {
                 if(!(url[url.length - 1] == '/')) {
                     url += '/';

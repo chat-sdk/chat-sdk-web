@@ -235,15 +235,16 @@ gulp.task('scripts', function(done) {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
+
     var scripts = gulp.series('lint', 'scripts', 'copy');
     var html = gulp.series('minify-html', 'copy');
     var css = gulp.series('minify-css', 'copy');
     
 //     gulp.watch(gulp.series('app/js/*.js', 'app/js/**/*.js', 'app/js/*.ts', 'app/js/**/*.ts'), scripts);
-    gulp.watch('app/js/*.js', scripts);
-    gulp.watch('app/js/**/*.js', scripts);
-    gulp.watch('app/js/*.ts', scripts);
-    gulp.watch('app/js/**/*.ts', scripts);
+//     gulp.watch('app/js/*.js', scripts);
+//     gulp.watch('app/js/**/*.js', scripts);
+//     gulp.watch('app/js/*.ts', scripts);
+//     gulp.watch('app/js/**/*.ts', scripts);
     gulp.watch('app/css/*.css', css);
     gulp.watch('app/partials/*.html', html);
 
@@ -252,4 +253,5 @@ gulp.task('watch', function() {
 
 
 // Default Task
-gulp.task('default', gulp.series('lint', 'scripts', 'minify-html', 'minify-css', 'copy', 'watch'));
+gulp.task('default', gulp.series('minify-html', 'minify-css', 'copy', 'watch'));
+//gulp.task('default', gulp.series('lint', 'scripts', 'minify-html', 'minify-css', 'copy', 'watch'));
