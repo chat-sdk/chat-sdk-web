@@ -1,57 +1,56 @@
 import * as angular from 'angular'
 import {PublicRoomAddedNotification, PublicRoomRemovedNotification} from "../keys/notification-keys";
+import {IPaths} from "../network/paths";
+import {IRoomStore} from "../persistence/room-store";
 
-angular.module('myApp.services').factory('PublicRoomsConnector', ['$rootScope', 'Room', 'RoomStore', 'Paths',
-    function ($rootScope, Room, RoomStore, Paths) {
-        return {
-            on: function () {
+interface IPublicRoomsConnector {
 
-                const publicRoomsRef = Paths.publicRoomsRef();
+}
 
-                // Start listening to Firebase
-                publicRoomsRef.on('child_added', (function (snapshot) {
+class PublicRoomsConnector implements IPublicRoomsConnector{
 
-                    let rid = snapshot.key;
-                    if(rid) {
-                        let room = RoomStore.getOrCreateRoomWithID(rid);
+    static $inject = ['$rootScope', 'RoomStore', 'Paths'];
 
-                        // TODO: Remove this
-                        //room.newPanel = snapshot.val().newPanel;
+    $rootScope;
+    Paths: IPaths;
+    RoomStore: IRoomStore;
 
-                        room.on().then(function () {
+    constructor ($rootScope, RoomStore, Paths) {
+        this.$rootScope = $rootScope;
+        this.Paths = Paths;
+        this.RoomStore = RoomStore;
+    }
 
-                            $rootScope.$broadcast(PublicRoomAddedNotification, room);
+    on() {
+        const publicRoomsRef = this.Paths.publicRoomsRef();
 
-                            // Check to see if the room is marked as public
-                            // TODO: Depricated code fix for old customers who didn't have
-                            // public room flagged
-//                        if(!room.meta.isPublic && !room.meta.type) {
-//                            var ref = Paths.roomMetaRef(room.rid());
-//                            ref.update({type: RoomTypePublic});
-//                        }
+        // Start listening to Firebase
+        publicRoomsRef.on('child_added', (snapshot) => {
 
-                            //RoomStore.addRoom(room);
+            const rid = snapshot.key;
+            if(rid) {
+                const room = this.RoomStore.getOrCreateRoomWithID(rid);
 
-                        });
-
-                    }
-
-                }).bind(this));
-
-                publicRoomsRef.on('child_removed', (function (snapshot) {
-
-                    var room = RoomStore.getOrCreateRoomWithID(snapshot.key);
-                    $rootScope.$broadcast(PublicRoomRemovedNotification, room);
-
-
-                }).bind(this));
-            },
-
-            off: function () {
-                let publicRoomsRef = Paths.publicRoomsRef();
-
-                publicRoomsRef.off('child_added');
-                publicRoomsRef.off('child_removed');
+                room.on().then(() => {
+                    this.$rootScope.$broadcast(PublicRoomAddedNotification, room);
+                });
             }
-        }
-    }]);
+
+        });
+
+        publicRoomsRef.on('child_removed', (snapshot) => {
+
+            const room = this.RoomStore.getOrCreateRoomWithID(snapshot.key);
+            this.$rootScope.$broadcast(PublicRoomRemovedNotification, room);
+        });
+    }
+
+    off() {
+        const publicRoomsRef = this.Paths.publicRoomsRef();
+
+        publicRoomsRef.off('child_added');
+        publicRoomsRef.off('child_removed');
+    }
+}
+
+angular.module('myApp.services').service('PublicRoomsConnector', PublicRoomsConnector);

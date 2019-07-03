@@ -1,7 +1,8 @@
 import * as angular from 'angular'
+import {IRoom} from "../entities/room";
 
 export interface IRoomStore {
-
+    getOrCreateRoomWithID(rid): IRoom
 }
 
 angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload', 'ArrayUtils',
@@ -48,7 +49,7 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
                 LocalStorage.sync();
             },
 
-            getOrCreateRoomWithID: function (rid) {
+            getOrCreateRoomWithID: function (rid): IRoom {
 
                 var room = this.getRoomWithID(rid);
 

@@ -1,195 +1,201 @@
 import * as angular from 'angular'
 import * as NotificationKeys from "../keys/notification-keys";
 import * as Defines from "../keys/defines"
+import {IUtils} from "./utils";
+import {IPaths} from "../network/paths";
 
 export interface IConfig {
     clockType: string
 }
 
-angular.module('myApp.services').factory('Config', ['$rootScope', '$timeout', '$q', 'Paths', 'Utils', function ($rootScope, $timeout, $q, Paths, Utils) {
+export enum SetBy {
+    Default = 0,
+    ControlPanel = 10,
+    ByInclude = 20,
+    SingleSignOn = 30,
+    Admin = 40,
+}
 
-    // Priorities for setting
-    var setByDefault = 0;
-    var setByControlPanel = 10;
-    var setByInclude = 20;
-    var setBySingleSignOn = 30;
-    var setByAdmin = 40;
+class Config implements IConfig {
 
-    return {
+    static $inject = ['$rootScope', '$timeout', '$q', 'Paths', 'Utils'];
 
-        setByDefault: setByDefault,
-        setByInclude: setByInclude,
-        setBySingleSignOn: setBySingleSignOn,
-        //setByFirebase: setByFirebase,
-        setByControlPanel: setByControlPanel,
-        setByAdmin: setByAdmin,
+    singleSignOnURL = null;
+    singleSignOnURLSet = SetBy.Default;
 
-        singleSignOnURL: null,
-        singleSignOnURLSet: setByDefault,
+    loginURL = null;
+    loginURLSet = SetBy.Default;
 
-        loginURL: null,
-        loginURLSet: setByDefault,
+    registerURL = null;
+    registerURLSet = SetBy.Default;
 
-        registerURL: null,
-        registerURLSet: setByDefault,
+    // How many historic messages to set by default
+    maxHistoricMessages = 50;
+    maxHistoricMessagesSet = SetBy.Default;
 
-        // How many historic messages to set by default
-        maxHistoricMessages: 50,
-        maxHistoricMessagesSet: setByDefault,
+    // Stop the user from changing their name
+    disableUserNameChange = false;
+    disableUserNameChangeSet = SetBy.Default;
 
-        // Stop the user from changing their name
-        disableUserNameChange: false,
-        disableUserNameChangeSet: setByDefault,
+    // Stop the profile box from being displayed
+    disableProfileBox = false;
+    disableProfileBoxSet = SetBy.Default;
 
-        // Stop the profile box from being displayed
-        disableProfileBox: false,
-        disableProfileBoxSet: setByDefault,
+    // Clock type:
+    // - 12hour
+    // - 24hour
+    clockType = '12hour';
+    clockTypeSet = SetBy.Default;
 
-        // Clock type:
-        // - 12hour
-        // - 24hour
-        clockType: '12hour',
-        clockTypeSet: setByDefault,
+    // Are users allowed to create their own public rooms
+    usersCanCreatePublicRooms = false;
+    usersCanCreatePublicRoomsSet = SetBy.Default;
 
-        // Are users allowed to create their own public rooms
-        usersCanCreatePublicRooms: false,
-        usersCanCreatePublicRoomsSet: setByDefault,
+    // The primary domain is used when the chat is needed
+    // across multiple subdomains
+    primaryDomain = '';
+    primaryDomainSet = SetBy.Default;
 
-        // The primary domain is used when the chat is needed
-        // across multiple subdomains
-        primaryDomain: '',
-        primaryDomainSet: setByDefault,
+    // Allow anonymous login?
+    anonymousLoginEnabled = false;
+    anonymousLoginEnabledSet = SetBy.Default;
 
-        // Allow anonymous login?
-        anonymousLoginEnabled: false,
-        anonymousLoginEnabledSet: setByDefault,
+    // Can the user log in using social logins
+    socialLoginEnabled = true;
+    socialLoginEnabledSet = SetBy.Default;
 
-        // Can the user log in using social logins
-        socialLoginEnabled: true,
-        socialLoginEnabledSet: setByDefault,
+    // Header and tab color
+    headerColor = '#0d82b3';
+    headerColorSet = SetBy.Default;
 
-        // Header and tab color
-        headerColor: '#0d82b3',
-        headerColorSet: setByDefault,
+    // After how long should the user be marked as offline
+    inactivityTimeout = 5;
+    inactivityTimeoutSet = SetBy.Default;
 
-        // After how long should the user be marked as offline
-        inactivityTimeout: 5,
-        inactivityTimeoutSet: setByDefault,
+    // The Single sign on API to use
+    singleSignOnAPILevel = 1;
+    singleSignOnAPILevelSet = SetBy.Default;
 
-        // The Single sign on API to use
-        singleSignOnAPILevel: 1,
-        singleSignOnAPILevelSet: setByDefault,
+    singleSignOn = true;
+    singleSignOnSet = SetBy.Admin;
 
-        singleSignOn: true,
-        singleSignOnSet: setByAdmin,
+    onlineUsersEnabled = true;
+    onlineUsersEnabledSet = SetBy.Default;
 
-        onlineUsersEnabled: true,
-        onlineUsersEnabledSet: setByDefault,
+    publicRoomsEnabled = true;
+    publicRoomsEnabledSet = SetBy.Default;
 
-        publicRoomsEnabled: true,
-        publicRoomsEnabledSet: setByDefault,
+    friendsEnabled = true;
+    friendsEnabledSet = SetBy.Default;
 
-        friendsEnabled: true,
-        friendsEnabledSet: setByDefault,
+    friends = [];
+    friendsSet = SetBy.Default;
 
-        friends: [],
-        friendsSet: setByDefault,
+    fileMessagesEnabled = false;
+    fileMessagesEnabledSet = SetBy.Default;
 
-        fileMessagesEnabled: false,
-        fileMessagesEnabledSet: setByDefault,
+    imageMessagesEnabled = false;
+    imageMessagesEnabledSet = SetBy.Default;
 
-        imageMessagesEnabled: false,
-        imageMessagesEnabledSet: setByDefault,
+    marginRight = 0;
+    marginRightSet = SetBy.Default;
 
-        marginRight: 0,
-        marginRightSet: setByDefault,
+    clearCacheTimestamp = null;
+    clearCacheTimestampSet = SetBy.Default;
 
-        clearCacheTimestamp: null,
-        clearCacheTimestampSet: setByDefault,
+    disableUserInfoPopup = false;
+    disableUserInfoPopupSet = SetBy.Default;
 
-        disableUserInfoPopup: false,
-        disableUserInfoPopupSet: setByDefault,
+    clickToChatTimeout = Defines.LastVisitedTimeout;
+    clickToChatTimeoutSet = SetBy.Default;
 
-        clickToChatTimeout: Defines.LastVisitedTimeout,
-        clickToChatTimeoutSet: setByDefault,
+    userProfileLinkEnabled = false;
+    userProfileLinkEnabledSet = SetBy.Default;
 
-        userProfileLinkEnabled: false,
-        userProfileLinkEnabledSet: setByDefault,
+    $timeout: ng.ITimeoutService;
+    $rootScope;
+    $q: ng.IQService;
+    Paths: IPaths;
+    Utils: IUtils;
 
-        // We update the config using the data provided
-        // but we only update variables where the priority
-        // of this setBy entity is higher than the previous
-        // one
-        setConfig: function (setBy, config) {
+    constructor($rootScope, $timeout: ng.ITimeoutService, $q: ng.IQService, Paths: IPaths, Utils: IUtils) {
+        this.$timeout = $timeout;
+        this.$rootScope = $rootScope;
+        this.$q = $q;
+        this.Paths = Paths;
+        this.Utils = Utils;
+    }
 
-            this.setValue("inactivityTimeout", config, setBy);
-            this.inactivityTimeout = Math.max(this.inactivityTimeout, 2);
-            this.inactivityTimeout = Math.min(this.inactivityTimeout, 15);
 
-            this.setValue("maxHistoricMessages", config, setBy);
-            this.setValue("disableUserNameChange", config, setBy);
-            this.setValue("disableProfileBox", config, setBy);
-            this.setValue("clockType", config, setBy);
-            this.setValue("usersCanCreatePublicRooms", config, setBy);
-            this.setValue("primaryDomain", config, setBy);
-            this.setValue("anonymousLoginEnabled", config, setBy);
+    // We update the config using the data provided
+    // but we only update variables where the priority
+    // of this setBy entity is higher than the previous
+    // one
+    setConfig (setBy: SetBy, config: Map<string, any>) {
 
-            this.setValue("socialLoginEnabled", config, setBy);
-            this.setValue("headerColor", config, setBy);
-            this.setValue("singleSignOnAPILevel", config, setBy);
-            this.setValue("apiLevel", config, setBy);
-            this.setValue("singleSignOn", config, setBy);
-            this.setValue("singleSignOnURL", config, setBy);
-            this.setValue("registerURL", config, setBy);
-            this.setValue("loginURL", config, setBy);
+        this.setValue("inactivityTimeout", config, setBy);
+        this.inactivityTimeout = Math.max(this.inactivityTimeout, 2);
+        this.inactivityTimeout = Math.min(this.inactivityTimeout, 15);
 
-            this.setValue("onlineUsersEnabled", config, setBy);
-            this.setValue("publicRoomsEnabled", config, setBy);
-            this.setValue("friendsEnabled", config, setBy);
-            this.setValue("clearCacheTimestamp", config, setBy);
-            this.setValue("fileMessagesEnabled", config, setBy);
-            this.setValue("imageMessagesEnabled", config, setBy);
-            this.setValue("marginRight", config, setBy);
+        this.setValue("maxHistoricMessages", config, setBy);
+        this.setValue("disableUserNameChange", config, setBy);
+        this.setValue("disableProfileBox", config, setBy);
+        this.setValue("clockType", config, setBy);
+        this.setValue("usersCanCreatePublicRooms", config, setBy);
+        this.setValue("primaryDomain", config, setBy);
+        this.setValue("anonymousLoginEnabled", config, setBy);
 
-            this.setValue("friends", config, setBy);
+        this.setValue("socialLoginEnabled", config, setBy);
+        this.setValue("headerColor", config, setBy);
+        this.setValue("singleSignOnAPILevel", config, setBy);
+        this.setValue("apiLevel", config, setBy);
+        this.setValue("singleSignOn", config, setBy);
+        this.setValue("singleSignOnURL", config, setBy);
+        this.setValue("registerURL", config, setBy);
+        this.setValue("loginURL", config, setBy);
 
-            this.setValue("clickToChatTimeout", config, setBy);
-            this.setValue("userProfileLinkEnabled", config, setBy);
+        this.setValue("onlineUsersEnabled", config, setBy);
+        this.setValue("publicRoomsEnabled", config, setBy);
+        this.setValue("friendsEnabled", config, setBy);
+        this.setValue("clearCacheTimestamp", config, setBy);
+        this.setValue("fileMessagesEnabled", config, setBy);
+        this.setValue("imageMessagesEnabled", config, setBy);
+        this.setValue("marginRight", config, setBy);
 
-            // After we've updated the config we need to digest the
-            // root scope
-            $timeout(function() {
-                $rootScope.$digest();
-            });
+        this.setValue("friends", config, setBy);
 
-            $rootScope.config = this;
+        this.setValue("clickToChatTimeout", config, setBy);
+        this.setValue("userProfileLinkEnabled", config, setBy);
 
-            $rootScope.$broadcast(NotificationKeys.ConfigUpdatedNotification);
-            $timeout(function () {
-                $rootScope.$digest()
-            });
+        this.$rootScope.config = this;
 
-        },
+        this.$rootScope.$broadcast(NotificationKeys.ConfigUpdatedNotification);
 
-        setValue: function (name, data, setBy) {
-            if(data && !Utils.unORNull(data[name]) && this[name+"Set"] <= setBy) {
-                this[name] = data[name];
-                this[name+"Set"] = setBy;
-            }
-        },
+        this.$timeout(() => {
+            this.$rootScope.$digest()
+        });
 
-        startConfigListener: function () {
+    }
 
-            var deferred = $q.defer();
-
-            var ref = Paths.configRef();
-            ref.on('value', (function (snapshot) {
-                this.setConfig(this.setByControlPanel, snapshot.val());
-                deferred.resolve();
-            }).bind(this));
-
-            return deferred.promise;
+    setValue(name: string, data: any, setBy: SetBy) {
+        if(data && !this.Utils.unORNull(data[name]) && this[name+"Set"] <= setBy) {
+            this[name] = data[name];
+            this[name+"Set"] = setBy;
         }
+    }
 
-    };
-}]);
+    startConfigListener(): ng.IPromise<any> {
+
+        const deferred = this.$q.defer();
+
+        const ref = this.Paths.configRef();
+        ref.on('value', (snapshot: firebase.database.DataSnapshot) => {
+            this.setConfig(SetBy.ControlPanel, snapshot.val());
+            deferred.resolve();
+        });
+
+        return deferred.promise;
+    }
+}
+
+angular.module('myApp.services').service('Config', Config);

@@ -1,32 +1,32 @@
-export let DEBUG = false;
-export let FIREBASE_REF_DEBUG = false;
+export const DEBUG = false;
+export const FIREBASE_REF_DEBUG = false;
 
-export let DefaultAvatarProvider = "http://flathash.com";
+export const DefaultAvatarProvider = "http://flathash.com";
 
-export let Minute = 60;
-export let Hour = Minute * 60;
-export let Day = Hour * 24;
+export const Minute = 60;
+export const Hour = Minute * 60;
+export const Day = Hour * 24;
 
 // Last visited
 // Show the click to chat box if the user has visited more than x hours
-export let LastVisitedTimeout = Hour;
+export const LastVisitedTimeout = Hour;
 
 // TODO:
-export let DefaultUserPrefix = "ChatSDK";
+export const DefaultUserPrefix = "ChatSDK";
 
-export let ProviderTypeCustom = 'custom';
+export const ProviderTypeCustom = 'custom';
 
-export let ProfileSettingsBox = 'profileSettingsBox';
-export let LoginBox = 'loginBox';
-export let MainBox = 'mainBox';
-export let CreateRoomBox = 'createRoomBox';
-export let ErrorBox = 'errorBox';
+export const ProfileSettingsBox = 'profileSettingsBox';
+export const LoginBox = 'loginBox';
+export const MainBox = 'mainBox';
+export const CreateRoomBox = 'createRoomBox';
+export const ErrorBox = 'errorBox';
 
-export let ShowProfileSettingsBox = 'showProfileSettingsBox';
-export let ShowCreateChatBox = 'showCreateChatBox';
+export const ShowProfileSettingsBox = 'showProfileSettingsBox';
+export const ShowCreateChatBox = 'showCreateChatBox';
 
 // Notifications
 
-export let NotificationTypeWaiting = 'waiting';
-export let NotificationTypeAlert = 'alert';
+export const NotificationTypeWaiting = 'waiting';
+export const NotificationTypeAlert = 'alert';
 

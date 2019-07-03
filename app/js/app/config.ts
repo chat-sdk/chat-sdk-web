@@ -45,6 +45,13 @@ export const ChatSDKConfig = {
 
     hideMainBox: false,
 
-    // resourceRootURL: 'http://test.com',
+    // Comma separated list of paths. If set, chat will
+    // only display on these paths
+    showOnPaths: null,
+
+    // If set, partials will be loaded from this URL. Otherwise
+    // they will be loaded from the current url in test mode or
+    // the Firebase hosting URL if live
+    resourceRootURL: null,
 };
 

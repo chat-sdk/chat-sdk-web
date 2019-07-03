@@ -16,175 +16,182 @@ import {
     UsersPath
 } from "../keys/path-keys";
 import {ConfigKey, DetailsKey, ImageKey, MetaKey, OnlineKey, TimeKey} from "../keys/keys";
+import {IEnvironment} from "../services/environment";
 
 export interface IPaths {
-
+    configRef() : firebase.database.Reference
+    publicRoomsRef () : firebase.database.Reference
 }
 
-angular.module('myApp.services').factory('Paths', ['Environment', function (Environment) {
+class Paths implements IPaths {
 
-    return {
+    static $inject = ['Environment'];
 
-        cid: null,
-        database: null,
+    cid: string = null;
+    database: firebase.database.Database;
+    Environment: IEnvironment;
 
-        setCID: function (cid: string) {
-            if(FIREBASE_REF_DEBUG) console.log("setCID: " + cid);
-            this.cid = cid;
-        },
+    constructor (Environment: IEnvironment) {
+        this.Environment = Environment;
+    }
 
-        firebase: function () : firebase.database.Reference {
-            if(firebase.apps.length == 0) {
-                firebase.initializeApp(Environment.firebaseConfig());
-                this.database = firebase.database();
-            }
-            if(FIREBASE_REF_DEBUG) console.log("firebase");
-            if(this.cid) {
-                return this.database.ref(this.cid);
-            }
-            else {
-                return this.database.ref();
-            }
-        },
+    setCID (cid: string) {
+        if(FIREBASE_REF_DEBUG) console.log("setCID: " + cid);
+        this.cid = cid;
+    }
 
-        usersRef: function () : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("usersRef");
-            return this.firebase().child(UsersPath);
-        },
+    firebase () : firebase.database.Reference {
+        if(firebase.apps.length == 0) {
+            firebase.initializeApp(this.Environment.firebaseConfig());
+            this.database = firebase.database();
+        }
+        if(FIREBASE_REF_DEBUG) console.log("firebase");
+        if(this.cid) {
+            return this.database.ref(this.cid);
+        }
+        else {
+            return this.database.ref();
+        }
+    }
 
-        configRef: function () : firebase.database.Reference {
-            return this.firebase().child(ConfigKey);
-        },
+    usersRef () : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("usersRef");
+        return this.firebase().child(UsersPath);
+    }
 
-        timeRef: function (uid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("timeRef");
-            return this.firebase().child(TimeKey).child(uid);
-        },
+    configRef () : firebase.database.Reference {
+        return this.firebase().child(ConfigKey);
+    }
 
-        userRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userRef");
-            return this.usersRef().child(fid);
-        },
+    timeRef (uid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("timeRef");
+        return this.firebase().child(TimeKey).child(uid);
+    }
 
-        userMetaRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userMetaRef");
-            return this.userRef(fid).child(MetaKey);
-        },
+    userRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userRef");
+        return this.usersRef().child(fid);
+    }
 
-        userImageRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userImageRef");
-            return this.userRef(fid).child(ImageKey);
-        },
+    userMetaRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userMetaRef");
+        return this.userRef(fid).child(MetaKey);
+    }
 
-        userStateRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userStateRef");
-            return this.userRef(fid).child(UpdatedPath);
-        },
+    userImageRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userImageRef");
+        return this.userRef(fid).child(ImageKey);
+    }
 
-        userOnlineRef: function (fid) : firebase.database.Reference {
-            return this.userRef(fid).child(OnlineKey);
-        },
+    userStateRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userStateRef");
+        return this.userRef(fid).child(UpdatedPath);
+    }
+
+    userOnlineRef (fid) : firebase.database.Reference {
+        return this.userRef(fid).child(OnlineKey);
+    }
 
 
-//    userThumbnailRef: function (fid) {
+//    userThumbnailRef (fid) {
 //        if(DEBUG) console.log("");
 //        return this.userRef(fid).child(bThumbnailKey);
-//    },
+//    }
 
-        userFriendsRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userFriendsRef");
-            return this.userRef(fid).child(FriendsPath);
-        },
+    userFriendsRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userFriendsRef");
+        return this.userRef(fid).child(FriendsPath);
+    }
 
-        userBlockedRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userBlockedRef");
-            return this.userRef(fid).child(BlockedPath);
-        },
+    userBlockedRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userBlockedRef");
+        return this.userRef(fid).child(BlockedPath);
+    }
 
-        onlineUsersRef: function () : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUsersRef");
-            return this.firebase().child(OnlineKey);
-        },
+    onlineUsersRef () : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("onlineUsersRef");
+        return this.firebase().child(OnlineKey);
+    }
 
-        onlineUserRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUserRef");
-            return this.onlineUsersRef().child(fid);
-        },
+    onlineUserRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("onlineUserRef");
+        return this.onlineUsersRef().child(fid);
+    }
 
 
-        roomsRef: function () : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomsRef");
-            return this.firebase().child(RoomsPath);
-        },
+    roomsRef () : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomsRef");
+        return this.firebase().child(RoomsPath);
+    }
 
-        publicRoomsRef: function () : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("publicRoomsRef");
-            return this.firebase().child(PublicRoomsPath);
-        },
+    publicRoomsRef () : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("publicRoomsRef");
+        return this.firebase().child(PublicRoomsPath);
+    }
 
-        publicRoomRef: function (rid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("publicRoomRef");
-            return this.publicRoomsRef().child(rid);
-        },
+    publicRoomRef (rid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("publicRoomRef");
+        return this.publicRoomsRef().child(rid);
+    }
 
-        roomRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomRef");
-            return this.roomsRef().child(fid);
-        },
+    roomRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomRef");
+        return this.roomsRef().child(fid);
+    }
 
-        roomMetaRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomMetaRef");
-            return this.roomRef(fid).child(DetailsKey);
-        },
+    roomMetaRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomMetaRef");
+        return this.roomRef(fid).child(DetailsKey);
+    }
 
-        roomLastMessageRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
-            return this.roomRef(fid).child(LastMessagePath);
-        },
+    roomLastMessageRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomLastMessageRef");
+        return this.roomRef(fid).child(LastMessagePath);
+    }
 
-        roomStateRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomStateRef");
-            return this.roomRef(fid).child(UpdatedPath);
-        },
+    roomStateRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomStateRef");
+        return this.roomRef(fid).child(UpdatedPath);
+    }
 
-        roomMessagesRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomMessagesRef");
-            return this.roomRef(fid).child(MessagesPath);
-        },
+    roomMessagesRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomMessagesRef");
+        return this.roomRef(fid).child(MessagesPath);
+    }
 
-        roomUsersRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomUsersRef");
-            return this.roomRef(fid).child(UsersMetaPath);
-        },
+    roomUsersRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomUsersRef");
+        return this.roomRef(fid).child(UsersMetaPath);
+    }
 
-        roomTypingRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("roomTypingRef");
-            return this.roomRef(fid).child(TypingPath);
-        },
+    roomTypingRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("roomTypingRef");
+        return this.roomRef(fid).child(TypingPath);
+    }
 
-        userRoomsRef: function (fid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("userRoomsRef");
-            return this.userRef(fid).child(RoomsPath);
-        },
+    userRoomsRef (fid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("userRoomsRef");
+        return this.userRef(fid).child(RoomsPath);
+    }
 
-        messageUsersRef: function (rid, mid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("messageUsersRef");
-            return this.messageRef(rid, mid).child(UsersPath);
-        },
+    messageUsersRef (rid, mid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("messageUsersRef");
+        return this.messageRef(rid, mid).child(UsersPath);
+    }
 
-        messageRef: function (rid, mid) : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("messageRef");
-            return this.roomMessagesRef(rid).child(mid);
-        },
+    messageRef (rid, mid) : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("messageRef");
+        return this.roomMessagesRef(rid).child(mid);
+    }
 
-        onlineUserCountRef: function () : firebase.database.Reference {
-            if(FIREBASE_REF_DEBUG) console.log("onlineUserCountRef");
-            return this.firebase().child(OnlineUserCountKey);
-        },
+    onlineUserCountRef () : firebase.database.Reference {
+        if(FIREBASE_REF_DEBUG) console.log("onlineUserCountRef");
+        return this.firebase().child(OnlineUserCountKey);
+    }
 
-        flaggedMessageRef: function (tid, mid) : firebase.database.Reference {
-            return this.firebase().child(FlaggedPath).child(RoomsPath).child(tid).child(MessagesPath).child(mid);
-        }
+    flaggedMessageRef (tid, mid) : firebase.database.Reference {
+        return this.firebase().child(FlaggedPath).child(RoomsPath).child(tid).child(MessagesPath).child(mid);
+    }
+}
 
-    };
-}]);
+angular.module('myApp.services').service('Paths', Paths);

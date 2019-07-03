@@ -30,6 +30,7 @@ export interface IRoom {
     updateType()
     loadMoreMessages(callback: () => void, numberOfMessages?: number): void
     rid(): string
+    on()
 }
 
 angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', '$window','Config','MessageFactory','Cache', 'UserStore','User', 'Presence', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Log', 'Time', 'Entity', 'Utils', 'Paths', 'CloudImage', 'Marquee', 'Environment',
