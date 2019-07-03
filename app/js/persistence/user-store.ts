@@ -4,7 +4,7 @@ import {ILocalStorage} from "./local-storage";
 
 angular.module('myApp.services').factory('UserStore', ['$rootScope', '$timeout', 'LocalStorage', 'User', 'BeforeUnload', 'NetworkManager',
     function ($rootScope, $timeout, LocalStorage, User, BeforeUnload, NetworkManager) {
-        var UserStore = {
+        let UserStore = {
 
             users: {},
 

@@ -23,7 +23,7 @@ angular.module('myApp.services').factory('RoomOpenQueue', [function () {
         },
 
         roomExistsAndPop: function (rid) {
-            var index = this.rids.indexOf(rid);
+            let index = this.rids.indexOf(rid);
             if(index >= 0) {
                 this.rids.splice(index, 1);
                 return true;

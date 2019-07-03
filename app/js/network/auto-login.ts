@@ -21,7 +21,7 @@ angular.module('myApp.services').factory('AutoLogin', ["$window", "Credential", 
 
             let pairs = $window.location.search.replace("?", "").split("&");
 
-            for(var i = 0; i < pairs.length; i++) {
+            for(let i = 0; i < pairs.length; i++) {
                 let values = pairs[i].split("=");
                 if(values.length === 2) {
                     let key = values[0];

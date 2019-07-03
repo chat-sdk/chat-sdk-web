@@ -9,18 +9,18 @@ angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q
     return {
         // This should be called after the user has selected
         update_user_to_1_0_5: function (user) {
-            var array;
-            var promises = [];
+            let array;
+            const promises = [];
             if(user.meta && user.meta.friends) {
                 array = user.meta.friends;
-                for(var key in array) {
+                for(let key in array) {
                     if(array.hasOwnProperty(key)) {
                         promises.push(user.addFriendWithUID(array[key].uid));
                     }
                 }
                 // Now remove the friends reference
-                var deferred = $q.defer();
-                var ref = Paths.userMetaRef(user.uid()).child(PathKeys.FriendsPath);
+                const deferred = $q.defer();
+                const ref = Paths.userMetaRef(user.uid()).child(PathKeys.FriendsPath);
                 ref.remove((function (error) {
                     if(error) {
                         deferred.reject(error);
@@ -33,14 +33,14 @@ angular.module('myApp.services').factory('Upgrade', ['$q', 'Paths', function ($q
             }
             if(user.meta && user.meta.blocked) {
                 array = user.meta.blocked;
-                for(var key in array) {
+                for(let key in array) {
                     if(array.hasOwnProperty(key)) {
                         promises.push(user.blockUserWithUID(array[key].uid));
                     }
                 }
                 // Now remove the friends reference
-                deferred = $q.defer();
-                ref = Paths.userMetaRef(user.uid()).child(PathKeys.BlockedPath);
+                const deferred = $q.defer();
+                const ref = Paths.userMetaRef(user.uid()).child(PathKeys.BlockedPath);
                 ref.remove(function (error) {
                     if(error) {
                         deferred.reject(error);

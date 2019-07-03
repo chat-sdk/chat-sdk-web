@@ -8,7 +8,7 @@ angular.module('myApp.filters').filter("emoji", function () {
             input = "";
         }
 
-        var replaceAll = function(target, search, replacement) {
+        let replaceAll = function(target, search, replacement) {
             return target.split(search).join(replacement);
         };
 

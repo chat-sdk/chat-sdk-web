@@ -228,7 +228,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
                 return;
             }
 
-            var ref = Paths.userOnlineRef(this.uid());
+            let ref = Paths.userOnlineRef(this.uid());
             ref.on('value', (function (snapshot) {
                 if(!Utils.unORNull(snapshot.val())) {
                     this.online = snapshot.val();
@@ -265,9 +265,9 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         User.prototype.pushMeta = function () {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userMetaRef(this.uid());
+            let ref = Paths.userMetaRef(this.uid());
             ref.update(this.meta, (function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -312,7 +312,7 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         User.prototype.updateImageURL = function (imageURL) {
             // Compare to the old URL
-            var imageChanged = imageURL != this.imageURL();
+            let imageChanged = imageURL != this.imageURL();
             if(imageChanged) {
                 this.setMetaValue(UserKeys.UserImageURL, imageURL);
                 this.setImageURL(imageURL);
@@ -364,11 +364,11 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         User.prototype.addRoomWithRID = function (rid, type) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userRoomsRef(this.uid()).child(rid);
+            let ref = Paths.userRoomsRef(this.uid()).child(rid);
 
-            var data = {
+            let data = {
                 invitedBy: $rootScope.user.uid()
             };
 
@@ -395,9 +395,9 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
 
         User.prototype.removeRoomWithRID = function (rid) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userRoomsRef(this.uid()).child(rid);
+            let ref = Paths.userRoomsRef(this.uid()).child(rid);
             ref.remove((function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -454,10 +454,10 @@ angular.module('myApp.services').factory('User', ['$rootScope', '$timeout', '$q'
         };
 
         User.prototype.blockUserWithUID = function (uid) {
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.userBlockedRef(this.uid());
-            var data = {};
+            let ref = Paths.userBlockedRef(this.uid());
+            let data = {};
             data[uid] = {uid: uid};
             ref.update(data, (function (error) {
                 if(error) {

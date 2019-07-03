@@ -13,14 +13,14 @@ angular.module('myApp.services').factory('WebStorage', ['$window', function ($wi
         cacheCleared: false,
 
         init: function () {
-            var localStorage = this.localStorage();
+            let localStorage = this.localStorage();
             if(!localStorage) {
                 return;
             }
 
             // Load the items from the store
-            var key = null;
-            for (var i = 0, k; i < localStorage.length; i++) {
+            let key = null;
+            for (let i = 0, k; i < localStorage.length; i++) {
                 key = localStorage.key(i);
                 if(key.slice(0, this.key.length) === this.key) {
                     this.store[key.slice(this.key.length)] = angular.fromJson(localStorage.getItem(key));

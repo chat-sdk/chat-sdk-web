@@ -5,7 +5,7 @@ export interface IMarquee {
 }
 
 angular.module('myApp.services').factory('Marquee', ['$window', '$interval', function ($window, $interval) {
-    var Marquee = {
+    let Marquee = {
 
         running: null,
         title: "",
@@ -19,7 +19,7 @@ angular.module('myApp.services').factory('Marquee', ['$window', '$interval', fun
             if(this.running) {
                 this.stop();
             }
-            var text = "Chatcat Message: " + message + "...";
+            let text = "Chatcat Message: " + message + "...";
 
             this.running = $interval((function () {
                 // Change the page title

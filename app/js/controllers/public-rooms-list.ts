@@ -46,24 +46,24 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
 
         $scope.allRooms.sort(function(a, b) {
 
-            var au = Utils.unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
-            var bu = Utils.unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+            let au = Utils.unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
+            let bu = Utils.unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
 
             if(au != bu) {
                 return au ? 1 : -1;
             }
 
             // Weight
-            var aw = Utils.unORNull(a.meta.weight) ? 100 : a.meta.weight;
-            var bw = Utils.unORNull(b.meta.weight) ? 100 : b.meta.weight;
+            let aw = Utils.unORNull(a.meta.weight) ? 100 : a.meta.weight;
+            let bw = Utils.unORNull(b.meta.weight) ? 100 : b.meta.weight;
 
             if(aw != bw) {
                 return aw - bw;
             }
             else {
 
-                var ac = a.getOnlineUserCount();
-                var bc = b.getOnlineUserCount();
+                let ac = a.getOnlineUserCount();
+                let bc = b.getOnlineUserCount();
 
                 //console.log("1: " + ac + ", 2: " + bc);
 

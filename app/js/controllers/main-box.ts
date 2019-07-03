@@ -89,7 +89,7 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
         };
 
         $scope.numberOfTabs = function () {
-            var tabs = 1;
+            let tabs = 1;
             if(Config.onlineUsersEnabled) {
                 tabs++;
             }

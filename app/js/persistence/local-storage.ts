@@ -30,21 +30,21 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         users: {},
 
         init: function () {
-            var rooms = this.getProperty(this.roomsKey);
+            const rooms = this.getProperty(this.roomsKey);
 
             if(rooms && rooms.length) {
-                var room = null;
-                for(var i = 0; i < rooms.length; i++) {
+                let room = null;
+                for(let i = 0; i < rooms.length; i++) {
                     room = rooms[i];
                     this.rooms[room.meta.rid] = room;
                 }
             }
 
-            var sus = this.getProperty(this.usersKey);
+            const sus = this.getProperty(this.usersKey);
             if(sus && sus.length) {
-                var su = null;
+                let su = null;
 
-                for(i = 0; i < sus.length; i++) {
+                for(let i = 0; i < sus.length; i++) {
                     su = sus[i];
                     this.users[su.meta.uid] = su;
                 }
@@ -70,9 +70,9 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         },
 
         storeRooms: function (rooms) {
-            var room;
-            var sr = [];
-            for(var key in rooms) {
+            let room;
+            let sr = [];
+            for(let key in rooms) {
                 if(rooms.hasOwnProperty(key)) {
                     room = rooms[key];
                     sr.push(room.serialize());
@@ -82,9 +82,9 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         },
 
         storeUsers: function (users) {
-            var user;
-            var su = [];
-            for(var key in users) {
+            let user;
+            let su = [];
+            for(let key in users) {
                 if(users.hasOwnProperty(key)) {
                     user = users[key];
                     su.push(user.serialize());
@@ -98,14 +98,14 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         },
 
         updateRoomFromStore: function (room) {
-            var sr = this.rooms[room.rid()];
+            let sr = this.rooms[room.rid()];
             if(sr) {
                 room.deserialize(sr);
             }
         },
 
         updateUserFromStore: function (user) {
-            var su = this.users[user.uid()];
+            let su = this.users[user.uid()];
             if(su) {
                 user.deserialize(su);
                 return true;
@@ -128,10 +128,10 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         },
 
         getProperty: function (key) {
-            var c = WebStorage.getProperty(key);
+            let c = WebStorage.getProperty(key);
 
             if(!Utils.unORNull(c)) {
-                var e;
+                let e;
                 try {
                     e = eval(c);
                 }
@@ -160,7 +160,7 @@ angular.module('myApp.services').factory('LocalStorage', ['$rootScope', '$timeou
         clearCacheWithTimestamp: function (timestamp) {
             if(!timestamp) return;
 
-            var currentTimestamp = this.getProperty(this.timestampKey);
+            let currentTimestamp = this.getProperty(this.timestampKey);
             if(!currentTimestamp || timestamp > currentTimestamp) {
                 this.removeProperty(this.roomsKey);
                 this.removeProperty(this.usersKey);

@@ -106,7 +106,7 @@ angular.module('myApp.services').service('StateManager', ['$rootScope', 'Friends
              * Blocked
              */
 
-            var blockedUsersRef = Paths.userBlockedRef(uid);
+            let blockedUsersRef = Paths.userBlockedRef(uid);
             blockedUsersRef.on('child_added', (function (snapshot) {
 
                 if(snapshot && snapshot.val()) {
@@ -142,7 +142,7 @@ angular.module('myApp.services').service('StateManager', ['$rootScope', 'Friends
             blockedUsersRef.off('child_removed');
 
             // Switch the rooms off
-            for(var i = 0; i < Cache.rooms.length; i++) {
+            for(let i = 0; i < Cache.rooms.length; i++) {
                 let room = Cache.rooms[i];
                 room.off();
             }
@@ -153,7 +153,7 @@ angular.module('myApp.services').service('StateManager', ['$rootScope', 'Friends
 
             let uid = snapshot.val().uid;
             if(uid) {
-                var user = UserStore.getOrCreateUserWithID(uid);
+                let user = UserStore.getOrCreateUserWithID(uid);
 
                 user.unblock = function () {
                     snapshot.ref.remove();
@@ -180,7 +180,7 @@ angular.module('myApp.services').service('StateManager', ['$rootScope', 'Friends
         impl_roomAdded: function (rid, invitedBy) {
 
             if (rid && invitedBy) {
-                var invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
+                let invitedByUser = UserStore.getOrCreateUserWithID(invitedBy);
 
                 // First check if we want to accept the room
                 // This should never happen

@@ -11,7 +11,7 @@ export interface ICache {
 }
 
 angular.module('myApp.services').factory('Cache', ['$rootScope', '$timeout', 'ArrayUtils', 'Utils', function ($rootScope, $timeout, ArrayUtils, Utils) {
-    var Cache = {
+    let Cache = {
 
         // The user's active rooms
         //

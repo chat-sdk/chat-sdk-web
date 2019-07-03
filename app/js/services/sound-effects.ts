@@ -21,7 +21,7 @@ angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Envir
         },
 
         alert1: function () {
-            var sound = new Howl({
+            let sound = new Howl({
                 src: [Environment.audioURL() + 'alert_1.mp3']
             });
             sound.play();

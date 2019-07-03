@@ -19,7 +19,7 @@ angular.module('myApp.controllers').controller('CreateRoomController', ['$scope'
 
         $scope.createRoom  = function () {
 
-            var promise;
+            let promise;
 
             // Is this a public room?
             if($scope.public) {
@@ -40,7 +40,7 @@ angular.module('myApp.controllers').controller('CreateRoomController', ['$scope'
             promise.then(function (rid) {
                 RoomOpenQueue.addRoomWithID(rid);
 
-//                var room = RoomStore.getOrCreateRoomWithID(rid);
+//                let room = RoomStore.getOrCreateRoomWithID(rid);
 //                room.on().then(function () {
 //                    room.open(0, 300);
 //                });

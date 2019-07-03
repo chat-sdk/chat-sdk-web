@@ -7,7 +7,7 @@ export interface IVisibility {
 
 angular.module('myApp.services').factory('Visibility', ['$rootScope', '$document', function ($rootScope, $document) {
 
-    var Visibility = {
+    let Visibility = {
 
         isHidden: false,
         uid: "Test",

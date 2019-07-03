@@ -11,14 +11,14 @@
 
         ga('create', 'UA-66551942-1', 'auto');
 
-        var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-        var eventer = window[eventMethod];
-        var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+        let eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+        let eventer = window[eventMethod];
+        let messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
 
         // Listen to message from child window
         eventer(messageEvent,function(e) {
             if(e.data) {
-                var data = JSON.parse(e.data);
+                let data = JSON.parse(e.data);
                 if (data && data.sender == 'chatcat') {
                     // Register this or realtime
                     if(data.action == 'bStatsImpressionNotification') {

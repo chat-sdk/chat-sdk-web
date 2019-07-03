@@ -31,7 +31,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
          */
         pathOn: function (key, callback) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             // Check to see if this path has already
             // been turned on
@@ -42,7 +42,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
             this.pathIsOn[key] = true;
 
             // Start listening to the state
-            var stateRef = this.stateRef(key);
+            let stateRef = this.stateRef(key);
 
             stateRef.off('value');
 
@@ -50,7 +50,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
             // when we call push this method is called twice
             stateRef.on('value', (function (snapshot) {
 
-                var time = snapshot.val();
+                let time = snapshot.val();
 
                 if(Defines.DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
                 if(Defines.DEBUG) console.log('Time: ' + time + ' State time: ' + this.state[key]);
@@ -66,7 +66,7 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
                     this.state[key] = time;
 
                     // Get the ref
-                    var ref = this.pathRef(key);
+                    let ref = this.pathRef(key);
 
                     // Add the value listener
                     ref.once('value', (function (snapshot) {
@@ -107,9 +107,9 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
 
         updateState: function (key) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = this.stateRef(key);
+            let ref = this.stateRef(key);
             ref.set(firebase.database.ServerValue.TIMESTAMP, function () {
                 deferred.resolve();
             });
@@ -144,9 +144,9 @@ angular.module('myApp.services').factory('Entity', ['$q', 'Paths', function ($q,
 
     Entity.updateState = function (path, id, key) {
 
-        var deferred = $q.defer();
+        let deferred = $q.defer();
 
-        var ref = this.stateRef(path, id, key);
+        let ref = this.stateRef(path, id, key);
         ref.set(firebase.database.ServerValue.TIMESTAMP, (function (error) {
             if(!error) {
                 deferred.resolve();

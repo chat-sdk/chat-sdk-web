@@ -9,19 +9,19 @@ angular.module('myApp.directives').directive('socialIframe', ["$rootScope", "$do
 
             //element.load(function () {
 
-//                var data = {
+//                let data = {
 //                    action: 'github',
 //                    path: Paths.firebase().toString()
 //                };
 
             // Add the event listener
-            var eventMethod = $window.addEventListener ? "addEventListener" : "attachEvent";
-            var eventer = $window[eventMethod];
-            var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+            let eventMethod = $window.addEventListener ? "addEventListener" : "attachEvent";
+            let eventer = $window[eventMethod];
+            let messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
 
             eventer(messageEvent, function(e) {
                 if (e.data) {
-                    var data = JSON.parse(e.data);
+                    let data = JSON.parse(e.data);
                     if(data.provider == 'chatcat') {
                         callback(data);
                     }

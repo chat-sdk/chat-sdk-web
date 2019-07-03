@@ -223,7 +223,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             // The login failed - display a message to the user
             $scope.hideNotification();
 
-            var message = "An unknown error occurred";
+            let message = "An unknown error occurred";
 
             if (error.code == 'AUTHENTICATION_DISABLED') {
                 message = "This authentication method is currently disabled.";

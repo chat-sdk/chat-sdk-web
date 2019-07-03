@@ -69,8 +69,8 @@ angular.module('myApp.controllers').controller('UserListController', ['$scope', 
         // then alphabetically
         $scope.users.sort(function (user1, user2) {
             // Sort by who's online first then alphabetcially
-            var aOnline = OnlineConnector.onlineUsers[user1.uid()];
-            var bOnline = OnlineConnector.onlineUsers[user2.uid()];
+            let aOnline = OnlineConnector.onlineUsers[user1.uid()];
+            let bOnline = OnlineConnector.onlineUsers[user2.uid()];
 
             if(aOnline !== bOnline) {
                 return aOnline ? 1 : -1;

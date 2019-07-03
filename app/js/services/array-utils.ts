@@ -12,9 +12,9 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
 
         getRoomsWithUsers: function (rooms, users) {
 
-            var roomsWithUsers = [];
-            for(var i = 0; i < rooms.length; i++) {
-                var room = rooms[i];
+            let roomsWithUsers = [];
+            for(let i = 0; i < rooms.length; i++) {
+                let room = rooms[i];
                 if(room.containsOnlyUsers(users)) {
                     if((users.length == 2 && room.type() == RoomType.RoomType1to1) || (users.length != 2 && room.type() == RoomType.RoomTypeGroup)) {
                         roomsWithUsers.push(room);
@@ -26,8 +26,8 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
 
         roomsSortedByMostRecent: function (rooms) {
             rooms.sort(function (a, b) {
-                var at = a.lastMessageMeta ? a.lastMessageMeta[MessageKeys.messageTime] : a.created();
-                var bt = b.lastMessageMeta ? b.lastMessageMeta[MessageKeys.messageTime] : b.created();
+                let at = a.lastMessageMeta ? a.lastMessageMeta[MessageKeys.messageTime] : a.created();
+                let bt = b.lastMessageMeta ? b.lastMessageMeta[MessageKeys.messageTime] : b.created();
 
                 return bt - at;
             });
@@ -35,7 +35,7 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
         },
 
         indexOf: function (array, id, getID) {
-            for(var i = 0; i < array.length; i++) {
+            for(let i = 0; i < array.length; i++) {
                 if(id == getID(array[i])) {
                     return i;
                 }
@@ -46,7 +46,7 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
             if(array.length == 0) {
                 return;
             }
-            var i = this.indexOf(array, id, getID);
+            let i = this.indexOf(array, id, getID);
             array.splice(i, 1);
         },
 
@@ -54,12 +54,12 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
             if(array.length == 0) {
                 return null;
             }
-            var i = this.indexOf(array, id, getID);
+            let i = this.indexOf(array, id, getID);
             return array[i];
         },
 
         contains: function (array, obj) {
-            for(var i = 0; i < array.length; i++) {
+            for(let i = 0; i < array.length; i++) {
                 if(obj == array[i]) {
                     return true;
                 }
@@ -68,7 +68,7 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
         },
 
         remove: function (array, obj) {
-            for(var i = 0; i < array.length; i++) {
+            for(let i = 0; i < array.length; i++) {
                 if(obj == array[i]) {
                     array.splice(i, 1);
                     break;
@@ -82,14 +82,14 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
             }
             else {
                 // Loop over all elements
-                var result = [];
-                var elm, t1, t2;
-                for(var i = 0; i < array.length; i++) {
+                let result = [];
+                let elm, t1, t2;
+                for(let i = 0; i < array.length; i++) {
 
                     elm = array[i];
                     // Switch to lower case and remove spaces
                     // to improve search results
-                    var elmKey = getKey(elm);
+                    let elmKey = getKey(elm);
                     if (!Utils.unORNull(key) && !Utils.unORNull(elmKey)) {
                         t1 = key.toLowerCase().replace(/ /g,'');
                         t2 = elmKey.toLowerCase().replace(/ /g,'');
@@ -103,8 +103,8 @@ angular.module('myApp.services').factory('ArrayUtils', ['Utils', function (Utils
         },
 
         objectToArray: function (object) {
-            var array = [];
-            for(var key in object) {
+            let array = [];
+            for(let key in object) {
                 if(object.hasOwnProperty(key)) {
                     array.push(object[key]);
                 }

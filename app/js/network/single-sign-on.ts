@@ -22,7 +22,7 @@ angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$
             busy: false,
 
             getAPILevel: function () {
-                var level = Config.singleSignOnAPILevel;
+                let level = Config.singleSignOnAPILevel;
 
                 if(Utils.unORNull(level)) {
                     level = 0;
@@ -39,7 +39,7 @@ angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$
 
             authenticate: function () {
 
-                var url = Config.singleSignOnURL;
+                let url = Config.singleSignOnURL;
 
                 this.busy = true;
                 switch (this.getAPILevel()) {
@@ -54,7 +54,7 @@ angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$
 
             authenticateLevel0: function (url) {
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 this.executeRequest({
                     method: 'get',
@@ -85,22 +85,22 @@ angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$
 
                 //this.invalidate();
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 // Get the current user's information
                 this.getUserUID(url).then((function (response) {
 
-                    var currentUID = response.uid;
+                    let currentUID = response.uid;
 
                     // Check to see if we have a token cached
-                    var token = LocalStorage.getProperty(LocalStorage.tokenKey);
-                    var expiry = LocalStorage.getProperty(LocalStorage.tokenExpiryKey);
-                    var uid = LocalStorage.getProperty(LocalStorage.UIDKey);
+                    let token = LocalStorage.getProperty(LocalStorage.tokenKey);
+                    let expiry = LocalStorage.getProperty(LocalStorage.tokenExpiryKey);
+                    let uid = LocalStorage.getProperty(LocalStorage.UIDKey);
 
                     // If any value isn't set or if the token is expired get a new token
                     if(!Utils.unORNull(token) && !Utils.unORNull(expiry) && !Utils.unORNull(uid) && !force) {
                         // Time since token was refreshed...
-                        var timeSince = new Date().getTime() - expiry;
+                        let timeSince = new Date().getTime() - expiry;
                         // Longer than 20 days
                         if(timeSince < 60 * 60 * 24 * 20 && uid == currentUID) {
 
@@ -157,7 +157,7 @@ angular.module('myApp.services').factory('SingleSignOn', ['$rootScope', '$q', '$
 
             executeRequest: function (params) {
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 $http(params).then((function (r) {
                     if(r && r.data && r.status == 200) {

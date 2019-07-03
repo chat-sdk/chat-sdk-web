@@ -74,30 +74,30 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
         $scope.isValidURL = function(url) {// wrapped in self calling function to prevent global pollution
 
             //URL pattern based on rfc1738 and rfc3986
-            var rg_pctEncoded = "%[0-9a-fA-F]{2}";
-            var rg_protocol = "(http|https):\\/\\/";
+            let rg_pctEncoded = "%[0-9a-fA-F]{2}";
+            let rg_protocol = "(http|https):\\/\\/";
 
-            var rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
+            let rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
 
-            var rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
-            var rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
-            var rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
-            var rg_port = "[0-9]+";
+            let rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
+            let rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
+            let rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
+            let rg_port = "[0-9]+";
 
-            var rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
+            let rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
 
             // chars sets
             // safe           = "$" | "-" | "_" | "." | "+"
             // extra          = "!" | "*" | "'" | "(" | ")" | ","
             // hsegment       = *[ alpha | digit | safe | extra | ";" | ":" | "@" | "&" | "=" | escape ]
-            var rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
-            var rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
+            let rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
+            let rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
 
-            var rg_path = rg_segment + "(\\/" + rg_segment + ")*";
-            var rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
-            var rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+            let rg_path = rg_segment + "(\\/" + rg_segment + ")*";
+            let rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+            let rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
 
-            var rgHttpUrl = new RegExp(
+            let rgHttpUrl = new RegExp(
                 "^"
                 + rg_protocol
                 + "(" + rg_userinfo + ")?"
@@ -120,19 +120,19 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
 
         $scope.validate = function () {
 
-            var user = $scope.getUser();
+            let user = $scope.getUser();
 
             // Validate the user
-            var nameValid = $scope.validateString(UserName, user.getName());
-            var locationValid = $scope.validateString(UserLocation, user.getLocation());
+            let nameValid = $scope.validateString(UserName, user.getName());
+            let locationValid = $scope.validateString(UserLocation, user.getLocation());
 
-            var profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(UserProfileLink, user.getProfileLink());
+            let profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(UserProfileLink, user.getProfileLink());
 
             return nameValid && locationValid && profileLinkValid;
         };
 
         $scope.validateString = function (key, string) {
-            var valid = true;
+            let valid = true;
 
             if(Utils.unORNull(string)) {
                 valid = false;

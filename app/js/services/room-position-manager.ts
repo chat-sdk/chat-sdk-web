@@ -14,7 +14,7 @@ export interface IRoomPositionManager {
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen', 'ArrayUtils',
     function ($rootScope, $timeout, $document, $window, LocalStorage, Cache, Screen, ArrayUtils) {
 
-        var rpm = {
+        let rpm = {
 
             rooms: [],
             slotPositions: [],
@@ -35,8 +35,8 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 this.calculateSlotPositions();
 
                 // Right to left
-                var nextSlot = room.slot;
-                var nextRoom = null;
+                let nextSlot = room.slot;
+                let nextRoom = null;
 
                 if(room.dragDirection > 0) {
                     nextSlot++;
@@ -91,7 +91,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                     slot = this.rooms.length;
                 }
 
-                var i;
+                let i;
 
                 // Move the rooms left
                 for(i = slot; i < this.rooms.length; i++) {
@@ -149,13 +149,13 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
             },
 
             closeAllRooms: function () {
-                for(var i = 0; i < this.rooms.length; i++) {
+                for(let i = 0; i < this.rooms.length; i++) {
                     this.closeRoom(this.rooms[i]);
                 }
             },
 
             autoSetSlots: function () {
-                for(var i = 0; i < this.rooms.length; i++) {
+                for(let i = 0; i < this.rooms.length; i++) {
                     this.rooms[i].slot = i;
                 }
             },
@@ -173,7 +173,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 }
 
                 // Animate all rooms into position
-                for(var i = 0; i < this.rooms.length; i++) {
+                for(let i = 0; i < this.rooms.length; i++) {
                     if(this.rooms[i].active && duration > 0) {
                         $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                             room: this.rooms[i],
@@ -196,13 +196,13 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
 
                 this.calculateSlotPositions(true);
 
-                var effectiveScreenWidth = this.effectiveScreenWidth();
+                let effectiveScreenWidth = this.effectiveScreenWidth();
 
                 // Get the index of the current room
                 // If any room has gone changed their active status then digest
-                var digest;
+                let digest;
 
-                for(var i = 0; i < this.rooms.length; i++) {
+                for(let i = 0; i < this.rooms.length; i++) {
                     if((this.slotPositions[i] + this.rooms[i].width) < effectiveScreenWidth) {
                         digest = digest || this.rooms[i].active == false;
                         this.rooms[i].setActive(true);
@@ -222,7 +222,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 this.calculateSlotPositions();
 
                 if(this.rooms.length) {
-                    for(var i = Math.max(this.rooms.indexOf(room), 0); i < this.rooms.length; i++) {
+                    for(let i = Math.max(this.rooms.indexOf(room), 0); i < this.rooms.length; i++) {
                         if(this.rooms[i].active && duration > 0) {
                             $rootScope.$broadcast(NotificationKeys.AnimateRoomNotification, {
                                 room: this.rooms[i],
@@ -245,7 +245,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
 
                 this.calculateSlotPositions();
 
-                var width = Screen.screenWidth;
+                let width = Screen.screenWidth;
 
                 if(!this.rooms.length) {
                     return width;
@@ -253,7 +253,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
 
                 // Check the last box to see if it's off the end of the
                 // screen
-                var lastRoom = this.rooms[this.rooms.length - 1];
+                let lastRoom = this.rooms[this.rooms.length - 1];
 
                 // If we can fit the last room in then
                 // the rooms list will be hidden which will
@@ -298,8 +298,8 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 this.slotPositions = [];
 
                 // Work out the positions
-                var p = Dimensions.MainBoxWidth + Dimensions.ChatRoomSpacing;
-                for(var i = 0; i < this.rooms.length; i++) {
+                let p = Dimensions.MainBoxWidth + Dimensions.ChatRoomSpacing;
+                for(let i = 0; i < this.rooms.length; i++) {
 
                     this.slotPositions.push(p);
 
@@ -307,7 +307,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                     p += Dimensions.ChatRoomSpacing;
                 }
 
-//            for(var i in this.slotPositions) {
+//            for(let i in this.slotPositions) {
 //                console.log("Slot: " + i + " - " + this.slotPositions[i]);
 //            }
 //            for(i = 0; i < this.rooms.length; i++) {

@@ -5,17 +5,17 @@
     <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
     <script>
 
-        var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-        var eventer = window[eventMethod];
-        var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+        let eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+        let eventer = window[eventMethod];
+        let messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
 
         // Listen to message from child window
         eventer(messageEvent,function(e) {
             if (e.data) {
-                var data = JSON.parse(e.data);
+                let data = JSON.parse(e.data);
                 if(data.config && data.action) {
                     firebase.initializeApp(data.config);
-                    var provider;
+                    let provider;
                     if(data.action == "facebook") {
                         provider = new firebase.auth.FacebookAuthProvider();
                     }
@@ -28,15 +28,15 @@
                     if(data.action == "google") {
                         provider = new firebase.auth.GoogleAuthProvider();
                     }
-                    var scopes = data.scope.split(',');
-                    for(var scope in scopes) {
+                    let scopes = data.scope.split(',');
+                    for(let scope in scopes) {
                         if(scopes.hasOwnProperty(scope)) {
                             provider.addScope(scope);
                         }
                     }
 
                     firebase.auth().signInWithPopup(provider).then(function (authData) {
-                        var data = {
+                        let data = {
                             authData: authData,
                             error: null,
                             action: e.data.action,
@@ -44,7 +44,7 @@
                         };
                         window.parent.postMessage(JSON.stringify(data), "*");
                     }).catch(function (error) {
-                        var data = {
+                        let data = {
                             authData: null,
                             error: error,
                             action: e.data.action,

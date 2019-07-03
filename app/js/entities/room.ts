@@ -120,9 +120,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.updateTyping = function () {
 
-            var i = 0;
-            var name = null;
-            for(var key in this.typing) {
+            let i = 0;
+            let name = null;
+            for(let key in this.typing) {
                 if(this.typing.hasOwnProperty(key)) {
                     if(key == $rootScope.user.uid()) {
                         continue;
@@ -132,7 +132,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
             }
 
-            var typing = null;
+            let typing = null;
             if (i == 1) {
                 typing = name + "...";
             }
@@ -158,9 +158,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             // Otherwise build a room based on the users' names
             this.name = "";
-            for(var key in this.users) {
+            for(let key in this.users) {
                 if(this.users.hasOwnProperty(key)) {
-                    var user = this.users[key];
+                    let user = this.users[key];
                     if(!user.isMe() && user.getName() && user.getName().length) {
                         this.name += user.getName() + ", ";
                     }
@@ -287,7 +287,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.typingOff();
             this.messagesOff();
 
-            var type = this.type();
+            let type = this.type();
 
             switch (type) {
                 case RoomType.Public:
@@ -303,7 +303,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.leave = function () {
 
-            var type = this.type();
+            let type = this.type();
 
             switch (type) {
                 case RoomType.OneToOne:
@@ -316,7 +316,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 }
                 case RoomType.Group:
                 {
-                    var promises = [
+                    let promises = [
                         this.removeUser($rootScope.user),
                         $rootScope.user.removeRoom(this)
                     ];
@@ -355,7 +355,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.calculatedType = function () {
 
-            var type = null;
+            let type = null;
 
             if(this.isPublic()) {
                 type = RoomType.Public;
@@ -415,11 +415,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             message.flagged = true;
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.flaggedMessageRef(this.rid(), message.mid);
+            let ref = Paths.flaggedMessageRef(this.rid(), message.mid);
 
-            var data = {};
+            let data = {};
             data[Keys.CreatorEntityID] = $rootScope.user.uid();
             data[Keys.DateKey] = firebase.database.ServerValue.TIMESTAMP;
             data[Keys.MessageKey] = message.text();
@@ -442,11 +442,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.unflagMessage = function (message) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             message.flagged = false;
 
-            var ref = Paths.flaggedMessageRef(this.rid(), message.mid);
+            let ref = Paths.flaggedMessageRef(this.rid(), message.mid);
             ref.remove((function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -537,15 +537,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         // TODO: #1
         Room.prototype.join = function (status) {
 
-            var statusPromise = setStatusForUser(this, $rootScope.user, status, true);
-            var roomPromise = $rootScope.user.addRoom(this);
+            let statusPromise = setStatusForUser(this, $rootScope.user, status, true);
+            let roomPromise = $rootScope.user.addRoom(this);
 
             return $q.all([statusPromise, roomPromise]);
         };
 
         // TODO: #1
         Room.prototype.removeUser = function (user) {
-            var ref = Paths.roomUsersRef(this.rid());
+            let ref = Paths.roomUsersRef(this.rid());
             ref.child(user.uid()).remove();
         };
 
@@ -557,7 +557,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             }
             else {
                 // Are we the owner?
-                var owner = this.getOwner();
+                let owner = this.getOwner();
                 if(owner && owner.meta) {
                     return owner.uid() == $rootScope.user.uid();
                 }
@@ -615,15 +615,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.getUserStatus = function (user) {
-            var info = this.getUserInfo(user);
+            let info = this.getUserInfo(user);
             return info ? info.status : null;
         };
 
         Room.prototype.getUsers = function () {
-            var users = {};
-            for(var key in this.users) {
+            let users = {};
+            for(let key in this.users) {
                 if(this.users.hasOwnProperty(key)) {
-                    var user = this.users[key];
+                    let user = this.users[key];
                     if(user.meta && $rootScope.user && $rootScope.user.meta) {
                         if(user.uid() != $rootScope.user.uid() && this.userIsActiveWithUID(user.uid())) {
                             users[user.uid()] = user;
@@ -635,15 +635,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.userIsActiveWithUID = function (uid) {
-            var info = this.getUserInfo(uid);
+            let info = this.getUserInfo(uid);
             return Room.userIsActiveWithInfo(info);
         };
 
         Room.prototype.getOwner = function () {
             // get the owner's ID
-            var data = null;
+            let data = null;
 
-            for(var key in this.usersMeta) {
+            for(let key in this.usersMeta) {
                 if(this.usersMeta.hasOwnProperty(key)) {
                     data = this.usersMeta[key];
                     if(data.status == UserStatus.UserStatusOwner) {
@@ -672,13 +672,13 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         // Update the timestamp on the user status
         Room.prototype.updateUserStatusTime = function (user) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var data = {
+            let data = {
                 time: firebase.database.ServerValue.TIMESTAMP
             };
 
-            var ref = Paths.roomUsersRef(this.rid());
+            let ref = Paths.roomUsersRef(this.rid());
             ref.child(user.uid()).update(data, function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -695,10 +695,10 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
          */
 
         Room.prototype.getOnlineUserCount = function () {
-            var i = 0;
-            for(var key in this.usersMeta) {
+            let i = 0;
+            for(let key in this.usersMeta) {
                 if(this.usersMeta.hasOwnProperty(key)) {
-                    var user = this.usersMeta[key];
+                    let user = this.usersMeta[key];
                     if($rootScope.user && $rootScope.user.meta) {
                         if((UserStore.users[user.uid].online || $rootScope.user.uid() == user.uid) && this.userIsActiveWithUID(user.uid)) {
                             i++;
@@ -771,33 +771,33 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.sendImageMessage = function (user, url, width, height) {
             // Build the payload
-            var message = MessageFactory.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
+            let message = MessageFactory.buildImageMeta(this.rid(), user.uid(), url, url, width, height);
             this.sendMessage(message, user);
         };
 
         Room.prototype.sendFileMessage = function (user, fileName, mimeType, fileURL) {
             // Build the payload
-            var message = MessageFactory.buildFileMeta(this.rid(), user.uid(), fileName, mimeType, fileURL);
+            let message = MessageFactory.buildFileMeta(this.rid(), user.uid(), fileName, mimeType, fileURL);
             this.sendMessage(message, user);
         };
 
         Room.prototype.sendTextMessage = function (text, user, type) {
             if(!text || text.length === 0)
                 return;
-            var message = MessageFactory.buildMeta(this.rid(), user.uid(), text, type);
+            let message = MessageFactory.buildMeta(this.rid(), user.uid(), text, type);
             this.sendMessage(message, user);
         };
 
         Room.prototype.sendMessage = function (message, user) {
-            var innerSendMessage = (function (message, user) {
+            let innerSendMessage = (function (message, user) {
 
                 // Get a ref to the room
-                var ref = Paths.roomMessagesRef(this.rid());
+                let ref = Paths.roomMessagesRef(this.rid());
 
                 // Add the message
-                var newRef = ref.push();
+                let newRef = ref.push();
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 newRef.setWithPriority(message.meta, firebase.database.ServerValue.TIMESTAMP, function (error) {
                     if(!error) {
@@ -809,17 +809,17 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 });
 
                 // Now update this room with this data
-                var roomMetaRef = Paths.roomMetaRef(this.rid());
+                let roomMetaRef = Paths.roomMetaRef(this.rid());
 
                 // Last message
-                var p1 = this.setLastMessage(message, user);
+                let p1 = this.setLastMessage(message, user);
 
                 // The user's been active so update their status
                 // with the current time
                 this.updateUserStatusTime(user);
 
                 // Avoid a clash..
-                var p2 = this.entity.updateState(PathKeys.MessagesPath);
+                let p2 = this.entity.updateState(PathKeys.MessagesPath);
 
                 return $q.all([
                     deferred.promise, p1, p2
@@ -845,12 +845,12 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.setLastMessage = function (message, user) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var lastMessageMeta = message.meta;
+            let lastMessageMeta = message.meta;
             lastMessageMeta['userName'] = user.getName();
 
-            var ref = Paths.roomLastMessageRef(this.rid());
+            let ref = Paths.roomLastMessageRef(this.rid());
             ref.set(lastMessageMeta, function (error) {
                 if(!error) {
                     deferred.resolve(null);
@@ -941,11 +941,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.deduplicateMessages = function () {
-            var uniqueMessages = [];
+            let uniqueMessages = [];
 
             // Deduplicate list
-            var lastMID = null;
-            for(var i = 0; i < this.messages.length; i++) {
+            let lastMID = null;
+            for(let i = 0; i < this.messages.length; i++) {
                 if(this.messages[i].mid != lastMID) {
                     uniqueMessages.push(this.messages[i]);
                 }
@@ -971,11 +971,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.markRead = function () {
 
-            var messages = this.unreadMessages;
+            let messages = this.unreadMessages;
 
             if(messages && messages.length > 0) {
 
-                for(var i in messages) {
+                for(let i in messages) {
                     if(messages.hasOwnProperty(i)) {
                         messages[i].markRead();
                     }
@@ -997,7 +997,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.updateImageURL = function (imageURL) {
             // Compare to the old URL
-            var imageChanged = imageURL != this.meta.image;
+            let imageChanged = imageURL != this.meta.image;
             if(imageChanged) {
                 this.meta.image = imageURL;
                 this.setImage(imageURL, false);
@@ -1024,9 +1024,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.pushMeta = function () {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.roomMetaRef(this.rid());
+            let ref = Paths.roomMetaRef(this.rid());
             ref.update(this.meta, (function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -1048,9 +1048,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             let transcript: string = "";
 
-            for(var i in this.messages) {
+            for(let i in this.messages) {
                 if(this.messages.hasOwnProperty(i)) {
-                    var m = this.messages[i];
+                    let m = this.messages[i];
                     transcript += Time.formatTimestamp(m.time()) + " " + m.user.getName() + ": " + m.text() + "\n";
                 }
             }
@@ -1064,7 +1064,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.startTyping = function (user) {
             // The user is typing...
-            var ref = Paths.roomTypingRef(this.rid()).child(user.uid());
+            let ref = Paths.roomTypingRef(this.rid()).child(user.uid());
             ref.set({name: user.getName()});
 
             // If the user disconnects, tidy up by removing the typing
@@ -1073,7 +1073,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.finishTyping = function (user) {
-            var ref = Paths.roomTypingRef(this.rid()).child(user.uid());
+            let ref = Paths.roomTypingRef(this.rid()).child(user.uid());
             ref.remove();
         };
 
@@ -1082,8 +1082,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
          */
 
         Room.prototype.serialize = function () {
-            var m = [];
-            for(var i = 0; i < this.messages.length; i++) {
+            let m = [];
+            for(let i = 0; i < this.messages.length; i++) {
                 m.push(this.messages[i].serialize());
             }
             return {
@@ -1122,14 +1122,14 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
                 //this.setUsersMeta(sr.usersMeta);
 
-                for(var key in sr.usersMeta) {
+                for(let key in sr.usersMeta) {
                     if(sr.usersMeta.hasOwnProperty(key)) {
                         this.addUserMeta(sr.usersMeta[key]);
                     }
                 }
                 //this.offset = sr.offset;
 
-                for(var i = 0; i < sr.messages.length; i++) {
+                for(let i = 0; i < sr.messages.length; i++) {
                     this.addMessageMeta(sr.messages[i].mid, sr.messages[i].meta, sr.messages[i], true);
                 }
             }
@@ -1163,7 +1163,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                 this.usersMeta[meta[Keys.userUID]] = meta;
 
                 // Add the user object
-                var user = UserStore.getOrCreateUserWithID(meta[Keys.userUID]);
+                let user = UserStore.getOrCreateUserWithID(meta[Keys.userUID]);
                 this.users[user.uid()] = user;
 
                 this.update(false);
@@ -1178,11 +1178,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.usersMetaOn = function () {
 
-            var roomUsersRef = Paths.roomUsersRef(this.rid());
+            let roomUsersRef = Paths.roomUsersRef(this.rid());
 
             roomUsersRef.on('child_added', (function (snapshot) {
                 if(snapshot.val() && snapshot.val()) {
-                    var meta = snapshot.val();
+                    let meta = snapshot.val();
                     meta.uid = snapshot.key;
                     this.addUserMeta(meta);
                 }
@@ -1190,7 +1190,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             roomUsersRef.on('child_removed', (function (snapshot) {
                 if(snapshot.val()) {
-                    var meta = snapshot.val();
+                    let meta = snapshot.val();
                     meta.uid = snapshot.key;
                     this.removeUserMeta(meta);
                 }
@@ -1203,11 +1203,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.userDeletedDate = function () {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.roomUsersRef(this.rid()).child($rootScope.user.uid());
+            let ref = Paths.roomUsersRef(this.rid()).child($rootScope.user.uid());
             ref.once('value',function (snapshot) {
-                var val = snapshot.val();
+                let val = snapshot.val();
                 if(val && val.status == UserStatus.UserStatusClosed) {
                     deferred.resolve(val.time);
                 }
@@ -1233,7 +1233,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             // }
 
             // Check that the message doesn't already exist
-            for(var i = 0; i < this.messages.length; i++) {
+            for(let i = 0; i < this.messages.length; i++) {
                 if(this.messages[i].mid === mid) {
                     return false;
                 }
@@ -1341,9 +1341,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.messagesAreOn = true;
 
             // Also get the messages from the room
-            var ref = Paths.roomMessagesRef(this.rid());
+            let ref = Paths.roomMessagesRef(this.rid());
 
-            var startDate = timestamp;
+            let startDate = timestamp;
             if(Utils.unORNull(startDate)) {
                 // If we already have a message then only listen for new
                 // messages
@@ -1393,8 +1393,8 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
             ref.on('child_removed', (function (snapshot) {
                 if(snapshot.val()) {
-                    for(var i = 0; i < this.messages.length; i++) {
-                        var message = this.messages[i];
+                    for(let i = 0; i < this.messages.length; i++) {
+                        let message = this.messages[i];
                         if(message.mid == snapshot.key) {
                             this.messages.splice(i, 1);
                             break;
@@ -1411,9 +1411,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             this.sortMessages();
             this.deduplicateMessages();
 
-            var toRemove = this.messages.length - 100;
+            let toRemove = this.messages.length - 100;
             if(toRemove > 0) {
-                for(var j = 0; j < toRemove; j++) {
+                for(let j = 0; j < toRemove; j++) {
                     this.messages.shift();
 
                 }
@@ -1433,7 +1433,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         Room.prototype.typingOn = function () {
 
             // Handle typing
-            var ref = Paths.roomTypingRef(this.rid());
+            let ref = Paths.roomTypingRef(this.rid());
 
             ref.on('child_added', (function (snapshot) {
                 this.typing[snapshot.key] = snapshot.val().name;
@@ -1460,7 +1460,7 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         };
 
         Room.prototype.lastMessageOn = function () {
-            var lastMessageRef = Paths.roomLastMessageRef(this.rid());
+            let lastMessageRef = Paths.roomLastMessageRef(this.rid());
             lastMessageRef.on('value', (function (snapshot) {
                 if(snapshot.val()) {
 
@@ -1492,9 +1492,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
          */
         Room.prototype.removeFromPublicRooms = function () {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.publicRoomRef(this.getRID());
+            let ref = Paths.publicRoomRef(this.getRID());
             ref.remove(function (error) {
                 if(!error) {
                     deferred.resolve();
@@ -1509,15 +1509,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.prototype.userIsMember = function (user) {
 
-//            var deferred = $q.defer();
+//            let deferred = $q.defer();
 //
-//            var ref = Paths.roomUsersRef(uid);
+//            let ref = Paths.roomUsersRef(uid);
 //            ref.once('value', function (snapshot) {
 //
 //            });
 //
 //            return deferred.promise;
-            var userStatus = this.getUserStatus(user);
+            let userStatus = this.getUserStatus(user);
             return userStatus == UserStatus.UserStatusMember || userStatus == UserStatus.UserStatusOwner;
 
         };
@@ -1532,15 +1532,15 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.createRoomWithRID = function (rid, name, description, invitesEnabled, type, userCreated, weight) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             if(Utils.unORNull(rid)) {
                 rid = Paths.roomsRef().push().key;
             }
-            var roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
+            let roomMeta = this.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
             roomMeta[RoomKeys.roomCreatorEntityID] = $rootScope.user.uid();
 
-            var roomMetaRef = Paths.roomMetaRef(rid);
+            let roomMetaRef = Paths.roomMetaRef(rid);
 
             // Add the room to Firebase
             roomMetaRef.set(roomMeta, (function (error) {
@@ -1553,9 +1553,9 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
                     this.addUserToRoom(rid, $rootScope.user, UserStatus.UserStatusOwner, type);
 
                     if(type == RoomType.Public) {
-                        var ref = Paths.publicRoomRef(rid);
+                        let ref = Paths.publicRoomRef(rid);
 
-                        var data = {};
+                        let data = {};
 
                         data[RoomKeys.roomCreated] = firebase.database.ServerValue.TIMESTAMP;
                         data[RoomKeys.roomRID] = rid;
@@ -1586,11 +1586,11 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
         // private chats
         Room.updateRoomType = function (rid, type) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
-            var ref = Paths.roomMetaRef(rid);
+            let ref = Paths.roomMetaRef(rid);
 
-            var data = {};
+            let data = {};
             data[Keys.TypeKey] = type;
 
             ref.update(data, (function (error) {
@@ -1611,14 +1611,14 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
 
         Room.createPrivateRoom = function (users) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             // Since we're calling create room we will be added automatically
             this.createRoom(null, null, true, users.length == 1 ? RoomType.OneToOne : RoomType.Group).then((function (rid) {
 
-                var promises = [];
+                let promises = [];
 
-                for (var i = 0; i < users.length; i++) {
+                for (let i = 0; i < users.length; i++) {
                     promises.push(
                         this.addUserToRoom(rid, users[i], UserStatus.UserStatusMember)
                     );
@@ -1637,24 +1637,24 @@ angular.module('myApp.services').factory('Room', ['$rootScope','$timeout','$q', 
             return deferred.promise;
         };
 
-        var setStatusForUser = function(room, user, status, force) {
+        let setStatusForUser = function(room, user, status, force) {
 
             if(Utils.unORNull(force)) {
                 force = false;
             }
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             // Check the current status
-            var currentStatus = room.getUserStatus(user);
+            let currentStatus = room.getUserStatus(user);
             if(currentStatus == status && !force) {
                 deferred.resolve();
                 return deferred.promise;
             }
 
-            var ref = Paths.roomUsersRef(room.rid()).child(user.uid());
+            let ref = Paths.roomUsersRef(room.rid()).child(user.uid());
 
-            var data = {
+            let data = {
                 status: status,
                 uid: user.uid(),
                 time: firebase.database.ServerValue.TIMESTAMP

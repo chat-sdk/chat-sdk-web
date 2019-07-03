@@ -7,8 +7,8 @@ export interface IPathAnalyser {
 class PathAnalyser implements IPathAnalyser {
 
     toAscii(string): string {
-        var output = "";
-        for(var i = 0; i < string.length; i++) {
+        let output = "";
+        for(let i = 0; i < string.length; i++) {
             output += string.charCodeAt(i);
         }
         return output;
@@ -20,11 +20,11 @@ class PathAnalyser implements IPathAnalyser {
 
         // First see if the query has any wildcards. The * is a wildcard
         // and can be used at the start or end of the query
-        var wildPrefix = false;
+        let wildPrefix = false;
         if(query.length) {
             wildPrefix = query[0] == '*';
         }
-        var wildSuffix = false;
+        let wildSuffix = false;
         if(query.length) {
             wildSuffix = query[query.length - 1] == '*';
         }
@@ -40,7 +40,7 @@ class PathAnalyser implements IPathAnalyser {
         query = (wildPrefix ? '' : '/^') + this.toAscii(query) + (wildSuffix ? '.*' : '$');
 
         // Now get the path
-        var path = this.toAscii(document.location.href);
+        let path = this.toAscii(document.location.href);
         // First we check to see if the query has wild cards
 
         return path.search(query)!= -1;
@@ -52,8 +52,8 @@ class PathAnalyser implements IPathAnalyser {
 
         paths = paths.split(',');
 
-        for (var i = 0; i < paths.length; i++) {
-            var path = paths[i];
+        for (let i = 0; i < paths.length; i++) {
+            let path = paths[i];
             if (this.searchPath(path)) {
                 matches = true;
                 break;

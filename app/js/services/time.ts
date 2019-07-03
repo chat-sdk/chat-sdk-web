@@ -16,7 +16,7 @@ angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, P
 
         start: function (uid) {
 
-            var deferred = $q.defer();
+            let deferred = $q.defer();
 
             if(this.remoteTime && uid == this.uid) {
                 deferred.resolve();
@@ -25,7 +25,7 @@ angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, P
 
             this.working = true;
 
-            var ref = Paths.timeRef(uid);
+            let ref = Paths.timeRef(uid);
             ref.set(firebase.database.ServerValue.TIMESTAMP, (function (error) {
                 this.localTime = new Date().getTime();
                 if(!error) {

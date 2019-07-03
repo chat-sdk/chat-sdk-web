@@ -7,8 +7,8 @@ angular.module('myApp.directives').directive('fitText', function () {
 
         element.bind('keyup', function(e) {
             //jQuery(element).height(0);
-            //var height = jQuery(element)[0].scrollHeight;
-            var height = element.prop('scrollHeight');
+            //let height = jQuery(element)[0].scrollHeight;
+            let height = element.prop('scrollHeight');
 
             // 8 is for the padding
             if (height < 26) {
@@ -16,7 +16,7 @@ angular.module('myApp.directives').directive('fitText', function () {
             }
 
             // If we go over the max height
-            var maxHeight = eval(attr.fitText);
+            let maxHeight = eval(attr.fitText);
             if(height > maxHeight) {
                 height = maxHeight;
                 element.css({overflow: 'auto'});

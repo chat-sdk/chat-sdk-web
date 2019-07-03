@@ -23,7 +23,7 @@ angular.module('myApp.directives').directive('animateRoom', ['$timeout', 'RoomPo
                 // Stop the previous animation
                 $(elm).stop(true, false);
 
-                var completion = function () {
+                let completion = function () {
                     scope.room.setOffset(toOffset);
 
                     scope.room.zIndex = null;

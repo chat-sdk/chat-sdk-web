@@ -6,14 +6,14 @@ angular.module('myApp.directives').directive('infiniteScroll', [function() {
 
         return function(scope: IRoomScope, elem, attrs) {
 
-            var handler = (function () {
+            let handler = (function () {
 
-                var scrollHeight = elem.prop('scrollHeight');
-                var scrollTop = $(elem).scrollTop();
-                var height = $(elem).height();
+                let scrollHeight = elem.prop('scrollHeight');
+                let scrollTop = $(elem).scrollTop();
+                let height = $(elem).height();
 
-                var top = scrollTop;
-                var bottom = scrollHeight - scrollTop - height;
+                let top = scrollTop;
+                let bottom = scrollHeight - scrollTop - height;
 
                 if(top < 1 && scrollHeight > height) {
                     scope.room.loadMoreMessages(function () {

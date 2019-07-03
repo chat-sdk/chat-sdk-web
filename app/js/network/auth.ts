@@ -71,8 +71,8 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                 }
                 else {
 
-                    var scopes = null;
-                    var provider = null;
+                    let scopes = null;
+                    let provider = null;
 
                     if(credential.getType() === credential.Facebook) {
                         provider = new firebase.auth.FacebookAuthProvider();
@@ -255,7 +255,7 @@ angular.module('myApp.services').factory('Auth', ['$rootScope','$q', '$http', '$
                     //
                     //     $http.get('http://freegeoip.net/json/').then((function (r) {
                     //
-                    //         var changed = false;
+                    //         let changed = false;
                     //
                     //         // The first time the user logs on
                     //         // try to guess which city and country they're from

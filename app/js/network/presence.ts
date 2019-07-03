@@ -15,7 +15,7 @@ export interface IPresence {
 
 angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q',
     function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
-        var Presence = {
+        let Presence = {
 
             user: null,
             inactiveTimerPromise: null,
@@ -89,14 +89,14 @@ angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 
 
             update: function () {
 
-                var deferred = $q.defer();
+                let deferred = $q.defer();
 
                 if(this.user) {
-                    var uid = this.user.uid();
+                    let uid = this.user.uid();
                     if (uid) {
 
                         if(Config.onlineUsersEnabled) {
-                            var ref = Paths.onlineUserRef(uid);
+                            let ref = Paths.onlineUserRef(uid);
 
                             ref.onDisconnect().remove();
 
@@ -114,18 +114,18 @@ angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 
                         }
 
                         // Also store this information on the user object
-                        var userOnlineRef = Paths.userOnlineRef(uid);
+                        let userOnlineRef = Paths.userOnlineRef(uid);
                         userOnlineRef.set(true);
                         userOnlineRef.onDisconnect().set(false);
 
-                        var promises = [
+                        let promises = [
                             deferred.promise
                         ];
 
                         // Go online for the public rooms
-                        var rooms = Cache.rooms;
-                        var room;
-                        for(var i = 0; i < rooms.length; i++) {
+                        let rooms = Cache.rooms;
+                        let room;
+                        for(let i = 0; i < rooms.length; i++) {
                             // TRAFFIC
                             // If this is a public room we would have removed it when we logged off
                             // We need to set ourself as a member again

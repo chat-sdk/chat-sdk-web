@@ -7,7 +7,7 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
         friends: {},
 
         on: function (uid) {
-            var friendsRef = Paths.userFriendsRef(uid);
+            let friendsRef = Paths.userFriendsRef(uid);
 
             friendsRef.on('child_added', (function (snapshot) {
 
@@ -27,7 +27,7 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
         },
 
         off: function (uid) {
-            var friendsRef = Paths.userFriendsRef(uid);
+            let friendsRef = Paths.userFriendsRef(uid);
 
             friendsRef.off('child_added');
             friendsRef.off('child_removed');
@@ -41,9 +41,9 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
 
         impl_friendAdded: function (snapshot) {
 
-            var uid = snapshot.val().uid;
+            let uid = snapshot.val().uid;
             if(uid) {
-                var user = UserStore.getOrCreateUserWithID(uid);
+                let user = UserStore.getOrCreateUserWithID(uid);
 
                 user.removeFriend = function () {
                     snapshot.ref.remove();
@@ -58,10 +58,10 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
         },
 
         addFriendsFromConfig: function (friends) {
-            for(var i = 0; i < friends.length; i++) {
-                var uid = friends[i];
+            for(let i = 0; i < friends.length; i++) {
+                let uid = friends[i];
 
-                var user = UserStore.getOrCreateUserWithID(uid);
+                let user = UserStore.getOrCreateUserWithID(uid);
                 user.ssoFriend = true;
 
                 this.addFriend(user);
@@ -95,7 +95,7 @@ angular.module('myApp.services').factory('FriendsConnector', ['$rootScope', 'Use
 
         removeFriendWithID: function (uid) {
             if(uid) {
-                var user = this.friends[uid];
+                let user = this.friends[uid];
                 if(user) {
                     user.friend = false;
                     delete this.friends[uid];

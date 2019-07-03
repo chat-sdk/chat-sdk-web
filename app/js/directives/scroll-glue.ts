@@ -6,7 +6,7 @@ angular.module('myApp.directives').directive('scrollGlue', function(){
         require: ['?ngModel'],
         restrict: 'A',
         link: function(scope, $el, attrs, ctrls){
-            var el = $el[0],
+            let el = $el[0],
                 ngModel = ctrls[0] || fakeNgModel(true);
 
             function scrollToBottom(){
@@ -25,7 +25,7 @@ angular.module('myApp.directives').directive('scrollGlue', function(){
             });
 
             $el.bind('scroll', function(){
-                var activate = shouldActivateAutoScroll();
+                let activate = shouldActivateAutoScroll();
                 if(activate !== ngModel.$viewValue){
                     scope.$apply(ngModel.$setViewValue.bind(ngModel, activate));
                 }

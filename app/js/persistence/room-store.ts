@@ -7,7 +7,7 @@ export interface IRoomStore {
 
 angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout', '$window', 'LocalStorage', 'Room', 'BeforeUnload', 'ArrayUtils',
     function ($rootScope, $timeout, $window, LocalStorage, Room, BeforeUnload, ArrayUtils) {
-        var RoomStore = {
+        let RoomStore = {
 
             rooms: {},
 
@@ -32,8 +32,8 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
                 this.roomsLoadedFromMemory = true;
 
                 // Load private rooms
-                var rooms = LocalStorage.rooms;
-                for(var key in rooms) {
+                let rooms = LocalStorage.rooms;
+                for(let key in rooms) {
                     if(rooms.hasOwnProperty(key)) {
                         this.getOrCreateRoomWithID(key);
                     }
@@ -51,7 +51,7 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
 
             getOrCreateRoomWithID: function (rid): IRoom {
 
-                var room = this.getRoomWithID(rid);
+                let room = this.getRoomWithID(rid);
 
                 if(!room) {
                     room = this.buildRoomWithID(rid);
@@ -63,7 +63,7 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
 
             buildRoomWithID: function (rid) {
 
-                var room = new Room(rid);
+                let room = new Room(rid);
                 room.associatedUserID = $rootScope.user.uid();
 
 //            room.height = ChatRoomHeight;
@@ -103,10 +103,10 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
 
                 this.loadPrivateRoomsToMemory();
 
-                var rooms = [];
-                for(var rid in this.rooms) {
+                let rooms = [];
+                for(let rid in this.rooms) {
                     if(this.rooms.hasOwnProperty(rid)) {
-                        var room = this.rooms[rid];
+                        let room = this.rooms[rid];
                         // Make sure that we only return private rooms for the current user
                         if(!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == $rootScope.user.uid() && room.usersMeta != {}) {
                             rooms.push(this.rooms[rid]);
@@ -117,8 +117,8 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
             },
 
             getPrivateRoomsWithUsers: function (user1, user2) {
-                var rooms = [];
-                for(var key in this.rooms) {
+                let rooms = [];
+                for(let key in this.rooms) {
                     if(this.rooms.hasOwnProperty(key)) {
                         if(!this.rooms[key].isPublic()) {
                             rooms.push(this.rooms[key]);
@@ -130,9 +130,9 @@ angular.module('myApp.services').factory('RoomStore', ['$rootScope', '$timeout',
             },
 
             inboxBadgeCount: function () {
-                var count = 0;
-                var rooms = this.getPrivateRooms();
-                for(var i = 0; i < rooms.length; i++) {
+                let count = 0;
+                let rooms = this.getPrivateRooms();
+                for(let i = 0; i < rooms.length; i++) {
                     count += rooms[i].badge;
                 }
                 return count;

@@ -5,15 +5,15 @@ export interface IBeforeUnload {
 }
 
 angular.module('myApp.services').factory('BeforeUnload', ['$window', function ($window) {
-    var BeforeUnload = {
+    let BeforeUnload = {
 
         listeners: [],
 
         init: function () {
 
-            var beforeUnloadHandler = (function (e) {
-                var listener = null;
-                for(var i = 0; i < this.listeners.length; i++) {
+            let beforeUnloadHandler = (function (e) {
+                let listener = null;
+                for(let i = 0; i < this.listeners.length; i++) {
                     listener = this.listeners[i];
                     try {
                         listener.beforeUnload();
@@ -39,7 +39,7 @@ angular.module('myApp.services').factory('BeforeUnload', ['$window', function ($
         },
 
         removeListener: function (object) {
-            var index = this.listeners.indexOf(object);
+            let index = this.listeners.indexOf(object);
             if(index >= 0) {
                 this.listeners.splice(index, 1);
             }

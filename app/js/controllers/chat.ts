@@ -52,7 +52,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             // The height of the bottom message input bar
             $scope.inputHeight = 26;
 
-            var digest = function (callback) {
+            let digest = function (callback) {
                 $timeout(function () {
                     $scope.$digest();
                     if(callback) {
@@ -97,7 +97,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
         };
 
         $scope.enabledMessageOptions = function () {
-            var list = [];
+            let list = [];
             if (Config.fileMessagesEnabled) {
                 list.push('fileMessagesEnabled');
             }
@@ -140,7 +140,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 return;
             }
 
-            var f = $files[0];
+            let f = $files[0];
 
             if (f.type == 'image/png' || f.type == 'image/jpeg') {
                 $scope.sendingImage = true;
@@ -152,14 +152,14 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             }
 
             NetworkManager.upload.uploadFile(f).then((function (r) {
-                var url = (typeof r === 'string' ? r : r.data && r.data.url)
+                let url = (typeof r === 'string' ? r : r.data && r.data.url)
                 if (typeof url === 'string' && url.length > 0) {
-                    var reader = new FileReader();
+                    let reader = new FileReader();
 
                     // Load the image into the canvas immediately to get the dimensions
                     reader.onload = (function () {
                         return function (e) {
-                            var image = new Image();
+                            let image = new Image();
                             image.onload = function () {
                                 room.sendImageMessage($scope.getUser(), url, image.width, image.height);
                             };
@@ -183,7 +183,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 return;
             }
 
-            var f = $files[0];
+            let f = $files[0];
 
             if (f.type == 'image/png' || f.type == 'image/jpeg') {
                 this.sendImageMessage($files, room);
@@ -194,7 +194,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             }
 
             NetworkManager.upload.uploadFile(f).then((function (r) {
-                var url = (typeof r === 'string' ? r : r.data && r.data.url)
+                let url = (typeof r === 'string' ? r : r.data && r.data.url)
                 if (typeof url === 'string' && url.length > 0) {
                     room.sendFileMessage($scope.getUser(), f.name, f.type, url);
                 }
@@ -208,13 +208,13 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
         $scope.getZIndex = function () {
             // Make sure windows further to the right have a higher index
-            var z =  $scope.room.zIndex ? $scope.room.zIndex :  100 * (1 - $scope.room.offset/Screen.screenWidth);
+            let z =  $scope.room.zIndex ? $scope.room.zIndex :  100 * (1 - $scope.room.offset/Screen.screenWidth);
             return parseInt(z);
         };
 
         $scope.sendMessage = function () {
             console.log('sendMessage()');
-            var user = $scope.getUser();
+            let user = $scope.getUser();
 
             $scope.showEmojis = false;
             $scope.showMessageOptions = false;
@@ -264,9 +264,9 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
             $scope.superShowProfileBox(uid);
 
             // Work out the x position
-            var x = $scope.room.offset + $scope.room.width;
+            let x = $scope.room.offset + $scope.room.width;
 
-            var facesLeft = true;
+            let facesLeft = true;
             if ($scope.room.offset + Dimensions.ProfileBoxWidth + $scope.room.width > Screen.screenWidth) {
                 facesLeft = false;
                 x = $scope.room.offset - Dimensions.ProfileBoxWidth;
@@ -322,10 +322,10 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
 
 //    $scope.getUsers = function () {
 //
-//        var users = $scope.room.getUsers();
+//        let users = $scope.room.getUsers();
 //        // Add the users to an array
-//        var array = [];
-//        for(var key in users) {
+//        let array = [];
+//        for(let key in users) {
 //            if(users.hasOwnProperty(key)) {
 //                array.push(users[key]);
 //            }

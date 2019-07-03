@@ -45,8 +45,8 @@ angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope
             $scope.rooms.sort(function (a, b) {
                 // First order by number of unread messages
                 // Badge can be null
-                var ab = a.badge ? a.badge : 0;
-                var bb = b.badge ? b.badge : 0;
+                let ab = a.badge ? a.badge : 0;
+                let bb = b.badge ? b.badge : 0;
 
                 if(ab != bb) {
                     return bb - ab;
@@ -67,17 +67,17 @@ angular.module('myApp.controllers').controller('RoomListBoxController', ['$scope
         $scope.roomClicked = function(room) {
 
             // Get the left most room
-            var rooms = RoomPositionManager.getRooms();
+            let rooms = RoomPositionManager.getRooms();
 
             // Get the last box that's active
-            for(var i = rooms.length - 1; i >= 0; i--) {
+            for(let i = rooms.length - 1; i >= 0; i--) {
                 if(rooms[i].active) {
 
                     // Get the details of the final room
-                    var offset = rooms[i].offset;
-                    var width = rooms[i].width;
-                    var height = rooms[i].height;
-                    var slot = rooms[i].slot;
+                    let offset = rooms[i].offset;
+                    let width = rooms[i].width;
+                    let height = rooms[i].height;
+                    let slot = rooms[i].slot;
 
                     // Update the old room with the position of the new room
                     rooms[i].setOffset(room.offset);

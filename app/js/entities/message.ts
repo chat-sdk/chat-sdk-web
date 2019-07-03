@@ -57,8 +57,8 @@ class Message implements IMessage {
 
     shouldHideDate(nextMessage) {
         // Last message date
-        var lastDate = new Date(nextMessage.time());
-        var newDate = new Date(this.time());
+        let lastDate = new Date(nextMessage.time());
+        let newDate = new Date(this.time());
 
         // If messages have the same day, hour and minute
         // hide the time
@@ -201,11 +201,11 @@ class MessageFactory implements IMessageFactory {
 
     buildImageMeta(rid, uid, imageURL, thumbnailURL, width, height) {
 
-        var text = imageURL+','+imageURL+',W'+width+"&H"+height;
+        let text = imageURL+','+imageURL+',W'+width+"&H"+height;
 
-        var m = this.buildMeta(rid, uid, text, MessageType.Image);
+        let m = this.buildMeta(rid, uid, text, MessageType.Image);
 
-        var json = {};
+        let json = {};
 
         json[MessageKeys.messageText] = text;
         json[MessageKeys.messageImageURL] = imageURL;
@@ -220,9 +220,9 @@ class MessageFactory implements IMessageFactory {
 
     buildFileMeta(rid, uid, fileName, mimeType, fileURL) {
 
-        var m = this.buildMeta(rid, uid, fileName, MessageType.File);
+        let m = this.buildMeta(rid, uid, fileName, MessageType.File);
 
-        var json = {};
+        let json = {};
 
         json[MessageKeys.messageText] = fileName;
         json[MessageKeys.messageMimeType] = mimeType;
