@@ -1,0 +1,23 @@
+import * as angular from 'angular'
+
+angular.module('myApp.controllers', []);
+
+import '../controllers/app'
+import '../controllers/chat'
+import '../controllers/chat-bar'
+import '../controllers/chat-embed'
+import '../controllers/chat-settings'
+import '../controllers/create-room'
+import '../controllers/draggable-user'
+import '../controllers/emoji'
+import '../controllers/error-box'
+import '../controllers/inbox-rooms-list'
+import '../controllers/login'
+import '../controllers/main-box'
+import '../controllers/notification'
+import '../controllers/online-users-list'
+import '../controllers/profile-settings'
+import '../controllers/public-rooms-list'
+import '../controllers/room-list-box'
+import '../controllers/user-list'
+import '../controllers/user-profile-box'

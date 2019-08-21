@@ -1,0 +1,13 @@
+export let UsersPath = "users";
+export let UsersMetaPath = "users";
+export let RoomsPath = "threads";
+export let PublicRoomsPath = "public-threads";
+export let MessagesPath = 'messages';
+export let FlaggedPath = 'flagged';
+export let TypingPath = 'typing';
+export let FriendsPath = 'contacts';
+export let BlockedPath = 'blocked';
+export let UpdatedPath = 'updated';
+export let OnlineUserCountKey = 'onlineUserCount';
+export let LastMessagePath = "lastMessage";
+export let FlaggedMessagesPath = "flagged";
