@@ -1,6 +1,7 @@
 import * as angular from 'angular'
 import * as $ from 'jquery'
 
+
 /**
  * #54
  * This directive is used for scrollbars when the component can

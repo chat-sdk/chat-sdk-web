@@ -1,5 +1,7 @@
 import * as angular from 'angular'
 import * as $ from 'jquery'
+
+
 import {UserListScope} from "../controllers/user-list";
 import {Utils} from "../services/utils";
 

@@ -1,4 +1,6 @@
 import * as angular from 'angular'
+
+
 import {IRoomScope} from "../controllers/chat";
 
 angular.module('myApp.directives').directive('scrollGlue', function(){

@@ -8,7 +8,7 @@ import {Utils} from "../services/utils";
 import {IPresence} from "./presence";
 import {IUserStore} from "../persistence/user-store";
 import {IEnvironment} from "../services/environment";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 import {IStateManager} from "../services/state-manager";
 import {IConfig, SetBy} from "../services/config";
 import {IPaths} from "./paths";

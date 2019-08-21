@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {myApp} from "../angularjs/app/app";
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'chat-sdk-web';
+  title = 'chat-sdk-web-123-hello';
 }

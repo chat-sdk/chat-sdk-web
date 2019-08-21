@@ -1,4 +1,6 @@
 import * as angular from 'angular'
+
+
 import {Emoji} from "../services/emoji";
 import {IRoomScope} from "./chat";
 

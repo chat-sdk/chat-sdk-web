@@ -1,5 +1,7 @@
 import * as angular from 'angular'
 import * as $ from 'jquery'
+
+
 import {N} from "../keys/notification-keys";
 import {IRoomScope} from "../controllers/chat";
 import {Dimensions} from "../keys/dimensions";

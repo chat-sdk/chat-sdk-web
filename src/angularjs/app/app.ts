@@ -1,10 +1,17 @@
 import * as angular from 'angular'
+import './filters'
+import './services'
+import './directives'
+import './controllers'
 
-import '../app/controllers'
-import '../app/directives'
-import '../app/filters'
-import '../app/services'
-import {SetBy} from "../services/config";
+import '../controllers/index'
+import '../services/index'
+import '../directives/index'
+import '../filters/index'
+import '../entities/index'
+import '../network/index'
+import '../connectors/index'
+import '../persistence/index'
 
 // Declare app level module which depends on filters, and services
 export let myApp = angular.module('myApp',
@@ -39,10 +46,8 @@ export let myApp = angular.module('myApp',
         };
         return $delegate;
     }]);
-}]).run(['Config', 'Environment', (Config, Environment) => {
-    Config.setConfig(SetBy.Include, Environment.config());
 }]);
 
-angular.bootstrap(document.getElementById("cc-app"), ['myApp']);
+// angular.bootstrap(document.getElementById("cc-app"), ['myApp']);
 
 

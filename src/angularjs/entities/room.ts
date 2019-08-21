@@ -17,7 +17,7 @@ import {IUser} from "./user";
 import {Utils} from "../services/utils";
 import {UserStatus} from "../keys/user-status";
 import {UserKeys} from "../keys/user-keys";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 import {Log} from "../services/log";
 import {IFirebaseReference} from "../network/paths";
 

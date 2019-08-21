@@ -3,7 +3,7 @@ import {RoomType} from "../keys/room-type";
 import {UserAllowInvites} from "../keys/allow-invite-type";
 import {RoomKeys} from "../keys/room-keys";
 import {N} from "../keys/notification-keys";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 import {IFriendsConnector} from "../connectors/friend-connector";
 import {IConfig} from "./config";
 import {ICache} from "../persistence/cache";

@@ -193,4 +193,8 @@ class Config implements IConfig {
     }
 }
 
-angular.module('myApp.services').service('Config', Config);
+angular.module('myApp.services').service('Config', Config)
+    // Check this
+    .run(['Config', 'Environment', (Config, Environment) => {
+    Config.setConfig(SetBy.Include, Environment.config());
+}]);

@@ -1,6 +1,7 @@
 import * as angular from 'angular'
 import * as $ from 'jquery'
 
+
 import {IRoomScope} from "../controllers/chat";
 import {Dimensions} from "../keys/dimensions";
 import {Utils} from "../services/utils";

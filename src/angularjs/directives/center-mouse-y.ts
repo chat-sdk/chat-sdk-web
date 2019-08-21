@@ -4,6 +4,7 @@ import * as $ from 'jquery'
 import * as angular from 'angular'
 import {IProfileBoxScope} from "../controllers/user-profile-box";
 
+
 angular.module('myApp.directives').directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
     return function (scope: IProfileBoxScope, elm) {
 

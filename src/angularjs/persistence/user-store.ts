@@ -1,6 +1,6 @@
 import * as angular from 'angular'
 import {IUser} from "../entities/user";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 import {ILocalStorage} from "./local-storage";
 import {IBeforeUnload, IBeforeUnloadListener} from "../services/before-unload";
 import {INetworkManager} from "../network/network-manager";

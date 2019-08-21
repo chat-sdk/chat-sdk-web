@@ -6,7 +6,7 @@ import {N} from "../keys/notification-keys";
 import {IUser} from "../entities/user";
 import {IPaths} from "../network/paths";
 import {IUserStore} from "../persistence/user-store";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 
 export interface IOnlineConnector {
     on(): void

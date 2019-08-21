@@ -1,5 +1,5 @@
 import * as angular from 'angular'
-import {IUser} from "../entities/user";
+
 
 export interface IProfileBoxScope extends ng.IScope {
     hover: any,

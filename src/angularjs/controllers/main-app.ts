@@ -14,7 +14,7 @@ export interface IRootScope extends ng.IRootScopeService{
     user: IUser
 }
 
-angular.module('myApp.controllers').controller('AppController', [
+angular.module('myApp.controllers').controller('MainAppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
     function($rootScope, $scope, $timeout, $window, $sce, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, RoomCreator, Config, Partials, RoomPositionManager, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
@@ -96,7 +96,7 @@ angular.module('myApp.controllers').controller('AppController', [
             $scope.setMainBoxMinimized(LocalStorage.getProperty(LocalStorage.mainMinimizedKey));
 
             $scope.$on(N.UserOnlineStateChanged, function () {
-                Log.notification(N.UserOnlineStateChanged, "AppController");
+                Log.notification(N.UserOnlineStateChanged, "MainAppController");
                 $scope.updateTotalUserCount();
                 $timeout(() => {
                     $scope.$digest();
@@ -579,3 +579,60 @@ angular.module('myApp.controllers').controller('AppController', [
         $scope.init();
 
     }]);
+
+class MainApp {
+
+    static inject = [
+        '$rootScope',
+        '$scope',
+        '$timeout',
+        '$window',
+        '$sce',
+        'PathAnalyser',
+        'OnlineConnector',
+        'FriendsConnector',
+        'Cache',
+        'UserStore',
+        'RoomStore',
+        '$document',
+        'Presence',
+        'LocalStorage',
+        'RoomCreator',
+        'Config',
+        'Partials',
+        'RoomPositionManager',
+        'Paths',
+        'Auth',
+        'StateManager',
+        'RoomOpenQueue',
+        'NetworkManager',
+        'Environment'];
+
+    constructor(
+        private $rootScope: ng.IRootScopeService,
+        private $scope: ng.IScope,
+        private $timeout: ng.ITimeoutService,
+        private $window: ng.IWindowService,
+        private $sce: ng.ISCEService,
+        PathAnalyser,
+        OnlineConnector,
+        FriendsConnector,
+        Cache,
+        UserStore,
+        RoomStore,
+        $document,
+        Presence,
+        LocalStorage,
+        RoomCreator,
+        Config,
+        Partials,
+        RoomPositionManager,
+        Paths,
+        Auth,
+        StateManager,
+        RoomOpenQueue,
+        NetworkManager,
+        Environment) {
+
+    }
+}

@@ -1,5 +1,6 @@
 import * as angular from 'angular'
 
+
 angular.module('myApp.directives').directive('onFileChange', function () {
     return {
         restrict: 'A',

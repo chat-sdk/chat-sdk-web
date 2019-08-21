@@ -11,7 +11,7 @@ import {UserAllowInvites} from "../keys/allow-invite-type";
 import {Utils} from "../services/utils";
 import {IRoom} from "./room";
 import {RoomKeys} from "../keys/room-keys";
-import {IRootScope} from "../controllers/app";
+import {IRootScope} from "../controllers/main-app";
 
 export interface IUser extends IEntity {
     online: boolean
