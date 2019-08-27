@@ -1,5 +1,5 @@
 import * as angular from 'angular'
-import * as Howl from 'howler'
+import {Howl, Howler} from 'howler'
 
 export interface ISoundEffects {
 

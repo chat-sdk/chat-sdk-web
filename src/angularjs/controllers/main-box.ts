@@ -113,6 +113,7 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
         $scope.updateMainBoxSize = function () {
             $scope.mainBoxHeight = Math.max(Screen.screenHeight * 0.5, Dimensions.MainBoxHeight);
             $scope.mainBoxWidth = Dimensions.MainBoxWidth;
+            // console.log("MainBoxHeight:  " + $scope.mainBoxHeight);
             $timeout(() => {
                 $scope.$digest();
             });

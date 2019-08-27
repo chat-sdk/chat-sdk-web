@@ -247,6 +247,9 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             if (error.code == 'INVALID_USER') {
                 message = "Invalid email or password.";
             }
+            if (error.code == 'ALREADY_AUTHENTICATING') {
+                message = "Already Authenticating"
+            }
 
             $scope.setError(message);
 

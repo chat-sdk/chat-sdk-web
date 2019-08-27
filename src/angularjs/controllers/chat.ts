@@ -270,7 +270,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 x = $scope.room.offset - Dimensions.ProfileBoxWidth;
             }
 
-            $scope.profileBoxStyle.right = x;
+            $scope.profileBoxStyle.right = x + "px";
             $scope.profileBoxStyle['border-top-left-radius'] = facesLeft ? 4 : 0;
             $scope.profileBoxStyle['border-bottom-left-radius'] = facesLeft ? 4 : 0;
             $scope.profileBoxStyle['border-top-right-radius'] = facesLeft ? 0 : 4;

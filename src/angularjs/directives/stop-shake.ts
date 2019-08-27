@@ -10,15 +10,17 @@ import * as $ from 'jquery'
  * we add a listener to hear when they're scrolling.
  */
 angular.module('myApp.directives').directive('stopShake', ['$rootScope', '$document',function ($rootScope, $document) {
-    return function (scope, elm, attrs) {
+    return {
+        link: function (scope, elm, attrs) {
 
-        $(elm).scroll(() => {
-            $rootScope.disableDrag = true;
-        });
+            $(elm).scroll(() => {
+                $rootScope.disableDrag = true;
+            });
 
-        // Allow dragging again on mouse up
-        $document.mouseup((e) => {
-            $rootScope.disableDrag = false;
-        });
+            // Allow dragging again on mouse up
+            $(document).mouseup((e) => {
+                $rootScope.disableDrag = false;
+            });
+        }
     };
 }]);

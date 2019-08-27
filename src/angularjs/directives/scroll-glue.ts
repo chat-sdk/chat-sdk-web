@@ -22,7 +22,7 @@ angular.module('myApp.directives').directive('scrollGlue', function(){
                 return el.scrollTop + el.clientHeight + 1 >= el.scrollHeight;
             };
 
-            scope.$watch(() => {
+            scope.$watchCollection('room.messages', () => {
                 if(scope.autoScroll){
                     scrollToBottom();
                 }

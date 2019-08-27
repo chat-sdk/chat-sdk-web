@@ -6,20 +6,22 @@ import {IProfileBoxScope} from "../controllers/user-profile-box";
 
 
 angular.module('myApp.directives').directive('centerMouseY', ['$document', 'Screen', function ($document, Screen) {
-    return function (scope: IProfileBoxScope, elm) {
+    return {
+        link: function (scope: IProfileBoxScope, elm) {
 
-        $(elm).hover(() => {
-            scope.hover = true;
-        }, () => {
-            scope.hover = false;
-        });
+            $(elm).hover(() => {
+                scope.hover = true;
+            }, () => {
+                scope.hover = false;
+            });
 
-        $document.mousemove((e) => {
-            //!elm.is(":hover")
-            if(scope.currentUser && !scope.hover) {
-                // Keep the center of this box level with the mouse y
-                elm.css({bottom: Screen.screenHeight - e.clientY - $(elm).height()/2});
-            }
-        });
+            $(document).mousemove((e) => {
+                //!elm.is(":hover")
+                if (scope.currentUser && !scope.hover) {
+                    // Keep the center of this box level with the mouse y
+                    elm.css({bottom: (Screen.screenHeight - e.clientY - $(elm).height() / 2) + 'px'});
+                }
+            });
+        }
     };
 }]);

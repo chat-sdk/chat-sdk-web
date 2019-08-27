@@ -5,7 +5,7 @@ export interface IVisibility {
 
 }
 
-angular.module('myApp.services').factory('Visibility', ['$rootScope', '$document', function ($rootScope, $document) {
+angular.module('myApp.services').factory('Visibility', ['$rootScope', '$document', '$window', function ($rootScope, $document, $window) {
 
     let Visibility = {
 

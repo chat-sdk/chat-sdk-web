@@ -1,0 +1,67 @@
+
+<div style="display: none" cc-uncloak class="cc-disable-highlight" data-ng-style="{display: hidden ? 'none' : ''}" >
+
+        <div class="cc-user-drag cc-ellipsis" data-ng-class="userDrag.dropLoc ? 'cc-bg-blue' : null" data-ng-show="userDrag.visible" data-ng-style="{'left':userDrag.x + 'px', 'top':userDrag.y + 'px'}">
+            <img class="cc-thumbnail-20"  data-ng-src="{{ userDrag.user.getThumbnail() }}"  />
+            {{ userDrag.user.getName() }}
+        </div>
+
+        <div id="cc-base" >
+
+            <div id="cc-menu-bar" class="cc-menu-bar" data-ng-click="toggleMainBoxVisibility()">
+                <div class="uk-float-left cc-base-text">
+                    <div class="cc-inner cc-pointer">
+                        <span data-ng-show="totalUserCount > 0">
+                            {{ totalUserCount }} <!-- {{ totalUserCount == 1 ? 'Person' : 'People' }} -->&nbsp; Online
+                        </span>
+                        <!--<span data-ng-show="totalUserCount == 0">-->
+                            <!--Chatcat Messenger-->
+                        <!--</span>-->
+                        <a href="https://github.com/chat-sdk/chat-sdk-web" target="_blank">
+                            <img class="uk-float-right" data-ng-src="{{ ::img_30_powered_by }}" />
+                        </a>
+                        <a data-ng-click="shutdown($event)" title="{{ on ? 'Shutdown the chat' : 'Turn on chat' }}" data-consume-event>
+                            <img class="cc-image-30 uk-float-right" data-ng-src="{{ shutdownImage() }}" />
+                        </a>
+                        <a data-ng-show="mainBoxMinimized">
+                            <img class="uk-float-right cc-image-30" data-ng-src="{{ ::img_30_maximize }}" data-disable-drag/>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div data-ng-show="on">
+
+                <div data-ng-include data-ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" partialsURL + 'login-box.html'"></div>
+
+                <div data-ng-include data-ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" partialsURL + 'profile-settings-box.html'"></div>
+                <div data-ng-include data-ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" partialsURL + 'main-box.html'"></div>
+                <div data-ng-include data-ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" partialsURL + 'create-room-box.html'"></div>
+
+                <div data-ng-include data-ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></div>
+
+                <div data-ng-controller="ChatBarController as cbc" >
+                    <div data-ng-repeat="(id, room) in cbc.rooms">
+                        <div data-ng-controller="ChatController as cc">
+                            <div data-ng-include data-ng-init="init(room)" src=" partialsURL + 'chat-room.html'"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-ng-include src="partialsURL + 'room-list-box.html'"></div>
+                <div data-ng-include src="partialsURL + 'profile-box.html'"></div>
+            </div>
+        </div>
+</div>
+
+<!--<iframe stats-iframe src="https://chatcat.firebaseapp.com/partials/stats.html" style="display: none" ></iframe>-->
+
+<!--<script type="text/javascript">-->
+    <!--let ccProtocol = (("https:" == document.location.protocol) ? "https://" : "http://");-->
+    <!--document.write(decodeURI("%3Clink rel='stylesheet' href='" + ccProtocol + "chatcat.firebaseapp.com/css/_/cc_styles.min.css' %3E%3C/link%3E"));-->
+<!--</script>-->
+
+
+<!--<link rel="stylesheet" href="css/_/cc_styles.min.css"/>-->
+
+

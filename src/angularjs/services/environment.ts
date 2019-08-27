@@ -37,15 +37,15 @@ class Environment implements IEnvironment {
     }
 
     partialsURL() {
-        return this.resourceRootURL() + 'partials/';
+        return this.resourceRootURL() + 'assets/partials/';
     }
 
     imagesURL() {
-        return this.resourceRootURL() + 'img/';
+        return this.resourceRootURL() + 'assets/img/';
     }
 
     audioURL() {
-        return this.resourceRootURL() + 'audio/';
+        return this.resourceRootURL() + 'assets/audio/';
     }
 
     defaultProfilePictureURL() {

@@ -1,0 +1,26 @@
+<div data-ng-controller="ChatSettingsController as csc">
+    <table class="uk-table">
+        <tr>
+            <td>Save conversation
+                <button class="uk-button uk-float-right" data-ng-click="csc.saveTranscript()">
+                    <img data-ng-src="{{ ::img_24_save }}">
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>Copy to clipboard
+                <button class="uk-button uk-float-right" data-ng-click="csc.copyTranscript()">
+                    <img data-ng-src="{{ ::img_24_copy }}">
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Leave room
+                <button class="uk-button uk-float-right uk-button-danger" data-ng-click="csc.$scope.leaveRoom()">
+                    <img data-ng-src="{{ ::img_24_cross }}">
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>

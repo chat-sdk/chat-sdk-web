@@ -264,8 +264,8 @@ angular.module('myApp.controllers').controller('MainAppController', [
             $scope.friendsEnabled = Config.friendsEnabled;
 
             $scope.profileBoxStyle = {
-                right: 250,
-                width: Dimensions.ProfileBoxWidth,
+                right: 250 + 'px',
+                width: Dimensions.ProfileBoxWidth + 'px',
                 'border-top-left-radius': 4,
                 'border-bottom-left-radius': 4,
                 'border-top-right-radius': 0,

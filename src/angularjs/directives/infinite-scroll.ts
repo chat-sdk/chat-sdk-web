@@ -1,9 +1,7 @@
 import * as $ from 'jquery'
 import * as angular from 'angular'
 
-
 import {IRoomScope} from "../controllers/chat";
-import {IRoom} from "../entities/room";
 
 class InfiniteScroll implements ng.IDirective{
 

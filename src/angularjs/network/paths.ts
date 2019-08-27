@@ -59,6 +59,7 @@ export interface IPaths {
     publicRoomsRef(): firebase.database.Reference
     flaggedMessageRef(mid): firebase.database.Reference
     roomUsersRef(fid): firebase.database.Reference
+    // Test
 }
 
 class Paths implements IPaths {

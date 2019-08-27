@@ -1,0 +1,49 @@
+<div data-ng-controller="UserProfileBoxController as upbc"
+     id="cc-profile-box"
+     class="cc-shadow-diffuse"
+     data-ng-style="profileBoxStyle"
+     data-ng-show="currentUser && !userDrag.dragging"
+     data-ng-mouseenter="cancelTimer()"
+     data-ng-mouseleave="showProfileBox(null, 0)"
+     center-mouse-y >
+    <div data-ng-hide="currentUser.getProfileHTML() && currentUser.getProfileHTML().length > 0">
+        <div class="cc-right-margin-5">
+            <img id="cc-profile-picture" class="cc-thumbnail-30 uk-float-left" data-ng-src="{{ currentUser.getThumbnail() }}" />
+            <span class="uk-float-left" >
+                <div data-ng-hide="config.userProfileLinkEnabled && currentUser.getProfileLink().length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis">{{ currentUser.getName() }}</div>
+                <div data-ng-show="config.userProfileLinkEnabled && currentUser.getProfileLink().length > 0"
+                     class="uk-text-bold cc-user-name cc-ellipsis"><a data-ng-href="{{ currentUser.getProfileLink() }}" target="_blank">{{ currentUser.getName() }}</a></div>
+                <div class="cc-profile-subtitle uk-text-muted cc-italic cc-ellipsis">{{ currentUser.getLocation() }}</div>
+            </span>
+            <div class="f32 uk-float-right" >
+                <span class="flag {{ currentUser.getCountryCode() | lowercase }}"></span>
+            </div>
+            <span class="cc-user-id cc-pointer" data-ng-click="upbc.copyUserID()" >Copy ID</span>
+        </div>
+        <div class="uk-grid">
+            <div class="uk-text-justify uk-text-small cc-profile-description">
+                {{ currentUser.getStatus() }}
+            </div>
+            <div class="uk-text-small cc-margin-5 uk-align-right"
+                 style="margin-right: 10px"
+                 data-ng-show="currentUser.getHomepageLink() && currentUser.getHomepageLink().length">
+                <a data-ng-href="{{ currentUser.getHomepageLink() }}">{{ currentUser.getHomepageText() }}</a>
+            </div>
+        </div>
+    </div>
+    <div data-ng-show="currentUser.getProfileHTML() && currentUser.getProfileHTML().length > 0">
+        <div data-ng-bind-html="currentUserHTML"></div>
+    </div>
+    <div class="uk-grid uk-grid-small" style="padding: 5px;">
+        <div class="uk-width-1-4 uk-text-center">
+            <button class="uk-button uk-button-success uk-button-small uk-text-center" data-ng-click="userClicked(currentUser)">Chat</button>
+        </div>
+        <div class="uk-width-2-4 uk-text-center" data-ng-hide="currentUser.ssoFriend || !friendsEnabled">
+            <button class="uk-button uk-button-primary uk-button-small uk-text-center" data-ng-click="addRemoveFriend(currentUser)">{{ isFriend(currentUser) ? 'Remove friend' : 'Add friend' }}</button>
+        </div>
+        <div class="uk-width-1-4 uk-text-center">
+            <button class="uk-button uk-button-danger uk-button-small uk-text-center" data-ng-click="blockUnblockUser(currentUser)">{{ isBlocked(currentUser) ? 'Unblock' : 'Block' }}</button>
+        </div>
+    </div>
+</div>

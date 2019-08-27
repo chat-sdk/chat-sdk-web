@@ -1,0 +1,5644 @@
+/*! UIkit 2.9.0 | http://www.getuikit.com | (c) 2014 YOOtheme | MIT License */
+
+/*div#cc-app * {*/
+    /*font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;*/
+/*}*/
+
+
+div#cc-app span,
+/*div#cc-app a,*/
+div#cc-app div,
+div#cc-app button,
+div#cc-app textarea,
+div#cc-app input,
+div#cc-app td,
+#cc-app caption,
+#cc-app table,
+#cc-app th,
+#cc-app tr
+ {
+    animation : none;
+    animation-delay : 0;
+    animation-direction : normal;
+    animation-duration : 0;
+    animation-fill-mode : none;
+    animation-iteration-count : 1;
+    animation-name : none;
+    animation-play-state : running;
+    animation-timing-function : ease;
+    backface-visibility : visible;
+    background : 0;
+    background-attachment : scroll;
+    background-clip : border-box;
+    background-color : transparent;
+    background-image : none;
+    background-origin : padding-box;
+    background-position : 0 0;
+    background-position-x : 0;
+    background-position-y : 0;
+    background-repeat : repeat;
+    background-size : auto auto;
+    border : 0;
+    border-style : none;
+    border-width : medium;
+    border-color : inherit;
+    border-bottom : 0;
+    border-bottom-color : inherit;
+    border-bottom-left-radius : 0;
+    border-bottom-right-radius : 0;
+    border-bottom-style : none;
+    border-bottom-width : medium;
+    border-collapse : separate;
+    border-image : none;
+    border-left : 0;
+    border-left-color : inherit;
+    border-left-style : none;
+    border-left-width : medium;
+    border-radius : 0;
+    border-right : 0;
+    border-right-color : inherit;
+    border-right-style : none;
+    border-right-width : medium;
+    border-spacing : 0;
+    border-top : 0;
+    border-top-color : inherit;
+    border-top-left-radius : 0;
+    border-top-right-radius : 0;
+    border-top-style : none;
+    border-top-width : medium;
+    bottom : auto;
+    box-shadow : none;
+    /*box-sizing : initial;*/
+    caption-side : top;
+    clear : none;
+    clip : auto;
+    color : inherit;
+    columns : auto;
+    column-count : auto;
+    column-fill : balance;
+    column-gap : normal;
+    column-rule : medium none currentColor;
+    column-rule-color : currentColor;
+    column-rule-style : none;
+    column-rule-width : none;
+    column-span : 1;
+    column-width : auto;
+    content : normal;
+    counter-increment : none;
+    counter-reset : none;
+    cursor : auto;
+    direction : ltr;
+    display : inline;
+    empty-cells : show;
+    /*float : none;*/
+    font : normal;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+    font-size : small;
+    font-style : normal;
+    font-variant : normal;
+    /*font-weight : normal;*/
+    height : auto;
+    hyphens : none;
+    left : auto;
+    letter-spacing : normal;
+    /*line-height : normal;*/
+    list-style : none;
+    list-style-image : none;
+    list-style-position : outside;
+    list-style-type : disc;
+    margin : 0;
+    margin-bottom : 0;
+    margin-left : 0;
+    margin-right : 0;
+    margin-top : 0;
+    max-height : none;
+    /*max-width : none;*/
+    min-height : 0;
+    min-width : 0;
+    opacity : 1;
+    orphans : 0;
+    outline : 0;
+    outline-color : invert;
+    outline-style : none;
+    outline-width : medium;
+    overflow : visible;
+    overflow-x : visible;
+    overflow-y : visible;
+    padding : 0;
+    padding-bottom : 0;
+    padding-left : 0;
+    padding-right : 0;
+    padding-top : 0;
+    page-break-after : auto;
+    page-break-before : auto;
+    page-break-inside : auto;
+    perspective : none;
+    perspective-origin : 50% 50%;
+    position : static;
+    /* May need to alter quotes for different locales (e.g fr) */
+    quotes : '\201C' '\201D' '\2018' '\2019';
+    right : auto;
+    tab-size : 8;
+    table-layout : auto;
+    /*text-align : initial;*/
+    text-align-last : auto;
+    text-decoration : none;
+    text-decoration-color : inherit;
+    text-decoration-line : none;
+    text-decoration-style : solid;
+    text-indent : 0;
+    text-shadow : none;
+    text-transform : none;
+    top : auto;
+    transform : none;
+    transform-style : flat;
+    transition : none;
+    transition-delay : 0s;
+    transition-duration : 0s;
+    transition-property : none;
+    transition-timing-function : ease;
+    unicode-bidi : normal;
+    vertical-align : baseline;
+    visibility : visible;
+    white-space : normal;
+    widows : 0;
+    width : auto;
+    word-spacing : normal;
+    z-index : auto;
+}
+
+/* Fix layout on Chatcat.io */
+div#cc-app input,
+div#cc-app select {
+    padding: 0 0.5em !important;
+}
+
+div#cc-app select {
+    border: 1px solid #DDD !important;
+    box-shadow: none !important;
+}
+
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+
+
+/* blocks */
+
+div#cc-app article,
+div#cc-app aside,
+div#cc-app div,
+div#cc-app dt,
+div#cc-app figcaption,
+div#cc-app footer,
+div#cc-app form,
+div#cc-app header,
+div#cc-app hgroup,
+div#cc-app html,
+div#cc-app main,
+div#cc-app nav,
+div#cc-app section {
+    display: block;
+}
+
+div#cc-app body {
+    display: block;
+    margin: 8px;
+}
+
+div#cc-app p,
+div#cc-app dl,
+div#cc-app multicol {
+    display: block;
+    margin: 1em 0;
+}
+
+div#cc-app dd {
+    display: block;
+    -moz-margin-start: 40px;
+}
+
+div#cc-app blockquote,
+div#cc-app figure {
+    display: block;
+    margin: 1em 40px;
+}
+
+div#cc-app address {
+    display: block;
+    font-style: italic;
+}
+
+div#cc-app center {
+    display: block;
+    text-align: -moz-center;
+}
+
+div#cc-app blockquote[type=cite] {
+    display: block;
+    margin: 1em 0px;
+    -moz-padding-start: 1em;
+    -moz-border-start: solid;
+    border-color: blue;
+    border-width: thin;
+}
+
+div#cc-app h1 {
+    display: block;
+    font-size: 2em;
+    font-weight: bold;
+    margin: .67em 0;
+}
+
+div#cc-app h2,
+div#cc-app h1 {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: .83em 0;
+}
+
+div#cc-app h3,
+div#cc-app h1 {
+    display: block;
+    font-size: 1.17em;
+    font-weight: bold;
+    margin: 1em 0;
+}
+
+div#cc-app h4,
+div#cc-app h1 {
+    display: block;
+    font-size: 1.00em;
+    font-weight: bold;
+    margin: 1.33em 0;
+}
+
+div#cc-app h5,
+div#cc-app h1 {
+    display: block;
+    font-size: 0.83em;
+    font-weight: bold;
+    margin: 1.67em 0;
+}
+
+div#cc-app h6,
+div#cc-app h1 {
+    display: block;
+    font-size: 0.67em;
+    font-weight: bold;
+    margin: 2.33em 0;
+}
+
+div#cc-app listing {
+    display: block;
+    font-family: -moz-fixed;
+    font-size: medium;
+    white-space: pre;
+    margin: 1em 0;
+}
+
+div#cc-app xmp,
+div#cc-app pre,
+div#cc-app plaintext {
+    display: block;
+    font-family: -moz-fixed;
+    white-space: pre;
+    margin: 1em 0;
+}
+
+/* tables */
+
+div#cc-app table {
+    display: table;
+    border-spacing: 2px;
+    border-collapse: separate;
+    margin-top: 0;
+    margin-bottom: 0;
+    /* XXXldb do we want this if we're border-collapse:collapse ? */
+    box-sizing: border-box;
+    text-indent: 0;
+}
+
+div#cc-app table[align="left"] {
+    float: left;
+}
+
+div#cc-app table[align="right"] {
+    float: right;
+    text-align: start;
+}
+
+
+/* border collapse rules */
+
+/* Set hidden if we have 'frame' or 'rules' attribute.
+   Set it on all sides when we do so there's more consistency
+   in what authors should expect */
+
+/* Put this first so 'border' and 'frame' rules can override it. */
+div#cc-app table[rules] {
+    border-width: thin;
+    border-style: hidden;
+}
+
+/* 'border' before 'frame' so 'frame' overrides
+    A border with a given value should, of course, pass that value
+    as the border-width in pixels -> attr mapping */
+
+div#cc-app table[frame] {
+    border: thin hidden;
+}
+
+/* specificity must beat table:-moz-table-border-nonzero rule above */
+div#cc-app table[frame="void"]   { border-style: hidden; }
+div#cc-app table[frame="above"]  { border-style: outset hidden hidden hidden; }
+div#cc-app table[frame="below"]  { border-style: hidden hidden outset hidden; }
+div#cc-app table[frame="lhs"]    { border-style: hidden hidden hidden outset; }
+div#cc-app table[frame="rhs"]    { border-style: hidden outset hidden hidden; }
+div#cc-app table[frame="hsides"] { border-style: outset hidden; }
+div#cc-app table[frame="vsides"] { border-style: hidden outset; }
+div#cc-app table[frame="box"],
+div#cc-app table[frame="border"] { border-style: outset; }
+
+
+/* Internal Table Borders */
+
+/* 'border' cell borders first */
+
+div#cc-app table:-moz-table-border-nonzero > * > tr > td,
+div#cc-app table:-moz-table-border-nonzero > * > tr > th,
+div#cc-app table:-moz-table-border-nonzero > * > td,
+div#cc-app table:-moz-table-border-nonzero > * > th,
+div#cc-app table:-moz-table-border-nonzero > td,
+div#cc-app table:-moz-table-border-nonzero > th
+{
+    border-width: thin;
+    border-style: inset;
+}
+
+/* collapse only if rules are really specified */
+div#cc-app table[rules]:not([rules="none"]):not([rules=""]) {
+    border-collapse: collapse;
+}
+
+/* only specified rules override 'border' settings
+  (increased specificity to achieve this) */
+div#cc-app table[rules]:not([rules=""])> tr > td,
+div#cc-app table[rules]:not([rules=""])> * > tr > td,
+div#cc-app table[rules]:not([rules=""])> tr > th,
+div#cc-app table[rules]:not([rules=""])> * > tr > th,
+div#cc-app table[rules]:not([rules=""])> td,
+div#cc-app table[rules]:not([rules=""])> th
+{
+    border-width: thin;
+    border-style: none;
+}
+
+
+div#cc-app table[rules][rules="none"]  > tr > td,
+div#cc-app table[rules][rules="none"] > * > tr > td,
+div#cc-app table[rules][rules="none"] > tr > th,
+div#cc-app table[rules][rules="none"] > * > tr > th,
+div#cc-app table[rules][rules="none"] > td,
+div#cc-app table[rules][rules="none"] > th
+{
+    border-width: thin;
+    border-style: none;
+}
+
+div#cc-app table[rules][rules="all"] > tr > td,
+div#cc-app table[rules][rules="all"] > * > tr > td,
+div#cc-app table[rules][rules="all"] > tr > th,
+div#cc-app table[rules][rules="all"] > * > tr > th,
+div#cc-app table[rules][rules="all"] > td,
+div#cc-app table[rules][rules="all"] > th
+{
+    border-width: thin;
+    border-style: solid;
+}
+
+div#cc-app table[rules][rules="rows"] > tr,
+div#cc-app table[rules][rules="rows"] > * > tr {
+    border-top-width: thin;
+    border-bottom-width: thin;
+    border-top-style: solid;
+    border-bottom-style: solid;
+}
+
+
+div#cc-app table[rules][rules="cols"] > tr > td,
+div#cc-app table[rules][rules="cols"] > * > tr > td,
+div#cc-app table[rules][rules="cols"] > tr > th,
+div#cc-app table[rules][rules="cols"] > * > tr > th {
+    border-left-width: thin;
+    border-right-width: thin;
+    border-left-style: solid;
+    border-right-style: solid;
+}
+
+div#cc-app table[rules][rules="groups"] > colgroup {
+    border-left-width: thin;
+    border-right-width: thin;
+    border-left-style: solid;
+    border-right-style: solid;
+}
+div#cc-app table[rules][rules="groups"] > tfoot,
+div#cc-app table[rules][rules="groups"] > thead,
+div#cc-app table[rules][rules="groups"] > tbody {
+    border-top-width: thin;
+    border-bottom-width: thin;
+    border-top-style: solid;
+    border-bottom-style: solid;
+}
+
+
+/* caption inherits from table not table-outer */
+div#cc-app caption {
+    display: table-caption;
+    text-align: center;
+}
+
+div#cc-app table[align="center"] > caption {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div#cc-app table[align="center"] > caption[align="left"] {
+    margin-right: 0;
+}
+
+div#cc-app table[align="center"] > caption[align="right"] {
+    margin-left: 0;
+}
+
+div#cc-app tr {
+    display: table-row;
+    vertical-align: inherit;
+}
+
+div#cc-app col {
+    display: table-column;
+}
+
+div#cc-app colgroup {
+    display: table-column-group;
+}
+
+div#cc-app tbody {
+    display: table-row-group;
+    vertical-align: middle;
+}
+
+div#cc-app thead {
+    display: table-header-group;
+    vertical-align: middle;
+}
+
+div#cc-app tfoot {
+    display: table-footer-group;
+    vertical-align: middle;
+}
+
+/* for XHTML tables without tbody */
+div#cc-app table > tr {
+    vertical-align: middle;
+}
+
+div#cc-app td {
+    display: table-cell;
+    vertical-align: inherit;
+    text-align: inherit;
+    padding: 1px;
+}
+
+div#cc-app th {
+    display: table-cell;
+    vertical-align: inherit;
+    font-weight: bold;
+    padding: 1px;
+}
+
+div#cc-app tr > form:-moz-is-html, tbody > form:-moz-is-html,
+div#cc-app thead > form:-moz-is-html, tfoot > form:-moz-is-html,
+div#cc-app table > form:-moz-is-html {
+    /* Important: don't show these forms in HTML */
+    display: none !important;
+}
+
+div#cc-app table[bordercolor] > tbody,
+div#cc-app table[bordercolor] > thead,
+div#cc-app table[bordercolor] > tfoot,
+div#cc-app table[bordercolor] > col,
+div#cc-app table[bordercolor] > colgroup,
+div#cc-app table[bordercolor] > tr,
+div#cc-app table[bordercolor] > * > tr,
+div#cc-app table[bordercolor]  > tr > td,
+div#cc-app table[bordercolor] > * > tr > td,
+div#cc-app table[bordercolor]  > tr > th,
+div#cc-app table[bordercolor] > * > tr > th {
+    border-color: inherit;
+}
+
+/* inlines */
+
+div#cc-app q:before {
+    content: open-quote;
+}
+
+div#cc-app q:after {
+    content: close-quote;
+}
+
+div#cc-app b,
+div#cc-app strong {
+    font-weight: bolder;
+}
+
+div#cc-app i,
+div#cc-app cite,
+div#cc-app em,
+div#cc-app var,
+div#cc-app dfn {
+    font-style: italic;
+}
+
+div#cc-app tt,
+div#cc-app code,
+div#cc-app kbd,
+div#cc-app samp {
+    font-family: -moz-fixed;
+}
+
+div#cc-app u,
+div#cc-app ins {
+    text-decoration: underline;
+}
+
+div#cc-app s,
+div#cc-app strike,
+div#cc-app del {
+    text-decoration: line-through;
+}
+
+div#cc-app big {
+    font-size: larger;
+}
+
+div#cc-app small {
+    font-size: smaller;
+}
+
+div#cc-app sub {
+    vertical-align: sub;
+    font-size: smaller;
+    line-height: normal;
+}
+
+div#cc-app sup {
+    vertical-align: super;
+    font-size: smaller;
+    line-height: normal;
+}
+
+div#cc-app nobr {
+    white-space: nowrap;
+}
+
+div#cc-app mark {
+    background: yellow;
+    color: black;
+}
+
+/* titles */
+div#cc-app abbr[title],
+div#cc-app acronym[title] {
+    border-bottom: dotted 1px;
+}
+
+/* lists */
+
+div#cc-app ul,
+div#cc-app menu,
+div#cc-app dir {
+    display: block;
+    list-style-type: disc;
+    margin: 1em 0;
+    -moz-padding-start: 40px;
+}
+
+div#cc-app menu[type="context"] {
+    display: none !important;
+}
+
+div#cc-app ol {
+    display: block;
+    list-style-type: decimal;
+    margin: 1em 0;
+    -moz-padding-start: 40px;
+}
+
+div#cc-app li {
+    display: list-item;
+}
+
+/* leafs */
+
+/* <hr> noshade and color attributes are handled completely by
+ * the nsHTMLHRElement attribute mapping code
+ */
+div#cc-app hr {
+    display: block;
+    height: 2px;
+    border: 1px inset;
+    margin: 0.5em auto 0.5em auto;
+    color: gray;
+    -moz-float-edge: margin-box;
+    box-sizing: border-box;
+}
+
+div#cc-app hr[size="1"] {
+    border-style: solid none none none;
+}
+
+div#cc-app img[usemap],
+div#cc-app object[usemap] {
+    color: blue;
+}
+
+div#cc-app frameset {
+    display: block ! important;
+    overflow: -moz-hidden-unscrollable;
+    position: static ! important;
+    float: none ! important;
+    border: none ! important;
+}
+
+div#cc-app link {
+    display: none;
+}
+
+div#cc-app frame {
+    border-radius: 0 ! important;
+}
+
+div#cc-app iframe {
+    border: 2px inset;
+}
+
+div#cc-app noframes {
+    display: none;
+}
+
+div#cc-app spacer {
+    position: static ! important;
+    float: none ! important;
+}
+
+div#cc-app canvas {
+    -moz-user-select: none;
+}
+
+/* hidden elements */
+div#cc-app base,
+div#cc-app basefont,
+div#cc-app datalist,
+div#cc-app head,
+div#cc-app meta,
+div#cc-app script,
+div#cc-app style,
+div#cc-app title,
+div#cc-app noembed,
+div#cc-app param,
+div#cc-app template {
+    display: none;
+}
+
+div#cc-app area {
+    /* Don't give it frames other than its imageframe */
+    display: none ! important;
+}
+
+div#cc-app iframe:-moz-full-screen {
+    /* iframes in full-screen mode don't show a border. */
+    border: none;
+}
+
+/* media elements */
+div#cc-app video > xul|videocontrols, audio > xul|videocontrols {
+    display: -moz-box;
+    -moz-box-orient: vertical;
+    -moz-binding: url("chrome://global/content/bindings/videocontrols.xml#videoControls");
+}
+
+div#cc-app video:not([controls]) > xul|videocontrols,
+div#cc-app audio:not([controls]) > xul|videocontrols {
+    visibility: hidden;
+    -moz-binding: none;
+}
+
+div#cc-app audio:not([controls]) {
+    display: none;
+}
+
+div#cc-app video > .caption-box {
+    position: relative;
+    overflow: hidden;
+}
+
+/* emulation of non-standard HTML <marquee> tag */
+div#cc-app marquee {
+    width: -moz-available;
+    display: inline-block;
+    vertical-align: text-bottom;
+    text-align: start;
+    -moz-binding: url('chrome://xbl-marquee/content/xbl-marquee.xml#marquee-horizontal');
+}
+
+div#cc-app marquee[direction="up"],
+div#cc-app marquee[direction="down"] {
+    -moz-binding: url('chrome://xbl-marquee/content/xbl-marquee.xml#marquee-vertical');
+    height: 200px;
+}
+
+
+/* ========================================================================
+   Component: Normalize
+ ========================================================================== */
+/* Base
+ ========================================================================== */
+/*
+ * 1. Sets default font family to sans-serif.
+ * 2. Prevents iOS text size adjust after orientation change, without disabling user zoom.
+ */
+div#cc-app html {
+    /* 1 */
+    font-family: sans-serif;
+    /* 2 */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+/*
+ * Removes default margin.
+ */
+div#cc-app body {
+    margin: 0;
+}
+/* HTML5 display definitions
+ ========================================================================== */
+/*
+ * Corrects `block` display not defined in IE 8/9.
+ */
+div#cc-app article,
+div#cc-app aside,
+div#cc-app details,
+div#cc-app figcaption,
+div#cc-app figure,
+div#cc-app footer,
+div#cc-app header,
+div#cc-app main,
+div#cc-app nav,
+div#cc-app section,
+div#cc-app summary {
+    display: block;
+}
+/*
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+div#cc-app audio,
+div#cc-app canvas,
+div#cc-app progress,
+div#cc-app video {
+    /* 1 */
+    display: inline-block;
+    /* 2 */
+    vertical-align: baseline;
+}
+/*
+ * Prevents modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+div#cc-app audio:not([controls]) {
+    display: none;
+    height: 0;
+}
+/*
+ * Address `[hidden]` styling not present in IE 8/9.
+ * Hide the `template` element in IE, Safari, and Firefox < 22.
+ */
+div#cc-app [hidden],
+div#cc-app template {
+    display: none;
+}
+/* Links
+ ========================================================================== */
+/*
+ * Remove the gray background color from active links in IE 10.
+ */
+div#cc-app a {
+    background: transparent;
+}
+/*
+ * Improves readability when focused and also mouse hovered in all browsers.
+ */
+div#cc-app a:active,
+div#cc-app a:hover {
+    outline: 0;
+}
+/* Text-level semantics
+ ========================================================================== */
+/*
+ * Addresses styling not present in IE 8/9, Safari 5, and Chrome.
+ */
+div#cc-app abbr[title] {
+    border-bottom: 1px dotted;
+}
+/*
+ * Addresses style set to `bolder` in Firefox 4+, Safari 5, and Chrome.
+ */
+div#cc-app b,
+div#cc-app strong {
+    font-weight: bold;
+}
+/*
+ * Addresses styling not present in Safari 5 and Chrome.
+ */
+div#cc-app dfn {
+    font-style: italic;
+}
+/*
+ * Addresses inconsistent and variable font size in all browsers.
+ */
+div#cc-app small {
+    font-size: 80%;
+}
+/*
+ * Prevents `sub` and `sup` affecting `line-height` in all browsers.
+ */
+div#cc-app sub,
+div#cc-app sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+div#cc-app sup {
+    top: -0.5em;
+}
+div#cc-app sub {
+    bottom: -0.25em;
+}
+/* Embedded content
+ ========================================================================== */
+/*
+ * Removes border when inside `a` element in IE 8/9.
+ */
+div#cc-app img {
+    border: 0;
+}
+/*
+ * Corrects overflow displayed oddly in IE 9.
+ */
+div#cc-app svg:not(:root) {
+    overflow: hidden;
+}
+/* Grouping content
+ ========================================================================== */
+/*
+ * Addresses margin not present in IE 8/9 and Safari 5.
+ */
+div#cc-app figure {
+    margin: 0;
+}
+/*
+ * Address differences between Firefox and other browsers.
+ */
+div#cc-app hr {
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    height: 0;
+}
+/*
+ * Contain overflow in all browsers.
+ */
+div#cc-app pre {
+    overflow: auto;
+}
+/*
+ * Address odd `em`-unit font size rendering in all browsers.
+ * 1. Consolas has a better baseline in running text compared to `Courier`
+ */
+div#cc-app code,
+div#cc-app kbd,
+div#cc-app pre,
+div#cc-app samp {
+    font-size: 1em;
+    /* 1 */
+    font-family: Consolas, monospace, serif;
+}
+/* Forms
+ ========================================================================== */
+/*
+ * 1. Correct color not being inherited. Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari 5, and Chrome.
+ * 4. Define consistent box sizing
+ *    Defaults:   `button`, `input` and `textarea` have box sizing set to `content-box`
+ *                `select`, `input[type="checkbox"]` and `input[type="radio"]` have box sizing set to `border-box`
+ *    Exceptions: `input[type="checkbox"]` and `input[type="radio"]` have box sizing set to `content-box` in IE 8/9.
+ *                `input[type="search"]` has box sizing set to `border-box` in Safari 5 and Chrome.
+ */
+div#cc-app button,
+div#cc-app input,
+div#cc-app optgroup,
+div#cc-app select,
+div#cc-app textarea {
+    /* 1 */
+    color: inherit;
+    /* 2 */
+    font: inherit;
+    /* 3 */
+    margin: 0;
+    /* 4 */
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+div#cc-app optgroup {
+    font-weight: bold;
+}
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10.
+ */
+div#cc-app button {
+    overflow: visible;
+}
+/*
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8+, and Opera
+ * Correct `select` style inheritance in Firefox.
+ */
+div#cc-app button,
+div#cc-app select {
+    text-transform: none;
+}
+/*
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio` and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type `input` and others.
+ */
+div#cc-app button,
+div#cc-app html input[type="button"],
+div#cc-app input[type="reset"],
+div#cc-app input[type="submit"] {
+    /* 2 */
+    -webkit-appearance: button;
+    /* 3 */
+    cursor: pointer;
+}
+/*
+ * Re-set default cursor for disabled elements.
+ */
+div#cc-app button:disabled,
+div#cc-app html input:disabled {
+    cursor: default;
+}
+/*
+ * Removes inner padding and border in Firefox 4+.
+ */
+div#cc-app button::-moz-focus-inner,
+div#cc-app input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+/*
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in the UA stylesheet.
+ */
+div#cc-app input {
+    line-height: normal;
+}
+/*
+ * 1. Removes excess padding in IE 8/9.
+ * 2. Improves consistency of cursor style for clickable elements
+ */
+div#cc-app input[type="checkbox"],
+div#cc-app input[type="radio"] {
+    /* 1 */
+    padding: 0;
+    /* 2 */
+    cursor: pointer;
+}
+/*
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+div#cc-app input[type="number"]::-webkit-inner-spin-button,
+div#cc-app input[type="number"]::-webkit-outer-spin-button {
+    height: auto;
+}
+/*
+ * Addresses `appearance` set to `searchfield` in Safari 5 and Chrome.
+ */
+div#cc-app input[type="search"] {
+    -webkit-appearance: textfield;
+}
+/*
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+div#cc-app input[type="search"]::-webkit-search-cancel-button,
+div#cc-app input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+/*
+ * Define consistent border, margin, and padding.
+ */
+div#cc-app fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+/*
+ * 1. Corrects color not being inherited in IE 8/9.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+div#cc-app legend {
+    /* 1 */
+    border: 0;
+    /* 2 */
+    padding: 0;
+}
+/**
+ * 1. Remove default vertical scrollbar in IE 8/9.
+ * 2. Improve readability and alignment in all browsers.
+ */
+div#cc-app textarea {
+    overflow: auto;
+    /* 1 */
+    vertical-align: top;
+    /* 2 */
+}
+/*
+ * Removes placeholder transparency in Firefox.
+ */
+div#cc-app ::-moz-placeholder {
+    opacity: 1;
+}
+/* Tables
+ ========================================================================== */
+/*
+ * Remove most spacing between table cells.
+ */
+div#cc-app table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+/* ========================================================================
+   Component: Base
+ ========================================================================== */
+/* Body
+ ========================================================================== */
+/*
+ * `font-size` is set in `html` element to support the `rem` unit for font-sizes
+ */
+div#cc-app html {
+    font-size: 14px;
+}
+div#cc-app body {
+    /*background: #ffffff;*/
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    line-height: 20px;
+    color: #444444;
+    background-image: -webkit-radial-gradient(100% 100%, center, #ffffff, #ffffff);
+    background-image: radial-gradient(100% 100% at center, #ffffff, #ffffff);
+}
+/* Text-level semantics
+ ========================================================================== */
+/*
+ * Links
+ */
+div#cc-app a,
+div#cc-app .uk-link {
+    color: #0077dd;
+    text-decoration: none;
+    cursor: pointer;
+}
+div#cc-app a:hover,
+div#cc-app .uk-link:hover {
+    color: #005599;
+    text-decoration: underline;
+}
+/*
+ * Emphasize
+ */
+div#cc-app em {
+    color: #dd0055;
+}
+/*
+ * Insert
+ */
+div#cc-app ins {
+    background: #ffffaa;
+    color: #444444;
+    text-decoration: none;
+}
+/*
+ * Mark
+ * Note: Addresses styling not present in IE 8/9.
+ */
+div#cc-app mark {
+    background: #ffffaa;
+    color: #444444;
+}
+/*
+ * Selection highlight
+ */
+div#cc-app ::-moz-selection {
+    background: #3399ff;
+    color: #ffffff;
+    text-shadow: none;
+}
+div#cc-app ::selection {
+    background: #3399ff;
+    color: #ffffff;
+    text-shadow: none;
+}
+/*
+ * Abbreviation and definition
+ */
+div#cc-app abbr[title],
+div#cc-app dfn[title] {
+    cursor: help;
+}
+div#cc-app dfn[title] {
+    border-bottom: 1px dotted;
+    font-style: normal;
+}
+/* Embedded content
+ ========================================================================== */
+/*
+ * 1. Responsiveness: Sets a maximum width relative to the parent and auto scales the height
+ * 2. Corrects `max-width` behavior if padding and border are used
+ * 3. Remove the gap between images and the bottom of their containers
+ */
+div#cc-app img {
+    /* 1 */
+    max-width: 100%;
+    height: auto;
+    /* 2 */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    /* 3 */
+    vertical-align: middle;
+}
+/*
+ * Preserve original image dimensions
+ */
+div#cc-app .uk-img-preserve,
+div#cc-app .uk-img-preserve img {
+    max-width: none;
+}
+/* Spacing for block elements
+ ========================================================================== */
+div#cc-app p,
+div#cc-app hr,
+div#cc-app ul,
+div#cc-app ol,
+div#cc-app dl,
+div#cc-app blockquote,
+div#cc-app pre,
+div#cc-app address,
+div#cc-app fieldset,
+div#cc-app figure {
+    margin: 0 0 15px 0;
+}
+/*
+ * Don't worry about the universal selector.
+ * There is no mentionable performance impact.
+ */
+div#cc-app * + p,
+div#cc-app * + hr,
+div#cc-app * + ul,
+div#cc-app * + ol,
+div#cc-app * + dl,
+div#cc-app * + blockquote,
+div#cc-app * + pre,
+div#cc-app * + address,
+div#cc-app * + fieldset,
+div#cc-app * + figure {
+    margin-top: 15px;
+}
+/* Headings
+ ========================================================================== */
+div#cc-app h1,
+div#cc-app h2,
+div#cc-app h3,
+div#cc-app h4,
+div#cc-app h5,
+div#cc-app h6 {
+    margin: 0 0 15px 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    color: #444444;
+    text-transform: none;
+}
+/*
+ * Don't worry about the universal selector.
+ * There is no mentionable performance impact.
+ */
+div#cc-app * + h1,
+div#cc-app * + h2,
+div#cc-app * + h3,
+div#cc-app * + h4,
+div#cc-app * + h5,
+div#cc-app * + h6 {
+    margin-top: 25px;
+}
+div#cc-app h1,
+div#cc-app .uk-h1 {
+    font-size: 36px;
+    line-height: 42px;
+}
+div#cc-app h2,
+div#cc-app .uk-h2 {
+    font-size: 24px;
+    line-height: 30px;
+}
+div#cc-app h3,
+div#cc-app .uk-h3 {
+    font-size: 18px;
+    line-height: 24px;
+}
+div#cc-app h4,
+div#cc-app .uk-h4 {
+    font-size: 16px;
+    line-height: 22px;
+}
+div#cc-app h5,
+div#cc-app .uk-h5 {
+    font-size: 14px;
+    line-height: 20px;
+}
+div#cc-app h6,
+div#cc-app .uk-h6 {
+    font-size: 12px;
+    line-height: 18px;
+}
+/* Lists
+ ========================================================================== */
+/*
+ * Ordered and unordered lists
+ */
+div#cc-app ul,
+div#cc-app ol {
+    padding-left: 30px;
+}
+/* Reset margin for nested lists */
+div#cc-app ul > li > ul,
+div#cc-app ul > li > ol,
+div#cc-app ol > li > ol,
+div#cc-app ol > li > ul {
+    margin: 0;
+}
+/*
+ * Description lists
+ */
+div#cc-app dt {
+    font-weight: bold;
+}
+div#cc-app dd {
+    margin-left: 0;
+}
+/* Horizontal rule
+ ========================================================================== */
+div#cc-app hr {
+    display: block;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #dddddd;
+}
+/* Address
+ ========================================================================== */
+div#cc-app address {
+    font-style: normal;
+}
+/* Quotes
+ ========================================================================== */
+div#cc-app q,
+div#cc-app blockquote {
+    font-style: italic;
+}
+div#cc-app blockquote {
+    padding-left: 15px;
+    border-left: 5px solid #dddddd;
+    font-size: 16px;
+    line-height: 22px;
+}
+/* Small print for identifying the source */
+div#cc-app blockquote small {
+    display: block;
+    color: #999999;
+    font-style: normal;
+}
+/* Smaller margin if `small` follows */
+div#cc-app blockquote p:last-of-type {
+    margin-bottom: 5px;
+}
+/* Code and preformatted text
+ ========================================================================== */
+div#cc-app code {
+    color: #dd0055;
+    font-size: 12px;
+    white-space: nowrap;
+    padding: 0 4px;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    background: #fafafa;
+}
+/* Reset code elements if parent of pre elements */
+div#cc-app pre code {
+    color: inherit;
+    white-space: pre-wrap;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+div#cc-app pre {
+    padding: 10px;
+    background: #fafafa;
+    color: #444444;
+    font-size: 12px;
+    line-height: 18px;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+}
+/* Forms
+ ========================================================================== */
+/*
+ * Vertical alignment
+ * Exclude `radio` and `checkbox` elements because the default `baseline` value aligns better with text
+ */
+div#cc-app button,
+div#cc-app input:not([type="radio"]):not([type="checkbox"]),
+div#cc-app select {
+    vertical-align: middle;
+}
+/* Iframe
+ ========================================================================== */
+div#cc-app iframe {
+    border: 0;
+}
+/* Fix viewport for IE10 snap mode
+ ========================================================================== */
+@media screen and (max-width: 400px) {
+    @-ms-viewport {
+        width: device-width;
+    }
+}
+/* ========================================================================
+   Component: Grid
+ ========================================================================== */
+/*
+ * Micro clearfix
+ */
+div#cc-app .uk-grid:before,
+div#cc-app .uk-grid:after {
+    content: " ";
+    display: table;
+}
+div#cc-app .uk-grid:after {
+    clear: both;
+}
+/*
+ * 1. Needed for the gutter
+ * 2. Makes grid more robust so that it can be used with other block elements like lists
+ */
+div#cc-app .uk-grid {
+    /* 1 */
+    margin: 0 0 0 -25px;
+    /* 2 */
+    padding: 0;
+    list-style: none;
+}
+/*
+ * Grid cell
+ * 1. Makes grid more robust so that it can be used with other block elements
+ * 2. Create horizontal gutter
+ * 3. `float` is set by default so columns always behave the same and create a new block format context
+ */
+div#cc-app .uk-grid > * {
+    /* 1 */
+    margin: 0;
+    /* 2 */
+    padding-left: 25px;
+    /* 3 */
+    float: left;
+}
+/*
+ * Remove margin from the last-child
+ */
+div#cc-app .uk-grid > * > :last-child {
+    margin-bottom: 0;
+}
+/* Grid gutter
+ ========================================================================== */
+/*
+ * Vertical gutter
+ */
+div#cc-app .uk-grid + .uk-grid {
+    margin-top: 25px;
+}
+/*
+ * This class is set by JavaScript and applies a vertical gutter if the columns stack or float into the next row
+ * Higher specificity to override margin
+ */
+div#cc-app .uk-grid > .uk-grid-margin {
+    margin-top: 25px;
+}
+/*
+ * Vertical gutter for panels
+ */
+div#cc-app .uk-grid > * > .uk-panel + .uk-panel {
+    margin-top: 25px;
+}
+/*
+ * Larger gutter for large screens
+ */
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+    /* Horizontal gutter */
+    div#cc-app .uk-grid:not(.uk-grid-preserve) {
+        margin-left: -35px;
+    }
+    div#cc-app .uk-grid:not(.uk-grid-preserve) > * {
+        padding-left: 35px;
+    }
+    /* Vertical gutter */
+    div#cc-app .uk-grid:not(.uk-grid-preserve) + .uk-grid {
+        margin-top: 35px;
+    }
+    div#cc-app .uk-grid:not(.uk-grid-preserve) > .uk-grid-margin {
+        margin-top: 35px;
+    }
+    /* Vertical gutter for panels */
+    div#cc-app .uk-grid:not(.uk-grid-preserve) > * > .uk-panel + .uk-panel {
+        margin-top: 35px;
+    }
+}
+/*
+ * Small gutter
+ * Higher specificity to override large gutter
+ */
+div#cc-app .uk-grid.uk-grid-small {
+    margin-left: -10px;
+}
+div#cc-app .uk-grid.uk-grid-small > * {
+    padding-left: 10px;
+}
+div#cc-app .uk-grid.uk-grid-small + .uk-grid-small {
+    margin-top: 10px;
+}
+div#cc-app .uk-grid.uk-grid-small > .uk-grid-margin {
+    margin-top: 10px;
+}
+div#cc-app .uk-grid.uk-grid-small > * > .uk-panel + .uk-panel {
+    margin-top: 10px;
+}
+/* Modifier: `uk-grid-divider`
+ ========================================================================== */
+/*
+ * Horizontal divider
+ * Does not work with `uk-push-*`, `uk-pull-*` and not if the columns float into the next row
+ */
+div#cc-app .uk-grid-divider:not(:empty) {
+    margin-left: -25px;
+    margin-right: -25px;
+}
+div#cc-app .uk-grid-divider > * {
+    padding-left: 25px;
+    padding-right: 25px;
+}
+div#cc-app .uk-grid-divider > [class*='uk-width-1-']:not(.uk-width-1-1):nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-2-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-3-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-4-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-5-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-6-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-7-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-8-']:nth-child(n+2),
+div#cc-app .uk-grid-divider > [class*='uk-width-9-']:nth-child(n+2) {
+    border-left: 1px solid #dddddd;
+}
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    div#cc-app .uk-grid-divider > [class*='uk-width-medium-']:not(.uk-width-medium-1-1):nth-child(n+2) {
+        border-left: 1px solid #dddddd;
+    }
+}
+/* Desktop and bigger */
+@media (min-width: 960px) {
+    div#cc-app .uk-grid-divider > [class*='uk-width-large-']:not(.uk-width-large-1-1):nth-child(n+2) {
+        border-left: 1px solid #dddddd;
+    }
+}
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+    /*
+     * Large gutter
+     */
+    div#cc-app .uk-grid-divider:not(.uk-grid-preserve):not(:empty) {
+        margin-left: -35px;
+        margin-right: -35px;
+    }
+    div#cc-app .uk-grid-divider:not(.uk-grid-preserve) > * {
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+    div#cc-app .uk-grid-divider:not(.uk-grid-preserve):empty {
+        margin-top: 35px;
+        margin-bottom: 35px;
+    }
+}
+/*
+ * Vertical divider
+ */
+div#cc-app .uk-grid-divider:empty {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    border-top: 1px solid #dddddd;
+}
+/* Even grid cell widths
+ ========================================================================== */
+[class*='uk-grid-width'] > * {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+}
+div#cc-app .uk-grid-width-1-2 > * {
+    width: 50%;
+}
+div#cc-app .uk-grid-width-1-3 > * {
+    width: 33.333%;
+}
+div#cc-app .uk-grid-width-1-4 > * {
+    width: 25%;
+}
+div#cc-app .uk-grid-width-1-5 > * {
+    width: 20%;
+}
+div#cc-app .uk-grid-width-1-6 > * {
+    width: 16.666%;
+}
+div#cc-app .uk-grid-width-1-10 > * {
+    width: 10%;
+}
+/* Phone landscape and bigger */
+@media (min-width: 480px) {
+    div#cc-app .uk-grid-width-small-1-2 > * {
+        width: 50%;
+    }
+    div#cc-app .uk-grid-width-small-1-3 > * {
+        width: 33.333%;
+    }
+    div#cc-app .uk-grid-width-small-1-4 > * {
+        width: 25%;
+    }
+    div#cc-app .uk-grid-width-small-1-5 > * {
+        width: 20%;
+    }
+    div#cc-app .uk-grid-width-small-1-6 > * {
+        width: 16.666%;
+    }
+    div#cc-app .uk-grid-width-small-1-10 > * {
+        width: 10%;
+    }
+}
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    div#cc-app .uk-grid-width-medium-1-2 > * {
+        width: 50%;
+    }
+    div#cc-app .uk-grid-width-medium-1-3 > * {
+        width: 33.333%;
+    }
+    div#cc-app .uk-grid-width-medium-1-4 > * {
+        width: 25%;
+    }
+    div#cc-app .uk-grid-width-medium-1-5 > * {
+        width: 20%;
+    }
+    div#cc-app .uk-grid-width-medium-1-6 > * {
+        width: 16.666%;
+    }
+    div#cc-app .uk-grid-width-medium-1-10 > * {
+        width: 10%;
+    }
+}
+/* Desktop and bigger */
+@media (min-width: 960px) {
+    div#cc-app .uk-grid-width-large-1-2 > * {
+        width: 50%;
+    }
+    div#cc-app .uk-grid-width-large-1-3 > * {
+        width: 33.333%;
+    }
+    div#cc-app .uk-grid-width-large-1-4 > * {
+        width: 25%;
+    }
+    div#cc-app .uk-grid-width-large-1-5 > * {
+        width: 20%;
+    }
+    div#cc-app .uk-grid-width-large-1-6 > * {
+        width: 16.666%;
+    }
+    div#cc-app .uk-grid-width-large-1-10 > * {
+        width: 10%;
+    }
+}
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+    div#cc-app .uk-grid-width-xlarge-1-2 > * {
+        width: 50%;
+    }
+    div#cc-app .uk-grid-width-xlarge-1-3 > * {
+        width: 33.333%;
+    }
+    div#cc-app .uk-grid-width-xlarge-1-4 > * {
+        width: 25%;
+    }
+    div#cc-app .uk-grid-width-xlarge-1-5 > * {
+        width: 20%;
+    }
+    div#cc-app .uk-grid-width-xlarge-1-6 > * {
+        width: 16.666%;
+    }
+    div#cc-app .uk-grid-width-xlarge-1-10 > * {
+        width: 10%;
+    }
+}
+/* Sub-objects: `uk-width-*`
+ ========================================================================== */
+[class*='uk-width'] {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+}
+/*
+ * Widths
+ */
+/* Whole */
+div#cc-app .uk-width-1-1 {
+    width: 100%;
+}
+/* Halves */
+div#cc-app .uk-width-1-2,
+div#cc-app .uk-width-2-4,
+div#cc-app .uk-width-3-6,
+div#cc-app .uk-width-5-10 {
+    width: 50%;
+}
+/* Thirds */
+div#cc-app .uk-width-1-3,
+div#cc-app .uk-width-2-6 {
+    width: 33.333%;
+}
+div#cc-app .uk-width-2-3,
+div#cc-app .uk-width-4-6 {
+    width: 66.666%;
+}
+/* Quarters */
+div#cc-app .uk-width-1-4 {
+    width: 25%;
+}
+div#cc-app .uk-width-3-4 {
+    width: 75%;
+}
+/* Fifths */
+div#cc-app .uk-width-1-5,
+div#cc-app .uk-width-2-10 {
+    width: 20%;
+}
+div#cc-app .uk-width-2-5,
+div#cc-app .uk-width-4-10 {
+    width: 40%;
+}
+div#cc-app .uk-width-3-5,
+div#cc-app .uk-width-6-10 {
+    width: 60%;
+}
+div#cc-app .uk-width-4-5,
+div#cc-app .uk-width-8-10 {
+    width: 80%;
+}
+/* Sixths */
+div#cc-app .uk-width-1-6 {
+    width: 16.666%;
+}
+div#cc-app .uk-width-5-6 {
+    width: 83.333%;
+}
+/* Tenths */
+div#cc-app .uk-width-1-10 {
+    width: 10%;
+}
+div#cc-app .uk-width-3-10 {
+    width: 30%;
+}
+div#cc-app .uk-width-7-10 {
+    width: 70%;
+}
+div#cc-app .uk-width-9-10 {
+    width: 90%;
+}
+/* Phone landscape and bigger */
+@media (min-width: 480px) {
+    /* Whole */
+    div#cc-app .uk-width-small-1-1 {
+        width: 100%;
+    }
+    /* Halves */
+    div#cc-app .uk-width-small-1-2,
+    div#cc-app .uk-width-small-2-4,
+    div#cc-app .uk-width-small-3-6,
+    div#cc-app .uk-width-small-5-10 {
+        width: 50%;
+    }
+    /* Thirds */
+    div#cc-app .uk-width-small-1-3,
+    div#cc-app .uk-width-small-2-6 {
+        width: 33.333%;
+    }
+    div#cc-app .uk-width-small-2-3,
+    div#cc-app .uk-width-small-4-6 {
+        width: 66.666%;
+    }
+    /* Quarters */
+    div#cc-app .uk-width-small-1-4 {
+        width: 25%;
+    }
+    div#cc-app .uk-width-small-3-4 {
+        width: 75%;
+    }
+    /* Fifths */
+    div#cc-app .uk-width-small-1-5,
+    div#cc-app .uk-width-small-2-10 {
+        width: 20%;
+    }
+    div#cc-app .uk-width-small-2-5,
+    div#cc-app .uk-width-small-4-10 {
+        width: 40%;
+    }
+    div#cc-app .uk-width-small-3-5,
+    div#cc-app .uk-width-small-6-10 {
+        width: 60%;
+    }
+    div#cc-app .uk-width-small-4-5,
+    div#cc-app .uk-width-small-8-10 {
+        width: 80%;
+    }
+    /* Sixths */
+    div#cc-app .uk-width-small-1-6 {
+        width: 16.666%;
+    }
+    div#cc-app .uk-width-small-5-6 {
+        width: 83.333%;
+    }
+    /* Tenths */
+    div#cc-app .uk-width-small-1-10 {
+        width: 10%;
+    }
+    div#cc-app .uk-width-small-3-10 {
+        width: 30%;
+    }
+    div#cc-app .uk-width-small-7-10 {
+        width: 70%;
+    }
+    div#cc-app .uk-width-small-9-10 {
+        width: 90%;
+    }
+}
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    /* Whole */
+    div#cc-app .uk-width-medium-1-1 {
+        width: 100%;
+    }
+    /* Halves */
+    div#cc-app .uk-width-medium-1-2,
+    div#cc-app .uk-width-medium-2-4,
+    div#cc-app .uk-width-medium-3-6,
+    div#cc-app .uk-width-medium-5-10 {
+        width: 50%;
+    }
+    /* Thirds */
+    div#cc-app .uk-width-medium-1-3,
+    div#cc-app .uk-width-medium-2-6 {
+        width: 33.333%;
+    }
+    div#cc-app .uk-width-medium-2-3,
+    div#cc-app .uk-width-medium-4-6 {
+        width: 66.666%;
+    }
+    /* Quarters */
+    div#cc-app .uk-width-medium-1-4 {
+        width: 25%;
+    }
+    div#cc-app .uk-width-medium-3-4 {
+        width: 75%;
+    }
+    /* Fifths */
+    div#cc-app .uk-width-medium-1-5,
+    div#cc-app .uk-width-medium-2-10 {
+        width: 20%;
+    }
+    div#cc-app .uk-width-medium-2-5,
+    div#cc-app .uk-width-medium-4-10 {
+        width: 40%;
+    }
+    div#cc-app .uk-width-medium-3-5,
+    div#cc-app .uk-width-medium-6-10 {
+        width: 60%;
+    }
+    div#cc-app .uk-width-medium-4-5,
+    div#cc-app .uk-width-medium-8-10 {
+        width: 80%;
+    }
+    /* Sixths */
+    div#cc-app .uk-width-medium-1-6 {
+        width: 16.666%;
+    }
+    div#cc-app .uk-width-medium-5-6 {
+        width: 83.333%;
+    }
+    /* Tenths */
+    div#cc-app .uk-width-medium-1-10 {
+        width: 10%;
+    }
+    div#cc-app .uk-width-medium-3-10 {
+        width: 30%;
+    }
+    div#cc-app .uk-width-medium-7-10 {
+        width: 70%;
+    }
+    div#cc-app .uk-width-medium-9-10 {
+        width: 90%;
+    }
+}
+/* Desktop and bigger */
+@media (min-width: 960px) {
+    /* Whole */
+    div#cc-app .uk-width-large-1-1 {
+        width: 100%;
+    }
+    /* Halves */
+    div#cc-app .uk-width-large-1-2,
+    div#cc-app .uk-width-large-2-4,
+    div#cc-app .uk-width-large-3-6,
+    div#cc-app .uk-width-large-5-10 {
+        width: 50%;
+    }
+    /* Thirds */
+    div#cc-app .uk-width-large-1-3,
+    div#cc-app .uk-width-large-2-6 {
+        width: 33.333%;
+    }
+    div#cc-app .uk-width-large-2-3,
+    div#cc-app .uk-width-large-4-6 {
+        width: 66.666%;
+    }
+    /* Quarters */
+    div#cc-app .uk-width-large-1-4 {
+        width: 25%;
+    }
+    div#cc-app .uk-width-large-3-4 {
+        width: 75%;
+    }
+    /* Fifths */
+    div#cc-app .uk-width-large-1-5,
+    div#cc-app .uk-width-large-2-10 {
+        width: 20%;
+    }
+    div#cc-app .uk-width-large-2-5,
+    div#cc-app .uk-width-large-4-10 {
+        width: 40%;
+    }
+    div#cc-app .uk-width-large-3-5,
+    div#cc-app .uk-width-large-6-10 {
+        width: 60%;
+    }
+    div#cc-app .uk-width-large-4-5,
+    div#cc-app .uk-width-large-8-10 {
+        width: 80%;
+    }
+    /* Sixths */
+    div#cc-app .uk-width-large-1-6 {
+        width: 16.666%;
+    }
+    div#cc-app .uk-width-large-5-6 {
+        width: 83.333%;
+    }
+    /* Tenths */
+    div#cc-app .uk-width-large-1-10 {
+        width: 10%;
+    }
+    div#cc-app .uk-width-large-3-10 {
+        width: 30%;
+    }
+    div#cc-app .uk-width-large-7-10 {
+        width: 70%;
+    }
+    div#cc-app .uk-width-large-9-10 {
+        width: 90%;
+    }
+}
+/* Sub-object: `uk-push-*` and `uk-pull-*`
+ ========================================================================== */
+/*
+ * Source ordering
+ * Works only with `uk-width-medium-*`
+ */
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    [class*='uk-push-'],
+    [class*='uk-pull-'] {
+        position: relative;
+    }
+    /*
+     * Push
+     */
+    /* Halves */
+    div#cc-app .uk-push-1-2,
+    div#cc-app .uk-push-2-4,
+    div#cc-app .uk-push-3-6,
+    div#cc-app .uk-push-5-10 {
+        left: 50%;
+    }
+    /* Thirds */
+    div#cc-app .uk-push-1-3,
+    div#cc-app .uk-push-2-6 {
+        left: 33.333%;
+    }
+    div#cc-app .uk-push-2-3,
+    div#cc-app .uk-push-4-6 {
+        left: 66.666%;
+    }
+    /* Quarters */
+    div#cc-app .uk-push-1-4 {
+        left: 25%;
+    }
+    div#cc-app .uk-push-3-4 {
+        left: 75%;
+    }
+    /* Fifths */
+    div#cc-app .uk-push-1-5,
+    div#cc-app .uk-push-2-10 {
+        left: 20%;
+    }
+    div#cc-app .uk-push-2-5,
+    div#cc-app .uk-push-4-10 {
+        left: 40%;
+    }
+    div#cc-app .uk-push-3-5,
+    div#cc-app .uk-push-6-10 {
+        left: 60%;
+    }
+    div#cc-app .uk-push-4-5,
+    div#cc-app .uk-push-8-10 {
+        left: 80%;
+    }
+    /* Sixths */
+    div#cc-app .uk-push-1-6 {
+        left: 16.666%;
+    }
+    div#cc-app .uk-push-5-6 {
+        left: 83.333%;
+    }
+    /* Tenths */
+    div#cc-app .uk-push-1-10 {
+        left: 10%;
+    }
+    div#cc-app .uk-push-3-10 {
+        left: 30%;
+    }
+    div#cc-app .uk-push-7-10 {
+        left: 70%;
+    }
+    div#cc-app .uk-push-9-10 {
+        left: 90%;
+    }
+    /*
+     * Pull
+     */
+    /* Halves */
+    div#cc-app .uk-pull-1-2,
+    div#cc-app .uk-pull-2-4,
+    div#cc-app .uk-pull-3-6,
+    div#cc-app .uk-pull-5-10 {
+        left: -50%;
+    }
+    /* Thirds */
+    div#cc-app .uk-pull-1-3,
+    div#cc-app .uk-pull-2-6 {
+        left: -33.333%;
+    }
+    div#cc-app .uk-pull-2-3,
+    div#cc-app .uk-pull-4-6 {
+        left: -66.666%;
+    }
+    /* Quarters */
+    div#cc-app .uk-pull-1-4 {
+        left: -25%;
+    }
+    div#cc-app .uk-pull-3-4 {
+        left: -75%;
+    }
+    /* Fifths */
+    div#cc-app .uk-pull-1-5,
+    div#cc-app .uk-pull-2-10 {
+        left: -20%;
+    }
+    div#cc-app .uk-pull-2-5,
+    div#cc-app .uk-pull-4-10 {
+        left: -40%;
+    }
+    div#cc-app .uk-pull-3-5,
+    div#cc-app .uk-pull-6-10 {
+        left: -60%;
+    }
+    div#cc-app .uk-pull-4-5,
+    div#cc-app .uk-pull-8-10 {
+        left: -80%;
+    }
+    /* Sixths */
+    div#cc-app .uk-pull-1-6 {
+        left: -16.666%;
+    }
+    div#cc-app .uk-pull-5-6 {
+        left: -83.333%;
+    }
+    /* Tenths */
+    div#cc-app .uk-pull-1-10 {
+        left: -10%;
+    }
+    div#cc-app .uk-pull-3-10 {
+        left: -30%;
+    }
+    div#cc-app .uk-pull-7-10 {
+        left: -70%;
+    }
+    div#cc-app .uk-pull-9-10 {
+        left: -90%;
+    }
+}
+/* ========================================================================
+   Component: Panel
+ ========================================================================== */
+/*
+ * 1. Needed for `a` elements
+ * 2. Create position context for badges
+ */
+div#cc-app .uk-panel {
+    /* 1 */
+    display: block;
+    /* 2 */
+    position: relative;
+}
+/*
+ * Micro clearfix to make panels more robust
+ */
+div#cc-app .uk-panel:before,
+div#cc-app .uk-panel:after {
+    content: " ";
+    display: table;
+}
+div#cc-app .uk-panel:after {
+    clear: both;
+}
+/*
+ * Remove margin from the last-child if not `uk-widget-title`
+ */
+div#cc-app .uk-panel > :not(.uk-panel-title):last-child {
+    margin-bottom: 0;
+}
+/* Sub-object: `uk-panel-title`
+ ========================================================================== */
+div#cc-app .uk-panel-title {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: normal;
+    text-transform: none;
+    color: #444444;
+}
+/* Sub-object: `uk-panel-badge`
+ ========================================================================== */
+div#cc-app .uk-panel-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+/* Modifier: `uk-panel-box`
+ ========================================================================== */
+div#cc-app .uk-panel-box {
+    padding: 15px;
+    background: #fafafa;
+    color: #444444;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+}
+div#cc-app .uk-panel-box .uk-panel-title {
+    color: #444444;
+}
+div#cc-app .uk-panel-box .uk-panel-badge {
+    top: 10px;
+    right: 10px;
+}
+div#cc-app .uk-panel-box .uk-panel-teaser {
+    margin: -16px -16px 15px -16px;
+}
+/*
+ * Nav in panel
+ */
+div#cc-app .uk-panel-box > .uk-nav-side {
+    margin: 0 -15px;
+}
+/*
+ * Sub-modifier: `uk-panel-box-primary`
+ */
+div#cc-app .uk-panel-box-primary {
+    background-color: #ebf7fd;
+    color: #2d7091;
+    border-color: rgba(45, 112, 145, 0.3);
+}
+div#cc-app .uk-panel-box-primary .uk-panel-title {
+    color: #2d7091;
+}
+/*
+ * Sub-modifier: `uk-panel-box-secondary`
+ */
+div#cc-app .uk-panel-box-secondary {
+    background-color: #ffffff;
+    color: #444444;
+}
+div#cc-app .uk-panel-box-secondary .uk-panel-title {
+    color: #444444;
+}
+/* Modifier: `uk-panel-header`
+ ========================================================================== */
+div#cc-app .uk-panel-header .uk-panel-title {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dddddd;
+    color: #444444;
+}
+/* Modifier: `uk-panel-space`
+ ========================================================================== */
+div#cc-app .uk-panel-space {
+    padding: 30px;
+}
+div#cc-app .uk-panel-space .uk-panel-badge {
+    top: 30px;
+    right: 30px;
+}
+/* Modifier: `uk-panel-divider`
+ ========================================================================== */
+div#cc-app .uk-panel + .uk-panel-divider {
+    margin-top: 50px !important;
+}
+div#cc-app .uk-panel + .uk-panel-divider:before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: -25px;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #dddddd;
+}
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+    div#cc-app .uk-panel + .uk-panel-divider {
+        margin-top: 70px !important;
+    }
+    div#cc-app .uk-panel + .uk-panel-divider:before {
+        top: -35px;
+    }
+}
+div#cc-app .uk-panel-box .uk-panel-teaser > * {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+/* ========================================================================
+   Component: Form
+ ========================================================================== */
+/*
+ * Remove margin from the last-child
+ */
+div#cc-app .uk-form > :last-child {
+    margin-bottom: 0;
+}
+/*
+ * Controls
+ * Except for `range`, `radio`, `checkbox`, `file`, `submit`, `reset`, `button` and `image`
+ * 1. Must be `height` because `min-height` is not working in OSX
+ * 2. Responsiveness: Sets a maximum width relative to the parent to scale on narrower viewports
+ * 3. Vertical `padding` needed for `select` elements in Firefox
+ * 4. Style
+ */
+div#cc-app .uk-form select,
+div#cc-app .uk-form textarea,
+div#cc-app .uk-form input:not([type]),
+div#cc-app .uk-form input[type="text"],
+div#cc-app .uk-form input[type="password"],
+div#cc-app .uk-form input[type="datetime"],
+div#cc-app .uk-form input[type="datetime-local"],
+div#cc-app .uk-form input[type="date"],
+div#cc-app .uk-form input[type="month"],
+div#cc-app .uk-form input[type="time"],
+div#cc-app .uk-form input[type="week"],
+div#cc-app .uk-form input[type="number"],
+div#cc-app .uk-form input[type="email"],
+div#cc-app .uk-form input[type="url"],
+div#cc-app .uk-form input[type="search"],
+div#cc-app .uk-form input[type="tel"],
+div#cc-app .uk-form input[type="color"] {
+    /* 1 */
+    height: 30px;
+    /* 2 */
+    max-width: 100%;
+    /* 3 */
+    padding: 4px 6px;
+    /* 4 */
+    border: 1px solid #dddddd;
+    background: #ffffff;
+    color: #444444;
+    -webkit-transition: all linear 0.2s;
+    transition: all linear 0.2s;
+    border-radius: 4px;
+    /* Focus state */
+    /* Disabled state */
+}
+div#cc-app .uk-form select:focus,
+div#cc-app .uk-form textarea:focus,
+div#cc-app .uk-form input:not([type]):focus,
+div#cc-app .uk-form input[type="text"]:focus,
+div#cc-app .uk-form input[type="password"]:focus,
+div#cc-app .uk-form input[type="datetime"]:focus,
+div#cc-app .uk-form input[type="datetime-local"]:focus,
+div#cc-app .uk-form input[type="date"]:focus,
+div#cc-app .uk-form input[type="month"]:focus,
+div#cc-app .uk-form input[type="time"]:focus,
+div#cc-app .uk-form input[type="week"]:focus,
+div#cc-app .uk-form input[type="number"]:focus,
+div#cc-app .uk-form input[type="email"]:focus,
+div#cc-app .uk-form input[type="url"]:focus,
+div#cc-app .uk-form input[type="search"]:focus,
+div#cc-app .uk-form input[type="tel"]:focus,
+div#cc-app .uk-form input[type="color"]:focus {
+    border-color: #99baca;
+    outline: 0;
+    background: #f5fbfe;
+    color: #444444;
+}
+div#cc-app .uk-form select:disabled,
+div#cc-app .uk-form textarea:disabled,
+div#cc-app .uk-form input:not([type]):disabled,
+div#cc-app .uk-form input[type="text"]:disabled,
+div#cc-app .uk-form input[type="password"]:disabled,
+div#cc-app .uk-form input[type="datetime"]:disabled,
+div#cc-app .uk-form input[type="datetime-local"]:disabled,
+div#cc-app .uk-form input[type="date"]:disabled,
+div#cc-app .uk-form input[type="month"]:disabled,
+div#cc-app .uk-form input[type="time"]:disabled,
+div#cc-app .uk-form input[type="week"]:disabled,
+div#cc-app .uk-form input[type="number"]:disabled,
+div#cc-app .uk-form input[type="email"]:disabled,
+div#cc-app .uk-form input[type="url"]:disabled,
+div#cc-app .uk-form input[type="search"]:disabled,
+div#cc-app .uk-form input[type="tel"]:disabled,
+div#cc-app .uk-form input[type="color"]:disabled {
+    border-color: #dddddd;
+    background-color: #fafafa;
+    color: #999999;
+}
+/*
+ * Placeholder
+ * Higher specificity (!important) needed to override color in IE
+ */
+div#cc-app .uk-form :-ms-input-placeholder {
+    color: #999999 !important;
+}
+div#cc-app .uk-form ::-moz-placeholder {
+    color: #999999;
+}
+div#cc-app .uk-form ::-webkit-input-placeholder {
+    color: #999999;
+}
+div#cc-app .uk-form :disabled:-ms-input-placeholder {
+    color: #999999 !important;
+}
+div#cc-app .uk-form :disabled::-moz-placeholder {
+    color: #999999;
+}
+div#cc-app .uk-form :disabled::-webkit-input-placeholder {
+    color: #999999;
+}
+/*
+ * Reset style on iOS.
+ */
+div#cc-app .uk-form textarea,
+div#cc-app .uk-form input:not([type]),
+div#cc-app .uk-form input[type="text"],
+div#cc-app .uk-form input[type="password"],
+div#cc-app .uk-form input[type="email"],
+div#cc-app .uk-form input[type="url"],
+div#cc-app .uk-form input[type="search"],
+div#cc-app .uk-form input[type="tel"] {
+    -webkit-appearance: none;
+}
+/*
+ * Removes box-shadow for invalid controls in Firefox.
+ */
+div#cc-app .uk-form :invalid {
+    box-shadow: none;
+}
+/*
+ * Legend style
+ * 1. `margin-bottom` is not working in Safari and Opera.
+ *    Using `padding` and :after instead to create the border
+ * 2. Style
+ */
+div#cc-app .uk-form legend {
+    width: 100%;
+    /* 1 */
+    padding-bottom: 15px;
+    /* 2 */
+    font-size: 18px;
+    line-height: 30px;
+}
+/* 1 */
+div#cc-app .uk-form legend:after {
+    content: "";
+    display: block;
+    border-bottom: 1px solid #dddddd;
+}
+/* Size modifiers
+ * Higher specificity needed to override defaults
+ ========================================================================== */
+div#cc-app select.uk-form-small,
+div#cc-app textarea.uk-form-small,
+div#cc-app input[type].uk-form-small,
+div#cc-app input:not([type]).uk-form-small {
+    height: 25px;
+    padding: 3px 3px;
+    font-size: 12px;
+}
+div#cc-app select.uk-form-large,
+div#cc-app textarea.uk-form-large,
+div#cc-app input[type].uk-form-large,
+div#cc-app input:not([type]).uk-form-large {
+    height: 40px;
+    padding: 8px 6px;
+    font-size: 16px;
+}
+/* Reset height
+ * Must be after size modifiers
+ ========================================================================== */
+div#cc-app .uk-form textarea,
+div#cc-app .uk-form select[multiple],
+div#cc-app .uk-form select[size] {
+    height: auto;
+}
+/* Validation states
+ * Using !important to keep the selector simple
+ ========================================================================== */
+/*
+ * Error state
+ */
+div#cc-app .uk-form-danger {
+    border-color: #dc8d99 !important;
+    background: #fff7f8 !important;
+    color: #c91032 !important;
+}
+/*
+ * Success state
+ */
+div#cc-app .uk-form-success {
+    border-color: #8ec73b !important;
+    background: #fafff2 !important;
+    color: #539022 !important;
+}
+/* Style modifiers
+ * Using !important to keep the selector simple
+ ========================================================================== */
+/*
+ * Blank form
+ */
+div#cc-app .uk-form-blank {
+    border-color: transparent !important;
+    border-style: dashed !important;
+    background: none !important;
+}
+div#cc-app .uk-form-blank:focus {
+    border-color: #dddddd !important;
+}
+/* Size sub-modifiers
+ ========================================================================== */
+/*
+ * Fixed widths
+ * Different widths for mini sized `input` and `select` elements
+ */
+div#cc-app input.uk-form-width-mini {
+    width: 40px;
+}
+div#cc-app select.uk-form-width-mini {
+    width: 65px;
+}
+div#cc-app .uk-form-width-small {
+    width: 130px;
+}
+div#cc-app .uk-form-width-medium {
+    width: 200px;
+}
+div#cc-app .uk-form-width-large {
+    width: 500px;
+}
+/* Sub-objects: `uk-form-row`
+ * Groups labels and controls in rows
+ ========================================================================== */
+/*
+ * Micro clearfix
+ * Needed for `uk-form-horizontal` modifier
+ */
+div#cc-app .uk-form-row:before,
+div#cc-app .uk-form-row:after {
+    content: " ";
+    display: table;
+}
+div#cc-app .uk-form-row:after {
+    clear: both;
+}
+/*
+ * Vertical gutter
+ */
+div#cc-app .uk-form-row + .uk-form-row {
+    margin-top: 15px;
+}
+/* Help text
+ * Sub-object: `uk-form-help-inline`, `uk-form-help-block`
+ ========================================================================== */
+div#cc-app .uk-form-help-inline {
+    display: inline-block;
+    margin: 0 0 0 10px;
+}
+div#cc-app .uk-form-help-block {
+    margin: 5px 0 0 0;
+}
+/* Controls content
+ * Sub-object: `uk-form-controls`, `uk-form-controls-condensed`
+ ========================================================================== */
+/*
+ * Remove margins
+ */
+div#cc-app .uk-form-controls > :first-child {
+    margin-top: 0;
+}
+div#cc-app .uk-form-controls > :last-child {
+    margin-bottom: 0;
+}
+/*
+ * Group controls and text into blocks with a small spacing between blocks
+ */
+div#cc-app .uk-form-controls-condensed {
+    margin: 5px 0;
+}
+/* Modifier: `uk-form-stacked`
+ * Requires sub-object: `uk-form-label`
+ ========================================================================== */
+div#cc-app .uk-form-stacked .uk-form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+/* Modifier: `uk-form-horizontal`
+ * Requires sub-objects: `uk-form-label`, `uk-form-controls`
+ ========================================================================== */
+/* Tablet portrait and smaller */
+@media (max-width: 959px) {
+    /* Behave like `uk-form-stacked` */
+    div#cc-app .uk-form-horizontal .uk-form-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+}
+/* Desktop and bigger */
+@media (min-width: 960px) {
+    div#cc-app .uk-form-horizontal .uk-form-label {
+        width: 200px;
+        margin-top: 5px;
+        float: left;
+    }
+    div#cc-app .uk-form-horizontal .uk-form-controls {
+        margin-left: 215px;
+    }
+    /* Better vertical alignment if controls are checkboxes and radio buttons with text */
+    div#cc-app .uk-form-horizontal .uk-form-controls-text {
+        padding-top: 5px;
+    }
+}
+/* Sub-object: `uk-form-icon`
+ ========================================================================== */
+/*
+ * 1. Container width fits its content
+ * 2. Create position context
+ * 3. Prevent `inline-block` consequences
+ */
+div#cc-app .uk-form-icon {
+    /* 1 */
+    display: inline-block;
+    /* 2 */
+    position: relative;
+    /* 3 */
+    max-width: 100%;
+}
+/*
+ * 1. Make form element clickable through icon
+ */
+div#cc-app .uk-form-icon > [class*='uk-icon-'] {
+    position: absolute;
+    top: 50%;
+    width: 30px;
+    margin-top: -7px;
+    font-size: 14px;
+    color: #999999;
+    text-align: center;
+    /* 1 */
+    pointer-events: none;
+}
+div#cc-app .uk-form-icon:not(.uk-form-icon-flip) > input {
+    padding-left: 30px !important;
+}
+/*
+ * Sub-modifier: `uk-form-icon-flip`
+ */
+div#cc-app .uk-form-icon-flip > [class*='uk-icon-'] {
+    right: 0;
+}
+div#cc-app .uk-form-icon-flip > input {
+    padding-right: 30px !important;
+}
+/* ========================================================================
+   Component: Button
+ ========================================================================== */
+/*
+ * 1. Required for `a` elements
+ * 2. Required for `button` and `input` elements
+ * 3. `line-height` is used to create a height
+ * 4. `min-height` is necessary for `input` elements in Firefox and Opera because `line-height` is not working.
+ * 5. Reset button group whitespace hack
+ * 6. Style
+ */
+div#cc-app .uk-button {
+    /* 1 */
+    display: inline-block;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    vertical-align: middle;
+    text-decoration: none;
+    text-align: center;
+    /* 2 */
+    border: none;
+    /* 3 */
+    line-height: 28px;
+    /* 4 */
+    min-height: 30px;
+    /* 5 */
+    font-size: 1rem;
+    /* 6 */
+    padding: 0 12px;
+    background: #f7f7f7;
+    color: #444444;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.3);
+    background-origin: border-box;
+    background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);
+    background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
+    border-radius: 4px;
+    text-shadow: 0 1px 0 #ffffff;
+}
+/*
+ * Hover
+ * 1. Apply hover style also to focus state
+ * 2. Remove default focus style
+ * 3. Required for `a` elements
+ */
+div#cc-app .uk-button:hover,
+div#cc-app .uk-button:focus {
+    background-color: #fafafa;
+    color: #444444;
+    /* 2 */
+    outline: none;
+    /* 3 */
+    text-decoration: none;
+    background-image: none;
+}
+/* Active */
+div#cc-app .uk-button:active,
+div#cc-app .uk-button.uk-active {
+    background-color: #f5f5f5;
+    color: #444444;
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.3);
+    background-image: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+/* Color modifiers
+ ========================================================================== */
+/*
+ * Modifier: `uk-button-primary`
+ */
+div#cc-app .uk-button-primary {
+    background-color: #009dd8;
+    color: #ffffff;
+    background-image: -webkit-linear-gradient(top, #00b4f5, #008dc5);
+    background-image: linear-gradient(to bottom, #00b4f5, #008dc5);
+    border-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.4);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+/* Hover */
+div#cc-app .uk-button-primary:hover,
+div#cc-app .uk-button-primary:focus {
+    background-color: #00aff2;
+    color: #ffffff;
+    background-image: none;
+}
+/* Active */
+div#cc-app .uk-button-primary:active,
+div#cc-app .uk-button-primary.uk-active {
+    background-color: #008abf;
+    color: #ffffff;
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/*
+ * Modifier: `uk-button-success`
+ */
+div#cc-app .uk-button-success {
+    background-color: #82bb42;
+    color: #ffffff;
+    background-image: -webkit-linear-gradient(top, #9fd256, #6fac34);
+    background-image: linear-gradient(to bottom, #9fd256, #6fac34);
+    border-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.4);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+/* Hover */
+div#cc-app .uk-button-success:hover,
+div#cc-app .uk-button-success:focus {
+    background-color: #8fce48;
+    color: #ffffff;
+    background-image: none;
+}
+/* Active */
+div#cc-app .uk-button-success:active,
+div#cc-app .uk-button-success.uk-active {
+    background-color: #76b430;
+    color: #ffffff;
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/*
+ * Modifier: `uk-button-danger`
+ */
+div#cc-app .uk-button-danger {
+    background-color: #d32c46;
+    color: #ffffff;
+    background-image: -webkit-linear-gradient(top, #ee465a, #c11a39);
+    background-image: linear-gradient(to bottom, #ee465a, #c11a39);
+    border-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: rgba(0, 0, 0, 0.4);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+/* Hover */
+div#cc-app .uk-button-danger:hover,
+div#cc-app .uk-button-danger:focus {
+    background-color: #e33551;
+    color: #ffffff;
+    background-image: none;
+}
+/* Active */
+div#cc-app .uk-button-danger:active,
+div#cc-app .uk-button-danger.uk-active {
+    background-color: #c91c37;
+    color: #ffffff;
+    background-image: none;
+    border-color: rgba(0, 0, 0, 0.2);
+    border-top-color: rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/* Disabled state
+ * Overrides also the color modifiers
+ ========================================================================== */
+/* Equal for all button types */
+div#cc-app .uk-button:disabled {
+    background-color: #fafafa;
+    color: #999999;
+    border-color: rgba(0, 0, 0, 0.2);
+    background-image: none;
+    box-shadow: none;
+    text-shadow: 0 1px 0 #ffffff;
+}
+/* Modifier: `uk-button-link`
+ ========================================================================== */
+/* Reset */
+div#cc-app .uk-button-link,
+div#cc-app .uk-button-link:hover,
+div#cc-app .uk-button-link:focus,
+div#cc-app .uk-button-link:active,
+div#cc-app .uk-button-link.uk-active,
+div#cc-app .uk-button-link:disabled {
+    border-color: transparent;
+    background: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+/* Color */
+div#cc-app .uk-button-link {
+    color: #0077dd;
+}
+div#cc-app .uk-button-link:hover,
+div#cc-app .uk-button-link:focus,
+div#cc-app .uk-button-link:active,
+div#cc-app .uk-button-link.uk-active {
+    color: #005599;
+    text-decoration: underline;
+}
+div#cc-app .uk-button-link:disabled {
+    color: #999999;
+}
+/* Focus */
+div#cc-app .uk-button-link:focus {
+    outline: 1px dotted;
+}
+/* Size modifiers
+ ========================================================================== */
+div#cc-app .uk-button-mini {
+    min-height: 20px;
+    padding: 0 6px;
+    line-height: 18px;
+    font-size: 11px;
+}
+div#cc-app .uk-button-small {
+    min-height: 25px;
+    padding: 0 10px;
+    line-height: 23px;
+    font-size: 12px;
+}
+div#cc-app .uk-button-large {
+    min-height: 40px;
+    padding: 0 15px;
+    line-height: 38px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+/* Sub-object `uk-button-group`
+ ========================================================================== */
+/*
+ * 1. Behave like buttons
+ * 2. Create position context for dropdowns
+ * 3. Remove whitespace between child elements when using `inline-block`
+ * 4. Prevent buttons from wrapping
+ * 5. Remove whitespace between child elements when using `inline-block`
+ */
+div#cc-app .uk-button-group {
+    /* 1 */
+    display: inline-block;
+    vertical-align: middle;
+    /* 2 */
+    position: relative;
+    /* 3 */
+    font-size: 0.001px;
+    /* 4 */
+    white-space: nowrap;
+}
+div#cc-app .uk-button-group > * {
+    display: inline-block;
+}
+/* 5 */
+div#cc-app .uk-button-group .uk-button {
+    vertical-align: top;
+}
+/* Sub-object: `uk-button-dropdown`
+ ========================================================================== */
+/*
+ * 1. Behave like buttons
+ * 2. Create position context for dropdowns
+ */
+div#cc-app .uk-button-dropdown {
+    /* 1 */
+    display: inline-block;
+    vertical-align: middle;
+    /* 2 */
+    position: relative;
+}
+/* Sub-object `uk-button-group`
+     ========================================================================== */
+/*
+     * Reset border-radius
+     */
+div#cc-app .uk-button-group > .uk-button:not(:first-child):not(:last-child),
+div#cc-app .uk-button-group > div:not(:first-child):not(:last-child) .uk-button {
+    border-radius: 0;
+}
+div#cc-app .uk-button-group > .uk-button:first-child,
+div#cc-app .uk-button-group > div:first-child .uk-button {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+div#cc-app .uk-button-group > .uk-button:last-child,
+div#cc-app .uk-button-group > div:last-child .uk-button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+/*
+     * Collapse border
+     */
+div#cc-app .uk-button-group > .uk-button:nth-child(n+2),
+div#cc-app .uk-button-group > div:nth-child(n+2) .uk-button {
+    margin-left: -1px;
+}
+/*
+     * Create position context to superimpose the successor elements border
+     * Known issue: If you use an `a` element as button and an icon inside,
+     * the active state will not work if you click the icon inside the button
+     * Workaround: Just use a `button` or `input` element as button
+     */
+div#cc-app .uk-button-group .uk-button:active {
+    position: relative;
+}
+/* ========================================================================
+   Component: Icon
+ ========================================================================== */
+@font-face {
+    font-family: 'FontAwesome';
+    src: url("../assets/fonts/fontawesome-webfont.eot");
+    src: url("../assets/fonts/fontawesome-webfont.eot?#iefix") format("embedded-opentype"), url("../assets/fonts/fontawesome-webfont.woff") format("woff"), url("../assets/fonts/fontawesome-webfont.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+/*
+ * 1. Allow margin
+ * 2. Prevent inherit font style
+ * 4. Correct line-height
+ * 5. Better font rendering
+ */
+[class*='uk-icon-'] {
+    font-family: FontAwesome;
+    /* 1 */
+    display: inline-block;
+    /* 2 */
+    font-weight: normal;
+    font-style: normal;
+    /* 4 */
+    line-height: 1;
+    /* 5 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+/* Size modifiers
+ ========================================================================== */
+div#cc-app .uk-icon-small:before {
+    font-size: 150%;
+    vertical-align: -10%;
+}
+div#cc-app .uk-icon-medium:before {
+    font-size: 200%;
+    vertical-align: -16%;
+}
+div#cc-app .uk-icon-large:before {
+    font-size: 250%;
+    vertical-align: -22%;
+}
+/* Modifier: `uk-icon-spin`
+ ========================================================================== */
+div#cc-app .uk-icon-spin {
+    display: inline-block;
+    -webkit-animation: uk-rotate 2s infinite linear;
+    animation: uk-rotate 2s infinite linear;
+}
+/* Modifier: `uk-icon-button`
+ ========================================================================== */
+div#cc-app .uk-icon-button {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+    background: #f7f7f7;
+    line-height: 35px;
+    color: #444444;
+    font-size: 18px;
+    text-align: center;
+    border: 1px solid #cccccc;
+    border-bottom-color: #bbbbbb;
+    background-origin: border-box;
+    background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);
+    background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
+    text-shadow: 0 1px 0 #ffffff;
+}
+/*
+ * Hover
+ * 1. Apply hover style also to focus state
+ * 2. Remove default focus style
+ */
+div#cc-app .uk-icon-button:hover,
+div#cc-app .uk-icon-button:focus {
+    background-color: #fafafa;
+    color: #444444;
+    text-decoration: none;
+    /* 2 */
+    outline: none;
+    background-image: none;
+}
+/* Active */
+div#cc-app .uk-icon-button:active {
+    background-color: #f5f5f5;
+    color: #444444;
+    border-color: #cccccc;
+    border-top-color: #bbbbbb;
+    background-image: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+/* Icon mapping
+ ========================================================================== */
+div#cc-app .uk-icon-glass:before {
+    content: "\f000";
+}
+div#cc-app .uk-icon-music:before {
+    content: "\f001";
+}
+div#cc-app .uk-icon-search:before {
+    content: "\f002";
+}
+div#cc-app .uk-icon-envelope-o:before {
+    content: "\f003";
+}
+div#cc-app .uk-icon-heart:before {
+    content: "\f004";
+}
+div#cc-app .uk-icon-star:before {
+    content: "\f005";
+}
+div#cc-app .uk-icon-star-o:before {
+    content: "\f006";
+}
+div#cc-app .uk-icon-user:before {
+    content: "\f007";
+}
+div#cc-app .uk-icon-film:before {
+    content: "\f008";
+}
+div#cc-app .uk-icon-th-large:before {
+    content: "\f009";
+}
+div#cc-app .uk-icon-th:before {
+    content: "\f00a";
+}
+div#cc-app .uk-icon-th-list:before {
+    content: "\f00b";
+}
+div#cc-app .uk-icon-check:before {
+    content: "\f00c";
+}
+div#cc-app .uk-icon-times:before {
+    content: "\f00d";
+}
+div#cc-app .uk-icon-search-plus:before {
+    content: "\f00e";
+}
+div#cc-app .uk-icon-search-minus:before {
+    content: "\f010";
+}
+div#cc-app .uk-icon-power-off:before {
+    content: "\f011";
+}
+div#cc-app .uk-icon-signal:before {
+    content: "\f012";
+}
+div#cc-app .uk-icon-gear:before,
+div#cc-app .uk-icon-cog:before {
+    content: "\f013";
+}
+div#cc-app .uk-icon-trash-o:before {
+    content: "\f014";
+}
+div#cc-app .uk-icon-home:before {
+    content: "\f015";
+}
+div#cc-app .uk-icon-file-o:before {
+    content: "\f016";
+}
+div#cc-app .uk-icon-clock-o:before {
+    content: "\f017";
+}
+div#cc-app .uk-icon-road:before {
+    content: "\f018";
+}
+div#cc-app .uk-icon-download:before {
+    content: "\f019";
+}
+div#cc-app .uk-icon-arrow-circle-o-down:before {
+    content: "\f01a";
+}
+div#cc-app .uk-icon-arrow-circle-o-up:before {
+    content: "\f01b";
+}
+div#cc-app .uk-icon-inbox:before {
+    content: "\f01c";
+}
+div#cc-app .uk-icon-play-circle-o:before {
+    content: "\f01d";
+}
+div#cc-app .uk-icon-rotate-right:before,
+div#cc-app .uk-icon-repeat:before {
+    content: "\f01e";
+}
+div#cc-app .uk-icon-refresh:before {
+    content: "\f021";
+}
+div#cc-app .uk-icon-list-alt:before {
+    content: "\f022";
+}
+div#cc-app .uk-icon-lock:before {
+    content: "\f023";
+}
+div#cc-app .uk-icon-flag:before {
+    content: "\f024";
+}
+div#cc-app .uk-icon-headphones:before {
+    content: "\f025";
+}
+div#cc-app .uk-icon-volume-off:before {
+    content: "\f026";
+}
+div#cc-app .uk-icon-volume-down:before {
+    content: "\f027";
+}
+div#cc-app .uk-icon-volume-up:before {
+    content: "\f028";
+}
+div#cc-app .uk-icon-qrcode:before {
+    content: "\f029";
+}
+div#cc-app .uk-icon-barcode:before {
+    content: "\f02a";
+}
+div#cc-app .uk-icon-tag:before {
+    content: "\f02b";
+}
+div#cc-app .uk-icon-tags:before {
+    content: "\f02c";
+}
+div#cc-app .uk-icon-book:before {
+    content: "\f02d";
+}
+div#cc-app .uk-icon-bookmark:before {
+    content: "\f02e";
+}
+div#cc-app .uk-icon-print:before {
+    content: "\f02f";
+}
+div#cc-app .uk-icon-camera:before {
+    content: "\f030";
+}
+div#cc-app .uk-icon-font:before {
+    content: "\f031";
+}
+div#cc-app .uk-icon-bold:before {
+    content: "\f032";
+}
+div#cc-app .uk-icon-italic:before {
+    content: "\f033";
+}
+div#cc-app .uk-icon-text-height:before {
+    content: "\f034";
+}
+div#cc-app .uk-icon-text-width:before {
+    content: "\f035";
+}
+div#cc-app .uk-icon-align-left:before {
+    content: "\f036";
+}
+div#cc-app .uk-icon-align-center:before {
+    content: "\f037";
+}
+div#cc-app .uk-icon-align-right:before {
+    content: "\f038";
+}
+div#cc-app .uk-icon-align-justify:before {
+    content: "\f039";
+}
+div#cc-app .uk-icon-list:before {
+    content: "\f03a";
+}
+div#cc-app .uk-icon-dedent:before,
+div#cc-app .uk-icon-outdent:before {
+    content: "\f03b";
+}
+div#cc-app .uk-icon-indent:before {
+    content: "\f03c";
+}
+div#cc-app .uk-icon-video-camera:before {
+    content: "\f03d";
+}
+div#cc-app .uk-icon-photo:before,
+div#cc-app .uk-icon-image:before,
+div#cc-app .uk-icon-picture-o:before {
+    content: "\f03e";
+}
+div#cc-app .uk-icon-pencil:before {
+    content: "\f040";
+}
+div#cc-app .uk-icon-map-marker:before {
+    content: "\f041";
+}
+div#cc-app .uk-icon-adjust:before {
+    content: "\f042";
+}
+div#cc-app .uk-icon-tint:before {
+    content: "\f043";
+}
+div#cc-app .uk-icon-edit:before,
+div#cc-app .uk-icon-pencil-square-o:before {
+    content: "\f044";
+}
+div#cc-app .uk-icon-share-square-o:before {
+    content: "\f045";
+}
+div#cc-app .uk-icon-check-square-o:before {
+    content: "\f046";
+}
+div#cc-app .uk-icon-arrows:before {
+    content: "\f047";
+}
+div#cc-app .uk-icon-step-backward:before {
+    content: "\f048";
+}
+div#cc-app .uk-icon-fast-backward:before {
+    content: "\f049";
+}
+div#cc-app .uk-icon-backward:before {
+    content: "\f04a";
+}
+div#cc-app .uk-icon-play:before {
+    content: "\f04b";
+}
+div#cc-app .uk-icon-pause:before {
+    content: "\f04c";
+}
+div#cc-app .uk-icon-stop:before {
+    content: "\f04d";
+}
+div#cc-app .uk-icon-forward:before {
+    content: "\f04e";
+}
+div#cc-app .uk-icon-fast-forward:before {
+    content: "\f050";
+}
+div#cc-app .uk-icon-step-forward:before {
+    content: "\f051";
+}
+div#cc-app .uk-icon-eject:before {
+    content: "\f052";
+}
+div#cc-app .uk-icon-chevron-left:before {
+    content: "\f053";
+}
+div#cc-app .uk-icon-chevron-right:before {
+    content: "\f054";
+}
+div#cc-app .uk-icon-plus-circle:before {
+    content: "\f055";
+}
+div#cc-app .uk-icon-minus-circle:before {
+    content: "\f056";
+}
+div#cc-app .uk-icon-times-circle:before {
+    content: "\f057";
+}
+div#cc-app .uk-icon-check-circle:before {
+    content: "\f058";
+}
+div#cc-app .uk-icon-question-circle:before {
+    content: "\f059";
+}
+div#cc-app .uk-icon-info-circle:before {
+    content: "\f05a";
+}
+div#cc-app .uk-icon-crosshairs:before {
+    content: "\f05b";
+}
+div#cc-app .uk-icon-times-circle-o:before {
+    content: "\f05c";
+}
+div#cc-app .uk-icon-check-circle-o:before {
+    content: "\f05d";
+}
+div#cc-app .uk-icon-ban:before {
+    content: "\f05e";
+}
+div#cc-app .uk-icon-arrow-left:before {
+    content: "\f060";
+}
+div#cc-app .uk-icon-arrow-right:before {
+    content: "\f061";
+}
+div#cc-app .uk-icon-arrow-up:before {
+    content: "\f062";
+}
+div#cc-app .uk-icon-arrow-down:before {
+    content: "\f063";
+}
+div#cc-app .uk-icon-mail-forward:before,
+div#cc-app .uk-icon-share:before {
+    content: "\f064";
+}
+div#cc-app .uk-icon-expand:before {
+    content: "\f065";
+}
+div#cc-app .uk-icon-compress:before {
+    content: "\f066";
+}
+div#cc-app .uk-icon-plus:before {
+    content: "\f067";
+}
+div#cc-app .uk-icon-minus:before {
+    content: "\f068";
+}
+div#cc-app .uk-icon-asterisk:before {
+    content: "\f069";
+}
+div#cc-app .uk-icon-exclamation-circle:before {
+    content: "\f06a";
+}
+div#cc-app .uk-icon-gift:before {
+    content: "\f06b";
+}
+div#cc-app .uk-icon-leaf:before {
+    content: "\f06c";
+}
+div#cc-app .uk-icon-fire:before {
+    content: "\f06d";
+}
+div#cc-app .uk-icon-eye:before {
+    content: "\f06e";
+}
+div#cc-app .uk-icon-eye-slash:before {
+    content: "\f070";
+}
+div#cc-app .uk-icon-warning:before,
+div#cc-app .uk-icon-exclamation-triangle:before {
+    content: "\f071";
+}
+div#cc-app .uk-icon-plane:before {
+    content: "\f072";
+}
+div#cc-app .uk-icon-calendar:before {
+    content: "\f073";
+}
+div#cc-app .uk-icon-random:before {
+    content: "\f074";
+}
+div#cc-app .uk-icon-comment:before {
+    content: "\f075";
+}
+div#cc-app .uk-icon-magnet:before {
+    content: "\f076";
+}
+div#cc-app .uk-icon-chevron-up:before {
+    content: "\f077";
+}
+div#cc-app .uk-icon-chevron-down:before {
+    content: "\f078";
+}
+div#cc-app .uk-icon-retweet:before {
+    content: "\f079";
+}
+div#cc-app .uk-icon-shopping-cart:before {
+    content: "\f07a";
+}
+div#cc-app .uk-icon-folder:before {
+    content: "\f07b";
+}
+div#cc-app .uk-icon-folder-open:before {
+    content: "\f07c";
+}
+div#cc-app .uk-icon-arrows-v:before {
+    content: "\f07d";
+}
+div#cc-app .uk-icon-arrows-h:before {
+    content: "\f07e";
+}
+div#cc-app .uk-icon-bar-chart-o:before {
+    content: "\f080";
+}
+div#cc-app .uk-icon-twitter-square:before {
+    content: "\f081";
+}
+div#cc-app .uk-icon-facebook-square:before {
+    content: "\f082";
+}
+div#cc-app .uk-icon-camera-retro:before {
+    content: "\f083";
+}
+div#cc-app .uk-icon-key:before {
+    content: "\f084";
+}
+div#cc-app .uk-icon-gears:before,
+div#cc-app .uk-icon-cogs:before {
+    content: "\f085";
+}
+div#cc-app .uk-icon-comments:before {
+    content: "\f086";
+}
+div#cc-app .uk-icon-thumbs-o-up:before {
+    content: "\f087";
+}
+div#cc-app .uk-icon-thumbs-o-down:before {
+    content: "\f088";
+}
+div#cc-app .uk-icon-star-half:before {
+    content: "\f089";
+}
+div#cc-app .uk-icon-heart-o:before {
+    content: "\f08a";
+}
+div#cc-app .uk-icon-sign-out:before {
+    content: "\f08b";
+}
+div#cc-app .uk-icon-linkedin-square:before {
+    content: "\f08c";
+}
+div#cc-app .uk-icon-thumb-tack:before {
+    content: "\f08d";
+}
+div#cc-app .uk-icon-external-link:before {
+    content: "\f08e";
+}
+div#cc-app .uk-icon-sign-in:before {
+    content: "\f090";
+}
+div#cc-app .uk-icon-trophy:before {
+    content: "\f091";
+}
+div#cc-app .uk-icon-github-square:before {
+    content: "\f092";
+}
+div#cc-app .uk-icon-upload:before {
+    content: "\f093";
+}
+div#cc-app .uk-icon-lemon-o:before {
+    content: "\f094";
+}
+div#cc-app .uk-icon-phone:before {
+    content: "\f095";
+}
+div#cc-app .uk-icon-square-o:before {
+    content: "\f096";
+}
+div#cc-app .uk-icon-bookmark-o:before {
+    content: "\f097";
+}
+div#cc-app .uk-icon-phone-square:before {
+    content: "\f098";
+}
+div#cc-app .uk-icon-twitter:before {
+    content: "\f099";
+}
+div#cc-app .uk-icon-facebook:before {
+    content: "\f09a";
+}
+div#cc-app .uk-icon-github:before {
+    content: "\f09b";
+}
+div#cc-app .uk-icon-unlock:before {
+    content: "\f09c";
+}
+div#cc-app .uk-icon-credit-card:before {
+    content: "\f09d";
+}
+div#cc-app .uk-icon-rss:before {
+    content: "\f09e";
+}
+div#cc-app .uk-icon-hdd-o:before {
+    content: "\f0a0";
+}
+div#cc-app .uk-icon-bullhorn:before {
+    content: "\f0a1";
+}
+div#cc-app .uk-icon-bell:before {
+    content: "\f0f3";
+}
+div#cc-app .uk-icon-certificate:before {
+    content: "\f0a3";
+}
+div#cc-app .uk-icon-hand-o-right:before {
+    content: "\f0a4";
+}
+div#cc-app .uk-icon-hand-o-left:before {
+    content: "\f0a5";
+}
+div#cc-app .uk-icon-hand-o-up:before {
+    content: "\f0a6";
+}
+div#cc-app .uk-icon-hand-o-down:before {
+    content: "\f0a7";
+}
+div#cc-app .uk-icon-arrow-circle-left:before {
+    content: "\f0a8";
+}
+div#cc-app .uk-icon-arrow-circle-right:before {
+    content: "\f0a9";
+}
+div#cc-app .uk-icon-arrow-circle-up:before {
+    content: "\f0aa";
+}
+div#cc-app .uk-icon-arrow-circle-down:before {
+    content: "\f0ab";
+}
+div#cc-app .uk-icon-globe:before {
+    content: "\f0ac";
+}
+div#cc-app .uk-icon-wrench:before {
+    content: "\f0ad";
+}
+div#cc-app .uk-icon-tasks:before {
+    content: "\f0ae";
+}
+div#cc-app .uk-icon-filter:before {
+    content: "\f0b0";
+}
+div#cc-app .uk-icon-briefcase:before {
+    content: "\f0b1";
+}
+div#cc-app .uk-icon-arrows-alt:before {
+    content: "\f0b2";
+}
+div#cc-app .uk-icon-group:before,
+div#cc-app .uk-icon-users:before {
+    content: "\f0c0";
+}
+div#cc-app .uk-icon-chain:before,
+div#cc-app .uk-icon-link:before {
+    content: "\f0c1";
+}
+div#cc-app .uk-icon-cloud:before {
+    content: "\f0c2";
+}
+div#cc-app .uk-icon-flask:before {
+    content: "\f0c3";
+}
+div#cc-app .uk-icon-cut:before,
+div#cc-app .uk-icon-scissors:before {
+    content: "\f0c4";
+}
+div#cc-app .uk-icon-copy:before,
+div#cc-app .uk-icon-files-o:before {
+    content: "\f0c5";
+}
+div#cc-app .uk-icon-paperclip:before {
+    content: "\f0c6";
+}
+div#cc-app .uk-icon-save:before,
+div#cc-app .uk-icon-floppy-o:before {
+    content: "\f0c7";
+}
+div#cc-app .uk-icon-square:before {
+    content: "\f0c8";
+}
+div#cc-app .uk-icon-navicon:before,
+div#cc-app .uk-icon-reorder:before,
+div#cc-app .uk-icon-bars:before {
+    content: "\f0c9";
+}
+div#cc-app .uk-icon-list-ul:before {
+    content: "\f0ca";
+}
+div#cc-app .uk-icon-list-ol:before {
+    content: "\f0cb";
+}
+div#cc-app .uk-icon-strikethrough:before {
+    content: "\f0cc";
+}
+div#cc-app .uk-icon-underline:before {
+    content: "\f0cd";
+}
+div#cc-app .uk-icon-table:before {
+    content: "\f0ce";
+}
+div#cc-app .uk-icon-magic:before {
+    content: "\f0d0";
+}
+div#cc-app .uk-icon-truck:before {
+    content: "\f0d1";
+}
+div#cc-app .uk-icon-pinterest:before {
+    content: "\f0d2";
+}
+div#cc-app .uk-icon-pinterest-square:before {
+    content: "\f0d3";
+}
+div#cc-app .uk-icon-google-plus-square:before {
+    content: "\f0d4";
+}
+div#cc-app .uk-icon-google-plus:before {
+    content: "\f0d5";
+}
+div#cc-app .uk-icon-money:before {
+    content: "\f0d6";
+}
+div#cc-app .uk-icon-caret-down:before {
+    content: "\f0d7";
+}
+div#cc-app .uk-icon-caret-up:before {
+    content: "\f0d8";
+}
+div#cc-app .uk-icon-caret-left:before {
+    content: "\f0d9";
+}
+div#cc-app .uk-icon-caret-right:before {
+    content: "\f0da";
+}
+div#cc-app .uk-icon-columns:before {
+    content: "\f0db";
+}
+div#cc-app .uk-icon-unsorted:before,
+div#cc-app .uk-icon-sort:before {
+    content: "\f0dc";
+}
+div#cc-app .uk-icon-sort-down:before,
+div#cc-app .uk-icon-sort-desc:before {
+    content: "\f0dd";
+}
+div#cc-app .uk-icon-sort-up:before,
+div#cc-app .uk-icon-sort-asc:before {
+    content: "\f0de";
+}
+div#cc-app .uk-icon-envelope:before {
+    content: "\f0e0";
+}
+div#cc-app .uk-icon-linkedin:before {
+    content: "\f0e1";
+}
+div#cc-app .uk-icon-rotate-left:before,
+div#cc-app .uk-icon-undo:before {
+    content: "\f0e2";
+}
+div#cc-app .uk-icon-legal:before,
+div#cc-app .uk-icon-gavel:before {
+    content: "\f0e3";
+}
+div#cc-app .uk-icon-dashboard:before,
+div#cc-app .uk-icon-tachometer:before {
+    content: "\f0e4";
+}
+div#cc-app .uk-icon-comment-o:before {
+    content: "\f0e5";
+}
+div#cc-app .uk-icon-comments-o:before {
+    content: "\f0e6";
+}
+div#cc-app .uk-icon-flash:before,
+div#cc-app .uk-icon-bolt:before {
+    content: "\f0e7";
+}
+div#cc-app .uk-icon-sitemap:before {
+    content: "\f0e8";
+}
+div#cc-app .uk-icon-umbrella:before {
+    content: "\f0e9";
+}
+div#cc-app .uk-icon-paste:before,
+div#cc-app .uk-icon-clipboard:before {
+    content: "\f0ea";
+}
+div#cc-app .uk-icon-lightbulb-o:before {
+    content: "\f0eb";
+}
+div#cc-app .uk-icon-exchange:before {
+    content: "\f0ec";
+}
+div#cc-app .uk-icon-cloud-download:before {
+    content: "\f0ed";
+}
+div#cc-app .uk-icon-cloud-upload:before {
+    content: "\f0ee";
+}
+div#cc-app .uk-icon-user-md:before {
+    content: "\f0f0";
+}
+div#cc-app .uk-icon-stethoscope:before {
+    content: "\f0f1";
+}
+div#cc-app .uk-icon-suitcase:before {
+    content: "\f0f2";
+}
+div#cc-app .uk-icon-bell-o:before {
+    content: "\f0a2";
+}
+div#cc-app .uk-icon-coffee:before {
+    content: "\f0f4";
+}
+div#cc-app .uk-icon-cutlery:before {
+    content: "\f0f5";
+}
+div#cc-app .uk-icon-file-text-o:before {
+    content: "\f0f6";
+}
+div#cc-app .uk-icon-building-o:before {
+    content: "\f0f7";
+}
+div#cc-app .uk-icon-hospital-o:before {
+    content: "\f0f8";
+}
+div#cc-app .uk-icon-ambulance:before {
+    content: "\f0f9";
+}
+div#cc-app .uk-icon-medkit:before {
+    content: "\f0fa";
+}
+div#cc-app .uk-icon-fighter-jet:before {
+    content: "\f0fb";
+}
+div#cc-app .uk-icon-beer:before {
+    content: "\f0fc";
+}
+div#cc-app .uk-icon-h-square:before {
+    content: "\f0fd";
+}
+div#cc-app .uk-icon-plus-square:before {
+    content: "\f0fe";
+}
+div#cc-app .uk-icon-angle-double-left:before {
+    content: "\f100";
+}
+div#cc-app .uk-icon-angle-double-right:before {
+    content: "\f101";
+}
+div#cc-app .uk-icon-angle-double-up:before {
+    content: "\f102";
+}
+div#cc-app .uk-icon-angle-double-down:before {
+    content: "\f103";
+}
+div#cc-app .uk-icon-angle-left:before {
+    content: "\f104";
+}
+div#cc-app .uk-icon-angle-right:before {
+    content: "\f105";
+}
+div#cc-app .uk-icon-angle-up:before {
+    content: "\f106";
+}
+div#cc-app .uk-icon-angle-down:before {
+    content: "\f107";
+}
+div#cc-app .uk-icon-desktop:before {
+    content: "\f108";
+}
+div#cc-app .uk-icon-laptop:before {
+    content: "\f109";
+}
+div#cc-app .uk-icon-tablet:before {
+    content: "\f10a";
+}
+div#cc-app .uk-icon-mobile-phone:before,
+div#cc-app .uk-icon-mobile:before {
+    content: "\f10b";
+}
+div#cc-app .uk-icon-circle-o:before {
+    content: "\f10c";
+}
+div#cc-app .uk-icon-quote-left:before {
+    content: "\f10d";
+}
+div#cc-app .uk-icon-quote-right:before {
+    content: "\f10e";
+}
+div#cc-app .uk-icon-spinner:before {
+    content: "\f110";
+}
+div#cc-app .uk-icon-circle:before {
+    content: "\f111";
+}
+div#cc-app .uk-icon-mail-reply:before,
+div#cc-app .uk-icon-reply:before {
+    content: "\f112";
+}
+div#cc-app .uk-icon-github-alt:before {
+    content: "\f113";
+}
+div#cc-app .uk-icon-folder-o:before {
+    content: "\f114";
+}
+div#cc-app .uk-icon-folder-open-o:before {
+    content: "\f115";
+}
+div#cc-app .uk-icon-smile-o:before {
+    content: "\f118";
+}
+div#cc-app .uk-icon-frown-o:before {
+    content: "\f119";
+}
+div#cc-app .uk-icon-meh-o:before {
+    content: "\f11a";
+}
+div#cc-app .uk-icon-gamepad:before {
+    content: "\f11b";
+}
+div#cc-app .uk-icon-keyboard-o:before {
+    content: "\f11c";
+}
+div#cc-app .uk-icon-flag-o:before {
+    content: "\f11d";
+}
+div#cc-app .uk-icon-flag-checkered:before {
+    content: "\f11e";
+}
+div#cc-app .uk-icon-terminal:before {
+    content: "\f120";
+}
+div#cc-app .uk-icon-code:before {
+    content: "\f121";
+}
+div#cc-app .uk-icon-mail-reply-all:before,
+div#cc-app .uk-icon-reply-all:before {
+    content: "\f122";
+}
+div#cc-app .uk-icon-star-half-empty:before,
+div#cc-app .uk-icon-star-half-full:before,
+div#cc-app .uk-icon-star-half-o:before {
+    content: "\f123";
+}
+div#cc-app .uk-icon-location-arrow:before {
+    content: "\f124";
+}
+div#cc-app .uk-icon-crop:before {
+    content: "\f125";
+}
+div#cc-app .uk-icon-code-fork:before {
+    content: "\f126";
+}
+div#cc-app .uk-icon-unlink:before,
+div#cc-app .uk-icon-chain-broken:before {
+    content: "\f127";
+}
+div#cc-app .uk-icon-question:before {
+    content: "\f128";
+}
+div#cc-app .uk-icon-info:before {
+    content: "\f129";
+}
+div#cc-app .uk-icon-exclamation:before {
+    content: "\f12a";
+}
+div#cc-app .uk-icon-superscript:before {
+    content: "\f12b";
+}
+div#cc-app .uk-icon-subscript:before {
+    content: "\f12c";
+}
+div#cc-app .uk-icon-eraser:before {
+    content: "\f12d";
+}
+div#cc-app .uk-icon-puzzle-piece:before {
+    content: "\f12e";
+}
+div#cc-app .uk-icon-microphone:before {
+    content: "\f130";
+}
+div#cc-app .uk-icon-microphone-slash:before {
+    content: "\f131";
+}
+div#cc-app .uk-icon-shield:before {
+    content: "\f132";
+}
+div#cc-app .uk-icon-calendar-o:before {
+    content: "\f133";
+}
+div#cc-app .uk-icon-fire-extinguisher:before {
+    content: "\f134";
+}
+div#cc-app .uk-icon-rocket:before {
+    content: "\f135";
+}
+div#cc-app .uk-icon-maxcdn:before {
+    content: "\f136";
+}
+div#cc-app .uk-icon-chevron-circle-left:before {
+    content: "\f137";
+}
+div#cc-app .uk-icon-chevron-circle-right:before {
+    content: "\f138";
+}
+div#cc-app .uk-icon-chevron-circle-up:before {
+    content: "\f139";
+}
+div#cc-app .uk-icon-chevron-circle-down:before {
+    content: "\f13a";
+}
+div#cc-app .uk-icon-html5:before {
+    content: "\f13b";
+}
+div#cc-app .uk-icon-css3:before {
+    content: "\f13c";
+}
+div#cc-app .uk-icon-anchor:before {
+    content: "\f13d";
+}
+div#cc-app .uk-icon-unlock-alt:before {
+    content: "\f13e";
+}
+div#cc-app .uk-icon-bullseye:before {
+    content: "\f140";
+}
+div#cc-app .uk-icon-ellipsis-h:before {
+    content: "\f141";
+}
+div#cc-app .uk-icon-ellipsis-v:before {
+    content: "\f142";
+}
+div#cc-app .uk-icon-rss-square:before {
+    content: "\f143";
+}
+div#cc-app .uk-icon-play-circle:before {
+    content: "\f144";
+}
+div#cc-app .uk-icon-ticket:before {
+    content: "\f145";
+}
+div#cc-app .uk-icon-minus-square:before {
+    content: "\f146";
+}
+div#cc-app .uk-icon-minus-square-o:before {
+    content: "\f147";
+}
+div#cc-app .uk-icon-level-up:before {
+    content: "\f148";
+}
+div#cc-app .uk-icon-level-down:before {
+    content: "\f149";
+}
+div#cc-app .uk-icon-check-square:before {
+    content: "\f14a";
+}
+div#cc-app .uk-icon-pencil-square:before {
+    content: "\f14b";
+}
+div#cc-app .uk-icon-external-link-square:before {
+    content: "\f14c";
+}
+div#cc-app .uk-icon-share-square:before {
+    content: "\f14d";
+}
+div#cc-app .uk-icon-compass:before {
+    content: "\f14e";
+}
+div#cc-app .uk-icon-toggle-down:before,
+div#cc-app .uk-icon-caret-square-o-down:before {
+    content: "\f150";
+}
+div#cc-app .uk-icon-toggle-up:before,
+div#cc-app .uk-icon-caret-square-o-up:before {
+    content: "\f151";
+}
+div#cc-app .uk-icon-toggle-right:before,
+div#cc-app .uk-icon-caret-square-o-right:before {
+    content: "\f152";
+}
+div#cc-app .uk-icon-euro:before,
+div#cc-app .uk-icon-eur:before {
+    content: "\f153";
+}
+div#cc-app .uk-icon-gbp:before {
+    content: "\f154";
+}
+div#cc-app .uk-icon-dollar:before,
+div#cc-app .uk-icon-usd:before {
+    content: "\f155";
+}
+div#cc-app .uk-icon-rupee:before,
+div#cc-app .uk-icon-inr:before {
+    content: "\f156";
+}
+div#cc-app .uk-icon-cny:before,
+div#cc-app .uk-icon-rmb:before,
+div#cc-app .uk-icon-yen:before,
+div#cc-app .uk-icon-jpy:before {
+    content: "\f157";
+}
+div#cc-app .uk-icon-ruble:before,
+div#cc-app .uk-icon-rouble:before,
+div#cc-app .uk-icon-rub:before {
+    content: "\f158";
+}
+div#cc-app .uk-icon-won:before,
+div#cc-app .uk-icon-krw:before {
+    content: "\f159";
+}
+div#cc-app .uk-icon-bitcoin:before,
+div#cc-app .uk-icon-btc:before {
+    content: "\f15a";
+}
+div#cc-app .uk-icon-file:before {
+    content: "\f15b";
+}
+div#cc-app .uk-icon-file-text:before {
+    content: "\f15c";
+}
+div#cc-app .uk-icon-sort-alpha-asc:before {
+    content: "\f15d";
+}
+div#cc-app .uk-icon-sort-alpha-desc:before {
+    content: "\f15e";
+}
+div#cc-app .uk-icon-sort-amount-asc:before {
+    content: "\f160";
+}
+div#cc-app .uk-icon-sort-amount-desc:before {
+    content: "\f161";
+}
+div#cc-app .uk-icon-sort-numeric-asc:before {
+    content: "\f162";
+}
+div#cc-app .uk-icon-sort-numeric-desc:before {
+    content: "\f163";
+}
+div#cc-app .uk-icon-thumbs-up:before {
+    content: "\f164";
+}
+div#cc-app .uk-icon-thumbs-down:before {
+    content: "\f165";
+}
+div#cc-app .uk-icon-youtube-square:before {
+    content: "\f166";
+}
+div#cc-app .uk-icon-youtube:before {
+    content: "\f167";
+}
+div#cc-app .uk-icon-xing:before {
+    content: "\f168";
+}
+div#cc-app .uk-icon-xing-square:before {
+    content: "\f169";
+}
+div#cc-app .uk-icon-youtube-play:before {
+    content: "\f16a";
+}
+div#cc-app .uk-icon-dropbox:before {
+    content: "\f16b";
+}
+div#cc-app .uk-icon-stack-overflow:before {
+    content: "\f16c";
+}
+div#cc-app .uk-icon-instagram:before {
+    content: "\f16d";
+}
+div#cc-app .uk-icon-flickr:before {
+    content: "\f16e";
+}
+div#cc-app .uk-icon-adn:before {
+    content: "\f170";
+}
+div#cc-app .uk-icon-bitbucket:before {
+    content: "\f171";
+}
+div#cc-app .uk-icon-bitbucket-square:before {
+    content: "\f172";
+}
+div#cc-app .uk-icon-tumblr:before {
+    content: "\f173";
+}
+div#cc-app .uk-icon-tumblr-square:before {
+    content: "\f174";
+}
+div#cc-app .uk-icon-long-arrow-down:before {
+    content: "\f175";
+}
+div#cc-app .uk-icon-long-arrow-up:before {
+    content: "\f176";
+}
+div#cc-app .uk-icon-long-arrow-left:before {
+    content: "\f177";
+}
+div#cc-app .uk-icon-long-arrow-right:before {
+    content: "\f178";
+}
+div#cc-app .uk-icon-apple:before {
+    content: "\f179";
+}
+div#cc-app .uk-icon-windows:before {
+    content: "\f17a";
+}
+div#cc-app .uk-icon-android:before {
+    content: "\f17b";
+}
+div#cc-app .uk-icon-linux:before {
+    content: "\f17c";
+}
+div#cc-app .uk-icon-dribbble:before {
+    content: "\f17d";
+}
+div#cc-app .uk-icon-skype:before {
+    content: "\f17e";
+}
+div#cc-app .uk-icon-foursquare:before {
+    content: "\f180";
+}
+div#cc-app .uk-icon-trello:before {
+    content: "\f181";
+}
+div#cc-app .uk-icon-female:before {
+    content: "\f182";
+}
+div#cc-app .uk-icon-male:before {
+    content: "\f183";
+}
+div#cc-app .uk-icon-gittip:before {
+    content: "\f184";
+}
+div#cc-app .uk-icon-sun-o:before {
+    content: "\f185";
+}
+div#cc-app .uk-icon-moon-o:before {
+    content: "\f186";
+}
+div#cc-app .uk-icon-archive:before {
+    content: "\f187";
+}
+div#cc-app .uk-icon-bug:before {
+    content: "\f188";
+}
+div#cc-app .uk-icon-vk:before {
+    content: "\f189";
+}
+div#cc-app .uk-icon-weibo:before {
+    content: "\f18a";
+}
+div#cc-app .uk-icon-renren:before {
+    content: "\f18b";
+}
+div#cc-app .uk-icon-pagelines:before {
+    content: "\f18c";
+}
+div#cc-app .uk-icon-stack-exchange:before {
+    content: "\f18d";
+}
+div#cc-app .uk-icon-arrow-circle-o-right:before {
+    content: "\f18e";
+}
+div#cc-app .uk-icon-arrow-circle-o-left:before {
+    content: "\f190";
+}
+div#cc-app .uk-icon-toggle-left:before,
+div#cc-app .uk-icon-caret-square-o-left:before {
+    content: "\f191";
+}
+div#cc-app .uk-icon-dot-circle-o:before {
+    content: "\f192";
+}
+div#cc-app .uk-icon-wheelchair:before {
+    content: "\f193";
+}
+div#cc-app .uk-icon-vimeo-square:before {
+    content: "\f194";
+}
+div#cc-app .uk-icon-turkish-lira:before,
+div#cc-app .uk-icon-try:before {
+    content: "\f195";
+}
+div#cc-app .uk-icon-plus-square-o:before {
+    content: "\f196";
+}
+div#cc-app .uk-icon-space-shuttle:before {
+    content: "\f197";
+}
+div#cc-app .uk-icon-slack:before {
+    content: "\f198";
+}
+div#cc-app .uk-icon-envelope-square:before {
+    content: "\f199";
+}
+div#cc-app .uk-icon-wordpress:before {
+    content: "\f19a";
+}
+div#cc-app .uk-icon-openid:before {
+    content: "\f19b";
+}
+div#cc-app .uk-icon-institution:before,
+div#cc-app .uk-icon-bank:before,
+div#cc-app .uk-icon-university:before {
+    content: "\f19c";
+}
+div#cc-app .uk-icon-mortar-board:before,
+div#cc-app .uk-icon-graduation-cap:before {
+    content: "\f19d";
+}
+div#cc-app .uk-icon-yahoo:before {
+    content: "\f19e";
+}
+div#cc-app .uk-icon-google:before {
+    content: "\f1a0";
+}
+div#cc-app .uk-icon-reddit:before {
+    content: "\f1a1";
+}
+div#cc-app .uk-icon-reddit-square:before {
+    content: "\f1a2";
+}
+div#cc-app .uk-icon-stumbleupon-circle:before {
+    content: "\f1a3";
+}
+div#cc-app .uk-icon-stumbleupon:before {
+    content: "\f1a4";
+}
+div#cc-app .uk-icon-delicious:before {
+    content: "\f1a5";
+}
+div#cc-app .uk-icon-digg:before {
+    content: "\f1a6";
+}
+div#cc-app .uk-icon-pied-piper-square:before,
+div#cc-app .uk-icon-pied-piper:before {
+    content: "\f1a7";
+}
+div#cc-app .uk-icon-pied-piper-alt:before {
+    content: "\f1a8";
+}
+div#cc-app .uk-icon-drupal:before {
+    content: "\f1a9";
+}
+div#cc-app .uk-icon-joomla:before {
+    content: "\f1aa";
+}
+div#cc-app .uk-icon-language:before {
+    content: "\f1ab";
+}
+div#cc-app .uk-icon-fax:before {
+    content: "\f1ac";
+}
+div#cc-app .uk-icon-building:before {
+    content: "\f1ad";
+}
+div#cc-app .uk-icon-child:before {
+    content: "\f1ae";
+}
+div#cc-app .uk-icon-paw:before {
+    content: "\f1b0";
+}
+div#cc-app .uk-icon-spoon:before {
+    content: "\f1b1";
+}
+div#cc-app .uk-icon-cube:before {
+    content: "\f1b2";
+}
+div#cc-app .uk-icon-cubes:before {
+    content: "\f1b3";
+}
+div#cc-app .uk-icon-behance:before {
+    content: "\f1b4";
+}
+div#cc-app .uk-icon-behance-square:before {
+    content: "\f1b5";
+}
+div#cc-app .uk-icon-steam:before {
+    content: "\f1b6";
+}
+div#cc-app .uk-icon-steam-square:before {
+    content: "\f1b7";
+}
+div#cc-app .uk-icon-recycle:before {
+    content: "\f1b8";
+}
+div#cc-app .uk-icon-automobile:before,
+div#cc-app .uk-icon-car:before {
+    content: "\f1b9";
+}
+div#cc-app .uk-icon-cab:before,
+div#cc-app .uk-icon-taxi:before {
+    content: "\f1ba";
+}
+div#cc-app .uk-icon-tree:before {
+    content: "\f1bb";
+}
+div#cc-app .uk-icon-spotify:before {
+    content: "\f1bc";
+}
+div#cc-app .uk-icon-deviantart:before {
+    content: "\f1bd";
+}
+div#cc-app .uk-icon-soundcloud:before {
+    content: "\f1be";
+}
+div#cc-app .uk-icon-database:before {
+    content: "\f1c0";
+}
+div#cc-app .uk-icon-file-pdf-o:before {
+    content: "\f1c1";
+}
+div#cc-app .uk-icon-file-word-o:before {
+    content: "\f1c2";
+}
+div#cc-app .uk-icon-file-excel-o:before {
+    content: "\f1c3";
+}
+div#cc-app .uk-icon-file-powerpoint-o:before {
+    content: "\f1c4";
+}
+div#cc-app .uk-icon-file-photo-o:before,
+div#cc-app .uk-icon-file-picture-o:before,
+div#cc-app .uk-icon-file-image-o:before {
+    content: "\f1c5";
+}
+div#cc-app .uk-icon-file-zip-o:before,
+div#cc-app .uk-icon-file-archive-o:before {
+    content: "\f1c6";
+}
+div#cc-app .uk-icon-file-sound-o:before,
+div#cc-app .uk-icon-file-audio-o:before {
+    content: "\f1c7";
+}
+div#cc-app .uk-icon-file-movie-o:before,
+div#cc-app .uk-icon-file-video-o:before {
+    content: "\f1c8";
+}
+div#cc-app .uk-icon-file-code-o:before {
+    content: "\f1c9";
+}
+div#cc-app .uk-icon-vine:before {
+    content: "\f1ca";
+}
+div#cc-app .uk-icon-codepen:before {
+    content: "\f1cb";
+}
+div#cc-app .uk-icon-jsfiddle:before {
+    content: "\f1cc";
+}
+div#cc-app .uk-icon-life-bouy:before,
+div#cc-app .uk-icon-life-saver:before,
+div#cc-app .uk-icon-support:before,
+div#cc-app .uk-icon-life-ring:before {
+    content: "\f1cd";
+}
+div#cc-app .uk-icon-circle-o-notch:before {
+    content: "\f1ce";
+}
+div#cc-app .uk-icon-ra:before,
+div#cc-app .uk-icon-rebel:before {
+    content: "\f1d0";
+}
+div#cc-app .uk-icon-ge:before,
+div#cc-app .uk-icon-empire:before {
+    content: "\f1d1";
+}
+div#cc-app .uk-icon-git-square:before {
+    content: "\f1d2";
+}
+div#cc-app .uk-icon-git:before {
+    content: "\f1d3";
+}
+div#cc-app .uk-icon-hacker-news:before {
+    content: "\f1d4";
+}
+div#cc-app .uk-icon-tencent-weibo:before {
+    content: "\f1d5";
+}
+div#cc-app .uk-icon-qq:before {
+    content: "\f1d6";
+}
+div#cc-app .uk-icon-wechat:before,
+div#cc-app .uk-icon-weixin:before {
+    content: "\f1d7";
+}
+div#cc-app .uk-icon-send:before,
+div#cc-app .uk-icon-paper-plane:before {
+    content: "\f1d8";
+}
+div#cc-app .uk-icon-send-o:before,
+div#cc-app .uk-icon-paper-plane-o:before {
+    content: "\f1d9";
+}
+div#cc-app .uk-icon-history:before {
+    content: "\f1da";
+}
+div#cc-app .uk-icon-circle-thin:before {
+    content: "\f1db";
+}
+div#cc-app .uk-icon-header:before {
+    content: "\f1dc";
+}
+div#cc-app .uk-icon-paragraph:before {
+    content: "\f1dd";
+}
+div#cc-app .uk-icon-sliders:before {
+    content: "\f1de";
+}
+div#cc-app .uk-icon-share-alt:before {
+    content: "\f1e0";
+}
+div#cc-app .uk-icon-share-alt-square:before {
+    content: "\f1e1";
+}
+div#cc-app .uk-icon-bomb:before {
+    content: "\f1e2";
+}
+
+/* ========================================================================
+   Component: Alert
+ ========================================================================== */
+div#cc-app .uk-alert {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #ebf7fd;
+    color: #2d7091;
+    border: 1px solid rgba(45, 112, 145, 0.3);
+    border-radius: 4px;
+    text-shadow: 0 1px 0 #ffffff;
+}
+/*
+ * Add margin if adjacent element
+ */
+* + div#cc-app .uk-alert {
+    margin-top: 15px;
+}
+/*
+ * Remove margin from the last-child
+ */
+div#cc-app .uk-alert > :last-child {
+    margin-bottom: 0;
+}
+/*
+ * Keep color for headings if the default heading color is changed
+ */
+div#cc-app .uk-alert h1,
+div#cc-app .uk-alert h2,
+div#cc-app .uk-alert h3,
+div#cc-app .uk-alert h4,
+div#cc-app .uk-alert h5,
+div#cc-app .uk-alert h6 {
+    color: inherit;
+}
+/* Close in alert
+ ========================================================================== */
+div#cc-app .uk-alert > .uk-close:first-child {
+    float: right;
+}
+/*
+ * Remove margin from adjacent element
+ */
+div#cc-app .uk-alert > .uk-close:first-child + * {
+    margin-top: 0;
+}
+/* Modifier: `uk-alert-success`
+ ========================================================================== */
+div#cc-app .uk-alert-success {
+    background: #f2fae3;
+    color: #659f13;
+    border-color: rgba(101, 159, 19, 0.3);
+}
+/* Modifier: `uk-alert-warning`
+ ========================================================================== */
+div#cc-app .uk-alert-warning {
+    background: #fffceb;
+    color: #e28327;
+    border-color: rgba(226, 131, 39, 0.3);
+}
+/* Modifier: `uk-alert-danger`
+ ========================================================================== */
+div#cc-app .uk-alert-danger {
+    background: #fff1f0;
+    color: #d85030;
+    border-color: rgba(216, 80, 48, 0.3);
+}
+/* Modifier: `uk-alert-large`
+ ========================================================================== */
+div#cc-app .uk-alert-large {
+    padding: 20px;
+}
+div#cc-app .uk-alert-large > .uk-close:first-child {
+    margin: -10px -10px 0 0;
+}
+
+/* ========================================================================
+   Component: Animation
+ ========================================================================== */
+[class*='uk-animation-'] {
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+/* Hide animated element if scrollspy is used */
+@media screen {
+    [data-uk-scrollspy*='uk-animation-'] {
+        opacity: 0;
+    }
+}
+/*
+ * Fade
+ * Higher specificity (!important) needed because of reverse modifier
+ */
+div#cc-app .uk-animation-fade {
+    -webkit-animation-name: uk-fade;
+    animation-name: uk-fade;
+    -webkit-animation-duration: 0.8s;
+    animation-duration: 0.8s;
+    -webkit-animation-timing-function: linear !important;
+    animation-timing-function: linear !important;
+}
+/*
+ * Fade with scale
+ */
+div#cc-app .uk-animation-scale-up {
+    -webkit-animation-name: uk-fade-scale-02;
+    animation-name: uk-fade-scale-02;
+}
+div#cc-app .uk-animation-scale-down {
+    -webkit-animation-name: uk-fade-scale-18;
+    animation-name: uk-fade-scale-18;
+}
+/*
+ * Fade with slide
+ */
+div#cc-app .uk-animation-slide-top {
+    -webkit-animation-name: uk-fade-top;
+    animation-name: uk-fade-top;
+}
+div#cc-app .uk-animation-slide-bottom {
+    -webkit-animation-name: uk-fade-bottom;
+    animation-name: uk-fade-bottom;
+}
+div#cc-app .uk-animation-slide-left {
+    -webkit-animation-name: uk-fade-left;
+    animation-name: uk-fade-left;
+}
+div#cc-app .uk-animation-slide-right {
+    -webkit-animation-name: uk-fade-right;
+    animation-name: uk-fade-right;
+}
+/*
+ * Scale
+ */
+div#cc-app .uk-animation-scale {
+    -webkit-animation-name: uk-scale-12;
+    animation-name: uk-scale-12;
+}
+/*
+ * Shake
+ */
+div#cc-app .uk-animation-shake {
+    -webkit-animation-name: uk-shake;
+    animation-name: uk-shake;
+}
+/* Direction modifiers
+ ========================================================================== */
+div#cc-app .uk-animation-reverse {
+    -webkit-animation-direction: reverse;
+    animation-direction: reverse;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+}
+/* Duration modifiers
+========================================================================== */
+div#cc-app .uk-animation-10 {
+    -webkit-animation-duration: 10s;
+    animation-duration: 10s;
+}
+/* Origin modifiers
+========================================================================== */
+div#cc-app .uk-animation-top-left {
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0;
+}
+div#cc-app .uk-animation-top-center {
+    -webkit-transform-origin: 50% 0;
+    transform-origin: 50% 0;
+}
+div#cc-app .uk-animation-top-right {
+    -webkit-transform-origin: 100% 0;
+    transform-origin: 100% 0;
+}
+div#cc-app .uk-animation-middle-left {
+    -webkit-transform-origin: 0 50%;
+    transform-origin: 0 50%;
+}
+div#cc-app .uk-animation-middle-right {
+    -webkit-transform-origin: 100% 50%;
+    transform-origin: 100% 50%;
+}
+div#cc-app .uk-animation-bottom-left {
+    -webkit-transform-origin: 0 100%;
+    transform-origin: 0 100%;
+}
+div#cc-app .uk-animation-bottom-center {
+    -webkit-transform-origin: 50% 100%;
+    transform-origin: 50% 100%;
+}
+div#cc-app .uk-animation-bottom-right {
+    -webkit-transform-origin: 100% 100%;
+    transform-origin: 100% 100%;
+}
+/* Keyframes: Fade
+ * Used by dropdown, datepicker and slideshow component
+ ========================================================================== */
+@-webkit-keyframes uk-fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@keyframes uk-fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+/* Keyframes: Fade with slide
+ ========================================================================== */
+/*
+ * Top
+ */
+@-webkit-keyframes uk-fade-top {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-100%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+@keyframes uk-fade-top {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/*
+ * Bottom
+ */
+@-webkit-keyframes uk-fade-bottom {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(100%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+@keyframes uk-fade-bottom {
+    0% {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/*
+ * Left
+ */
+@-webkit-keyframes uk-fade-left {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateX(-100%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-fade-left {
+    0% {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/*
+ * Right
+ */
+@-webkit-keyframes uk-fade-right {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateX(100%);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-fade-right {
+    0% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/* Keyframes: Fade with scale
+ ========================================================================== */
+/*
+ * Scale by 0.2
+ */
+@-webkit-keyframes uk-fade-scale-02 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(0.2);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+@keyframes uk-fade-scale-02 {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/*
+ * Scale by 1.5
+ * Used by slideshow component
+ */
+@-webkit-keyframes uk-fade-scale-15 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(1.5);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+@keyframes uk-fade-scale-15 {
+    0% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/*
+ * Scale by 1.8
+ */
+@-webkit-keyframes uk-fade-scale-18 {
+    0% {
+        opacity: 0;
+        -webkit-transform: scale(1.8);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: scale(1);
+    }
+}
+@keyframes uk-fade-scale-18 {
+    0% {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+/* Keyframes: Slide
+ * Used by slideshow component
+ ========================================================================== */
+/*
+ * Left
+ */
+@-webkit-keyframes uk-slide-left {
+    0% {
+        -webkit-transform: translateX(-100%);
+    }
+    100% {
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-slide-left {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+/*
+ * Right
+ */
+@-webkit-keyframes uk-slide-right {
+    0% {
+        -webkit-transform: translateX(100%);
+    }
+    100% {
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-slide-right {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+/*
+ * Left third
+ */
+@-webkit-keyframes uk-slide-left-33 {
+    0% {
+        -webkit-transform: translateX(33%);
+    }
+    100% {
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-slide-left-33 {
+    0% {
+        transform: translateX(33%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+/*
+ * Right third
+ */
+@-webkit-keyframes uk-slide-right-33 {
+    0% {
+        -webkit-transform: translateX(-33%);
+    }
+    100% {
+        -webkit-transform: translateX(0);
+    }
+}
+@keyframes uk-slide-right-33 {
+    0% {
+        transform: translateX(-33%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+/* Keyframes: Scale
+ ========================================================================== */
+@-webkit-keyframes uk-scale-12 {
+    0% {
+        -webkit-transform: scale(1.2);
+    }
+    100% {
+        -webkit-transform: scale(1);
+    }
+}
+@keyframes uk-scale-12 {
+    0% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+/* Keyframes: Rotate
+ * Used by icon and search component
+ ========================================================================== */
+@-webkit-keyframes uk-rotate {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+    }
+}
+@keyframes uk-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(359deg);
+    }
+}
+/* Keyframes: Shake
+ ========================================================================== */
+@-webkit-keyframes uk-shake {
+    0%,
+    100% {
+        -webkit-transform: translateX(0);
+    }
+    10% {
+        -webkit-transform: translateX(-9px);
+    }
+    20% {
+        -webkit-transform: translateX(8px);
+    }
+    30% {
+        -webkit-transform: translateX(-7px);
+    }
+    40% {
+        -webkit-transform: translateX(6px);
+    }
+    50% {
+        -webkit-transform: translateX(-5px);
+    }
+    60% {
+        -webkit-transform: translateX(4px);
+    }
+    70% {
+        -webkit-transform: translateX(-3px);
+    }
+    80% {
+        -webkit-transform: translateX(2px);
+    }
+    90% {
+        -webkit-transform: translateX(-1px);
+    }
+}
+@keyframes uk-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    10% {
+        transform: translateX(-9px);
+    }
+    20% {
+        transform: translateX(8px);
+    }
+    30% {
+        transform: translateX(-7px);
+    }
+    40% {
+        transform: translateX(6px);
+    }
+    50% {
+        transform: translateX(-5px);
+    }
+    60% {
+        transform: translateX(4px);
+    }
+    70% {
+        transform: translateX(-3px);
+    }
+    80% {
+        transform: translateX(2px);
+    }
+    90% {
+        transform: translateX(-1px);
+    }
+}
+/* Keyframes: Fade with slide fixed
+ * Used by dropdown and search component
+ ========================================================================== */
+/*
+ * Top fixed
+ */
+@-webkit-keyframes uk-slide-top-fixed {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+@keyframes uk-slide-top-fixed {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/*
+ * Bottom fixed
+ */
+@-webkit-keyframes uk-slide-bottom-fixed {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+@keyframes uk-slide-bottom-fixed {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* ========================================================================
+   Component: Text
+ ========================================================================== */
+/* Size modifiers
+ ========================================================================== */
+div#cc-app .uk-text-small {
+    font-size: 11px;
+    line-height: 16px;
+}
+div#cc-app .uk-text-large {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: normal;
+}
+/* Weight modifiers
+ ========================================================================== */
+div#cc-app .uk-text-bold {
+    font-weight: bold;
+}
+/* Color modifiers
+ ========================================================================== */
+div#cc-app .uk-text-muted {
+    color: #999999 !important;
+}
+div#cc-app .uk-text-primary {
+    color: #2d7091 !important;
+}
+div#cc-app .uk-text-success {
+    color: #659f13 !important;
+}
+div#cc-app .uk-text-warning {
+    color: #e28327 !important;
+}
+div#cc-app .uk-text-danger {
+    color: #d85030 !important;
+}
+/* Alignment modifiers
+ ========================================================================== */
+div#cc-app .uk-text-left {
+    text-align: left !important;
+}
+div#cc-app .uk-text-right {
+    text-align: right !important;
+}
+div#cc-app .uk-text-center {
+    text-align: center !important;
+}
+div#cc-app .uk-text-justify {
+    text-align: justify !important;
+}
+div#cc-app .uk-text-top {
+    vertical-align: top !important;
+}
+div#cc-app .uk-text-middle {
+    vertical-align: middle !important;
+}
+div#cc-app .uk-text-bottom {
+    vertical-align: bottom !important;
+}
+/* Only tablets portrait */
+@media (max-width: 959px) {
+    div#cc-app .uk-text-center-medium {
+        text-align: center !important;
+    }
+}
+/* Phone landscape and smaller */
+@media (max-width: 767px) {
+    div#cc-app .uk-text-center-small {
+        text-align: center !important;
+    }
+}
+/* Wrap modifiers
+ ========================================================================== */
+/*
+ * Prevent text from wrapping onto multiple lines
+ */
+div#cc-app .uk-text-nowrap {
+    white-space: nowrap;
+}
+/*
+ * Prevent text from wrapping onto multiple lines, and truncate with an ellipsis
+ */
+div#cc-app .uk-text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/*
+ * Break strings if their length exceeds the width of their container
+ */
+div#cc-app .uk-text-break {
+    word-wrap: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
+}
+/* ========================================================================
+   Component: Utility
+ ========================================================================== */
+/* Container
+ ========================================================================== */
+div#cc-app .uk-container {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    max-width: 980px;
+    padding: 0 25px;
+}
+/* Large screen and bigger */
+@media (min-width: 1220px) {
+    div#cc-app .uk-container {
+        max-width: 1200px;
+        padding: 0 35px;
+    }
+}
+/*
+ * Micro clearfix
+ */
+div#cc-app .uk-container:before,
+div#cc-app .uk-container:after {
+    content: " ";
+    display: table;
+}
+div#cc-app .uk-container:after {
+    clear: both;
+}
+/*
+ * Center container
+ */
+div#cc-app .uk-container-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Clearing
+ ========================================================================== */
+/*
+ * Micro clearfix
+ */
+div#cc-app .uk-clearfix:before,
+div#cc-app .uk-clearfix:after {
+    content: " ";
+    display: table;
+}
+div#cc-app .uk-clearfix:after {
+    clear: both;
+}
+/*
+ *  Create a new block formatting context
+ */
+div#cc-app .uk-nbfc {
+    overflow: hidden;
+}
+div#cc-app .uk-nbfc-alt {
+    display: table-cell;
+    width: 10000px;
+}
+/* Alignment of block elements
+ ========================================================================== */
+/*
+ * Float blocks
+ * 1. Prevent content overflow on small devices
+ */
+div#cc-app .uk-float-left {
+    float: left;
+}
+div#cc-app .uk-float-right {
+    float: right;
+}
+/* 1 */
+[class*='uk-float-'] {
+    max-width: 100%;
+}
+/* Alignment of images and objects
+ ========================================================================== */
+/*
+ * Alignment
+ */
+[class*='uk-align-'] {
+    display: block;
+    margin-bottom: 15px;
+}
+div#cc-app .uk-align-left {
+    margin-right: 15px;
+    float: left;
+}
+div#cc-app .uk-align-right {
+    margin-left: 15px;
+    float: right;
+}
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    div#cc-app .uk-align-medium-left {
+        margin-right: 15px;
+        margin-bottom: 15px;
+        float: left;
+    }
+    div#cc-app .uk-align-medium-right {
+        margin-left: 15px;
+        margin-bottom: 15px;
+        float: right;
+    }
+}
+div#cc-app .uk-align-center {
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Vertical alignment
+ ========================================================================== */
+/*
+ * Remove whitespace between child elements when using `inline-block`
+ */
+div#cc-app .uk-vertical-align {
+    font-size: 0.001px;
+}
+/*
+ *  The `uk-vertical-align` container needs a specific height
+ */
+div#cc-app .uk-vertical-align:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+/*
+ * Sub-object which can have any height
+ * 1. Reset whitespace hack
+ */
+div#cc-app .uk-vertical-align-middle,
+div#cc-app .uk-vertical-align-bottom {
+    display: inline-block;
+    max-width: 100%;
+    /* 1 */
+    font-size: 1rem;
+}
+div#cc-app .uk-vertical-align-middle {
+    vertical-align: middle;
+}
+div#cc-app .uk-vertical-align-bottom {
+    vertical-align: bottom;
+}
+/* Height
+ ========================================================================== */
+/*
+ * More robust if padding and border are used
+ */
+[class*='uk-height'] {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/*
+ * Useful to extend the `html` and `body` element to the full height of the page.
+ */
+div#cc-app .uk-height-1-1 {
+    height: 100%;
+}
+/*
+ * Useful to create image teasers
+ */
+div#cc-app .uk-height-viewport {
+    height: 100vh;
+    min-height: 600px;
+}
+/* Responsive objects
+ * Note: Images are already responsive by default, see Base component
+ ========================================================================== */
+/*
+ * 1. Corrects `max-width` and `max-height` behavior if padding and border are used
+ */
+div#cc-app .uk-responsive-width,
+div#cc-app .uk-responsive-height {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+/*
+ * Responsiveness: Sets a maximum width relative to the parent and auto scales the height
+ */
+div#cc-app .uk-responsive-width {
+    max-width: 100%;
+    height: auto;
+}
+/*
+ * Responsiveness: Sets a maximum height relative to the parent and auto scales the width
+ * Only works if the parent element has a fixed height.
+ */
+div#cc-app .uk-responsive-height {
+    max-height: 100%;
+    width: auto;
+}
+/* Margin
+ ========================================================================== */
+/*
+ * Create a block with the same margin of a paragraph
+ * Add margin if adjacent element
+ */
+div#cc-app .uk-margin {
+    margin-bottom: 15px;
+}
+* + div#cc-app .uk-margin {
+    margin-top: 15px;
+}
+div#cc-app .uk-margin-top {
+    margin-top: 15px !important;
+}
+div#cc-app .uk-margin-bottom {
+    margin-bottom: 15px !important;
+}
+div#cc-app .uk-margin-left {
+    margin-left: 15px !important;
+}
+div#cc-app .uk-margin-right {
+    margin-right: 15px !important;
+}
+/*
+ * Larger margins
+ */
+div#cc-app .uk-margin-large {
+    margin-bottom: 50px;
+}
+* + div#cc-app .uk-margin-large {
+    margin-top: 50px;
+}
+div#cc-app .uk-margin-large-top {
+    margin-top: 50px !important;
+}
+div#cc-app .uk-margin-large-bottom {
+    margin-bottom: 50px !important;
+}
+div#cc-app .uk-margin-large-left {
+    margin-left: 50px !important;
+}
+div#cc-app .uk-margin-large-right {
+    margin-right: 50px !important;
+}
+/*
+ * Smaller margins
+ */
+div#cc-app .uk-margin-small {
+    margin-bottom: 5px;
+}
+* + div#cc-app .uk-margin-small {
+    margin-top: 5px;
+}
+div#cc-app .uk-margin-small-top {
+    margin-top: 5px !important;
+}
+div#cc-app .uk-margin-small-bottom {
+    margin-bottom: 5px !important;
+}
+div#cc-app .uk-margin-small-left {
+    margin-left: 5px !important;
+}
+div#cc-app .uk-margin-small-right {
+    margin-right: 5px !important;
+}
+/*
+ * Remove margins
+ */
+div#cc-app .uk-margin-remove {
+    margin: 0 !important;
+}
+div#cc-app .uk-margin-top-remove {
+    margin-top: 0 !important;
+}
+div#cc-app .uk-margin-bottom-remove {
+    margin-bottom: 0 !important;
+}
+/* Border
+ ========================================================================== */
+div#cc-app .uk-border-circle {
+    border-radius: 50%;
+}
+div#cc-app .uk-border-rounded {
+    border-radius: 5px;
+}
+/* Headings
+ ========================================================================== */
+/* Tablet and bigger */
+@media (min-width: 768px) {
+    div#cc-app .uk-heading-large {
+        font-size: 52px;
+        line-height: 64px;
+    }
+}
+/* Link
+ ========================================================================== */
+/*
+ * Let links appear in default text color
+ */
+div#cc-app .uk-link-muted,
+div#cc-app .uk-link-muted a {
+    color: #444444;
+}
+div#cc-app .uk-link-muted:hover,
+div#cc-app .uk-link-muted a:hover {
+    color: #444444;
+}
+/*
+ * Reset link style
+ */
+div#cc-app .uk-link-reset,
+div#cc-app .uk-link-reset a,
+div#cc-app .uk-link-reset:hover,
+div#cc-app .uk-link-reset a:hover {
+    color: inherit;
+    text-decoration: none;
+}
+/* Scrollable
+ ========================================================================== */
+/*
+ * Enable scrolling for preformatted text
+ */
+div#cc-app .uk-scrollable-text {
+    height: 300px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    resize: both;
+}
+/*
+ * Box with scrolling enabled
+ */
+div#cc-app .uk-scrollable-box {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    height: 170px;
+    padding: 10px;
+    border: 1px solid #dddddd;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    resize: both;
+    border-radius: 3px;
+}
+div#cc-app .uk-scrollable-box > :last-child {
+    margin-bottom: 0;
+}
+/* Overflow
+ ========================================================================== */
+/*
+ * Enable scrollbars if content is clipped
+ */
+div#cc-app .uk-overflow-container {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+div#cc-app .uk-overflow-container > :last-child {
+    margin-bottom: 0;
+}
+/* Position
+ ========================================================================== */
+div#cc-app .uk-position-absolute {
+    position: absolute !important;
+}
+div#cc-app .uk-position-relative {
+    position: relative !important;
+}
+div#cc-app .uk-position-cover {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+/* Display
+ ========================================================================== */
+/*
+ * Display
+ */
+div#cc-app .uk-display-block {
+    display: block !important;
+}
+div#cc-app .uk-display-inline {
+    display: inline !important;
+}
+div#cc-app .uk-display-inline-block {
+    display: inline-block !important;
+}
+/*
+ * Visibility
+ * Avoids setting display to `block` so it works also with `inline-block` and `table`
+ */
+/* Desktop and bigger */
+@media (min-width: 960px) {
+    div#cc-app .uk-visible-small {
+        display: none !important;
+    }
+    div#cc-app .uk-visible-medium {
+        display: none !important;
+    }
+    div#cc-app .uk-hidden-large {
+        display: none !important;
+    }
+}
+/* Tablets portrait */
+@media (min-width: 768px) and (max-width: 959px) {
+    div#cc-app .uk-visible-small {
+        display: none !important;
+    }
+    div#cc-app .uk-visible-large {
+        display: none !important ;
+    }
+    div#cc-app .uk-hidden-medium {
+        display: none !important;
+    }
+}
+/* Phone landscape and smaller*/
+@media (max-width: 767px) {
+    div#cc-app .uk-visible-medium {
+        display: none !important;
+    }
+    div#cc-app .uk-visible-large {
+        display: none !important;
+    }
+    div#cc-app .uk-hidden-small {
+        display: none !important;
+    }
+}
+/* Remove from the flow and screen readers on any device */
+div#cc-app .uk-hidden {
+    display: none !important;
+    visibility: hidden !important;
+}
+/* It's hidden, but still affects layout */
+div#cc-app .uk-invisible {
+    visibility: hidden !important;
+}
+/* Show on hover */
+div#cc-app .uk-visible-hover:hover .uk-hidden,
+div#cc-app .uk-visible-hover:hover .uk-invisible {
+    display: block !important;
+    visibility: visible !important;
+}
+div#cc-app .uk-visible-hover-inline:hover .uk-hidden,
+div#cc-app .uk-visible-hover-inline:hover .uk-invisible {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+/* ========================================================================
+   Component: Print
+ ========================================================================== */
+@media print {
+    div#cc-app * {
+        background: transparent !important;
+        color: black !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    div#cc-app a,
+    div#cc-app a:visited {
+        text-decoration: underline;
+    }
+    div#cc-app pre,
+    div#cc-app blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+    div#cc-app thead {
+        display: table-header-group;
+    }
+    div#cc-app tr,
+    div#cc-app img {
+        page-break-inside: avoid;
+    }
+    div#cc-app img {
+        max-width: 100% !important;
+    }
+    div#cc-app @page {
+        margin: 0.5cm;
+    }
+    div#cc-app p,
+    div#cc-app h2,
+    div#cc-app h3 {
+        orphans: 3;
+        widows: 3;
+    }
+    div#cc-app h2,
+    div#cc-app h3 {
+        page-break-after: avoid;
+    }
+}
+
+/* ========================================================================
+   Component: Table
+ ========================================================================== */
+/*
+ * 1. Remove most spacing between table cells.
+ * 2. Block element behavior
+ * 3. Style
+ */
+div#cc-app .uk-table {
+  /* 1 */
+  border-collapse: collapse;
+  border-spacing: 0;
+  /* 2 */
+  width: 100%;
+  /* 3 */
+  margin-bottom: 15px;
+}
+/*
+ * Add margin if adjacent element
+ */
+* + .uk-table {
+  margin-top: 15px;
+}
+div#cc-app .uk-table th,
+div#cc-app .uk-table td {
+  padding: 8px 8px;
+}
+/*
+ * Set alignment
+ */
+div#cc-app .uk-table th {
+  text-align: left;
+}
+/* 
+div#cc-app .uk-table td {
+  vertical-align: top;
+}
+ */
+div#cc-app .uk-table thead th {
+  vertical-align: bottom;
+}
+/*
+ * Caption and footer
+ */
+div#cc-app .uk-table caption,
+div#cc-app .uk-table tfoot {
+  font-size: 12px;
+  font-style: italic;
+}
+div#cc-app .uk-table caption {
+  text-align: left;
+  color: #999999;
+}
+/* Sub-modifier: `uk-table-middle`
+ ========================================================================== */
+div#cc-app .uk-table-middle,
+div#cc-app .uk-table-middle td {
+  vertical-align: middle !important;
+}
+/* Modifier: `uk-table-striped`
+ ========================================================================== */
+div#cc-app .uk-table-striped tbody tr:nth-of-type(odd) {
+  background: #f5f5f5;
+}
+/* Modifier: `uk-table-condensed`
+ ========================================================================== */
+div#cc-app .uk-table-condensed td {
+  padding: 4px 8px;
+}
+/* Modifier: `uk-table-hover`
+ ========================================================================== */
+div#cc-app .uk-table-hover tbody tr:hover {
+  background: #eeeeee;
+}

@@ -47,9 +47,9 @@ class Auth {
     authenticate(credential): Promise<any> {
         return new Promise((resolve, reject) => {
             if (this.authenticating) {
-                return reject("Already authenticating");
+                reject({code: "ALREADY_AUTHENTICATING"});
+                return;
             }
-            this.authenticating = true;
 
             // Try to authenticate using auto login
             let autoLoginCredential = this.AutoLogin.getCredentials();
@@ -59,21 +59,26 @@ class Auth {
             }
 
             if(this.isAuthenticated()) {
-                return resolve({
+                resolve({
                     user: firebase.auth().currentUser
                 });
+                return;
             }
-            else if (Utils.unORNull(credential)) {
-                return Promise.reject();
+            if (Utils.unORNull(credential)) {
+                reject();
+                return;
             }
-            else if(credential.getType() === credential.Email) {
-                return firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword());
+
+            this.authenticating = true;
+
+            if(credential.getType() === credential.Email) {
+                resolve(firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword()));
             }
             else if(credential.getType() === credential.Anonymous) {
-                return firebase.auth().signInAnonymously();
+                resolve(firebase.auth().signInAnonymously());
             }
             else if(credential.getType() === credential.CustomToken) {
-                return firebase.auth().signInWithCustomToken(credential.getToken());
+                resolve(firebase.auth().signInWithCustomToken(credential.getToken()));
             }
             else {
 
@@ -103,7 +108,7 @@ class Auth {
                     }
                 }
 
-                return firebase.auth().signInWithPopup (provider);
+                resolve(firebase.auth().signInWithPopup (provider));
             }
         }).then((authData: any) => {
             this.authenticating = false;

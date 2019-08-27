@@ -21,10 +21,17 @@
             "aot": false,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/images"
             ],
             "styles": [
-              "src/styles.css"
+              "src/css/reset-uikit.css",
+              "src/css/styles.css",
+              "node_modules/angular-emoji-filter-hd/dist/emoji.min.css",
+              "node_modules/pikaday/css/pikaday.css",
+              "src/css/flags/common.css",
+              "src/css/flags/flags32.css",
+              "src/css/flags/flags16.css"
             ],
             "scripts": []
           },

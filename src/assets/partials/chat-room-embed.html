@@ -1,0 +1,146 @@
+<!--The 30 in the height is to take account for the bottom bar-->
+<div>
+    <div class="cc-chat-box-embed cc-chat-box cc-shadow" data-ng-style="{'width': room.width + 'px', 'height': room.height + 'px'}" >
+        <div class="cc-box-header cc-pointer" data-ng-style="{'background-color': config.headerColor}" data-cc-flash="room-header">
+            <div class="cc-ellipsis uk-float-left cc-pointer" data-ng-style="{width: room.width + 'px'}">{{ room.name }}</div>
+        </div>
+
+        <div class="cc-tab-container cc-bottom-shadow">
+            <div class="cc-tab cc-tab-small cc-tab-1-3"
+                 data-ng-style="activeTab == 'messages' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'messages'}"
+                 data-ng-click="tabClicked('messages')">
+                MESSAGES
+            </div>
+            <div class="cc-tab cc-tab-small cc-tab-1-3"
+                 data-ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'users'}"
+                 data-ng-click="tabClicked('users')">
+                USERS
+            </div>
+            <div class="cc-tab cc-tab-small cc-tab-1-3"
+                 data-ng-style="activeTab == 'settings' ? {'border-bottom-color': config.headerColor} : null"
+                 data-ng-class="{selected: activeTab == 'settings'}"
+                 data-ng-click="tabClicked('settings')">
+                SETTINGS
+            </div>
+        </div>
+
+        <div data-ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" data-ng-style="{'height': (room.height - 30 - 30) + 'px'}">
+            <div data-ng-include data-ng-controller="UserListController" data-ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></div>
+            <div data-ng-include data-ng-show="activeTab == 'settings'" src="partialsURL + 'chat-settings.html'"></div>
+        </div>
+
+        <!--Take account of the top and bottom bars as well as the tab bar - the tab bar is height 18 + 4 border + 5 bottom margin-->
+        <div data-ng-show="!showEmojis && !showMessageOptions  && activeTab == 'messages'" class="cc-chat-box-msgs" data-infinite-scroll="loadMoreMessages()" data-scroll-glue data-ng-style="{'height': (room.height - 30 - 30 - inputHeight) + 'px'}">
+            <div data-ng-repeat="message in room.messages track by message.mid">
+                <div>
+                    <div class="cc-message-outer">
+                        <img class="cc-thumbnail-30" data-ng-class="'cc-abs-' + message.side" data-ng-src="{{ message.user.getThumbnail() }}" />
+                        <span data-ng-show="message.type() == messageTypeText" class="cc-bubble" data-ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" data-ng-style="{'max-width': (room.width - 80) + 'px'}" data-on-edit-message>
+                            <span class="cc-enable-select" data-ng-bind-html="::message.text() | linky: '_blank' | emoji | newline"></span>
+                        </span>
+                        <span data-ng-show="message.type() == messageTypeImage" class="cc-bubble cc-image-bubble" data-ng-class="'cc-' + message.side + '-bubble'" data-ng-style="{'max-width': (room.width - 80) + 'px'}" data-on-edit-message>
+                            <a href="{{ message.imageURL }}" target="_blank"><img data-ng-src="{{ ::message.thumbnailURL }}"></a>
+                        </span>
+                        <span data-ng-show="message.type() == messageTypeFile" class="cc-bubble cc-file-bubble" data-ng-class="['cc-' + message.side + '-bubble','cc-' + message.side + '-text-bubble']" data-ng-style="{'max-width': (room.width - 80) + 'px'}" data-on-edit-message>
+                            <span class="cc-enable-select" data-ng-bind-html="::message.text() | linky: '_blank' | emoji | newline"></span>
+                            <a href="{{ message.fileURL }}" target="_blank"><img data-ng-src="{{ ::imgForFileType(message.text().split('.').pop()) }}"></a>
+                        </span>
+                        <span class="cc-flag" data-ng-class="'cc-' + message.side + '-flag'" data-ng-show="message.side == 'left'">
+                            <a class="cc-pointer" data-ng-click="room.toggleMessageFlag(message)">
+                                <img data-ng-show="!message.flagged" data-ng-src="{{ ::img_20_flag }}"/>
+                                <img data-ng-show="message.flagged" data-ng-src="{{ ::img_20_flagged }}"/>
+                            </a>
+                        </span>
+                    </div>
+                    <div class="cc-message-outer uk-text-small" data-ng-hide="message.hideName && message.hideTime">
+                        <div class="cc-message-margin cc-ellipsis" data-ng-class="'uk-float-' + message.side">
+                            <span class="cc-user-name uk-text-bold" data-ng-hide="message.hideName">{{ ::message.user.getName() }}</span>
+                        </div>
+                        <div class="uk-float-left uk-width-1-1 time" data-ng-hide="message.hideTime">
+                            {{ ::message.timeString }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- This stops the messages being rendered right to the bottom
+                 and being covered by the "User is typing ..." text-->
+            <div style="height: 20px"></div>
+        </div>
+
+        <div class="cc-emoji uk-overflow-container"
+             data-ng-show="showEmojis && activeTab == 'messages'"
+             data-ng-style="{'height': (room.height - 30 - 30 - inputHeight) + 'px'}">
+            <div data-ng-include src="partialsURL + 'emojis.html'"></div>
+        </div>
+
+        <div class="cc-message-options uk-overflow-container"
+             data-ng-show="showMessageOptions && activeTab == 'messages'"
+             data-ng-style="{'height': (room.height - 30 - 30 - inputHeight) + 'px'}">
+            <div class="cc-message-option uk-container-center" data-ng-show="config.imageMessagesEnabled">
+                <input class="cc-hidden-input" type="file" data-on-file-change="onSelectImage(room)">
+                <img data-ng-src="{{ ::img_30_image }}">
+                <label>Send Image Message</label>
+            </div>
+
+            <div class="cc-message-option uk-container-center" data-ng-show="config.fileMessagesEnabled">
+                <input class="cc-hidden-input" type="file" data-on-file-change="onSelectFile(room)">
+                <img data-ng-src="{{ ::img_30_save }}">
+                <label>Send File Message</label>
+            </div>
+        </div>
+
+        <div class="cc-chat-box-msg" data-ng-show="activeTab == 'messages'">
+            <div class="cc-typing-indicator">
+                {{ room.typingMessage }}
+            </div>
+
+            <textarea class="cc-chat-box-msg-txt"
+                      data-ng-model="input.text"
+                      data-enter-submit="sendMessage()"
+                      data-fit-text="84"
+                      data-ng-style="{'width': (room.width - 60) + 'px'}"
+                      placeholder="Type message here..."
+                      data-ng-blur="setTyping(false)"
+                      data-ng-keyup="setTyping(true)" >
+            </textarea>
+
+            <button class="cc-emoji-button" data-ng-click="toggleEmoticons()">
+                <img data-ng-src="{{ ::img_30_emojis }}">
+            </button>
+
+            <button class="cc-options-button" data-ng-click="toggleMessageOptions()" data-ng-show="enabledMessageOptionsCount() > 1 && !uploadingFile">
+                <img data-ng-src="{{ ::img_30_plus }}">
+            </button>
+
+            <div class="cc-image-button uk-container-center" data-ng-show="enabledMessageOptionsCount() == 1 && config.imageMessagesEnabled && !uploadingFile">
+                <input class="cc-hidden-input" type="file" on-file-change="onSelectImage(room)">
+                <img data-ng-src="{{ ::img_30_image }}">
+            </div>
+
+            <div class="cc-file-button uk-container-center" data-ng-show="enabledMessageOptionsCount() == 1 && config.fileMessagesEnabled && !uploadingFile">
+                <input class="cc-hidden-input" type="file" on-file-change="onSelectFile(room)">
+                <img data-ng-src="{{ ::img_30_save }}">
+            </div>
+
+            <img class="uk-container-center" data-ng-src="{{ ::img_loader }}" width="25" height="25" data-ng-show="uploadingFile">
+
+        </div>
+
+        <!--The overlay that appears if the user hasn't accepted the invitation-->
+        <!--We disable drag here because otherwise when the user clicks they also start a drag-->
+        <!--that results in the room data being modified that causes the room to be re-added-->
+        <div class="cc-overlay cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'" ></div>
+        <div class="cc-overlay-content cc-overlay-white" data-ng-hide="room.getUserStatus(user) != 'invited'">
+            <div class="uk-width-4-5 cc-center cc-ellipsis cc-title cc-user-name">{{ room.invitedBy.getName() }}</div>
+            <div class="uk-width-1-1 subtitle">Invited you to chat</div>
+            <a data-ng-click="room.close()" ><img data-ng-src="{{ ::img_40_cross }}" /></a>
+            <a data-ng-click="acceptInvitation()" ><img data-ng-src="{{ ::img_40_tick }}" /></a>
+        </div>
+    </div>
+</div>
+
+
+
+

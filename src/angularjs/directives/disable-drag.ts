@@ -3,14 +3,21 @@ import * as $ from 'jquery'
 
 
 angular.module('myApp.directives').directive('disableDrag', ['$rootScope','$document', function ($rootScope, $document) {
-    return function (scope, elm, attrs) {
+    return {
+        link: function (scope, elm, attrs) {
 
-        $(elm).mousedown((e) => {
-            $rootScope.disableDrag = true;
-        });
+            $(elm).mousedown((e) => {
+                $rootScope.disableDrag = true;
+            });
 
-        $document.mouseup((e) => {
-            $rootScope.disableDrag = false;
-        });
+            // TODO: Check this MM1
+            $(document).mouseup((e) => {
+                $rootScope.disableDrag = false;
+            });
+
+            // $document.mouseup((e) => {
+            //     $rootScope.disableDrag = false;
+            // });
+        }
     };
 }]);

@@ -34,6 +34,7 @@ export interface IRoom extends IEntity {
     draggable: boolean
     invitedBy: IUser
     deleted: boolean
+    messages: any
     transcript(): string
     setOffset(offset: number)
     updateOffsetFromSlot()
@@ -1269,25 +1270,23 @@ class Room extends Entity implements IRoom {
             const message = this.getMessageFromMeta(snapshot.key, snapshot.val());
             this.addMessageToEnd(message);
 
-            // if(this.addMessageFromMeta(snapshot.key, snapshot.val())) {
-                // Trim the room to make sure the message count isn't growing
-                // out of control
-                this.trimMessageList();
+            // Trim the room to make sure the message count isn't growing
+            // out of control
+            this.trimMessageList();
 
-                // Is the window visible?
-                // Play the sound
-                if (!this.muted) {
-                    if (this.Visibility.getIsHidden()) {
-                        // Only make a sound for messages that were received less than
-                        // 30 seconds ago
-                        if (Defines.DEBUG) console.log("Now: " + new Date().getTime() + ", Date now: " + this.Time.now() + ", Message: " + snapshot.val()[MessageKeys.Date]);
-                        if (Defines.DEBUG) console.log("Diff: " + Math.abs(this.Time.now() - snapshot.val().time));
-                        if (Math.abs(this.Time.now() - snapshot.val()[MessageKeys.Date]) / 1000 < 30) {
-                            this.SoundEffects.messageReceived();
-                        }
+            // Is the window visible?
+            // Play the sound
+            if (!this.muted) {
+                if (this.Visibility.getIsHidden()) {
+                    // Only make a sound for messages that were received less than
+                    // 30 seconds ago
+                    if (Defines.DEBUG) console.log("Now: " + new Date().getTime() + ", Date now: " + this.Time.now() + ", Message: " + snapshot.val()[MessageKeys.Date]);
+                    if (Defines.DEBUG) console.log("Diff: " + Math.abs(this.Time.now() - snapshot.val().time));
+                    if (Math.abs(this.Time.now() - snapshot.val()[MessageKeys.Date]) / 1000 < 30) {
+                        this.SoundEffects.messageReceived();
                     }
                 }
-            // }
+            }
 
         });
 

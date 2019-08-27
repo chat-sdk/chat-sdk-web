@@ -23,6 +23,10 @@
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1",
+    "howler": "latest",
+    "pikaday": "latest",
+    "moment": "latest",
+    "angular-emoji-filter-hd": "latest",
     "file-saver": "latest"
   },
   "devDependencies": {
@@ -35,6 +39,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/node": "~8.9.4",
     "@types/file-saver": "^2.0.1",
+    "@types/howler": "latest",
     "codelyzer": "^5.0.0",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",

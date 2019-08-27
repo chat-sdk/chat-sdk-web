@@ -1,0 +1,23 @@
+div#cc-app .flag {
+	display:inline-block;
+}
+
+div#cc-app .f16 .flag {
+	width:16px;
+	height:16px;
+}
+
+div#cc-app .f24 .flag {
+	width:24px;
+	height:24px;
+}
+
+div#cc-app .f32 .flag {
+	width:32px;
+	height:32px;
+}
+
+div#cc-app .f48 .flag {
+	width:48px;
+	height:48px;
+}
