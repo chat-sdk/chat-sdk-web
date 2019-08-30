@@ -1,4 +1,5 @@
 import * as angular from 'angular'
+import {IAuth} from "./auth";
 
 export interface IAuthenticationHandler {
     currentUserID(): string

@@ -18,6 +18,7 @@ angular.module('myApp.controllers').controller('MainAppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
     function($rootScope, $scope, $timeout, $window, $sce, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, RoomCreator, Config, Partials, RoomPositionManager, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
 
+
         $scope.totalUserCount = 0;
         $scope.friendsEnabled = true;
 

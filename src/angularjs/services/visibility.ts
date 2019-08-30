@@ -1,37 +1,37 @@
 import * as angular from 'angular'
 import {N} from "../keys/notification-keys";
+import * as $ from "jquery"
 
 export interface IVisibility {
 
 }
 
-angular.module('myApp.services').factory('Visibility', ['$rootScope', '$document', '$window', function ($rootScope, $document, $window) {
+class Visibility implements IVisibility {
 
-    let Visibility = {
+    static $inject = ["$rootScope"];
 
-        isHidden: false,
-        uid: "Test",
+    isHidden = false;
 
-        init: function () {
-            document.addEventListener("visibilitychange", () => this.changed);
-            document.addEventListener("webkitvisibilitychange", () => this.changed);
-            document.addEventListener("mozvisibilitychange", () => this.changed);
-            document.addEventListener("msvisibilitychange", () => this.changed);
+    constructor (private $rootScope) {
+        $(window).blur(() => {
+            this.isHidden = true;
+            this.changed()
+        });
 
-            this.uid = new Date().getTime();
+        $(window).focus(() => {
+            this.isHidden = false;
+            this.changed()
+        });
 
-            return this;
-        },
+    }
 
-        changed: function (event) {
-            this.isHidden = $document.hidden || $document.webkitHidden || $document.mozHidden || $document.msHidden;
-            $rootScope.$broadcast(N.VisibilityChanged, this.isHidden);
-        },
+    changed() {
+        this.$rootScope.$broadcast(N.VisibilityChanged, this.isHidden);
+    }
 
-        getIsHidden: function () {
-            return this.isHidden;
-        }
-    };
+    getIsHidden() {
+        return this.isHidden;
+    }
+}
 
-    return Visibility.init();
-}]);
+angular.module('myApp.services').service('Visibility', Visibility);

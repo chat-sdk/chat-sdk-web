@@ -78,6 +78,7 @@ class Paths implements IPaths {
 
     firebase(): firebase.database.Reference {
         if(firebase.apps.length == 0) {
+
             firebase.initializeApp(this.Environment.firebaseConfig());
             this.database = firebase.database();
         }

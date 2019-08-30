@@ -5,6 +5,7 @@ import {Utils} from "./utils";
 export interface IEnvironment {
     firebaseConfig(): any
     config(): any
+    partialsURL(): string
 }
 
 class Environment implements IEnvironment {
@@ -36,7 +37,7 @@ class Environment implements IEnvironment {
         }
     }
 
-    partialsURL() {
+    partialsURL(): string {
         return this.resourceRootURL() + 'assets/partials/';
     }
 

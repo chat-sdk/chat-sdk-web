@@ -17,7 +17,7 @@ import {IAutoLogin} from "./auto-login";
 import {INetworkManager} from "./network-manager";
 
 export interface IAuth {
-
+    logout(): Promise<void>
 }
 
 class Auth {
@@ -45,6 +45,7 @@ class Auth {
     }
 
     authenticate(credential): Promise<any> {
+
         return new Promise((resolve, reject) => {
             if (this.authenticating) {
                 reject({code: "ALREADY_AUTHENTICATING"});
@@ -114,6 +115,8 @@ class Auth {
             this.authenticating = false;
             this.Config.setConfig(SetBy.Include, this.Environment.config());
             return this.bindUser(authData.user);
+        }).catch((error) => {
+            this.authenticating = false;
         });
     }
 
@@ -129,8 +132,8 @@ class Auth {
         return firebase.auth().sendPasswordResetEmail(email);
     }
 
-    logout() {
-        firebase.auth().signOut();
+    logout(): Promise<void> {
+        return firebase.auth().signOut();
     }
 
     /**

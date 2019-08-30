@@ -4,42 +4,42 @@ export interface IMarquee {
 
 }
 
-angular.module('myApp.services').factory('Marquee', ['$window', '$interval', function ($window, $interval) {
-    let Marquee = {
+class Marquee implements IMarquee {
 
-        running: null,
-        title: "",
+    static $inject = ['$window', '$interval'];
 
-        init: function () {
-            this.title = $window.document.title;
-            return this;
-        },
+    running: any = null;
+    title =  "";
 
-        startWithMessage: function (message) {
-            if(this.running) {
+    constructor(private $window: ng.IWindowService, private $interval: ng.IIntervalService) {
+        this.title = $window.document.title;
+        return this;
+    }
+
+    startWithMessage(message) {
+        if(this.running) {
+            this.stop();
+        }
+        let text = "Chatcat Message: " + message + "...";
+
+        this.running = this.$interval(() => {
+            // Change the page title
+            this.$window.document.title = text;
+            if(text.length > 0) {
+                text = text.slice(1);
+            }
+            else {
                 this.stop();
             }
-            let text = "Chatcat Message: " + message + "...";
+        }, 80);
+    }
 
-            this.running = $interval(() => {
-                // Change the page title
-                $window.document.title = text;
-                if(text.length > 0) {
-                    text = text.slice(1);
-                }
-                else {
-                    this.stop();
-                }
-            }, 80);
-        },
+    stop() {
+        this.$interval.cancel(this.running);
+        this.running = null;
+        // Change the page title
+        this.$window.document.title = this.title;
+    }
+}
 
-        stop: function () {
-            $interval.cancel(this.running);
-            this.running = null;
-            // Change the page title
-            $window.document.title = this.title;
-        }
-
-    };
-    return Marquee.init();
-}]);
+angular.module('myApp.services').service('Marquee', Marquee);

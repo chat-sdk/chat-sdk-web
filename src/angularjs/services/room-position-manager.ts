@@ -326,7 +326,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
                 return this.slotPositions[slot];
             }
 
-        }
+        };
 
         return rpm.init();
 
