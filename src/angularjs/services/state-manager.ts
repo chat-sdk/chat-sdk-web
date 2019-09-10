@@ -3,7 +3,6 @@ import {RoomType} from "../keys/room-type";
 import {UserAllowInvites} from "../keys/allow-invite-type";
 import {RoomKeys} from "../keys/room-keys";
 import {N} from "../keys/notification-keys";
-import {IRootScope} from "../controllers/main-app";
 import {IFriendsConnector} from "../connectors/friend-connector";
 import {IConfig} from "./config";
 import {ICache} from "../persistence/cache";
@@ -13,6 +12,7 @@ import {IOnlineConnector} from "../connectors/online-connector";
 import {IPublicRoomsConnector} from "../connectors/public-rooms-connector";
 import {IPaths} from "../network/paths";
 import {IRoomOpenQueue} from "./room-open-queue";
+import {IRootScope} from "../interfaces/root-scope";
 
 export interface IStateManager {
     on(): void
@@ -231,7 +231,7 @@ class StateManager implements IStateManager {
                 }
                 // If the user just created the room...
                 if(this.RoomOpenQueue.roomExistsAndPop(room.rid())) {
-                    room.open(0, 300);
+                    room.open(0);
                 }
             });
         }

@@ -2,7 +2,8 @@ import * as angular from 'angular'
 import {N} from "../keys/notification-keys";
 
 export interface IScreen {
-
+    screenWidth: number
+    screenHeight: number
 }
 
 angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', function ($rootScope, $timeout, $document, $window, LocalStorage) {

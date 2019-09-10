@@ -8,6 +8,7 @@
             data-ng-click="userClicked(aUser)">
 
             <img class="cc-thumbnail-30 cc-user-image uk-float-left" data-ng-src="{{ aUser.getThumbnail() }}" title="{{ aUser.uid() }}"/>
+            <img class="uk-float-right cc-move" data-ng-src="{{ img_25_drag }}">
 
             <div class="uk-float-left cc-user-name cc-user-name" data-ng-class="aUser.getStatus() ? 'cc-show-status' : ''" >
                 <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.getName() }}</div>

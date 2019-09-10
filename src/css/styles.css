@@ -647,7 +647,7 @@ div#cc-app div.cc-user-drag {
     opacity: 0.6;
     z-index: 990000;
     pointer-events:none;
-    background: #ff0000;
+    background: #b5b4b6;
     width:150px;
     height: 30px;
     line-height: 30px;
@@ -775,6 +775,10 @@ div#cc-app .cc-pointer {
     cursor: pointer;
 }
 
+div#cc-app .cc-move {
+    cursor: move;
+}
+
 div#cc-app .cc-italic {
     font-style: italic;
 }
@@ -866,6 +870,10 @@ div#cc-app .cc-tab-1-4 {
 
 div#cc-app div.cc-bg-blue {
     background-color: #0d82b3 !important;
+}
+
+div#cc-app div.cc-bg-green {
+    background-color: #8bbf5a !important;
 }
 
 div#cc-app .uk-table td.cc-row {

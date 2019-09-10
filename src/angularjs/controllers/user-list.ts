@@ -5,7 +5,7 @@ import {N} from "../keys/notification-keys";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
 
-export interface UserListScope extends ng.IScope {
+export interface IUserListScope extends ng.IScope {
     aUser: any,
 }
 

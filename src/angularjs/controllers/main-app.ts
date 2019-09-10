@@ -10,10 +10,6 @@ import {Utils} from "../services/utils";
 import {IRoom} from "../entities/room";
 import {Log} from "../services/log";
 
-export interface IRootScope extends ng.IRootScopeService{
-    user: IUser
-}
-
 angular.module('myApp.controllers').controller('MainAppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
     function($rootScope, $scope, $timeout, $window, $sce, PathAnalyser, OnlineConnector, FriendsConnector, Cache, UserStore, RoomStore, $document, Presence, LocalStorage, RoomCreator, Config, Partials, RoomPositionManager, Paths, Auth, StateManager, RoomOpenQueue, NetworkManager, Environment) {
@@ -141,6 +137,7 @@ angular.module('myApp.controllers').controller('MainAppController', [
             $rootScope.img_20_flagged = Environment.imagesURL() + 'cc-20-flagged.png';
             $rootScope.img_30_powered_by = Environment.imagesURL() + 'cc-30-powered-by.png';
             $rootScope.img_30_start_chatting = Environment.imagesURL() + 'cc-30-start-chatting.png';
+            $rootScope.img_25_drag = Environment.imagesURL() + 'cc-25-drag.png';
         };
 
         $scope.setupFileIcons = function () {
@@ -385,12 +382,13 @@ angular.module('myApp.controllers').controller('MainAppController', [
                     rooms = RoomStore.getPrivateRoomsWithUsers(UserStore.currentUser(), user);
                     if(rooms.length) {
                         let room = rooms[0];
-                        room.open(0, 300);
+                        room.open(0);
                         return;
                     }
                 }
                 RoomCreator.createPrivateRoom([user]).then((room: IRoom) => {
                     RoomOpenQueue.addRoomWithID(room.rid());
+                    room.open(0);
                     //let room = RoomStore.getOrCreateRoomWithID(rid);
                 }, (error) => {
                     console.log(error);

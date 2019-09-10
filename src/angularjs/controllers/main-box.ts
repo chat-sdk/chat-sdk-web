@@ -173,7 +173,7 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
                 return;
             }
 
-            room.open(0, 300);
+            room.open(0);
         };
 
         $scope.init();

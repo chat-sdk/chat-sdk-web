@@ -1,69 +1,112 @@
 import * as angular from 'angular'
 import * as $ from 'jquery'
 
-
-import {UserListScope} from "../controllers/user-list";
+import {IUserListScope} from "../controllers/user-list";
 import {Utils} from "../services/utils";
+import {IUser} from "../entities/user";
+import {IRootScope} from "../interfaces/root-scope";
+import {IScreen} from "../services/screen";
 
-angular.module('myApp.directives').directive('draggableUser', ['$rootScope','$document', '$timeout', 'Screen', function ($rootScope, $document, $timeout, Screen) {
-    return {
-        link: function (scope: UserListScope, elm, attrs) {
+export interface IDraggableUser {
 
-            $rootScope.userDrag = {};
+}
 
-            $(elm).mousedown((e) => {
-                // Set the current user
-                $rootScope.userDrag = {
-                    user: scope.aUser,
-                    x: 0,
-                    y: 0,
-                    dragging: true,
-                    dropLoc: false,
-                    visible: false
-                };
+export class UserDragAction {
 
-                Utils.stopDefault(e);
+    public user: IUser = null;
+    // Initial position
+    public x0 = 0;
+    public y0 = 0;
 
-                return false;
+    // Current position
+    public x = 0;
+    public y = 0;
 
-            });
+    public dragging = true;
+    public dropLoc = false;
+    public visible = false;
 
-            $(document).mousemove((e) => {
+    constructor (user: IUser, x0: number, y0: number) {
+        this.user = user;
+        this.x0 = x0;
+        this.y0 = y0;
+    }
 
-                if ($rootScope.userDrag.dragging) {
+    distanceMoved (x: number, y: number): number {
+        return Math.sqrt(Math.pow(x - this.x0, 2) + Math.pow(y - this.y0, 2))
+    }
+}
 
-                    $rootScope.userDrag.visible = true;
+class DraggableUser implements IDraggableUser {
 
-                    $rootScope.userDrag.x = e.clientX - 10;
-                    $rootScope.userDrag.y = e.clientY - 10;
+    static $inject = ['$rootScope', '$timeout', 'Screen'];
 
-                    // TODO: Don't hardcode these values
-                    // for some reason .width() isn't working
-                    // Stop the dragged item going off the screen
-                    $rootScope.userDrag.x = Math.max($rootScope.userDrag.x, 0);
-                    $rootScope.userDrag.x = Math.min($rootScope.userDrag.x, Screen.screenWidth - 200);
+    constructor (private $rootScope: IRootScope,
+                 private $timeout: ng.ITimeoutService,
+                 private Screen: IScreen) {
 
-                    $rootScope.userDrag.y = Math.max($rootScope.userDrag.y, 0);
-                    $rootScope.userDrag.y = Math.min($rootScope.userDrag.y, Screen.screenHeight - 30);
+    }
 
-                    // If we're in the drop loc
-                    $timeout(() => {
-                        scope.$apply();
-                    });
-                }
+    public link = (scope: IUserListScope, elm) => {
+        this.$rootScope.userDrag = null;
+        const $elm = $(elm);
 
-            });
+        $elm.mousedown((e) => {
+            this.$rootScope.userDrag = new UserDragAction(scope.aUser, e.clientX, e.clientY);
 
-            $(document).mouseup((e) => {
-                if ($rootScope.userDrag.dragging) {
-                    $rootScope.userDrag.dragging = false;
-                    $rootScope.userDrag.visible = false;
+            Utils.stopDefault(e);
 
-                    $timeout(() => {
-                        scope.$apply();
-                    });
-                }
-            });
-        }
+            return false;
+
+        });
+
+        $(document).mousemove((e) => {
+
+            const userDrag = this.$rootScope.userDrag;
+
+            if (userDrag && userDrag.dragging) {
+
+                const x = e.clientX;
+                const y = e.clientY;
+
+                userDrag.visible = userDrag.distanceMoved(x, y) > 10;
+
+                userDrag.x = x - 20;
+                userDrag.y = y - $elm.height() / 2;
+
+                userDrag.x = Math.max(userDrag.x, 0);
+                userDrag.x = Math.min(userDrag.x, this.Screen.screenWidth);
+
+                userDrag.y = Math.max(userDrag.y, 0);
+                userDrag.y = Math.min(userDrag.y, this.Screen.screenHeight - $elm.height());
+
+                // If we're in the drop loc
+                this.$timeout(() => {
+                    scope.$apply();
+                });
+            }
+
+        });
+
+        $(document).mouseup((e) => {
+
+            const userDrag = this.$rootScope.userDrag;
+
+            if (userDrag && userDrag.dragging) {
+                userDrag.dragging = false;
+                userDrag.visible = false;
+
+                this.$timeout(() => {
+                    scope.$apply();
+                });
+            }
+        });
     };
-}]);
+
+    static factory (): ng.IDirectiveFactory {
+        return ($rootScope: IRootScope, $timeout: ng.ITimeoutService, Screen: IScreen) => new DraggableUser($rootScope, $timeout, Screen)
+    }
+
+}
+
+angular.module('myApp.directives').directive('draggableUser', DraggableUser.factory());

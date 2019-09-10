@@ -8,13 +8,14 @@ import {Utils} from "../services/utils";
 import {IPresence} from "./presence";
 import {IUserStore} from "../persistence/user-store";
 import {IEnvironment} from "../services/environment";
-import {IRootScope} from "../controllers/main-app";
+
 import {IStateManager} from "../services/state-manager";
 import {IConfig, SetBy} from "../services/config";
 import {IPaths} from "./paths";
 import {ITime} from "../services/time";
 import {IAutoLogin} from "./auto-login";
 import {INetworkManager} from "./network-manager";
+import {IRootScope} from "../interfaces/root-scope";
 
 export interface IAuth {
     logout(): Promise<void>

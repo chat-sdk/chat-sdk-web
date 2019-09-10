@@ -28,7 +28,7 @@ angular.module('myApp.directives').directive('userDropLocation', ['$rootScope', 
                     // Is the user already a member of this room?
 
                     // This isn't really needed since it's handled with security rules
-                    RoomFactory.addUserToRoom(scope.room.rid(), $rootScope.userDrag.user, UserStatus.Member).then(() => {
+                    RoomFactory.addUserToRoom($rootScope.userDrag.user, scope.room.rid(), UserStatus.Member).then(() => {
                         // Update the room's type
                         scope.room.updateType();
                     }, (error) => {

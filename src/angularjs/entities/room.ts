@@ -17,9 +17,9 @@ import {IUser} from "./user";
 import {Utils} from "../services/utils";
 import {UserStatus} from "../keys/user-status";
 import {UserKeys} from "../keys/user-keys";
-import {IRootScope} from "../controllers/main-app";
 import {Log} from "../services/log";
 import {IFirebaseReference} from "../network/paths";
+import {IRootScope} from "../interfaces/root-scope";
 
 export interface IRoom extends IEntity {
     name: string
@@ -48,7 +48,7 @@ export interface IRoom extends IEntity {
     getType(): RoomType
     addUserUpdate(user: IUser, status: UserStatus): {}
     removeUserUpdate(user: IUser): {}
-    open(slot: number, duration: number): void
+    open(slot: number, duration?: number): void
     close(): void
     deserialize(sr): void
     lastMessage (): IMessage
@@ -307,7 +307,7 @@ class Room extends Entity implements IRoom {
         });
     };
 
-    open(slot: number, duration: number): void {
+    open(slot: number, duration = 300): void {
 
         let open = () => {
 

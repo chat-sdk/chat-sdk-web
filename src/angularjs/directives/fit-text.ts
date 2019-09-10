@@ -38,3 +38,4 @@ angular.module('myApp.directives').directive('fitText', function () {
         }
     };
 });
+

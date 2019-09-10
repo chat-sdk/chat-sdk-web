@@ -43,8 +43,9 @@ class CreateRoomController {
             );
         }
 
-        promise.then((rid) => {
-            this.RoomOpenQueue.addRoomWithID(rid);
+        promise.then((room) => {
+            this.RoomOpenQueue.addRoomWithID(room.getRID());
+            room.open(0)
         });
 
         this.back();
