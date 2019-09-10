@@ -7,6 +7,7 @@ import {Utils} from "./utils";
 export interface IConfig {
     clockType: string
     defaultUserName: string
+    headerColor: string
     publicRoomsEnabled: boolean
     onlineUsersEnabled: boolean
     friendsEnabled: boolean
