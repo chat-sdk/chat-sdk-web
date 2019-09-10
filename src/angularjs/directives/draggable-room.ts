@@ -1,97 +1,115 @@
-import * as angular from 'angular'
-import * as $ from 'jquery'
+import * as angular from 'angular';
+import * as $ from 'jquery';
 
-import {N} from "../keys/notification-keys";
-import {IRoomScope} from "../controllers/chat";
-import {Dimensions} from "../keys/dimensions";
-import {Utils} from "../services/utils";
+import { N } from '../keys/notification-keys';
+import { Dimensions } from '../keys/dimensions';
+import { IRoomScope } from '../controllers/chat';
+import { Utils } from '../services/utils';
+import { IRoomPositionManager } from '../services/room-position-manager';
 
-angular.module('myApp.directives').directive('draggableRoom', ['$rootScope', '$document', '$timeout', 'RoomPositionManager', function ($rootScope, $document, $timeout, RoomPositionManager) {
+export interface IDraggableRoom extends ng.IDirective {
 
-    return {
-        link: function (scope: IRoomScope, elm, attrs) {
+}
 
-            let lastClientX = 0;
+class DraggableRoom implements IDraggableRoom {
 
-            console.log("Add draggable room directive");
+    static $inject = ['$rootScope', '$document', '$timeout', 'RoomPositionManager'];
 
-            // Set the room as draggable - this will interact
-            // with the layout manager i.e. draggable rooms
-            // will be animated to position whereas non-draggable
-            // rooms will be moved position manually
-            scope.room.draggable = true;
+    constructor(
+        private $rootScope: IRoomScope,
+        private $document: ng.IDocumentService, 
+        private $timeout: ng.ITimeoutService,
+        private RoomPositionManager: IRoomPositionManager
+    ) { }
 
-            $(elm).mousedown((e) => {
+    link(scope: IRoomScope, element: JQLite) {
+        let lastClientX = 0;
 
-                // If the user clicked in the text box
-                // then don't drag
-                if ($rootScope.disableDrag) {
-                    return true;
-                }
+        console.log('Add draggable room directive');
 
-                if (scope.resizing) {
-                    return;
-                }
+        // Set the room as draggable - this will interact
+        // with the layout manager i.e. draggable rooms
+        // will be animated to position whereas non-draggable
+        // rooms will be moved position manually
+        scope.room.draggable = true;
 
-                scope.room.zIndex = 1000;
+        $(element).mousedown((e) => {
 
-                $(elm).stop(true, false);
+            // If the user clicked in the text box
+            // then don't drag
+            if (this.$rootScope.disableDrag) {
+                return true;
+            }
 
-                scope.startDrag();
+            if (scope.resizing) {
+                return;
+            }
 
-                scope.dragging = true;
-                lastClientX = e.clientX;
+            scope.room.zIndex = 1000;
 
-                return false;
-            });
+            $(element).stop(true, false);
 
-            $(document).mousemove((e) => {
+            scope.startDrag();
 
-                if (scope.dragging && !$rootScope.disableDrag) {
+            scope.dragging = true;
+            lastClientX = e.clientX;
 
-                    Utils.stopDefault(e);
+            return false;
+        });
 
-                    let dx = lastClientX - e.clientX;
+        $(document).mousemove((e) => {
 
-                    // We must be moving in either a positive direction
-                    if (dx === 0) {
-                        return false;
-                    }
+            if (scope.dragging && !this.$rootScope.disableDrag) {
 
-                    // Modify the chat's offset
-                    scope.room.dragDirection = dx;
-                    scope.room.setOffset(scope.room.offset + dx);
+                Utils.stopDefault(e);
 
-                    lastClientX = e.clientX;
+                let dx = lastClientX - e.clientX;
 
-                    // Apply constraints
-                    scope.room.offset = Math.max(scope.room.offset, Dimensions.MainBoxWidth + Dimensions.ChatRoomSpacing);
-                    scope.room.offset = Math.min(scope.room.offset, RoomPositionManager.effectiveScreenWidth() - scope.room.width - Dimensions.ChatRoomSpacing);
-
-                    scope.wasDragged();
-
-                    RoomPositionManager.roomDragged(scope.room);
-
-                    // Apply the change
-                    $timeout(() => {
-                        scope.$digest();
-                    });
-
+                // We must be moving in either a positive direction
+                if (dx === 0) {
                     return false;
                 }
-            });
 
-            $(document).mouseup((e) => {
-                if (scope.dragging) {
+                // Modify the chat's offset
+                scope.room.dragDirection = dx;
+                scope.room.setOffset(scope.room.offset + dx);
 
-                    scope.dragging = false;
+                lastClientX = e.clientX;
 
-                    $rootScope.$broadcast(N.AnimateRoom, {
-                        room: scope.room
-                    });
+                // Apply constraints
+                scope.room.offset = Math.max(scope.room.offset, Dimensions.MainBoxWidth + Dimensions.ChatRoomSpacing);
+                scope.room.offset = Math.min(scope.room.offset, this.RoomPositionManager.effectiveScreenWidth() - scope.room.width - Dimensions.ChatRoomSpacing);
 
-                }
-            });
-        }
-    };
-}]);
+                scope.wasDragged();
+
+                this.RoomPositionManager.roomDragged(scope.room);
+
+                // Apply the change
+                this.$timeout(() => {
+                    scope.$digest();
+                });
+
+                return false;
+            }
+        });
+
+        $(document).mouseup((e) => {
+            if (scope.dragging) {
+
+                scope.dragging = false;
+
+                this.$rootScope.$broadcast(N.AnimateRoom, {
+                    room: scope.room
+                });
+
+            }
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return ($rootScope: IRoomScope, $document: ng.IDocumentService, $timeout: ng.ITimeoutService, RoomPositionManager: IRoomPositionManager) => new DraggableRoom($rootScope, $document, $timeout, RoomPositionManager);
+    }
+
+}
+
+angular.module('myApp.directives').directive('draggableRoom', DraggableRoom.factory());
