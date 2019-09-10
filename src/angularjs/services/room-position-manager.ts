@@ -10,7 +10,7 @@ import {Dimensions} from "../keys/dimensions";
 import {ArrayUtils} from "./array-utils";
 
 export interface IRoomPositionManager {
-
+    offsetForSlot: (slot) => number
 }
 
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen',
