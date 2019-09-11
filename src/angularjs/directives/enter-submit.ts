@@ -1,25 +1,34 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+export interface IEnterSubmit extends ng.IDirective {
 
-angular.module('myApp.directives').directive('enterSubmit', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, elem, attrs) {
+}
 
-            elem.bind('keydown', function(event) {
-                let code = event.keyCode || event.which;
+class EnterSubmit implements IEnterSubmit {
 
-                if (code === 13) {
-                    if (!event.shiftKey) {
-                        event.preventDefault();
-                        scope.$apply(attrs.enterSubmit);
+    restrict = 'A';
 
-                        // Scroll down on enter too
-                        scope.$broadcast('enterScrollDown');
+    link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
+        element.bind('keydown', function(event) {
+            let code = event.keyCode || event.which;
 
-                    }
+            if (code === 13) {
+                if (!event.shiftKey) {
+                    event.preventDefault();
+                    scope.$apply(attrs.enterSubmit);
+
+                    // Scroll down on enter too
+                    scope.$broadcast('enterScrollDown');
+
                 }
-            });
-        }
-    };
-});
+            }
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return () => new EnterSubmit();
+    }
+
+}
+
+angular.module('myApp.directives').directive('enterSubmit', EnterSubmit.factory());
