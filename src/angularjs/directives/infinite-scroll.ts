@@ -1,11 +1,11 @@
-import * as $ from 'jquery'
-import * as angular from 'angular'
+import * as $ from 'jquery';
+import * as angular from 'angular';
 
-import {IRoomScope} from "../controllers/chat";
+import { IRoomScope } from '../controllers/chat';
 
-class InfiniteScroll implements ng.IDirective{
+class InfiniteScroll implements ng.IDirective {
 
-    static $inject = ["$timeout"];
+    static $inject = ['$timeout'];
 
     private loading = false;
     private scrollHeight: number;
@@ -17,18 +17,18 @@ class InfiniteScroll implements ng.IDirective{
     private timer: any;
     private silent = false;
 
-    constructor (
+    constructor(
         private $timeout: ng.ITimeoutService
-    ) {}
+    ) { }
 
-    public link = (scope: IRoomScope, elem) => {
-        elem.on('scroll',  () => {
-            this.onScroll(scope, elem)
+    link(scope: IRoomScope, element: JQLite) {
+        element.on('scroll', () => {
+            this.onScroll(scope, element)
         });
 
         scope.$on('$destroy', () => {
-            return elem.off('scroll', () => {
-                this.onScroll(scope, elem)
+            return element.off('scroll', () => {
+                this.onScroll(scope, element)
             });
         });
     };
@@ -38,7 +38,7 @@ class InfiniteScroll implements ng.IDirective{
 
         const $elem = $(elem);
 
-        console.log("2 - Height: "+ this.height +", Scroll height: " + this.scrollHeight + ", top: " + this.scrollTop);
+        console.log('2 - Height: '+ this.height +', Scroll height: ' + this.scrollHeight + ', top: ' + this.scrollTop);
 
         const scrollHeight = this.scrollHeight;
 
@@ -48,7 +48,7 @@ class InfiniteScroll implements ng.IDirective{
             this.$timeout(() => {
                 let top = elem.prop('scrollHeight');
 
-                // console.log("3 - Height: " + $elem.height() + ", Scroll height: " + top + ", top: " + $elem.scrollTop());
+                // console.log('3 - Height: ' + $elem.height() + ', Scroll height: ' + top + ', top: ' + $elem.scrollTop());
 
                 if (messages && messages.length && $elem.scrollTop() == 0) {
                     $elem.stop();
@@ -116,7 +116,7 @@ class InfiniteScroll implements ng.IDirective{
         //             if (messages && messages.length) {
         //                 const top = elem.prop('scrollHeight') - scrollHeight;
         //
-        //                 console.log("Set scroll top: " + top);
+        //                 console.log('Set scroll top: ' + top);
         //
         //                 this.silent = true;
         //                 $elem.scrollTop(top)
@@ -134,9 +134,10 @@ class InfiniteScroll implements ng.IDirective{
         $(elem).scrollTop(position)
     }
 
-    static factory (): ng.IDirectiveFactory {
-        return ($timeout: ng.ITimeoutService) => new InfiniteScroll($timeout)
+    static factory(): ng.IDirectiveFactory {
+        return ($timeout: ng.ITimeoutService) => new InfiniteScroll($timeout);
     }
+
 }
 
 angular.module('myApp.directives').directive('infiniteScroll', InfiniteScroll.factory());
