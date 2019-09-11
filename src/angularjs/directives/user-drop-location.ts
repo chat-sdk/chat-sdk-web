@@ -1,41 +1,58 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
+import * as $ from 'jquery';
 
+import { NotificationTypeAlert } from '../keys/defines';
+import { IRoomScope } from '../controllers/chat';
+import { UserStatus } from '../keys/user-status';
+import { IRootScope } from '../interfaces/root-scope';
+import { IRoomFactory } from '../entities/room';
 
-import {NotificationTypeAlert} from "../keys/defines";
-import * as $ from 'jquery'
-import {IRoomScope} from "../controllers/chat";
-import {UserStatus} from "../keys/user-status";
+export interface IUserDropLocation extends ng.IDirective {
 
-angular.module('myApp.directives').directive('userDropLocation', ['$rootScope', 'RoomFactory', function ($rootScope, RoomFactory) {
-    return {
-        link: function (scope: IRoomScope, elm, attrs) {
+}
 
-            $(elm).mouseenter((e) => {
-                if ($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                    $rootScope.userDrag.dropLoc = true;
-                }
-            });
+class UserDropLocation implements IUserDropLocation {
 
-            $(elm).mouseleave((e) => {
-                if ($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                    $rootScope.userDrag.dropLoc = false;
-                }
-            });
+    static $inject = ['$rootScope', 'RoomFactory'];
 
-            $(elm).mouseup((e) => {
-                // Add the user to this chat
-                if ($rootScope.userDrag && $rootScope.userDrag.dragging) {
-                    // Is the user already a member of this room?
+    constructor(
+        private $rootScope: IRootScope,
+        private RoomFactory: IRoomFactory,
+    ) { }
 
-                    // This isn't really needed since it's handled with security rules
-                    RoomFactory.addUserToRoom($rootScope.userDrag.user, scope.room.rid(), UserStatus.Member).then(() => {
-                        // Update the room's type
-                        scope.room.updateType();
-                    }, (error) => {
-                        $rootScope.showNotification(NotificationTypeAlert, "Error", error.message, "Ok");
-                    });
-                }
-            });
-        }
-    };
-}]);
+    link(scope: IRoomScope, element: JQLite) {
+        $(element).mouseenter((e) => {
+            if (this.$rootScope.userDrag && this.$rootScope.userDrag.dragging) {
+                this.$rootScope.userDrag.dropLoc = true;
+            }
+        });
+
+        $(element).mouseleave((e) => {
+            if (this.$rootScope.userDrag && this.$rootScope.userDrag.dragging) {
+                this.$rootScope.userDrag.dropLoc = false;
+            }
+        });
+
+        $(element).mouseup((e) => {
+            // Add the user to this chat
+            if (this.$rootScope.userDrag && this.$rootScope.userDrag.dragging) {
+                // Is the user already a member of this room?
+
+                // This isn't really needed since it's handled with security rules
+                this.RoomFactory.addUserToRoom(this.$rootScope.userDrag.user, scope.room, UserStatus.Member).then(() => {
+                    // Update the room's type
+                    scope.room.updateType();
+                }, (error) => {
+                    this.$rootScope.showNotification(NotificationTypeAlert, 'Error', error.message, 'Ok');
+                });
+            }
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return ($rootScope: IRootScope, RoomFactory: IRoomFactory) => new UserDropLocation($rootScope, RoomFactory);
+    }
+
+}
+
+angular.module('myApp.directives').directive('userDropLocation', UserDropLocation.factory());

@@ -27,6 +27,7 @@ export const ShowCreateChatBox = 'showCreateChatBox';
 
 // Notifications
 
-export const NotificationTypeWaiting = 'waiting';
-export const NotificationTypeAlert = 'alert';
+export type NotificationType = 'waiting' | 'alert'
+export const NotificationTypeWaiting: NotificationType = 'waiting'
+export const NotificationTypeAlert: NotificationType = 'alert';
 

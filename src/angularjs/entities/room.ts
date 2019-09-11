@@ -56,7 +56,7 @@ export interface IRoom extends IEntity {
 }
 
 export interface IRoomFactory {
-
+    addUserToRoom(user: IUser, room: IRoom, status: UserStatus): Promise<any>
 }
 
 class Room extends Entity implements IRoom {
