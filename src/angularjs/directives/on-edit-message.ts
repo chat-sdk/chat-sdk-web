@@ -1,17 +1,26 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { N } from '../keys/notification-keys';
+import { MessageScope } from '../controllers/chat';
 
-import {MessageScope} from "../controllers/chat";
-import {N} from "../keys/notification-keys";
+export interface IOnEditMessage extends ng.IDirective {
 
-angular.module('myApp.directives').directive('onEditMessage', function () {
-    return {
-        link: function (scope: MessageScope, element, attr) {
-            scope.$on(N.EditMessage, (event, mid, newText) => {
-                if (mid == scope.message.meta.mid) {
-                    element.text(newText);
-                }
-            });
-        }
-    };
-});
+}
+
+class OnEditMessage implements IOnEditMessage {
+
+    link(scope: MessageScope, element: JQLite) {
+        scope.$on(N.EditMessage, (event, mid, newText) => {
+            if (mid == scope.message.meta.mid) {
+                element.text(newText);
+            }
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return () => new OnEditMessage();
+    }
+
+}
+
+angular.module('myApp.directives').directive('onEditMessage', OnEditMessage.factory());
