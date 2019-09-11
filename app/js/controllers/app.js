@@ -98,8 +98,8 @@ angular.module('myApp.controllers').controller('AppController', [
             $rootScope.img_30_cross = Environment.imagesURL() + 'cc-30-cross.png';
             $rootScope.img_40_cross = Environment.imagesURL() + 'cc-40-cross.png';
             $rootScope.img_40_tick = Environment.imagesURL() + 'cc-40-tick.png';
-            $rootScope.img_30_shutdown = Environment.imagesURL() + 'cc-30-shutdown_on.png';
-            $rootScope.img_30_shutdown_on = Environment.imagesURL() + 'cc-30-shutdown.png';
+            $rootScope.img_30_shutdown = Environment.imagesURL() + 'cc-30-shutdown.png';
+            $rootScope.img_30_shutdown_on = Environment.imagesURL() + 'cc-30-shutdown_on.png';
             $rootScope.img_30_plus = Environment.imagesURL() + 'cc-30-plus.png';
             $rootScope.img_30_profile_pic = Environment.imagesURL() + 'cc-30-profile-pic.png';
             $rootScope.img_30_gear = Environment.imagesURL() + 'cc-30-gear.png';
