@@ -13,6 +13,9 @@ export interface IRoomPositionManager {
     offsetForSlot: (slot) => number
     roomDragged: (room) => void
     effectiveScreenWidth: () => number
+    getRooms: () => any[];
+    setDirty: () => void;
+    updateAllRoomActiveStatus: () => void;
 }
 
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen',
