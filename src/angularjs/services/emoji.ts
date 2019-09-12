@@ -22,4 +22,3 @@ export class Emoji implements IEmoji {
 
 angular.module('myApp.services').service('Emoji', Emoji);
 
- 
