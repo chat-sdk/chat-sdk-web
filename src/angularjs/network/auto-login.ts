@@ -1,5 +1,5 @@
 import * as angular from 'angular'
-import {PasswordKey, RoomIDKey, UsernameKey} from "../keys/keys";
+import {PasswordKey, RoomIDKey, TokenKey, UsernameKey} from "../keys/keys";
 import {RoomType} from "../keys/room-type";
 import {Utils} from "../services/utils";
 import {ICredential} from "./credential";
@@ -16,6 +16,7 @@ class AutoLogin implements IAutoLogin {
     username = "";
     password = "";
     roomID = "";
+    token = "";
     updated = false;
 
     static $inject = ["$window", "Credential", "RoomCreator", "RoomStore", "Environment"];
@@ -50,6 +51,9 @@ class AutoLogin implements IAutoLogin {
                 if (key === RoomIDKey) {
                     this.roomID = value;
                 }
+                if (key === TokenKey) {
+                    this.token = value;
+                }
             }
         }
 
@@ -63,18 +67,25 @@ class AutoLogin implements IAutoLogin {
         if (this.roomID === "" && !Utils.unORNull(this.Environment.config().roomID)) {
             this.roomID = this.Environment.config().roomID;
         }
+        if (this.token === "" && !Utils.unORNull(this.Environment.config().token)) {
+            this.token = this.Environment.config().token;
+        }
 
         this.updated = true;
     }
 
     autoLoginEnabled() {
         this.updateParameters();
-        return this.username !== "" && this.password !== "";
+        return (this.username !== "" && this.password !== "") || this.token != "";
     }
 
     getCredentials(): ICredential {
         if (this.autoLoginEnabled()) {
-            return new this.Credential().emailAndPassword(this.username, this.password);
+            if (this.token != "") {
+                return new this.Credential().customToken(this.token);
+            } else {
+                return new this.Credential().emailAndPassword(this.username, this.password);
+            }
         } else {
             return null;
         }

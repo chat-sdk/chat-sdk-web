@@ -1,25 +1,26 @@
 
 // Deprecated
-export let SenderEntityID = "sender-entity-id";
-export let From = "from";
+export const SenderEntityID = "sender-entity-id";
+export const From = "from";
 
 // Deprecated
-export let CreatorEntityID = "creator-entity-id";
-export let Creator = "creator";
+export const CreatorEntityID = "creator-entity-id";
+export const Creator = "creator";
 
-export let userUID = "uid";
-export let ReadKey = 'read';
-export let DateKey = "date";
-export let MessageKey = "message";
-export let ThreadKey = "thread";
-export let MetaKey = "meta";
-export let DetailsKey = "details";
-export let ImageKey = "image";
-export let TimeKey = "time";
-export let UserCountKey = "user-count";
-export let ConfigKey = "config";
-export let OnlineKey = "online";
-export let TypeKey = "type";
-export let UsernameKey = 'username';
-export let PasswordKey = 'password';
-export let RoomIDKey = 'roomID';
+export const userUID = "uid";
+export const ReadKey = 'read';
+export const DateKey = "date";
+export const MessageKey = "message";
+export const ThreadKey = "thread";
+export const MetaKey = "meta";
+export const DetailsKey = "details";
+export const ImageKey = "image";
+export const TimeKey = "time";
+export const UserCountKey = "user-count";
+export const ConfigKey = "config";
+export const OnlineKey = "online";
+export const TypeKey = "type";
+export const UsernameKey = 'username';
+export const PasswordKey = 'password';
+export const RoomIDKey = 'roomID';
+export const TokenKey = "token";
