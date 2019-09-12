@@ -1,9 +1,16 @@
 import * as angular from 'angular'
 
+interface IDraggableUserController {
 
-angular.module('myApp.controllers').controller('DraggableUserController', ['$scope', function($scope) {
-    $scope.init = function () {
+}
 
-    };
-    $scope.init();
-}]);
+/**
+ * @deprecated
+ */
+class DraggableUserController implements IDraggableUserController {
+
+    static $inject = ['$scope'];
+
+}
+
+angular.module('myApp.controllers').controller('DraggableUserController', DraggableUserController);

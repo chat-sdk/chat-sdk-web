@@ -10,7 +10,12 @@ import {Dimensions} from "../keys/dimensions";
 import {ArrayUtils} from "./array-utils";
 
 export interface IRoomPositionManager {
-
+    offsetForSlot: (slot) => number
+    roomDragged: (room) => void
+    effectiveScreenWidth: () => number
+    getRooms: () => any[];
+    setDirty: () => void;
+    updateAllRoomActiveStatus: () => void;
 }
 
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen',

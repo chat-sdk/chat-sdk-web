@@ -1,6 +1,10 @@
-import * as angular from 'angular'
-import * as $ from 'jquery'
+import * as angular from 'angular';
+import * as $ from 'jquery';
+import { IRootScope } from '../interfaces/root-scope';
 
+export interface IStopShake extends ng.IDirective {
+
+}
 
 /**
  * #54
@@ -9,18 +13,30 @@ import * as $ from 'jquery'
  * the chat will shake while they're scrolling. To prevent this
  * we add a listener to hear when they're scrolling.
  */
-angular.module('myApp.directives').directive('stopShake', ['$rootScope', '$document',function ($rootScope, $document) {
-    return {
-        link: function (scope, elm, attrs) {
+class StopShake implements IStopShake {
 
-            $(elm).scroll(() => {
-                $rootScope.disableDrag = true;
-            });
+    $inject = ['$rootScope'/*, '$document'*/];
 
-            // Allow dragging again on mouse up
-            $(document).mouseup((e) => {
-                $rootScope.disableDrag = false;
-            });
-        }
-    };
-}]);
+    constructor(
+        private $rootScope: IRootScope,
+        // private $document: ng.IDocumentService,
+    ) { }
+
+    link(scope: ng.IScope, element: JQLite) {
+        $(element).scroll(() => {
+            this.$rootScope.disableDrag = true;
+        });
+
+        // Allow dragging again on mouse up
+        $(document).mouseup((e) => {
+            this.$rootScope.disableDrag = false;
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return ($rootScope: IRootScope, $document: ng.IDocumentService) => new StopShake($rootScope);
+    }
+
+}
+
+angular.module('myApp.directives').directive('stopShake', StopShake.factory());

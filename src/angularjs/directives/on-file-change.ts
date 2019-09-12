@@ -1,13 +1,23 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+export interface IOnFileChange extends ng.IDirective {
 
-angular.module('myApp.directives').directive('onFileChange', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attrs) {
-            element.bind('change' , () =>{
-                scope.$eval(attrs.onFileChange);
-            });
-        }
-    };
-});
+}
+
+class OnFileChange implements IOnFileChange {
+
+    restrict = 'A';
+
+    link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
+        element.bind('change' , () =>{
+            scope.$eval(attrs.onFileChange);
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return () => new OnFileChange();
+    }
+
+}
+
+angular.module('myApp.directives').directive('onFileChange', OnFileChange.factory());

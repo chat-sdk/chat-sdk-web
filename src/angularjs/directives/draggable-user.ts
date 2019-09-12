@@ -1,13 +1,13 @@
-import * as angular from 'angular'
-import * as $ from 'jquery'
+import * as angular from 'angular';
+import * as $ from 'jquery';
 
-import {IUserListScope} from "../controllers/user-list";
-import {Utils} from "../services/utils";
-import {IUser} from "../entities/user";
-import {IRootScope} from "../interfaces/root-scope";
-import {IScreen} from "../services/screen";
+import { IUserListScope } from '../controllers/user-list';
+import { Utils } from '../services/utils';
+import { IScreen } from '../services/screen';
+import { IUser } from '../entities/user';
+import { IRootScope } from '../interfaces/root-scope';
 
-export interface IDraggableUser {
+export interface IDraggableUser extends ng.IDirective {
 
 }
 
@@ -26,30 +26,31 @@ export class UserDragAction {
     public dropLoc = false;
     public visible = false;
 
-    constructor (user: IUser, x0: number, y0: number) {
+    constructor(user: IUser, x0: number, y0: number) {
         this.user = user;
         this.x0 = x0;
         this.y0 = y0;
     }
 
-    distanceMoved (x: number, y: number): number {
+    distanceMoved(x: number, y: number): number {
         return Math.sqrt(Math.pow(x - this.x0, 2) + Math.pow(y - this.y0, 2))
     }
+
 }
 
 class DraggableUser implements IDraggableUser {
 
     static $inject = ['$rootScope', '$timeout', 'Screen'];
 
-    constructor (private $rootScope: IRootScope,
-                 private $timeout: ng.ITimeoutService,
-                 private Screen: IScreen) {
+    constructor(
+        private $rootScope: IRootScope,
+        private $timeout: ng.ITimeoutService,
+        private Screen: IScreen,
+    ) { }
 
-    }
-
-    public link = (scope: IUserListScope, elm) => {
+    link(scope: IUserListScope, element: JQLite) {
         this.$rootScope.userDrag = null;
-        const $elm = $(elm);
+        const $elm = $(element);
 
         $elm.mousedown((e) => {
             this.$rootScope.userDrag = new UserDragAction(scope.aUser, e.clientX, e.clientY);
@@ -89,7 +90,6 @@ class DraggableUser implements IDraggableUser {
         });
 
         $(document).mouseup((e) => {
-
             const userDrag = this.$rootScope.userDrag;
 
             if (userDrag && userDrag.dragging) {
@@ -101,10 +101,11 @@ class DraggableUser implements IDraggableUser {
                 });
             }
         });
-    };
 
-    static factory (): ng.IDirectiveFactory {
-        return ($rootScope: IRootScope, $timeout: ng.ITimeoutService, Screen: IScreen) => new DraggableUser($rootScope, $timeout, Screen)
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return ($rootScope: IRootScope, $timeout: ng.ITimeoutService, Screen: IScreen) => new DraggableUser($rootScope, $timeout, Screen);
     }
 
 }

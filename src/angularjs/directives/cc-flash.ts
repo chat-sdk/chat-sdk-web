@@ -1,40 +1,56 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { N } from '../keys/notification-keys';
+import { IRoomScope } from '../controllers/chat';
+import { IConfig } from '../services/config';
 
-import {N} from "../keys/notification-keys";
-import {IRoomScope} from "../controllers/chat";
+export interface ICCFlash extends ng.IDirective {
 
-angular.module('myApp.directives').directive('ccFlash', ['$timeout', 'Config', function ($timeout, Config) {
-    return {
-        link: function (scope: IRoomScope, element, attr) {
+}
 
-            let originalColor = element.css('background-color');
-            let originalTag = element.attr('data-cc-flash');
-            let animating = false;
+class CCFlash implements ICCFlash {
 
-            scope.$on(N.RoomFlashHeader, (event, room, color, period, tag) => {
-                if (scope.room == room && color && period && !animating) {
-                    if (!tag || tag == originalTag) {
-                        animating = true;
+    static $inject = ['$timeout', 'Config'];
 
-                        element.css('background-color', color);
+    constructor(
+        private $timeout: ng.ITimeoutService,
+        private Config: IConfig
+    ) { }
 
-                        $timeout(() => {
-                            scope.$digest();
-                        });
+    link(scope: IRoomScope, element: JQLite) {
+        let originalColor = element.css('background-color');
+        let originalTag = element.attr('data-cc-flash');
+        let animating = false;
 
-                        // Set another timeout
-                        $timeout(() => {
-                            if (tag == "room-header") {
-                                originalColor = Config.headerColor;
-                            }
-                            element.css('background-color', originalColor);
-                            scope.$digest();
-                            animating = false;
-                        }, period);
-                    }
+        scope.$on(N.RoomFlashHeader, (event, room, color, period, tag) => {
+            if (scope.room == room && color && period && !animating) {
+                if (!tag || tag == originalTag) {
+                    animating = true;
+
+                    element.css('background-color', color);
+
+                    this.$timeout(() => {
+                        scope.$digest();
+                    });
+
+                    // Set another timeout
+                    this.$timeout(() => {
+                        if (tag == 'room-header') {
+                            originalColor = this.Config.headerColor;
+                        }
+                        element.css('background-color', originalColor);
+                        scope.$digest();
+                        animating = false;
+                    }, period);
                 }
-            });
-        }
-    };
-}]);
+            }
+        });
+    }
+
+    static factory(): ng.IDirectiveFactory {
+        return ($timeout: ng.ITimeoutService, Config: IConfig) => new CCFlash($timeout, Config);
+    }
+
+}
+
+angular.module('myApp.directives').directive('ccFlash', CCFlash.factory());

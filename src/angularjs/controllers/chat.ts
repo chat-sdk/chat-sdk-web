@@ -16,6 +16,7 @@ export interface IRoomScope extends ng.IScope {
     dragging: any
     startDrag: any
     wasDragged: any
+    disableDrag: any
     inputHeight: any
     input: any
     emojis: string[]

@@ -564,7 +564,7 @@ angular.module('myApp.controllers').controller('MainAppController', [
             $scope.notification.show = false;
         };
 
-        $scope.showNotification = function (type, title, message, button) {
+        $scope.showNotification = function (type: Defines.NotificationType, title: string, message: string, button: string) {
             $scope.notification.title = title;
             $scope.notification.message = message;
             $scope.notification.type = type;
