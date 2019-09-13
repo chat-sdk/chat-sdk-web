@@ -1,28 +1,34 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-import {IUser} from "./user";
-import {MessageType} from "../keys/message-type";
-import {MessageKeys} from "../keys/message-keys";
-import {Utils} from "../services/utils";
+import { IUser } from './user';
+import { MessageType } from '../keys/message-type';
+import { MessageKeys } from '../keys/message-keys';
+import { Utils } from '../services/utils';
+import { StringAnyObject } from '../interfaces/string-any-object';
+import { IRootScope } from '../interfaces/root-scope';
+import { ITime } from '../services/time';
+import { IUserStore } from '../persistence/user-store';
+import { IConfig } from '../services/config';
+import { ICloudImage } from '../services/cloud-image';
 
 export interface IMessage {
-    hideName: boolean
-    hideTime: boolean
-    mid: string
-    user: IUser
-    meta: {}
-    nextMessage: IMessage
-    previousMessage: IMessage
-    read: boolean
-    time()
-    date()
-    markRead(uid?: string): void
-    type(): MessageType
-    sender(): IUser
-    text(): string
-    updateDisplay(): void
-    uid(): string
+    hideName: boolean;
+    hideTime: boolean;
+    mid: string;
+    user: IUser;
+    meta: StringAnyObject;
+    nextMessage: IMessage;
+    previousMessage: IMessage;
+    read: boolean;
+    time(): number;
+    date(): Date;
+    markRead(uid?: string): void;
+    type(): MessageType;
+    sender(): IUser;
+    text(): string;
+    updateDisplay(): void;
+    uid(): string;
 }
 
 class Message implements IMessage {
@@ -42,11 +48,11 @@ class Message implements IMessage {
     hideTime = false;
 
     constructor (
-        private $rootScope,
-        private Time,
-        private UserStore,
-        private Config,
-        private CloudImage,
+        private $rootScope: IRootScope,
+        private Time: ITime,
+        private UserStore: IUserStore,
+        private Config: IConfig,
+        private CloudImage: ICloudImage,
         public mid: string,
         public meta: Map<string, any>
     ) {
@@ -54,22 +60,22 @@ class Message implements IMessage {
             this.meta = new Map();
         }
 
-        if(meta) {
+        if (meta) {
 
-            if(!this.type()) {
+            if (!this.type()) {
                 this.setType(MessageType.Text);
             }
 
-            if(this.type() == MessageType.Image || this.type() == MessageType.File) {
+            if (this.type() == MessageType.Image || this.type() == MessageType.File) {
                 // Get the image and thumbnail URLs
                 let json = meta[MessageKeys.JSONv2];
 
-                if(json) {
-                    if(this.type() == MessageType.Image) {
+                if (json) {
+                    if (this.type() == MessageType.Image) {
                         this.thumbnailURL = this.CloudImage.cloudImage(json[MessageKeys.ImageURL], 200, 200);
                         this.imageURL = json[MessageKeys.ImageURL];
                     }
-                    if(this.type() == MessageType.File) {
+                    if (this.type() == MessageType.File) {
                         this.fileURL = json[MessageKeys.FileURL];
                     }
                 }
@@ -82,10 +88,10 @@ class Message implements IMessage {
             this.timeString = this.Time.formatTimestamp(this.time(), this.Config.clockType);
 
             // Set the user
-            if(this.uid()) {
+            if (this.uid()) {
 
                 // We need to set the user here
-                if(this.uid() == this.UserStore.currentUser().uid()) {
+                if (this.uid() == this.UserStore.currentUser().uid()) {
                     this.user = this.UserStore.currentUser();
                 }
                 else {
@@ -100,7 +106,7 @@ class Message implements IMessage {
     }
 
 
-    serialize() {
+    serialize(): StringAnyObject {
         return {
             meta: this.meta,
             mid: this.mid,
@@ -112,7 +118,7 @@ class Message implements IMessage {
         }
     }
 
-    updateDisplay(): void {
+    updateDisplay() {
 
         let hideName = this.sender().isMe();
         let hideDate = true;
@@ -130,7 +136,7 @@ class Message implements IMessage {
         //console.log("Message: " + this.text() + ", user: " + this.uid() + ", h: " + this.date().getHours() + " m:" + this.date().getMinutes() + " hideName: " + hideName + ", hideDate: " + hideDate);
     }
 
-    deserialize(sm) {
+    deserialize(sm: StringAnyObject) {
         this.mid = sm.mid;
         this.meta = sm.meta;
         this.read = sm.read;
@@ -140,11 +146,11 @@ class Message implements IMessage {
         this.side = sm.side;
     }
 
-    setTime(time) {
+    setTime(time: number) {
         this.setValue(MessageKeys.Date, time);
     }
 
-    time() {
+    time(): number {
         return this.getValue(MessageKeys.Date);
     }
 
@@ -152,7 +158,7 @@ class Message implements IMessage {
         return new Date(this.time());
     }
 
-    setText(text) {
+    setText(text: string) {
         this.setMetaValue(MessageKeys.Text, text);
     }
 
@@ -176,15 +182,15 @@ class Message implements IMessage {
         return this.user;
     }
 
-    getMetaValue(key) {
+    getMetaValue(key: string) {
         return this.getValue(MessageKeys.Meta)[key];
     }
 
-    getValue(key) {
+    getValue(key: string): any {
         return this.meta[key];
     }
 
-    setValue(key, value) {
+    setValue(key: string, value: any) {
         this.meta[key] = value;
     }
 
@@ -192,7 +198,7 @@ class Message implements IMessage {
         return this.getValue(MessageKeys.Type);
     }
 
-    setType(type) {
+    setType(type: MessageType) {
         this.setValue(MessageKeys.Type, type);
     }
 
@@ -204,20 +210,20 @@ class Message implements IMessage {
         return from;
     }
 
-    setUID(uid) {
+    setUID(uid: string) {
         this.setValue(MessageKeys.From, uid);
         this.setValue(MessageKeys.UID, uid);
     }
 
-    metaValue(key) {
+    metaValue(key: string) {
         return this.getMetaValue(key);
     }
 
-    setMetaValue(key, value) {
+    setMetaValue(key: string, value: any) {
         this.meta[MessageKeys.Meta][key] = value;
     }
 
-    setMID(mid) {
+    setMID(mid: string) {
         this.mid = mid;
     }
 }
@@ -228,14 +234,14 @@ export enum MessageSide {
 }
 
 export interface IMessageFactory {
+
 }
 
 class MessageFactory implements IMessageFactory {
 
     constructor() {}
 
-
-    buildFileMeta (fileName: string, mimeType: string, fileURL: string): Map<string, any> {
+    buildFileMeta(fileName: string, mimeType: string, fileURL: string): Map<string, any> {
         const map = new Map<string, any>();
         map.set(MessageKeys.Text, fileName);
         map.set(MessageKeys.MimeType, mimeType);
@@ -243,13 +249,13 @@ class MessageFactory implements IMessageFactory {
         return map;
     }
 
-    buildTextMeta (text: string): Map<string, any> {
+    buildTextMeta(text: string): Map<string, any> {
         const map = new Map<string, any>();
         map.set(MessageKeys.Text, text);
         return map;
     }
 
-    buildImageMeta (url: string, width: number, height: number): Map<string, any> {
+    buildImageMeta(url: string, width: number, height: number): Map<string, any> {
         const map = new Map<string, any>();
         map.set(MessageKeys.ImageURL, url);
         map.set(MessageKeys.ImageWidth, width);
@@ -293,7 +299,7 @@ class MessageFactory implements IMessageFactory {
 }
 
 angular.module('myApp.services')
-    .service('Message', ['$rootScope', 'Time', 'UserStore', 'Config', 'CloudImage', function($rootScope, Time, UserStore, Config, CloudImage) {
+    .service('Message', ['$rootScope', 'Time', 'UserStore', 'Config', 'CloudImage', function($rootScope: IRootScope, Time: ITime, UserStore: IUserStore, Config: IConfig, CloudImage: ICloudImage) {
         // we can ask for more parameters if needed
         return function messageFactory(mid: string, meta: Map<string, any>) { // return a factory instead of a new talker
             return new Message($rootScope, Time, UserStore, Config, CloudImage, mid, meta);
