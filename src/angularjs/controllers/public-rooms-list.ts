@@ -78,7 +78,7 @@ angular.module('myApp.controllers').controller('PublicRoomsListController', ['$s
         });
 
         $scope.rooms = ArrayUtils.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], (room) => {
-            return room.meta.name;
+            return (room as any).meta.name;
         });
 
         $timeout(() =>{

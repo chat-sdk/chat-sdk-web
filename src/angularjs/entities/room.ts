@@ -59,6 +59,7 @@ export interface IRoom extends IEntity {
     created(): number;
     getUserStatus(user: IUser): UserStatus;
     getType(): RoomType;
+    containsOnlyUsers(users: IUser[]): boolean;
     addUserUpdate(user: IUser, status: UserStatus): {};
     removeUserUpdate(user: IUser): {};
     open(slot: number, duration?: number): void;

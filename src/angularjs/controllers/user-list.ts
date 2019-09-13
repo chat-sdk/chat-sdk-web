@@ -4,6 +4,7 @@ import * as angular from 'angular'
 import {N} from "../keys/notification-keys";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
+import { IUser } from '../entities/user';
 
 export interface IUserListScope extends ng.IScope {
     aUser: any,
@@ -57,7 +58,7 @@ angular.module('myApp.controllers').controller('UserListController', ['$scope', 
 
         if($scope.searchKeyword()) {
             $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.searchKeyword(), (user) => {
-                return user.getName();
+                return (user as IUser).getName();
             });
         }
         else {

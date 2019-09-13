@@ -4,6 +4,7 @@ import * as angular from 'angular'
 import {N} from "../keys/notification-keys";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
+import { IUser } from '../entities/user';
 
 angular.module('myApp.controllers').controller('OnlineUsersListController', ['$scope', '$timeout', 'OnlineConnector', function($scope, $timeout, OnlineConnector) {
 
@@ -54,7 +55,7 @@ angular.module('myApp.controllers').controller('OnlineUsersListController', ['$s
         // Filter online users to remove users that are blocking us
         $scope.allUsers = ArrayUtils.objectToArray(OnlineConnector.onlineUsers);
         $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.search[$scope.activeTab], (user) => {
-            return user.getName();
+            return (user as IUser).getName();
         });
 
         $timeout(() => {

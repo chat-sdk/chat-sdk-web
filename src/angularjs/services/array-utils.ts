@@ -1,16 +1,17 @@
-import {IRoom} from "../entities/room";
-import {RoomType} from "../keys/room-type";
-import {Utils} from "./utils";
+import { IRoom } from '../entities/room';
+import { RoomType } from '../keys/room-type';
+import { Utils } from './utils';
+import { IUser } from '../entities/user';
 
 export class ArrayUtils {
 
-    public static getRoomsWithUsers(rooms, users): Array<IRoom> {
+    public static getRoomsWithUsers(rooms: IRoom[], users: IUser[]): IRoom[] {
 
-        let roomsWithUsers = [];
-        for(let i = 0; i < rooms.length; i++) {
+        const roomsWithUsers: IRoom[] = [];
+        for (let i = 0; i < rooms.length; i++) {
             let room = rooms[i];
-            if(room.containsOnlyUsers(users)) {
-                if((users.length == 2 && room.getType() == RoomType.OneToOne) || (users.length != 2 && room.getType() == RoomType.Group)) {
+            if (room.containsOnlyUsers(users)) {
+                if ((users.length == 2 && room.getType() == RoomType.OneToOne) || (users.length != 2 && room.getType() == RoomType.Group)) {
                     roomsWithUsers.push(room);
                 }
             }
@@ -18,7 +19,7 @@ export class ArrayUtils {
         return roomsWithUsers;
     }
 
-    public static roomsSortedByMostRecent(rooms: Array<IRoom>): Array<IRoom> {
+    public static roomsSortedByMostRecent(rooms: IRoom[]): IRoom[] {
         rooms.sort((a: IRoom, b: IRoom) => {
             const almt = a.lastMessageTime();
             const blmt = b.lastMessageTime();
@@ -29,57 +30,57 @@ export class ArrayUtils {
         return rooms;
     }
 
-    public static indexOf(array, id, getID) {
-        for(let i = 0; i < array.length; i++) {
-            if(id == getID(array[i])) {
+    public static indexOf<T>(array: T[], id: string, getID: (item: T) => string) {
+        for (let i = 0; i < array.length; i++) {
+            if (id == getID(array[i])) {
                 return i;
             }
         }
     }
 
-    public static removeItem(array, id, getID): void {
-        if(array.length == 0) {
+    public static removeItem<T>(array: T[], id: string, getID: (item: T) => string): void {
+        if (array.length == 0) {
             return;
         }
         let i = this.indexOf(array, id, getID);
         array.splice(i, 1);
     }
 
-    public static getItem(array, id, getID) {
-        if(array.length == 0) {
+    public static getItem<T>(array: T[], id: string, getID: (item: T) => string) {
+        if (array.length == 0) {
             return null;
         }
         let i = this.indexOf(array, id, getID);
         return array[i];
     }
 
-    public static contains(array, obj): boolean {
-        for(let i = 0; i < array.length; i++) {
-            if(obj == array[i]) {
+    public static contains<T>(array: T[], obj: T): boolean {
+        for (let i = 0; i < array.length; i++) {
+            if (obj == array[i]) {
                 return true;
             }
         }
         return false;
     }
 
-    public static remove(array, obj): void {
-        for(let i = 0; i < array.length; i++) {
-            if(obj == array[i]) {
+    public static remove<T>(array: T[], obj: T): void {
+        for (let i = 0; i < array.length; i++) {
+            if (obj == array[i]) {
                 array.splice(i, 1);
                 break;
             }
         }
     }
 
-    public static filterByKey(array, key, getKey) {
-        if(!key || key.length == 0 || key === "") {
+    public static filterByKey<T>(array: T[], key: string, getKey: (item: T) => string) {
+        if (!key || key.length == 0 || key === "") {
             return array;
         }
         else {
             // Loop over all elements
             let result = [];
-            let elm, t1, t2;
-            for(let i = 0; i < array.length; i++) {
+            let elm: T, t1: string, t2: string;
+            for (let i = 0; i < array.length; i++) {
 
                 elm = array[i];
                 // Switch to lower case and remove spaces
@@ -88,7 +89,7 @@ export class ArrayUtils {
                 if (!Utils.unORNull(key) && !Utils.unORNull(elmKey)) {
                     t1 = key.toLowerCase().replace(/ /g,'');
                     t2 = elmKey.toLowerCase().replace(/ /g,'');
-                    if(t2.length >= t1.length && t2.substring(0, t1.length) == t1) {
+                    if (t2.length >= t1.length && t2.substring(0, t1.length) == t1) {
                         result.push(elm);
                     }
                 }
@@ -97,13 +98,14 @@ export class ArrayUtils {
         }
     }
 
-    public static objectToArray(object) {
+    public static objectToArray<T>(object: { [key: string]: T }): T[] {
         let array = [];
-        for(let key in object) {
-            if(object.hasOwnProperty(key)) {
+        for (let key in object) {
+            if (object.hasOwnProperty(key)) {
                 array.push(object[key]);
             }
         }
         return array;
     }
+
 }
