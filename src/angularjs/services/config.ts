@@ -1,18 +1,20 @@
-import * as angular from 'angular'
-import {N} from "../keys/notification-keys";
-import * as Defines from "../keys/defines"
-import {IPaths} from "../network/paths";
-import {Utils} from "./utils";
+import * as angular from 'angular';
+import * as Defines from '../keys/defines'
+import { N } from '../keys/notification-keys';
+import { IPaths } from '../network/paths';
+import { Utils } from './utils';
+import { IEnvironment } from './environment';
+import { IRootScope } from '../interfaces/root-scope';
 
 export interface IConfig {
-    clockType: string
-    defaultUserName: string
-    headerColor: string
-    publicRoomsEnabled: boolean
-    onlineUsersEnabled: boolean
-    friendsEnabled: boolean
-    maxHistoricMessages: number
-    setConfig (setBy: SetBy, config: Map<string, any>)
+    clockType: string;
+    defaultUserName: string;
+    headerColor: string;
+    publicRoomsEnabled: boolean;
+    onlineUsersEnabled: boolean;
+    friendsEnabled: boolean;
+    maxHistoricMessages: number;
+    setConfig(setBy: SetBy, config: Map<string, any>): void;
 }
 
 export enum SetBy {
@@ -119,53 +121,55 @@ class Config implements IConfig {
     userProfileLinkEnabled = false;
     userProfileLinkEnabledSet = SetBy.Default;
 
-    defaultUserName = "ChatSDK";
+    defaultUserName = 'ChatSDK';
     defaultUserNameSet = SetBy.Default;
 
-    constructor(private $rootScope, private $timeout: ng.ITimeoutService, private Paths: IPaths) {
-    }
-
+    constructor(
+        private $rootScope: IRootScope,
+        private $timeout: ng.ITimeoutService,
+        private Paths: IPaths,
+    ) { }
 
     // We update the config using the data provided
     // but we only update variables where the priority
     // of this setBy entity is higher than the previous
     // one
-    setConfig (setBy: SetBy, config: Map<string, any>) {
+    setConfig(setBy: SetBy, config: Map<string, any>) {
 
-        this.setValue("inactivityTimeout", config, setBy);
+        this.setValue('inactivityTimeout', config, setBy);
         this.inactivityTimeout = Math.max(this.inactivityTimeout, 2);
         this.inactivityTimeout = Math.min(this.inactivityTimeout, 15);
 
-        this.setValue("maxHistoricMessages", config, setBy);
-        this.setValue("disableUserNameChange", config, setBy);
-        this.setValue("disableProfileBox", config, setBy);
-        this.setValue("clockType", config, setBy);
-        this.setValue("usersCanCreatePublicRooms", config, setBy);
-        this.setValue("primaryDomain", config, setBy);
-        this.setValue("anonymousLoginEnabled", config, setBy);
+        this.setValue('maxHistoricMessages', config, setBy);
+        this.setValue('disableUserNameChange', config, setBy);
+        this.setValue('disableProfileBox', config, setBy);
+        this.setValue('clockType', config, setBy);
+        this.setValue('usersCanCreatePublicRooms', config, setBy);
+        this.setValue('primaryDomain', config, setBy);
+        this.setValue('anonymousLoginEnabled', config, setBy);
 
-        this.setValue("socialLoginEnabled", config, setBy);
-        this.setValue("headerColor", config, setBy);
-        this.setValue("singleSignOnAPILevel", config, setBy);
-        this.setValue("apiLevel", config, setBy);
-        this.setValue("singleSignOn", config, setBy);
-        this.setValue("singleSignOnURL", config, setBy);
-        this.setValue("registerURL", config, setBy);
-        this.setValue("loginURL", config, setBy);
+        this.setValue('socialLoginEnabled', config, setBy);
+        this.setValue('headerColor', config, setBy);
+        this.setValue('singleSignOnAPILevel', config, setBy);
+        this.setValue('apiLevel', config, setBy);
+        this.setValue('singleSignOn', config, setBy);
+        this.setValue('singleSignOnURL', config, setBy);
+        this.setValue('registerURL', config, setBy);
+        this.setValue('loginURL', config, setBy);
 
-        this.setValue("onlineUsersEnabled", config, setBy);
-        this.setValue("publicRoomsEnabled", config, setBy);
-        this.setValue("friendsEnabled", config, setBy);
-        this.setValue("clearCacheTimestamp", config, setBy);
-        this.setValue("fileMessagesEnabled", config, setBy);
-        this.setValue("imageMessagesEnabled", config, setBy);
-        this.setValue("marginRight", config, setBy);
+        this.setValue('onlineUsersEnabled', config, setBy);
+        this.setValue('publicRoomsEnabled', config, setBy);
+        this.setValue('friendsEnabled', config, setBy);
+        this.setValue('clearCacheTimestamp', config, setBy);
+        this.setValue('fileMessagesEnabled', config, setBy);
+        this.setValue('imageMessagesEnabled', config, setBy);
+        this.setValue('marginRight', config, setBy);
 
-        this.setValue("friends", config, setBy);
+        this.setValue('friends', config, setBy);
 
-        this.setValue("clickToChatTimeout", config, setBy);
-        this.setValue("userProfileLinkEnabled", config, setBy);
-        this.setValue("defaultUserName", config, setBy);
+        this.setValue('clickToChatTimeout', config, setBy);
+        this.setValue('userProfileLinkEnabled', config, setBy);
+        this.setValue('defaultUserName', config, setBy);
 
         this.$rootScope.config = this;
 
@@ -178,9 +182,9 @@ class Config implements IConfig {
     }
 
     setValue(name: string, data: any, setBy: SetBy) {
-        if(data && !Utils.unORNull(data[name]) && this[name+"Set"] <= setBy) {
+        if (data && !Utils.unORNull(data[name]) && this[name+'Set'] <= setBy) {
             this[name] = data[name];
-            this[name+"Set"] = setBy;
+            this[name+'Set'] = setBy;
         }
     }
 
@@ -193,10 +197,11 @@ class Config implements IConfig {
             });
         });
     }
+
 }
 
 angular.module('myApp.services').service('Config', Config)
     // Check this
-    .run(['Config', 'Environment', (Config, Environment) => {
+    .run(['Config', 'Environment', (Config: IConfig, Environment: IEnvironment) => {
     Config.setConfig(SetBy.Include, Environment.config());
 }]);
