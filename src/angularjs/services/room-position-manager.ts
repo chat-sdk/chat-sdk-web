@@ -10,12 +10,15 @@ import {Dimensions} from "../keys/dimensions";
 import {ArrayUtils} from "./array-utils";
 
 export interface IRoomPositionManager {
-    offsetForSlot: (slot) => number
-    roomDragged: (room) => void
-    effectiveScreenWidth: () => number
-    getRooms: () => any[];
-    setDirty: () => void;
-    updateAllRoomActiveStatus: () => void;
+    offsetForSlot(slot: number): number;
+    roomDragged(room: IRoom): void;
+    effectiveScreenWidth(): number;
+    getRooms(): any[];
+    insertRoom(room: IRoom, slot: number, duration): void;
+    roomIsOpen(room: IRoom)
+    closeRoom(room: IRoom): void;
+    setDirty(): void;
+    updateAllRoomActiveStatus(): void;
 }
 
 angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', 'Cache', 'Screen',
@@ -132,7 +135,7 @@ angular.module('myApp.services').factory('RoomPositionManager', ['$rootScope', '
 
             },
 
-            roomIsOpen: function (room) {
+            roomIsOpen: function (room: IRoom) {
                 return ArrayUtils.contains(this.rooms, room);
             },
 

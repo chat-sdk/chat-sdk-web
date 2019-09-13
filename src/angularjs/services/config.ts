@@ -11,6 +11,7 @@ export interface IConfig {
     publicRoomsEnabled: boolean
     onlineUsersEnabled: boolean
     friendsEnabled: boolean
+    maxHistoricMessages: number
     setConfig (setBy: SetBy, config: Map<string, any>)
 }
 

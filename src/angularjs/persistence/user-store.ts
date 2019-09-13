@@ -6,9 +6,10 @@ import {INetworkManager} from "../network/network-manager";
 import {IRootScope} from "../interfaces/root-scope";
 
 export interface IUserStore {
-    getUserWithID (uid): IUser
-    getOrCreateUserWithID(uid: string, cancelOn?: boolean): IUser
-    currentUser(): IUser
+    getUserWithID (uid): IUser;
+    getOrCreateUserWithID(uid: string, cancelOn?: boolean): IUser;
+    currentUser(): IUser;
+    users: { [uid: string]: IUser };
 }
 
 class UserStore implements IUserStore, IBeforeUnloadListener {

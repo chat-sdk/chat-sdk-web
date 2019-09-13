@@ -4,6 +4,7 @@ import * as firebase from 'firebase';
 
 import {UserStatus} from "../keys/user-status";
 import {N} from "../keys/notification-keys";
+import { IUser } from '../entities/user';
 /**
  * The presence service handles the user's online / offline
  * status
@@ -11,7 +12,8 @@ import {N} from "../keys/notification-keys";
  */
 
 export interface IPresence {
-    start(user): void
+    start(user: IUser): void;
+    update(): Promise<any>;
 }
 
 angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q',

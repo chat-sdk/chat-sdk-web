@@ -1,62 +1,77 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-import * as PathKeys from "../keys/path-keys";
-import {N} from "../keys/notification-keys";
-import * as RoomNameKeys from "../keys/room-name-keys";
-import * as Keys from "../keys/keys";
-import * as Defines from "../keys/defines";
-import {Entity, EntityFactory, IEntity} from "./entity";
-import {RoomKeys} from "../keys/room-keys";
-import {IMessage} from "./message";
-import {RoomType} from "../keys/room-type";
-import {MessageKeys} from "../keys/message-keys";
-import {MessageType} from "../keys/message-type";
-import {Dimensions} from "../keys/dimensions";
-import {IUser} from "./user";
-import {Utils} from "../services/utils";
-import {UserStatus} from "../keys/user-status";
-import {UserKeys} from "../keys/user-keys";
-import {Log} from "../services/log";
-import {IFirebaseReference} from "../network/paths";
-import {IRootScope} from "../interfaces/root-scope";
+import * as PathKeys from '../keys/path-keys';
+import * as RoomNameKeys from '../keys/room-name-keys';
+import * as Keys from '../keys/keys';
+import * as Defines from '../keys/defines';
+import { N } from '../keys/notification-keys';
+import { Entity , EntityFactory, IEntity} from './entity';
+import { RoomKeys } from '../keys/room-keys';
+import { IMessage , IMessageFactory} from './message';
+import { RoomType } from '../keys/room-type';
+import { MessageKeys } from '../keys/message-keys';
+import { MessageType } from '../keys/message-type';
+import { Dimensions } from '../keys/dimensions';
+import { IUser } from './user';
+import { Utils } from '../services/utils';
+import { UserStatus } from '../keys/user-status';
+import { UserKeys } from '../keys/user-keys';
+import { Log } from '../services/log';
+import { IFirebaseReference , IPaths} from '../network/paths';
+import { IRootScope } from '../interfaces/root-scope';
+import { IPresence } from '../network/presence';
+import { IConfig } from '../services/config';
+import { ICache } from '../persistence/cache';
+import { IUserStore } from '../persistence/user-store';
+import { IRoomPositionManager } from '../services/room-position-manager';
+import { ISoundEffects } from '../services/sound-effects';
+import { IVisibility } from '../services/visibility';
+import { ITime } from '../services/time';
+import { ICloudImage } from '../services/cloud-image';
+import { IMarquee } from '../services/marquee';
+import { IEnvironment } from '../services/environment';
+import { INetworkManager } from '../network/network-manager';
+import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface IRoom extends IEntity {
-    name: string
-    isOpen: boolean
-    slot: number
-    height: number
-    width: number
-    offset: number
-    type: RoomType
-    dragDirection: number
-    zIndex: number
-    draggable: boolean
-    invitedBy: IUser
-    deleted: boolean
-    messages: any
-    transcript(): string
-    setOffset(offset: number)
-    updateOffsetFromSlot()
-    updateType()
-    loadMoreMessages(numberOfMessages?: number): Promise<Array<IMessage>>
-    rid(): string
-    on(): Promise<any>
-    off(): void
-    created()
-    getUserStatus(user: IUser): UserStatus
-    getType(): RoomType
-    addUserUpdate(user: IUser, status: UserStatus): {}
-    removeUserUpdate(user: IUser): {}
-    open(slot: number, duration?: number): void
-    close(): void
-    deserialize(sr): void
-    lastMessage (): IMessage
-    lastMessageTime()
+    name: string;
+    isOpen: boolean;
+    slot: number;
+    height: number;
+    width: number;
+    offset: number;
+    type: RoomType;
+    dragDirection: number;
+    zIndex: number;
+    draggable: boolean;
+    invitedBy: IUser;
+    deleted: boolean;
+    messages: IMessage[];
+    transcript(): string;
+    setOffset(offset: number): void;
+    updateOffsetFromSlot(): void;
+    updateType(): void;
+    loadMoreMessages(numberOfMessages?: number): Promise<Array<IMessage>>;
+    rid(): string;
+    on(): Promise<any>;
+    off(): void;
+    created(): number;
+    getUserStatus(user: IUser): UserStatus;
+    getType(): RoomType;
+    addUserUpdate(user: IUser, status: UserStatus): {};
+    removeUserUpdate(user: IUser): {};
+    open(slot: number, duration?: number): void;
+    close(): void;
+    deserialize(sr: StringAnyObject): void;
+    lastMessage(): IMessage;
+    lastMessageTime(): number;
 }
 
 export interface IRoomFactory {
-    addUserToRoom(user: IUser, room: IRoom, status: UserStatus): Promise<any>
+    addUserToRoom(user: IUser, room: IRoom, status: UserStatus): Promise<any>;
+    removeUserFromRoom(user: IUser, room: IRoom): Promise<any>;
+    updateRoomType(rid: string, type: RoomType): void;
 }
 
 class Room extends Entity implements IRoom {
@@ -66,7 +81,7 @@ class Room extends Entity implements IRoom {
     onlineUserCount = 0;
     messages = [];
     typing = {};
-    typingMessage = "";
+    typingMessage = '';
     badge = 0;
     isOn = false;
     draggable: boolean;
@@ -104,41 +119,41 @@ class Room extends Entity implements IRoom {
     associatedUserID = null;
 
     // TODO: Check this
-    name = "";
+    name = '';
 
     slot: number;
     unreadMessages: Array<IMessage>;
 
-    userOnlineStateChangedNotificationOff;
+    userOnlineStateChangedNotificationOff?: () => void;
 
     messagesAreOn: boolean;
 
     constructor (
         private $rootScope: IRootScope,
-        private $timeout,
-        private $window,
-        private Presence,
-        Paths,
-        private Config,
-        private Message,
-        private MessageFactory,
-        private Cache,
-        private UserStore,
-        private User,
-        private RoomPositionManager,
-        private SoundEffects,
-        private Visibility,
-        private Time,
-        private CloudImage,
-        private Marquee,
-        private Environment,
-        private RoomFactory,
-        private NetworkManager,
+        private $timeout: ng.ITimeoutService,
+        private $window: ng.IWindowService,
+        private Presence: IPresence,
+        Paths: IPaths,
+        private Config: IConfig,
+        private Message/*: IMessage*/,
+        private MessageFactory: IMessageFactory,
+        private Cache: ICache,
+        private UserStore: IUserStore,
+        private User: IUser,
+        private RoomPositionManager: IRoomPositionManager,
+        private SoundEffects: ISoundEffects,
+        private Visibility: IVisibility,
+        private Time: ITime,
+        private CloudImage: ICloudImage,
+        private Marquee: IMarquee,
+        private Environment: IEnvironment,
+        private RoomFactory: IRoomFactory,
+        private NetworkManager: INetworkManager,
         rid: string,
         meta?: Map<string, any>,
     ) {
         super(Paths, PathKeys.RoomsPath, rid);
-        if(meta) {
+        if (meta) {
             this.setMeta(meta);
         }
     }
@@ -147,13 +162,13 @@ class Room extends Entity implements IRoom {
      * GETTERS AND SETTERS
      */
 
-    getRID() {
+    getRID(): string {
         return this.rid();
-    };
+    }
 
-    getUserCreated() {
+    getUserCreated(): boolean {
         return this.metaValue(RoomKeys.UserCreated);
-    };
+    }
 
     /***********************************
      * UPDATE METHOD
@@ -170,18 +185,18 @@ class Room extends Entity implements IRoom {
         // TODO: Check
         this.setImage(this.metaValue(RoomKeys.Image));
         this.updateOnlineUserCount();
-        if(!silent) {
+        if (!silent) {
             this.$rootScope.$broadcast(N.RoomUpdated, this);
         }
-    };
+    }
 
     updateTyping() {
 
         let i = 0;
         let name = null;
-        for(let key in this.typing) {
-            if(this.typing.hasOwnProperty(key)) {
-                if(key == this.UserStore.currentUser().uid()) {
+        for (let key in this.typing) {
+            if (this.typing.hasOwnProperty(key)) {
+                if (key == this.UserStore.currentUser().uid()) {
                     continue;
                 }
                 name = this.typing[key];
@@ -191,46 +206,45 @@ class Room extends Entity implements IRoom {
 
         let typing = null;
         if (i == 1) {
-            typing = name + "...";
+            typing = name + '...';
         }
         else if (i > 1) {
-            typing = i + " people typing";
+            typing = i + ' people typing';
         }
 
         this.typingMessage = typing;
-    };
+    }
 
     updateOnlineUserCount() {
         this.onlineUserCount = this.getOnlineUserCount();
-    };
+    }
 
     updateName() {
-
         // If the room already has a name
         // use it
         const name = this.metaValue(RoomKeys.Name);
-        if(name && name.length) {
+        if (name && name.length) {
             this.name = name;
             return;
         }
 
         // Otherwise build a room based on the users' names
-        this.name = "";
-        for(let key in this.users) {
-            if(this.users.hasOwnProperty(key)) {
+        this.name = '';
+        for (let key in this.users) {
+            if (this.users.hasOwnProperty(key)) {
                 let user = this.users[key];
-                if(!user.isMe() && user.getName() && user.getName().length) {
-                    this.name += user.getName() + ", ";
+                if (!user.isMe() && user.getName() && user.getName().length) {
+                    this.name += user.getName() + ', ';
                 }
             }
         }
-        if(this.name.length >= 2) {
+        if (this.name.length >= 2) {
             this.name = this.name.substring(0, this.name.length - 2);
         }
 
         // Private chat x users
         // Ben Smiley
-        if(!this.name || !this.name.length) {
+        if (!this.name || !this.name.length) {
             if (this.isPublic()) {
                 this.name = RoomNameKeys.RoomDefaultNamePublic;
             }
@@ -244,8 +258,7 @@ class Room extends Entity implements IRoom {
                 this.name = RoomNameKeys.RoomDefaultName1To1;
             }
         }
-
-    };
+    }
 
     /***********************************
      * LIFECYCLE: on -> open -> closed -> off
@@ -253,7 +266,7 @@ class Room extends Entity implements IRoom {
 
     on(): Promise<any> {
         return new Promise((resolve, reject) => {
-            if(!this.isOn && this.rid()) {
+            if (!this.isOn && this.rid()) {
                 this.isOn = true;
 
                 let on = () => {
@@ -261,12 +274,12 @@ class Room extends Entity implements IRoom {
                     this.userOnlineStateChangedNotificationOff = this.$rootScope.$on(N.UserOnlineStateChanged, (event, user: IUser) => {
                         Log.notification(N.UserOnlineStateChanged, 'Room');
                         // If the user is a member of this room, update the room
-                        if(this.containsUser(user)) {
+                        if (this.containsUser(user)) {
                             this.update();
                         }
                     });
                     this.$rootScope.$on(N.UserValueChanged, (event, user: IUser) => {
-                        if(this.containsUser(user)) {
+                        if (this.containsUser(user)) {
                             this.update();
                         }
                     });
@@ -285,7 +298,7 @@ class Room extends Entity implements IRoom {
                         case RoomType.OneToOne:
                             this.deleted = false;
                             this.userDeletedDate().then((timestamp) => {
-                                if(timestamp) {
+                                if (timestamp) {
                                     this.deleted = true;
                                     this.deletedTimestamp = timestamp;
                                 }
@@ -305,12 +318,10 @@ class Room extends Entity implements IRoom {
                 resolve();
             }
         });
-    };
+    }
 
     open(slot: number, duration = 300): void {
-
-        let open = () => {
-
+        const open = () => {
             // Add the room to the UI
             this.RoomPositionManager.insertRoom(this, slot, duration);
 
@@ -322,7 +333,6 @@ class Room extends Entity implements IRoom {
 
             // Update the interface
             this.$rootScope.$broadcast(N.RoomAdded);
-
         };
 
         switch (this.getType()) {
@@ -335,7 +345,7 @@ class Room extends Entity implements IRoom {
             case RoomType.OneToOne:
                 open();
         }
-    };
+    }
 
     /**
      * Removes the room from the display
@@ -356,47 +366,44 @@ class Room extends Entity implements IRoom {
         }
 
         this.RoomPositionManager.closeRoom(this);
-    };
+    }
 
-    leave(): Promise<any> {
+    async leave(): Promise<any> {
         this.deleteMessages();
         this.$rootScope.$broadcast(N.RoomRemoved);
         this.deleted = true;
-        return this.RoomFactory.removeUserFromRoom(this.UserStore.currentUser(), this).then(()=>{
-            this.off();
-        });
-    };
+        await this.RoomFactory.removeUserFromRoom(this.UserStore.currentUser(), this);
+        this.off();
+    }
 
-    off(): void {
-
+    off() {
         this.isOn = false;
 
-        if(this.userOnlineStateChangedNotificationOff) {
+        if (this.userOnlineStateChangedNotificationOff) {
             this.userOnlineStateChangedNotificationOff();
         }
 
         this.metaOff();
         this.usersMetaOff();
-
-    };
+    }
 
     getType(): RoomType {
         let type = parseInt(this.metaValue(RoomKeys.Type));
-        if(!type) {
+        if (!type) {
             type = parseInt(this.metaValue(RoomKeys.Type_v4));
         }
         return type;
-    };
+    }
 
-    calculatedType() {
+    calculatedType(): RoomType {
 
-        let type = null;
+        let type: RoomType = null;
 
-        if(this.isPublic()) {
+        if (this.isPublic()) {
             type = RoomType.Public;
         }
         else {
-            if(this.userCount() <= 1) {
+            if (this.userCount() <= 1) {
                 type = RoomType.Invalid;
             }
             else if (this.userCount() == 2) {
@@ -408,32 +415,32 @@ class Room extends Entity implements IRoom {
         }
 
         return type;
-    };
+    }
 
     updateType() {
         const type = this.calculatedType();
-        if(type != this.getType()) {
+        if (type != this.getType()) {
             // One important thing is that we can't go from group -> 1to1
-            if(this.getType() != RoomType.Group) {
+            if (this.getType() != RoomType.Group) {
                 this.RoomFactory.updateRoomType(this.rid(), type);
             }
         }
-    };
+    }
 
     /**
      * Message flagging
      */
 
-    toggleMessageFlag(message) {
-        if(message.flagged) {
+    toggleMessageFlag(message: IMessage) {
+        if (message.flagged) {
             return this.unflagMessage(message);
         }
         else {
             return this.flagMessage(message);
         }
-    };
+    }
 
-    flagMessage(message) {
+    async flagMessage(message: IMessage) {
 
         message.flagged = true;
 
@@ -451,197 +458,194 @@ class Room extends Entity implements IRoom {
         data[Keys.ThreadKey] = message.rid;
         data[Keys.DateKey] = firebase.database.ServerValue.TIMESTAMP;
 
-        return ref.set(data).then(() => {
-            message.flagged = false;
-            this.$rootScope.$broadcast(N.ChatUpdated, this);
-        });
-    };
+        await ref.set(data);
+        message.flagged = false;
+        this.$rootScope.$broadcast(N.ChatUpdated, this);
+    }
 
-    unflagMessage(message) {
-
+    async unflagMessage(message: IMessage) {
         message.flagged = false;
 
         const ref = this.Paths.flaggedMessageRef(message.mid);
-        return ref.remove().then(() => {
-            message.flagged = true;
-            this.$rootScope.$broadcast(N.ChatUpdated, this);
-        });
-    };
+        await ref.remove();
+        message.flagged = true;
+        this.$rootScope.$broadcast(N.ChatUpdated, this);
+    }
 
-    isPublic() {
+    isPublic(): boolean {
         return this.getType() == RoomType.Public;
-    };
+    }
 
-    rid() {
+    rid(): string {
         return this._id;
-    };
+    }
 
-    created() {
+    created(): number {
         return this.metaValue(RoomKeys.Created);
-    };
+    }
 
     lastMessageExists(): boolean {
         return this.messages.length > 0;
-    };
+    }
 
     lastMessageType(): MessageType {
-        if(this.lastMessageExists()) {
+        if (this.lastMessageExists()) {
             this.lastMessage().type();
         }
         return null;
-    };
+    }
 
     lastMessage(): IMessage {
-        if(this.lastMessageExists()) {
+        if (this.lastMessageExists()) {
             return this.messages[this.messages.length - 1];
         }
         return null;
     }
 
     lastMessageUserName(): string {
-        if(this.lastMessageExists()) {
+        if (this.lastMessageExists()) {
             return this.lastMessage().user.getName();
         }
         return null;
-    };
+    }
 
-    lastMessageTime() {
-        if(this.lastMessageExists()) {
+    lastMessageTime(): number {
+        if (this.lastMessageExists()) {
             return this.lastMessage().time();
         }
         return null;
-    };
+    }
 
-    lastMessageDate() {
-        if(this.lastMessageExists()) {
+    lastMessageDate(): Date {
+        if (this.lastMessageExists()) {
             return this.lastMessage().date();
         }
         return null;
-    };
+    }
 
     lastMessageText(): string {
-        if(this.lastMessageExists()) {
+        if (this.lastMessageExists()) {
             return this.lastMessage().text();
         }
         return null;
-    };
+    }
 
     /**
      * Add the user to the room and add the room to the
      * user in Firebase
      * @param status
      */
-    join(status): Promise<any> {
+    join(status: UserStatus): Promise<any> {
         return this.RoomFactory.addUserToRoom(this.UserStore.currentUser(), this, status);
-    };
+    }
 
-    setActive(active) {
-        if(active) {
+    setActive(active: boolean) {
+        if (active) {
             this.markRead();
         }
         this.active = active;
-    };
+    }
 
     setSizeToDefault() {
         this.width = Dimensions.ChatRoomWidth;
         this.height = Dimensions.ChatRoomHeight;
-    };
+    }
 
-    flashHeader() {
+    flashHeader(): boolean {
         // TODO: Implement this
         // Ideally if the chat is in the side bar then bring it
         // to the front
         // Or flash the side bar
-        if(this.RoomPositionManager.roomIsOpen(this)) {
+        if (this.RoomPositionManager.roomIsOpen(this)) {
             this.$rootScope.$broadcast(N.RoomFlashHeader, this, '#555', 500, 'room-header');
             this.$rootScope.$broadcast(N.RoomFlashHeader, this, '#CCC', 500, 'room-list');
             return true;
         }
         return false;
-    };
+    }
 
     /***********************************
      * USERS
      */
 
-    getUserInfoWithUID(uid) {
+    getUserInfoWithUID(uid: string) {
         // This could be called from the UI so it's important
         // to wait until users has been populated
-        if(this.usersMeta) {
+        if (this.usersMeta) {
             return this.usersMeta[uid];
         }
         return null;
-    };
+    }
 
-    getUserInfo(user) {
+    getUserInfo(user: IUser) {
         // This could be called from the UI so it's important
         // to wait until users has been populated
-        if(user && user.meta) {
+        if (user && user.meta) {
             return this.getUserInfoWithUID(user.uid());
         }
         return null;
-    };
+    }
 
     getUserStatus(user: IUser): UserStatus {
         let info = this.getUserInfo(user);
         return info ? info[UserKeys.Status] : null;
-    };
+    }
 
-    getUsers() {
+    getUsers(): { [uid: string]: IUser } {
         let users = {};
-        for(let key in this.users) {
-            if(this.users.hasOwnProperty(key)) {
+        for (let key in this.users) {
+            if (this.users.hasOwnProperty(key)) {
                 let user = this.users[key];
-                if(user.meta && this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
-                    if(user.uid() != this.UserStore.currentUser().uid()) {
+                if (user.meta && this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
+                    if (user.uid() != this.UserStore.currentUser().uid()) {
                         users[user.uid()] = user;
                     }
                 }
             }
         }
         return users;
-    };
+    }
 
-    getUserIDs():Array<string> {
+    getUserIDs(): Array<string> {
         const users = new Array<string>();
-        for(let key in this.users) {
-            if(this.users.hasOwnProperty(key)) {
+        for (let key in this.users) {
+            if (this.users.hasOwnProperty(key)) {
                 users.push(key);
             }
         }
         return users;
-    };
+    }
 
     // userIsActiveWithUID(uid) {
     //     let info = this.getUserInfo(uid);
     //     return this.RoomFactory.userIsActiveWithInfo(info);
     // };
 
-    getOwner() {
+    getOwner(): IUser {
         // get the owner's ID
         let data = null;
 
-        for(let key in this.usersMeta) {
-            if(this.usersMeta.hasOwnProperty(key)) {
+        for (let key in this.usersMeta) {
+            if (this.usersMeta.hasOwnProperty(key)) {
                 data = this.usersMeta[key];
-                if(data.status == UserStatus.Owner) {
+                if (data.status == UserStatus.Owner) {
                     break;
                 }
             }
         }
-        if(data) {
+        if (data) {
             return this.UserStore.getOrCreateUserWithID(data.uid);
         }
         return null;
-    };
+    }
 
 //        isClosed() {
 //            return this.getUserStatus(this.UserStore.currentUser()) == UserStatusClosed;
 //        };
 
-    containsUser(user) {
+    containsUser(user: IUser) {
         return this.users[user.uid()] != null;
-    };
+    }
 
     // Update the timestamp on the user status
     // updateUserStatusTime(user): Promise<any> {
@@ -660,40 +664,40 @@ class Room extends Entity implements IRoom {
 
     getOnlineUserCount() {
         let i = 0;
-        for(let key in this.usersMeta) {
-            if(this.usersMeta.hasOwnProperty(key)) {
+        for (let key in this.usersMeta) {
+            if (this.usersMeta.hasOwnProperty(key)) {
                 let user = this.usersMeta[key];
-                if(this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
-                    if((this.UserStore.users[user.uid].online || this.UserStore.currentUser().uid() == user.uid)) {
+                if (this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
+                    if ((this.UserStore.users[user.uid].online || this.UserStore.currentUser().uid() == user.uid)) {
                         i++;
                     }
                 }
             }
         }
         return i;
-    };
+    }
 
     userCount() {
         let i = 0;
-        for(let key in this.users) {
-            if(this.users.hasOwnProperty(key)) {
+        for (let key in this.users) {
+            if (this.users.hasOwnProperty(key)) {
                 i++;
             }
         }
         return i;
-    };
+    }
 
-    containsOnlyUsers(users) {
+    containsOnlyUsers(users: IUser[]) {
         let usersInRoom = 0;
         const totalUsers = this.userCount();
 
-        for(let i = 0; i < users.length; i++) {
-            if(this.users[users[i].uid()]) {
+        for (let i = 0; i < users.length; i++) {
+            if (this.users[users[i].uid()]) {
                 usersInRoom++;
             }
         }
         return usersInRoom == users.length && usersInRoom == totalUsers;
-    };
+    }
 
     /***********************************
      * LAYOUT
@@ -701,33 +705,33 @@ class Room extends Entity implements IRoom {
 
         // If the room is animating then
         // return the destination
-    getOffset() {
+    getOffset(): number {
         return this.offset;
-    };
+    }
 
-    getCenterX() {
+    getCenterX(): number {
         return this.getOffset() + this.width / 2;
-    };
+    }
 
-    getMinX() {
+    getMinX(): number {
         return this.getOffset();
-    };
+    }
 
-    getMaxX() {
+    getMaxX(): number {
         return this.getOffset() + this.width;
-    };
+    }
 
     updateOffsetFromSlot() {
         this.setOffset(this.RoomPositionManager.offsetForSlot(this.slot));
-    };
+    }
 
-    setOffset(offset: number) : void {
+    setOffset(offset: number) {
         this.offset = offset;
-    };
+    }
 
-    setSlot(slot) {
+    setSlot(slot: number) {
         this.slot = slot;
-    };
+    }
 
     /***********************************
      * MESSAGES
@@ -737,22 +741,22 @@ class Room extends Entity implements IRoom {
         const meta = this.MessageFactory.buildImageMeta(url, width, height);
         const messageMeta = this.MessageFactory.buildMessage(user.uid(), this.getUserIDs(), MessageType.Image, meta);
         return this.sendMessage(messageMeta, user);
-    };
+    }
 
     sendFileMessage(user: IUser, fileName: string, mimeType: string, fileURL: string): Promise<any> {
         const meta = this.MessageFactory.buildFileMeta(fileName, mimeType, fileURL);
         const messageMeta = this.MessageFactory.buildMessage(user.uid(), this.getUserIDs(), MessageType.File, meta);
         return this.sendMessage(messageMeta, user);
-    };
+    }
 
     sendTextMessage(user: IUser, text: string): Promise<any> {
-        if(!text || text.length === 0) {
+        if (!text || text.length === 0) {
             return;
         }
         const meta = this.MessageFactory.buildTextMeta(text);
         const messageMeta = this.MessageFactory.buildMessage(user.uid(), this.getUserIDs(), MessageType.Text, meta);
         return this.sendMessage(messageMeta, user);
-    };
+    }
 
     sendMessage(messageMeta: {}, user): Promise<any> {
         let innerSendMessage = ((message, user) => {
@@ -783,10 +787,10 @@ class Room extends Entity implements IRoom {
                 return innerSendMessage(messageMeta, user);
             });
         });
-    };
+    }
 
     addMessagesFromSerialization (sm) {
-        for(let i = 0; i < sm.length; i++) {
+        for (let i = 0; i < sm.length; i++) {
             this.addMessageFromSerialization(sm[i]);
         }
         // Now update all the message displays
@@ -845,9 +849,9 @@ class Room extends Entity implements IRoom {
     }
 
     updateBadgeForMessage(message: IMessage): void {
-        if(this.shouldIncrementUnreadMessageBadge() && !message.read && (message.time() > this.readTimestamp || !this.readTimestamp)) {
+        if (this.shouldIncrementUnreadMessageBadge() && !message.read && (message.time() > this.readTimestamp || !this.readTimestamp)) {
 
-            if(!this.unreadMessages) {
+            if (!this.unreadMessages) {
                 this.unreadMessages  = [];
             }
 
@@ -890,7 +894,7 @@ class Room extends Entity implements IRoom {
         return <Promise<Array<IMessage>>> query.once('value').then((snapshot: firebase.database.DataSnapshot) => {
             const val = snapshot.val();
             const messages = new Array<IMessage>();
-            if(val) {
+            if (val) {
                 Object.keys(val).forEach(key => {
                     messages.push(this.Message(key, val[key]));
                 });
@@ -903,7 +907,7 @@ class Room extends Entity implements IRoom {
 
     loadMoreMessages(numberOfMessages: number = 10): Promise<Array<IMessage>> {
 
-        if(this.loadingMoreMessages) {
+        if (this.loadingMoreMessages) {
             return Promise.resolve([]);
         }
         this.loadingMoreMessages = true;
@@ -924,12 +928,12 @@ class Room extends Entity implements IRoom {
             // Add messages to front of global list
             // Ignore the last message - it's a duplicate
             // let lastMessage = null;
-            // for(let i = messages.length - 2; i >= 0; i--) {
-            //     if(this.messages.length > 0) {
+            // for (let i = messages.length - 2; i >= 0; i--) {
+            //     if (this.messages.length > 0) {
             //         lastMessage = this.messages[0];
             //     }
             //     this.messages.unshift(messages[i]);
-            //     if(lastMessage) {
+            //     if (lastMessage) {
             //         lastMessage.hideName = lastMessage.shouldHideUser(messages[i]);
             //         lastMessage.hideTime = lastMessage.shouldHideDate(messages[i]);
             //     }
@@ -941,20 +945,20 @@ class Room extends Entity implements IRoom {
 
             return messages;
         });
-    };
+    }
 
     sortMessages() {
         // Now we should sort all messages
         this.sortMessageArray(this.messages);
-    };
+    }
 
     deduplicateMessages() {
         let uniqueMessages = [];
 
         // Deduplicate list
         let lastMID = null;
-        for(let i = 0; i < this.messages.length; i++) {
-            if(this.messages[i].mid != lastMID) {
+        for (let i = 0; i < this.messages.length; i++) {
+            if (this.messages[i].mid != lastMID) {
                 uniqueMessages.push(this.messages[i]);
             }
             lastMID = this.messages[i].mid;
@@ -962,29 +966,29 @@ class Room extends Entity implements IRoom {
 
         this.messages = uniqueMessages;
 
-    };
+    }
 
     deleteMessages() {
         this.messages.length = 0;
-        if(this.unreadMessages) {
+        if (this.unreadMessages) {
             this.unreadMessages.length = 0;
         }
-    };
+    }
 
     sortMessageArray(messages) {
         messages.sort((a, b) => {
             return a.time() - b.time();
         });
-    };
+    }
 
     markRead() {
 
         let messages = this.unreadMessages;
 
-        if(messages && messages.length > 0) {
+        if (messages && messages.length > 0) {
 
-            for(let i in messages) {
-                if(messages.hasOwnProperty(i)) {
+            for (let i in messages) {
+                if (messages.hasOwnProperty(i)) {
                     messages[i].markRead();
                 }
             }
@@ -998,62 +1002,62 @@ class Room extends Entity implements IRoom {
         this.sendBadgeChangedNotification();
 
         // Mark the date when the thread was read
-        if(!this.isPublic())
+        if (!this.isPublic())
             this.UserStore.currentUser().markRoomReadTime(this.rid());
 
-    };
+    }
 
     updateImageURL(imageURL) {
         // Compare to the old URL
         let imageChanged = imageURL != this.metaValue(RoomKeys.Image);
-        if(imageChanged) {
+        if (imageChanged) {
             this.setMetaValue(RoomKeys.Image, imageURL);
             this.setImage(imageURL, false);
             return this.pushMeta();
         }
-    };
+    }
 
     setImage(image, isData = false) {
 
         this.showImage = this.getType() == RoomType.Public;
 
-        if(!image) {
+        if (!image) {
             image = this.Environment.defaultRoomPictureURL();
         }
         else {
-            if(isData || image == this.Environment.defaultRoomPictureURL()) {
+            if (isData || image == this.Environment.defaultRoomPictureURL()) {
                 this.thumbnail = image;
             }
             else {
                 this.thumbnail = this.CloudImage.cloudImage(image, 30, 30);
             }
         }
-    };
+    }
 
     pushMeta(): Promise<any> {
         const ref = this.Paths.roomMetaRef(this.rid());
         return ref.update(this.getMetaObject()).then(() => {
             return this.updateState(Keys.DetailsKey);
         });
-    };
+    }
 
     sendBadgeChangedNotification() {
         this.$rootScope.$broadcast(N.LazyLoadedMessages, this);
-    };
+    }
 
     transcript() : string {
 
-        let transcript: string = "";
+        let transcript: string = '';
 
-        for(let i in this.messages) {
-            if(this.messages.hasOwnProperty(i)) {
+        for (let i in this.messages) {
+            if (this.messages.hasOwnProperty(i)) {
                 let m = this.messages[i];
-                transcript += this.Time.formatTimestamp(m.time()) + " " + m.user.getName() + ": " + m.text() + "\n";
+                transcript += this.Time.formatTimestamp(m.time()) + ' ' + m.user.getName() + ': ' + m.text() + '\n';
             }
         }
 
         return transcript;
-    };
+    }
 
     /***********************************
      * TYPING INDICATOR
@@ -1068,12 +1072,12 @@ class Room extends Entity implements IRoom {
         // indicator
         ref.onDisconnect().remove();
         return promise;
-    };
+    }
 
     finishTyping(user): Promise<any> {
         const ref = this.Paths.roomTypingRef(this.rid()).child(user.uid());
         return ref.remove();
-    };
+    }
 
     /***********************************
      * SERIALIZATION
@@ -1083,7 +1087,7 @@ class Room extends Entity implements IRoom {
         const superData = super.serialize();
 
         const m = [];
-        for(let i = 0; i < this.messages.length; i++) {
+        for (let i = 0; i < this.messages.length; i++) {
             m.push(this.messages[i].serialize());
         }
         const data = {
@@ -1101,10 +1105,10 @@ class Room extends Entity implements IRoom {
             readTimestamp: this.readTimestamp,
         };
         return {...superData, ...data};
-    };
+    }
 
     deserialize(sr): void {
-        if(sr) {
+        if (sr) {
             super.deserialize(sr);
             this.minimized = sr.minimized;
             this.width = sr.width;
@@ -1118,8 +1122,8 @@ class Room extends Entity implements IRoom {
 
             //this.setUsersMeta(sr.usersMeta);
 
-            for(let key in sr.usersMeta) {
-                if(sr.usersMeta.hasOwnProperty(key)) {
+            for (let key in sr.usersMeta) {
+                if (sr.usersMeta.hasOwnProperty(key)) {
                     this.addUserMeta(sr.usersMeta[key]);
                 }
             }
@@ -1128,7 +1132,7 @@ class Room extends Entity implements IRoom {
             this.addMessagesFromSerialization(sr.messages);
 
         }
-    };
+    }
 
     /***********************************
      * FIREBASE
@@ -1140,21 +1144,21 @@ class Room extends Entity implements IRoom {
      */
     metaOn() {
         return this.pathOn(Keys.DetailsKey, (val) => {
-            if(val) {
+            if (val) {
                 this.setMeta(val);
                 this.update();
             }
         });
-    };
+    }
 
     metaOff() {
         this.pathOff(Keys.DetailsKey);
-    };
+    }
 
     addUserMeta(meta) {
         // We only display users who have been active
         // recently
-        // if(this.RoomFactory.userIsActiveWithInfo(meta)) {
+        // if (this.RoomFactory.userIsActiveWithInfo(meta)) {
         this.usersMeta[meta[Keys.userUID]] = meta;
 
         // Add the user object
@@ -1163,20 +1167,20 @@ class Room extends Entity implements IRoom {
 
         this.update(false);
         // }
-    };
+    }
 
     removeUserMeta(meta) {
         delete this.usersMeta[meta[Keys.userUID]];
         delete this.users[meta[Keys.userUID]];
         this.update(false);
-    };
+    }
 
     usersMetaOn() {
 
         let roomUsersRef = this.Paths.roomUsersRef(this.rid());
 
         roomUsersRef.on('child_added', (snapshot) => {
-            if(snapshot.val() && snapshot.val()) {
+            if (snapshot.val() && snapshot.val()) {
                 let meta = snapshot.val();
                 meta.uid = snapshot.key;
                 this.addUserMeta(meta);
@@ -1184,35 +1188,35 @@ class Room extends Entity implements IRoom {
         });
 
         roomUsersRef.on('child_removed', (snapshot) => {
-            if(snapshot.val()) {
+            if (snapshot.val()) {
                 let meta = snapshot.val();
                 meta.uid = snapshot.key;
                 this.removeUserMeta(meta);
             }
         });
-    };
+    }
 
     usersMetaOff() {
         this.Paths.roomUsersRef(this.rid()).off();
-    };
+    }
 
     userDeletedDate(): Promise<number> {
         const ref = this.Paths.roomUsersRef(this.rid()).child(this.UserStore.currentUser().uid());
         return ref.once('value').then((snapshot) => {
             let val = snapshot.val();
-            if(val && val.status == UserStatus.Closed) {
+            if (val && val.status == UserStatus.Closed) {
                 return val.time;
             }
             return null;
         });
-    };
+    }
 
     /**
      * Start listening to messages being added
      */
 
     updateUnreadMessageCounter(messageMeta) {
-        if(this.shouldIncrementUnreadMessageBadge() && (messageMeta[MessageKeys.Date] > this.readTimestamp || !this.readTimestamp)) {
+        if (this.shouldIncrementUnreadMessageBadge() && (messageMeta[MessageKeys.Date] > this.readTimestamp || !this.readTimestamp)) {
             // If this is the first badge then this.badge will
             // undefined - so set it to one
             if (!this.badge) {
@@ -1223,16 +1227,16 @@ class Room extends Entity implements IRoom {
             }
             this.sendBadgeChangedNotification();
         }
-    };
+    }
 
     shouldIncrementUnreadMessageBadge() {
         return (!this.active || this.minimized || !this.RoomPositionManager.roomIsOpen(this));// && !this.isPublic();
-    };
+    }
 
     messagesOn(timestamp) {
 
         // Make sure the room is valid
-        if(this.messagesAreOn || !this.rid()) {
+        if (this.messagesAreOn || !this.rid()) {
             return;
         }
         this.messagesAreOn = true;
@@ -1241,11 +1245,11 @@ class Room extends Entity implements IRoom {
         let ref: firebase.database.Query = this.Paths.roomMessagesRef(this.rid());
 
         let startDate = timestamp;
-        if(Utils.unORNull(startDate)) {
+        if (Utils.unORNull(startDate)) {
             // If we already have a message then only listen for new
             // messages
             const lastMessageTime = this.lastMessageTime();
-            if(lastMessageTime) {
+            if (lastMessageTime) {
                 startDate = lastMessageTime + 1;
             }
         }
@@ -1253,7 +1257,7 @@ class Room extends Entity implements IRoom {
             startDate++;
         }
 
-        if(startDate) {
+        if (startDate) {
             // Start 1 thousandth of a second after the last message
             // so we don't get a duplicate
             ref = ref.startAt(startDate);
@@ -1263,7 +1267,7 @@ class Room extends Entity implements IRoom {
         // Add listen to messages added to this thread
         ref.on('child_added', (snapshot) => {
 
-            if(this.Cache.isBlockedUser(snapshot.val()[MessageKeys.UID])) {
+            if (this.Cache.isBlockedUser(snapshot.val()[MessageKeys.UID])) {
                 return;
             }
 
@@ -1280,8 +1284,8 @@ class Room extends Entity implements IRoom {
                 if (this.Visibility.getIsHidden()) {
                     // Only make a sound for messages that were received less than
                     // 30 seconds ago
-                    if (Defines.DEBUG) console.log("Now: " + new Date().getTime() + ", Date now: " + this.Time.now() + ", Message: " + snapshot.val()[MessageKeys.Date]);
-                    if (Defines.DEBUG) console.log("Diff: " + Math.abs(this.Time.now() - snapshot.val().time));
+                    if (Defines.DEBUG) console.log('Now: ' + new Date().getTime() + ', Date now: ' + this.Time.now() + ', Message: ' + snapshot.val()[MessageKeys.Date]);
+                    if (Defines.DEBUG) console.log('Diff: ' + Math.abs(this.Time.now() - snapshot.val().time));
                     if (Math.abs(this.Time.now() - snapshot.val()[MessageKeys.Date]) / 1000 < 30) {
                         this.SoundEffects.messageReceived();
                     }
@@ -1291,10 +1295,10 @@ class Room extends Entity implements IRoom {
         });
 
         ref.on('child_removed', (snapshot) => {
-            if(snapshot.val()) {
-                for(let i = 0; i < this.messages.length; i++) {
+            if (snapshot.val()) {
+                for (let i = 0; i < this.messages.length; i++) {
                     let message = this.messages[i];
-                    if(message.mid == snapshot.key) {
+                    if (message.mid == snapshot.key) {
                         this.messages.splice(i, 1);
                         break;
                     }
@@ -1304,30 +1308,30 @@ class Room extends Entity implements IRoom {
             }
         });
 
-    };
+    }
 
     trimMessageList() {
         this.sortMessages();
         this.deduplicateMessages();
 
         let toRemove = this.messages.length - 100;
-        if(toRemove > 0) {
-            for(let j = 0; j < toRemove; j++) {
+        if (toRemove > 0) {
+            for (let j = 0; j < toRemove; j++) {
                 this.messages.shift();
 
             }
         }
-    };
+    }
 
     messagesOff() {
 
         this.messagesAreOn = false;
 
         // Get the room meta data
-        if(this.rid()) {
+        if (this.rid()) {
             this.Paths.roomMessagesRef(this.rid()).off();
         }
-    };
+    }
 
     typingOn() {
 
@@ -1352,23 +1356,23 @@ class Room extends Entity implements IRoom {
             this.$rootScope.$broadcast(N.ChatUpdated, this);
         });
 
-    };
+    }
 
     typingOff() {
         this.Paths.roomTypingRef(this.rid()).off();
-    };
+    }
 
     // lastMessageOn() {
     //     let lastMessageRef = this.Paths.roomLastMessageRef(this.rid());
     //     lastMessageRef.on('value', (snapshot) => {
-    //         if(snapshot.val()) {
+    //         if (snapshot.val()) {
     //
     //             this.setLastMessage(snapshot.val(), );
     //
     //             // If the message comes in then we should make sure
     //             // the room is un deleted
-    //             if(!this.Cache.isBlockedUser(this.lastMessage.user.uid())) {
-    //                 if(this.deleted) {
+    //             if (!this.Cache.isBlockedUser(this.lastMessage.user.uid())) {
+    //                 if (this.deleted) {
     //                     this.deleted = false;
     //                     this.$rootScope.$broadcast(N.RoomAdded, this);
     //                 }
@@ -1392,12 +1396,12 @@ class Room extends Entity implements IRoom {
     removeFromPublicRooms(): Promise<any> {
         const ref = this.Paths.publicRoomRef(this.getRID());
         return ref.remove();
-    };
+    }
 
     userIsMember(user) {
         let userStatus = this.getUserStatus(user);
         return userStatus == UserStatus.Member || userStatus == UserStatus.Owner;
-    };
+    }
 
     addUserUpdate(user: IUser, status: UserStatus): {} {
         const update = {};
@@ -1450,7 +1454,7 @@ class RoomFactory implements IRoomFactory {
 
     // Group chats should be handled separately to
     // private chats
-    updateRoomType(rid, type) {
+    updateRoomType(rid: string, type: RoomType) {
 
         const ref = this.Paths.roomMetaRef(rid);
         const data = {};
@@ -1480,7 +1484,7 @@ class RoomFactory implements IRoomFactory {
         }).catch((error) => {
             console.log(error);
         });
-    };
+    }
 
     roomMeta(rid, name, description, userCreated, invitesEnabled, type, weight) {
 
@@ -1498,13 +1502,13 @@ class RoomFactory implements IRoomFactory {
         m[RoomKeys.Type_v4] = type; // Deprecated
 
         return m;
-    };
+    }
 
     // userIsActiveWithInfo(info) {
     //     // TODO: For the time being assume that users that
     //     // don't have this information are active
-    //     if(info && info.status && info.time) {
-    //         if(info.status != UserStatus.Closed) {
+    //     if (info && info.status && info.time) {
+    //         if (info.status != UserStatus.Closed) {
     //             return this.Time.secondsSince(info.time) < 60 * 60 * 24;
     //         }
     //     }
@@ -1533,7 +1537,7 @@ class RoomCreator implements IRoomCreator {
 
     createRoomWithRID(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated: boolean, weight: number): Promise<IRoom> {
 
-        if(Utils.unORNull(rid)) {
+        if (Utils.unORNull(rid)) {
             rid = this.Paths.roomsRef().push().key;
         }
         const roomMeta = this.RoomFactory.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
@@ -1548,7 +1552,7 @@ class RoomCreator implements IRoomCreator {
         // Add the room to Firebase
         return roomMetaRef.set(roomMeta).then(() => {
             return this.RoomFactory.addUserToRoom(this.UserStore.currentUser(), room, UserStatus.Owner).then(() => {
-                if(type == RoomType.Public) {
+                if (type == RoomType.Public) {
                     const ref = this.Paths.publicRoomRef(rid);
 
                     const data = {};

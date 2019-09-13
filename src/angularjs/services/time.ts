@@ -3,8 +3,9 @@ import * as firebase from 'firebase';
 import * as moment from 'moment';
 
 export interface ITime {
-    formatTimestamp (timestamp: number, type: string): string
-    start(uid): Promise<any>
+    formatTimestamp (timestamp: number, type?: string): string
+    start(uid: string): Promise<any>
+    now(): number;
 }
 
 angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
@@ -54,7 +55,7 @@ angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, P
             return Math.abs(this.now() - time)/1000;
         },
 
-        formatTimestamp: function (timestamp: number, type: string): string {
+        formatTimestamp: function (timestamp: number, type?: string): string {
             try {
                 if(type == '24hour') {
                     return moment(timestamp).format('HH:mm');

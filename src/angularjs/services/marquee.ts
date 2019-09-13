@@ -1,7 +1,7 @@
 import * as angular from 'angular'
 
 export interface IMarquee {
-
+    startWithMessage(message: string): void
 }
 
 class Marquee implements IMarquee {

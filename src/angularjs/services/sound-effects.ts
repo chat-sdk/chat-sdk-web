@@ -1,8 +1,8 @@
-import * as angular from 'angular'
-import {Howl, Howler} from 'howler'
+import * as angular from 'angular';
+import { Howl, Howler } from 'howler';
 
 export interface ISoundEffects {
-
+    messageReceived(): void;
 }
 
 angular.module('myApp.services').factory('SoundEffects', ['LocalStorage', 'Environment', function (LocalStorage, Environment) {

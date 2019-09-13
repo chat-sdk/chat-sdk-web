@@ -16,11 +16,13 @@ export interface IMessage {
     hideName: boolean;
     hideTime: boolean;
     mid: string;
+    rid: string;
     user: IUser;
     meta: StringAnyObject;
     nextMessage: IMessage;
     previousMessage: IMessage;
     read: boolean;
+    flagged: boolean;
     time(): number;
     date(): Date;
     markRead(uid?: string): void;
@@ -29,6 +31,7 @@ export interface IMessage {
     text(): string;
     updateDisplay(): void;
     uid(): string;
+    metaValue(key: string): any;
 }
 
 class Message implements IMessage {
@@ -37,6 +40,7 @@ class Message implements IMessage {
     public flagged = false;
     public side: MessageSide;
     public user: IUser;
+    public rid: string;
     public imageURL: string;
     public thumbnailURL: string;
     public fileURL: string;
@@ -234,7 +238,10 @@ export enum MessageSide {
 }
 
 export interface IMessageFactory {
-
+    buildFileMeta(fileName: string, mimeType: string, fileURL: string): Map<string, any>;
+    buildTextMeta(text: string): Map<string, any>;
+    buildImageMeta(url: string, width: number, height: number): Map<string, any>
+    buildMessage(from: string, to: Array<string>, type: MessageType, meta: Map<string, any>): {};
 }
 
 class MessageFactory implements IMessageFactory {

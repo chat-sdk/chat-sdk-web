@@ -7,6 +7,7 @@ export interface IEnvironment {
     config(): any
     partialsURL(): string
     defaultProfilePictureURL(): string
+    defaultRoomPictureURL(): string
 }
 
 class Environment implements IEnvironment {

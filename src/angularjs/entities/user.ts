@@ -49,7 +49,8 @@ export interface IUser extends IEntity {
     canBeInvitedByUser(invitingUser: IUser): boolean
     allowInvitesFrom(type: UserAllowInvites): boolean
     deserialize(su): void
-    removeFriend: (friend?: IUser) => void
+    removeFriend(friend?: IUser): void
+    markRoomReadTime(rid: string): Promise<any>
 }
 
 class User extends Entity implements IUser {
