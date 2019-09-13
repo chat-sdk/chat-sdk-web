@@ -6,6 +6,7 @@ export interface IEnvironment {
     firebaseConfig(): any
     config(): any
     partialsURL(): string
+    defaultProfilePictureURL(): string
 }
 
 class Environment implements IEnvironment {

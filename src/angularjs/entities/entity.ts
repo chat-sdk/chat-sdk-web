@@ -1,16 +1,17 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-import * as PathKeys from "../keys/path-keys";
-import * as Defines from "../keys/defines";
-import {IPaths} from "../network/paths";
-import {Emoji} from "../services/emoji";
-import {Utils} from "../services/utils";
+import * as PathKeys from '../keys/path-keys';
+import * as Defines from '../keys/defines';
+import { IPaths } from '../network/paths';
+import { Emoji } from '../services/emoji';
+import { Utils } from '../services/utils';
+import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface IEntity {
-    serialize()
+    serialize(): StringAnyObject
     setMeta(meta: any): void
-    getMetaObject (): {}
+    getMetaObject (): StringAnyObject
     getMeta(): Map<string, any>
     updateState(key: string): Promise<any>
     removeOnDisconnect (path: string): Promise<any>
@@ -21,14 +22,15 @@ export class Entity implements IEntity {
     protected meta = new Map<string, any>();
     protected _path: string;
     protected _id: string;
-    pathIsOn = {};
-    state = {};
+    pathIsOn: { [key: string]: boolean } = {};
+    state: StringAnyObject = {};
 
     // static $inject = ['$q', 'Paths'];
-    constructor (
+    constructor(
         protected Paths: IPaths,
         path: string,
-        id: string) {
+        id: string
+    ) {
         this._path = path;
         this._id = id;
     }
@@ -43,11 +45,11 @@ export class Entity implements IEntity {
      * @returns promise - the promise is resolved when the it's confirmed that
      *                    the state of the local data is up to date
      */
-    pathOn(key, callback): Promise<any> {
+    pathOn(key: string, callback: (value: StringAnyObject) => void): Promise<any> {
         return new Promise((resolve, reject) => {
             // Check to see if this path has already
             // been turned on
-            if(this.pathIsOn[key]) {
+            if (this.pathIsOn[key]) {
                 resolve();
             } else {
                 this.pathIsOn[key] = true;
@@ -63,13 +65,13 @@ export class Entity implements IEntity {
 
                     let time = snapshot.val();
 
-                    if(Defines.DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
-                    if(Defines.DEBUG) console.log('Date: ' + time + ' State time: ' + this.state[key]);
+                    if (Defines.DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
+                    if (Defines.DEBUG) console.log('Date: ' + time + ' State time: ' + this.state[key]);
 
                     // If the state isn't set either locally or remotely
                     // or if it is set but the timestamp is lower than the remove value
                     // add a listener to the value
-                    if((!time || !this.state[key]) || (time && time > this.state[key])) {
+                    if ((!time || !this.state[key]) || (time && time > this.state[key])) {
 
                         // Assume that the we will be able to get
                         // the latest version of the data so prevent any
@@ -91,7 +93,7 @@ export class Entity implements IEntity {
                     else {
                         resolve();
                     }
-                }, (error) => {
+                }, (error: Error) => {
                     console.log(error.message);
                     reject(error);
                 });
@@ -101,31 +103,30 @@ export class Entity implements IEntity {
 
     // This method strips the root of the Firebase reference to give a relative
     // path for batch writes
-    relativeFirebasePath (ref: firebase.database.Reference): string {
+    relativeFirebasePath(ref: firebase.database.Reference): string {
         return ref.toString().replace(this.Paths.firebase().toString(), "");
     }
 
-    pathOff(key) {
-
+    pathOff(key: string) {
         this.pathIsOn[key] = false;
 
         this.stateRef(key).off('value');
         this.pathRef(key).off('value');
     }
 
-    ref() {
+    ref(): firebase.database.Reference {
         return this.Paths.firebase().child(this._path).child(this._id);
     }
 
-    removeOnDisconnect (path: string): Promise<any> {
+    removeOnDisconnect(path: string): Promise<any> {
         return this.ref().child(path).onDisconnect().remove();
     }
 
-    pathRef(path) {
+    pathRef(path: string) {
         return this.ref().child(path);
     }
 
-    stateRef(key) {
+    stateRef(key: string) {
         return this.ref().child(PathKeys.UpdatedPath).child(key);
     }
 
@@ -134,7 +135,7 @@ export class Entity implements IEntity {
         return ref.set(firebase.database.ServerValue.TIMESTAMP);
     }
 
-    setMeta(meta: any): void {
+    setMeta(meta: Map<string, any> | StringAnyObject): void {
         if (meta instanceof Map) {
             this.meta = meta;
         } else {
@@ -142,7 +143,7 @@ export class Entity implements IEntity {
         }
     };
 
-    getMetaObject (): {} {
+    getMetaObject(): StringAnyObject {
         return Utils.toObject(this.meta);
     }
 
@@ -150,14 +151,14 @@ export class Entity implements IEntity {
         return this.meta;
     }
 
-    metaValue(key) {
-        if(this.getMeta()) {
+    metaValue(key: string) {
+        if (this.getMeta()) {
             return this.getMeta().get(key);
         }
         return null;
     };
 
-    getMetaValue(key) {
+    getMetaValue(key: string) {
         return this.metaValue(key);
     };
 
@@ -165,7 +166,7 @@ export class Entity implements IEntity {
         this.getMeta().set(key, value);
     };
 
-    serialize(): {} {
+    serialize(): StringAnyObject {
         return {
             _path: this._path,
             _id: this._id,
@@ -174,8 +175,8 @@ export class Entity implements IEntity {
         }
     }
 
-    deserialize(se) {
-        if(se) {
+    deserialize(se: StringAnyObject) {
+        if (se) {
             this._path = se._path;
             this._id = se._id;
             this.state = se.state ? se.state : {};
@@ -188,23 +189,27 @@ export class Entity implements IEntity {
 export class EntityFactory {
 
     static $inject = ['$q', 'Paths'];
-    constructor (protected $q: ng.IQService, protected Paths: IPaths) {}
 
-    ref(path, id) {
+    constructor(
+        protected $q: ng.IQService,
+        protected Paths: IPaths
+    ) { }
+
+    ref(path: string, id: string) {
         return this.Paths.firebase().child(path).child(id);
     }
 
-    stateRef(path, id, key) {
+    stateRef(path: string, id: string, key: string) {
         return this.ref(path, id).child(PathKeys.UpdatedPath).child(key);
     }
 
-    updateState(path, id, key) {
+    updateState(path: string, id: string, key: string) {
 
         const deferred = this.$q.defer();
 
         const ref = this.stateRef(path, id, key);
         ref.set(firebase.database.ServerValue.TIMESTAMP, (error) => {
-            if(!error) {
+            if (!error) {
                 deferred.resolve();
             }
             else {
@@ -216,7 +221,7 @@ export class EntityFactory {
     }}
 
 angular.module('myApp.services')
-    .service('Entity', ['Paths', function(Paths) {
+    .service('Entity', ['Paths', function(Paths: IPaths) {
     // we can ask for more parameters if needed
     return function entityFactory(path: string, id: string) { // return a factory instead of a new talker
         return new Entity(Paths, path, id);

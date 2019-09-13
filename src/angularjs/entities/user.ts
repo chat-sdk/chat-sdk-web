@@ -1,81 +1,89 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-import * as PathKeys from "../keys/path-keys";
-import {N} from "../keys/notification-keys";
-import * as Keys from "../keys/keys";
-import {Entity, IEntity} from "./entity";
-import {userUID} from "../keys/keys";
-import {UserKeys} from "../keys/user-keys";
-import {UserAllowInvites} from "../keys/allow-invite-type";
-import {Utils} from "../services/utils";
-import {IRoom} from "./room";
-import {RoomKeys} from "../keys/room-keys";
-import {IRootScope} from "../interfaces/root-scope";
+import * as PathKeys from '../keys/path-keys';
+import * as Keys from '../keys/keys';
+import { N } from '../keys/notification-keys';
+import { Entity , IEntity} from './entity';
+import { userUID } from '../keys/keys';
+import { UserKeys } from '../keys/user-keys';
+import { UserAllowInvites } from '../keys/allow-invite-type';
+import { Utils } from '../services/utils';
+import { IRoom } from './room';
+import { RoomKeys } from '../keys/room-keys';
+import { IRootScope } from '../interfaces/root-scope';
+import { IPaths } from '../network/paths';
+import { ICloudImage } from '../services/cloud-image';
+import { IEnvironment } from '../services/environment';
+import { INetworkManager } from '../network/network-manager';
+import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface IUser extends IEntity {
     online: boolean
     meta: Map<string, any>
-    unblock: () => void
+    friend?: boolean
+    ssoFriend?: boolean
+    unblock(): void
 
     uid(): string
     isMe(): boolean
 
-    setName(name): void
+    setName(name: string): void
     getName(): string
-    name(value): string
+    name(value: string): string
 
     getImageURL(): string
-    setImageURL(imageURL): void
+    setImageURL(imageURL: string): void
 
-    setImage(image, isData?): void
+    setImage(image: string, isData?: boolean): void
 
-    setProfileHTML(profileHTML): void
+    setProfileHTML(profileHTML: string): void
     hasImage(): boolean
     addRoomUpdate(room: IRoom): {}
     removeRoomUpdate(room: IRoom): {}
-    updateImageURL(imageURL): Promise<any>
+    updateImageURL(imageURL: string): Promise<any>
     pushMeta(): Promise<any>
     on(): Promise<any>
     off(): void
     unblockUser(block): void
     canBeInvitedByUser(invitingUser: IUser): boolean
-    allowInvitesFrom(type): boolean
+    allowInvitesFrom(type: UserAllowInvites): boolean
     deserialize(su): void
+    removeFriend: (friend?: IUser) => void
 }
 
 class User extends Entity implements IUser {
 
     public meta = new Map<string, any>();
     public online: boolean;
-    private image;
+    private image: string;
     unblock: () => void = null;
 
-    constructor (
+    constructor(
         private $rootScope: IRootScope,
-        private $timeout,
-        Paths,
-        private CloudImage,
-        private Environment,
-        private NetworkManager,
-        uid: string) {
+        private $timeout: ng.ITimeoutService,
+        Paths: IPaths,
+        private CloudImage: ICloudImage,
+        private Environment: IEnvironment,
+        private NetworkManager: INetworkManager,
+        uid: string,
+    ) {
         super(Paths, PathKeys.UsersPath, uid);
 
         this.setImageURL(Environment.defaultProfilePictureURL());
         this.setUID(uid);
         this.setAllowInvites(UserAllowInvites.Everyone);
-
     }
 
-    getName() {
+    getName(): string {
         return this.getMetaValue(UserKeys.Name);
     };
 
-    setName(name): void {
-        return this.setMetaValue(UserKeys.Name, name);
+    setName(name: string) {
+        this.setMetaValue(UserKeys.Name, name);
     };
 
-    name(value): string {
+    name(value: string): string {
         if (Utils.unORNull(value)) {
             return this.getName();
         } else {
@@ -87,12 +95,12 @@ class User extends Entity implements IUser {
         return this.getMetaValue(UserKeys.Status);
     };
 
-    setStatus(status) {
+    setStatus(status: string) {
         return this.setMetaValue(UserKeys.Status, status);
     };
 
     // For Angular getterSetter binding
-    status(value) {
+    status(value: string) {
         if (Utils.unORNull(value)) {
             return this.getStatus();
         } else {
@@ -116,15 +124,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getCountryCode() {
+    getCountryCode(): string {
         return this.getMetaValue(UserKeys.CountryCode);
     };
 
-    setCountryCode(countryCode) {
+    setCountryCode(countryCode: string) {
         return this.setMetaValue(UserKeys.CountryCode, countryCode);
     };
 
-    countryCode(value) {
+    countryCode(value: string) {
         if (Utils.unORNull(value)) {
             return this.getCountryCode();
         } else {
@@ -132,15 +140,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getGender() {
+    getGender(): string {
         return this.getMetaValue(UserKeys.Gender);
     };
 
-    setGender(gender) {
+    setGender(gender: string) {
         return this.setMetaValue(UserKeys.Gender, gender);
     };
 
-    gender(value) {
+    gender(value: string) {
         if (Utils.unORNull(value)) {
             return this.getGender();
         } else {
@@ -148,15 +156,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getProfileLink() {
+    getProfileLink(): string {
         return this.getMetaValue(UserKeys.ProfileLink);
     };
 
-    setProfileLink(profileLink) {
+    setProfileLink(profileLink: string) {
         return this.setMetaValue(UserKeys.ProfileLink, profileLink);
     };
 
-    profileLink(value) {
+    profileLink(value: string) {
         if (Utils.unORNull(value)) {
             return this.getProfileLink();
         } else {
@@ -164,15 +172,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getHomepageLink() {
+    getHomepageLink(): string {
         return this.getMetaValue(UserKeys.HomepageLink);
     };
 
-    setHomepageLink(homepageLink) {
+    setHomepageLink(homepageLink: string) {
         return this.setMetaValue(UserKeys.HomepageLink, homepageLink);
     };
 
-    homepageLink(value) {
+    homepageLink(value: string) {
         if (Utils.unORNull(value)) {
             return this.getHomepageLink();
         } else {
@@ -180,15 +188,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getHomepageText() {
+    getHomepageText(): string {
         return this.getMetaValue(UserKeys.HomepageText);
     };
 
-    setHomepageText(homepageText) {
+    setHomepageText(homepageText: string) {
         return this.setMetaValue(UserKeys.HomepageText, homepageText);
     };
 
-    homepageText(value) {
+    homepageText(value: string) {
         if (Utils.unORNull(value)) {
             return this.getHomepageText();
         } else {
@@ -196,15 +204,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getProfileHTML() {
+    getProfileHTML(): string {
         return this.getMetaValue(UserKeys.ProfileHTML);
     };
 
-    setProfileHTML(profileHTML): void {
-        return this.setMetaValue(UserKeys.ProfileHTML, profileHTML);
+    setProfileHTML(profileHTML: string) {
+        this.setMetaValue(UserKeys.ProfileHTML, profileHTML);
     };
 
-    profileHTML(value) {
+    profileHTML(value: string) {
         if (Utils.unORNull(value)) {
             return this.getProfileHTML();
         } else {
@@ -212,15 +220,15 @@ class User extends Entity implements IUser {
         }
     };
 
-    getAllowInvites() {
+    getAllowInvites(): UserAllowInvites {
         return this.getMetaValue(UserKeys.AllowInvites);
     };
 
-    setAllowInvites(allowInvites) {
+    setAllowInvites(allowInvites: UserAllowInvites) {
         return this.setMetaValue(UserKeys.AllowInvites, allowInvites);
     };
 
-    allowInvites(value = null) {
+    allowInvites(value?: UserAllowInvites) {
         if (Utils.unORNull(value)) {
             return this.getAllowInvites();
         } else {
@@ -232,15 +240,15 @@ class User extends Entity implements IUser {
         return this.getMetaValue(UserKeys.ImageURL);
     };
 
-    setImageURL(imageURL): void {
+    setImageURL(imageURL: string) {
         this.setMetaValue(UserKeys.ImageURL, imageURL);
     };
 
-    getThumbnail() {
+    getThumbnail(): string {
         return this.CloudImage.cloudImage(this.getImageURL(), 100, 100);
     }
 
-    imageURL(value = null) {
+    imageURL(value?: string) {
         if (Utils.unORNull(value)) {
             return this.getImageURL();
         } else {
@@ -250,15 +258,15 @@ class User extends Entity implements IUser {
 
     on(): Promise<any> {
 
-        if(this.pathIsOn[Keys.MetaKey]) {
+        if (this.pathIsOn[Keys.MetaKey]) {
             return;
         }
 
         const ref = this.Paths.userOnlineRef(this.uid());
         ref.on('value', (snapshot) => {
-            if(!Utils.unORNull(snapshot.val())) {
+            if (!Utils.unORNull(snapshot.val())) {
                 this.online = snapshot.val();
-                if(this.online) {
+                if (this.online) {
                     this.$rootScope.$broadcast(N.OnlineUserAdded);
                 }
                 else {
@@ -268,7 +276,7 @@ class User extends Entity implements IUser {
         });
 
         return this.pathOn(Keys.MetaKey, (val)  => {
-            if(val) {
+            if (val) {
                 this.setMeta(val);
 
                 // Update the user's thumbnail
@@ -283,30 +291,34 @@ class User extends Entity implements IUser {
         });
     };
 
-    // Stop listening to the Firebase location
-    off(): void {
+    /**
+     * Stop listening to the Firebase location
+     */
+    off() {
         this.pathOff(Keys.MetaKey);
         this.Paths.userOnlineRef(this.uid()).off();
     };
 
-    pushMeta(): Promise<any> {
+    async pushMeta(): Promise<any> {
         const ref = this.Paths.userMetaRef(this.uid());
-        return ref.update(this.getMetaObject()).then(() => {
+        try {
+            await ref.update(this.getMetaObject());
             return this.updateState(Keys.MetaKey);
-        }).catch((e) => {
-            console.log("PushMeta");
-        });
+        }
+        catch (err) {
+            console.error('PushMeta\n' + err.message);
+        }
     };
 
     canBeInvitedByUser(invitingUser: IUser): boolean {
 
         // This function should only ever be called on the root user
-        if(!this.isMe()) {
+        if (!this.isMe()) {
             console.log("Can be invited should only be called on the root user");
             return false;
         }
 
-        if(invitingUser.isMe()) {
+        if (invitingUser.isMe()) {
             return true;
         }
 
@@ -314,14 +326,14 @@ class User extends Entity implements IUser {
         return Utils.unORNull(allowInvites) || allowInvites == UserAllowInvites.Everyone;
     };
 
-    allowInvitesFrom(type): boolean {
+    allowInvitesFrom(type: UserAllowInvites): boolean {
         return this.allowInvites() == type;
     };
 
-    updateImageURL(imageURL): Promise<any> {
+    updateImageURL(imageURL: string): Promise<any> {
         // Compare to the old URL
         let imageChanged = imageURL != this.imageURL();
-        if(imageChanged) {
+        if (imageChanged) {
             this.setMetaValue(UserKeys.ImageURL, imageURL);
             this.setImageURL(imageURL);
             this.setImage(imageURL, false);
@@ -329,12 +341,12 @@ class User extends Entity implements IUser {
         }
     };
 
-    setImage(image, isData = false): void {
-        if(image === undefined) {
+    setImage(image: string, isData = false): void {
+        if (image === undefined) {
             // TODO: Improve this
             this.image = this.Environment.defaultProfilePictureURL();
         }
-        else if(isData || image == this.Environment.defaultProfilePictureURL()) {
+        else if (isData || image == this.Environment.defaultProfilePictureURL()) {
             this.image = image;
         }
         else {
@@ -346,15 +358,15 @@ class User extends Entity implements IUser {
         return this.uid() === this.NetworkManager.auth.currentUserID();
     };
 
-    getAvatar() {
-        if(Utils.unORNull(this.image)) {
+    getAvatar(): string {
+        if (Utils.unORNull(this.image)) {
             return this.Environment.defaultProfilePictureURL();
         }
         return this.image;
     };
 
     hasImage(): boolean {
-        return this.image && this.image != this.Environment.defaultProfilePictureURL;
+        return this.image && this.image != this.Environment.defaultProfilePictureURL();
     };
 
     addRoomUpdate(room: IRoom): {} {
@@ -374,31 +386,38 @@ class User extends Entity implements IUser {
         return this.Paths.userRoomsRef(this.uid());
     }
 
-    addFriend(friend) {
-        if(friend && friend.meta && friend.uid()) {
+    addFriend(friend: IUser): Promise<any> {
+        if (friend && friend.meta && friend.uid()) {
             return this.addFriendWithUID(friend.uid());
         }
     };
 
-    addFriendWithUID(uid) {
-        let ref = this.Paths.userFriendsRef(this.uid());
-        let data = {};
-        data[uid] = {uid: uid};
+    async addFriendWithUID(uid: string): Promise<any> {
+        const ref = this.Paths.userFriendsRef(this.uid());
+        const data = { [uid]: { uid: uid } };
 
-        return ref.update(data, ).then(() => {
-            return this.updateState(PathKeys.FriendsPath);
-        });
+        await ref.update(data);
+        return this.updateState(PathKeys.FriendsPath);
     };
 
-    uid() {
+    uid(): string {
         return this._id;
     };
 
-    setUID(uid) {
+    setUID(uid: string) {
         return this.setMetaValue(userUID, uid);
     };
 
-    removeFriend(friend) {
+    /**
+     * Remove the user as a friend on which this function is being called on
+     */
+    removeFriend(): void;
+    /**
+     * Remove a specified user as a friend
+     * @package friend - the user to be removed as a friend
+     */
+    removeFriend(friend: IUser): void;
+    removeFriend(friend?: IUser) {
         // This method is added to the object when the friend is
         // added initially
         friend.removeFriend();
@@ -406,49 +425,50 @@ class User extends Entity implements IUser {
         this.updateState(PathKeys.FriendsPath);
     };
 
-    blockUserWithUID(uid) {
+    blockUserWithUID(uid: string) {
         const ref = this.Paths.userBlockedRef(this.uid());
-        const data = {};
-        data[uid] = {uid: uid};
+        const data = { [uid]: { uid: uid } };
 
         ref.update(data).then(() => {
             return this.updateState(PathKeys.BlockedPath);
         });
     };
 
-    markRoomReadTime(rid) {
+    markRoomReadTime(rid: string) {
         const ref = this.Paths.userRoomsRef(this.uid()).child(rid);
-        const data = {};
-        data[Keys.ReadKey] = firebase.database.ServerValue.TIMESTAMP;
+        const data = {
+            [Keys.ReadKey]: firebase.database.ServerValue.TIMESTAMP,
+        };
         return ref.update(data);
     };
 
-    blockUser(block) {
-        if(block && block.meta && block.uid()) {
-            this.blockUserWithUID(block.uid());
+    blockUser(user: IUser) {
+        if (user && user.meta && user.uid()) {
+            this.blockUserWithUID(user.uid());
         }
     };
 
-    unblockUser(block): void {
-        block.unblock();
-        block.unblock = null;
-        const _ = this.updateState(PathKeys.BlockedPath);
+    unblockUser(user: IUser): void {
+        user.unblock();
+        user.unblock = null;
+        this.updateState(PathKeys.BlockedPath);
     };
 
-    serialize(): {} {
+    serialize(): StringAnyObject {
         return super.serialize();
     };
 
-    deserialize(su): void {
-        if(su) {
+    deserialize(su: StringAnyObject) {
+        if (su) {
             super.deserialize(su._super);
             this.setImage(su.meta[UserKeys.ImageURL]);
         }
     };
+
 }
 
 angular.module('myApp.services')
-    .service('User', ['$rootScope', '$timeout', 'Paths', 'CloudImage', 'Environment', 'NetworkManager', function($rootScope, $timeout, Paths, CloudImage, Environment, NetworkManager) {
+    .service('User', ['$rootScope', '$timeout', 'Paths', 'CloudImage', 'Environment', 'NetworkManager', function($rootScope: IRootScope, $timeout: ng.ITimeoutService, Paths: IPaths, CloudImage: ICloudImage, Environment: IEnvironment, NetworkManager: INetworkManager) {
         // we can ask for more parameters if needed
         return function messageFactory(uid: string) { // return a factory instead of a new talker
             return new User($rootScope, $timeout, Paths, CloudImage, Environment, NetworkManager, uid);
