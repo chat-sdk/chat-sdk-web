@@ -1,31 +1,34 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
 export interface IMarquee {
-    startWithMessage(message: string): void
+    startWithMessage(message: string): void;
 }
 
 class Marquee implements IMarquee {
 
     static $inject = ['$window', '$interval'];
 
-    running: any = null;
-    title =  "";
+    running: ng.IPromise<any> = null;
+    title =  '';
 
-    constructor(private $window: ng.IWindowService, private $interval: ng.IIntervalService) {
+    constructor(
+        private $window: ng.IWindowService,
+        private $interval: ng.IIntervalService,
+    ) {
         this.title = $window.document.title;
         return this;
     }
 
-    startWithMessage(message) {
-        if(this.running) {
+    startWithMessage(message: string) {
+        if (this.running) {
             this.stop();
         }
-        let text = "Chatcat Message: " + message + "...";
+        let text = 'Chatcat Message: ' + message + '...';
 
         this.running = this.$interval(() => {
             // Change the page title
             this.$window.document.title = text;
-            if(text.length > 0) {
+            if (text.length > 0) {
                 text = text.slice(1);
             }
             else {
@@ -40,6 +43,7 @@ class Marquee implements IMarquee {
         // Change the page title
         this.$window.document.title = this.title;
     }
+
 }
 
 angular.module('myApp.services').service('Marquee', Marquee);
