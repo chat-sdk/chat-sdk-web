@@ -1,18 +1,19 @@
-import * as angular from 'angular'
-import {AllEmojiNames} from "../keys/all-emojis";
+import * as angular from 'angular';
+
+import { AllEmojiNames } from '../keys/all-emojis';
 
 export interface IEmoji {
-    getEmojis() : string[]
+    getEmojis(): string[];
 }
 
 export class Emoji implements IEmoji {
 
-    private store: string [] = [];
+    private store = Array<string>();
 
-    getEmojis() : string[] {
+    getEmojis(): string[] {
         if (!this.store.length) {
-            for(let i = 0; i < 50; i++) {
-                this.store.push(":" + AllEmojiNames[i] + ":");
+            for (let i = 0; i < 50; i++) {
+                this.store.push(':' + AllEmojiNames[i] + ':');
             }
         }
         return this.store;
@@ -21,4 +22,3 @@ export class Emoji implements IEmoji {
 }
 
 angular.module('myApp.services').service('Emoji', Emoji);
-
