@@ -14,6 +14,7 @@ export interface IEnvironment {
     defaultRoomPictureURL(): string;
     cloudImageToken(): string;
     showOnPaths(): string;
+    audioURL(): string;
 }
 
 class Environment implements IEnvironment {

@@ -11,6 +11,8 @@ export interface ILocalStorage {
     updateRoomFromStore(room: IRoom): void
     sync(): void
     storeRooms(rooms: {}): void
+    isMuted(): boolean
+    setMuted(muted: boolean): void
 }
 
 class LocalStorage implements ILocalStorage {
@@ -81,7 +83,7 @@ class LocalStorage implements ILocalStorage {
         return this.getProperty('cc_muted');
     }
 
-    setMuted(muted) {
+    setMuted(muted: boolean) {
         this.setProperty('cc_muted', muted);
     }
 
