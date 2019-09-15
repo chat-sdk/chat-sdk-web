@@ -1,12 +1,13 @@
-import * as angular from 'angular'
-import {IUser} from "../entities/user";
-import {ILocalStorage} from "./local-storage";
-import {IBeforeUnload, IBeforeUnloadListener} from "../services/before-unload";
-import {INetworkManager} from "../network/network-manager";
-import {IRootScope} from "../interfaces/root-scope";
+import * as angular from 'angular';
+
+import { IUser } from '../entities/user';
+import { ILocalStorage } from './local-storage';
+import { IBeforeUnload , IBeforeUnloadListener} from '../services/before-unload';
+import { INetworkManager } from '../network/network-manager';
+import { IRootScope } from '../interfaces/root-scope';
 
 export interface IUserStore {
-    getUserWithID (uid): IUser;
+    getUserWithID(uid: string): IUser;
     getOrCreateUserWithID(uid: string, cancelOn?: boolean): IUser;
     currentUser(): IUser;
     users: { [uid: string]: IUser };
@@ -14,36 +15,36 @@ export interface IUserStore {
 
 class UserStore implements IUserStore, IBeforeUnloadListener {
 
-    users = {};
+    users: { [uid: string]: IUser } = {};
 
     static $inject = ['$rootScope', 'LocalStorage', 'User', 'BeforeUnload', 'NetworkManager'];
 
     constructor (
         private $rootScope: IRootScope,
         private LocalStorage: ILocalStorage,
-        private User,
+        private User/*: IUser*/,
         private BeforeUnload: IBeforeUnload,
         private NetworkManager: INetworkManager)
     {
         this.BeforeUnload.addListener(this);
     }
 
-    beforeUnload(): void {
+    beforeUnload() {
         this.sync();
     }
 
-    sync(): void {
+    sync() {
         this.LocalStorage.storeUsers(this.users);
         this.LocalStorage.sync();
     }
 
     getOrCreateUserWithID(uid: string, cancelOn?: boolean): IUser {
         let user = this.getUserWithID(uid);
-        if(!user) {
+        if (!user) {
             user = this.buildUserWithID(uid);
             this.addUser(user);
         }
-        if(!cancelOn) {
+        if (!cancelOn) {
             const _ = user.on();
         }
 
@@ -65,13 +66,13 @@ class UserStore implements IUserStore, IBeforeUnloadListener {
     }
 
     // A cache of all users
-    addUser(user: IUser): void {
-        if(user && user.meta && user.uid()) {
+    addUser(user: IUser) {
+        if (user && user.meta && user.uid()) {
             this.users[user.uid()] = user;
         }
     }
 
-    clear(): void {
+    clear() {
         this.users = {};
     }
 
