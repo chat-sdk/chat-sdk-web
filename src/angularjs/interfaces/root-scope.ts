@@ -8,5 +8,6 @@ export interface IRootScope extends ng.IRootScopeService {
     config: IConfig;
     userDrag: UserDragAction;
     disableDrag: boolean;
+    partialsURL: string;
     showNotification: (type: NotificationType, title: string, message: string, button: string) => void;
 }

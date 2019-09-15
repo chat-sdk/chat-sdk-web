@@ -1,38 +1,42 @@
-import * as angular from 'angular'
-import {ChatSDKConfig} from "../app/config";
-import {Utils} from "./utils";
+import * as angular from 'angular';
+
+import { ChatSDKConfig } from '../app/config';
+import { Utils } from './utils';
+import { IRootScope } from '../interfaces/root-scope';
+import { IFirebaseConfig } from '../interfaces/firebase-config';
+import { IChatSDKConfig } from '../interfaces/chat-sdk-config';
 
 export interface IEnvironment {
-    firebaseConfig(): any
-    config(): any
-    partialsURL(): string
-    defaultProfilePictureURL(): string
-    defaultRoomPictureURL(): string
-    cloudImageToken(): string
+    firebaseConfig(): any;
+    config(): any;
+    partialsURL(): string;
+    defaultProfilePictureURL(): string;
+    defaultRoomPictureURL(): string;
+    cloudImageToken(): string;
 }
 
 class Environment implements IEnvironment {
 
     static $inject = ['$rootScope'];
 
-    constructor (private $rootScope) {
+    constructor (private $rootScope: IRootScope) {
         $rootScope.partialsURL = this.partialsURL();
     }
 
-    firebaseConfig(): any {
+    firebaseConfig(): IFirebaseConfig {
         return this.config().firebaseConfig;
     }
 
-    config(): any {
+    config(): IChatSDKConfig {
         return ChatSDKConfig;
     }
 
-    showOnPaths() {
+    showOnPaths(): string[] {
         return this.config().showOnPaths;
     }
 
-    rootURL() {
-        if(this.config().environment == 'test') {
+    rootURL(): string {
+        if (this.config().environment == 'test') {
             return document.location.origin + '/';
         }
         else {
@@ -44,34 +48,34 @@ class Environment implements IEnvironment {
         return this.resourceRootURL() + 'assets/partials/';
     }
 
-    imagesURL() {
+    imagesURL(): string {
         return this.resourceRootURL() + 'assets/img/';
     }
 
-    audioURL() {
+    audioURL(): string {
         return this.resourceRootURL() + 'assets/audio/';
     }
 
-    defaultProfilePictureURL() {
+    defaultProfilePictureURL(): string {
         return this.imagesURL() + 'cc-100-profile-pic.png';
     }
 
-    defaultRoomPictureURL() {
+    defaultRoomPictureURL(): string {
         return this.imagesURL() + 'cc-100-room-pic.png';
     }
 
-    facebookAppID() {
+    facebookAppID(): string {
         return this.config().facebookAppID;
     }
 
-    cloudImageToken() {
+    cloudImageToken(): string {
         return this.config().cloudImageToken;
     }
 
-    resourceRootURL() {
+    resourceRootURL(): string {
         let url = this.config().resourceRootURL;
-        if(!Utils.unORNull(url)) {
-            if(!(url[url.length - 1] == '/')) {
+        if (!Utils.unORNull(url)) {
+            if (!(url[url.length - 1] == '/')) {
                 url += '/';
             }
             return url;
@@ -79,9 +83,10 @@ class Environment implements IEnvironment {
         return this.rootURL();
     }
 
-    rootPath() {
+    rootPath(): string {
         return this.config().rootPath;
     }
+
 }
 
 angular.module('myApp.services').service('Environment', Environment);
