@@ -1,5 +1,5 @@
-import * as angular from 'angular'
-import * as $ from 'jquery'
+import * as angular from 'angular';
+import * as $ from 'jquery';
 
 import { N } from '../keys/notification-keys';
 import { IRootScope } from '../interfaces/root-scope';
