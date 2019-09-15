@@ -13,6 +13,7 @@ export interface IEnvironment {
     defaultProfilePictureURL(): string;
     defaultRoomPictureURL(): string;
     cloudImageToken(): string;
+    showOnPaths(): string;
 }
 
 class Environment implements IEnvironment {
@@ -31,7 +32,7 @@ class Environment implements IEnvironment {
         return ChatSDKConfig;
     }
 
-    showOnPaths(): string[] {
+    showOnPaths(): string {
         return this.config().showOnPaths;
     }
 

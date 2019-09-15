@@ -54,7 +54,7 @@ export interface IChatSDKConfig {
      * Comma separated list of paths. If set, chat will
      * only display on these paths
      */
-    showOnPaths: string[],
+    showOnPaths: string,
 
     /**
      * If set, partials will be loaded from this URL. Otherwise
