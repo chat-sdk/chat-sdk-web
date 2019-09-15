@@ -1,40 +1,45 @@
-import * as angular from 'angular'
-import {N} from "../keys/notification-keys";
+import * as angular from 'angular';
+
+import { N } from '../keys/notification-keys';
+import { IRootScope } from '../interfaces/root-scope';
+import { ILocalStorage } from '../persistence/local-storage';
 
 export interface IScreen {
-    screenWidth: number
-    screenHeight: number
+    screenWidth: number;
+    screenHeight: number;
 }
 
-angular.module('myApp.services').factory('Screen', ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage', function ($rootScope, $timeout, $document, $window, LocalStorage) {
+class Screen implements IScreen {
 
-    let screen = {
+    static $inject = ['$rootScope', '$timeout', '$document', '$window', 'LocalStorage'];
 
-        //rooms: [],
-        screenWidth: 0,
-        screenHeight: 0,
+    screenWidth = 0;
+    screenHeight = 0;
 
-        init: function () {
+    constructor(
+        private $rootScope: IRootScope,
+        private $timeout: ng.ITimeoutService,
+        private $document: ng.IDocumentService,
+        private $window: ng.IWindowService,
+        private LocalStorage: ILocalStorage,
+    ) {
+        // Set the screen width and height
+        this.updateScreenSize();
 
-            // Set the screen width and height
+        // Monitor the window size
+        angular.element($window).bind('resize', () => {
             this.updateScreenSize();
+        });
+    }
 
-            // Monitor the window size
-            angular.element($window).bind('resize', () => {
-                this.updateScreenSize();
-            });
+    // TODO: Check this
+    updateScreenSize() {
+        this.screenWidth = this.$window.innerWidth;//this.$document.width();
+        this.screenHeight = this.$window.innerHeight;
 
-            return this;
-        },
+        this.$rootScope.$broadcast(N.ScreenSizeChanged);
+    }
 
-        // TODO: Check this
-        updateScreenSize: function () {
-            this.screenWidth = $window.innerWidth;//$document.width();
-            this.screenHeight = $window.innerHeight;
+}
 
-            $rootScope.$broadcast(N.ScreenSizeChanged);
-        }
-
-    };
-    return screen.init();
-}]);
+angular.module('myApp.services').service('Screen', Screen);
