@@ -8,6 +8,7 @@ export interface IEnvironment {
     partialsURL(): string
     defaultProfilePictureURL(): string
     defaultRoomPictureURL(): string
+    cloudImageToken(): string
 }
 
 class Environment implements IEnvironment {
