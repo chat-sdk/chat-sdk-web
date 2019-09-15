@@ -1,9 +1,9 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
 export interface IWebStorage {
-    sync(): void
-    setProperty(key: string, value: any): void
-    getProperty(key: string): any
+    sync(): void;
+    setProperty(key: string, value: any): void;
+    getProperty(key: string): any;
 }
 
 class WebStorage implements IWebStorage {
@@ -17,7 +17,7 @@ class WebStorage implements IWebStorage {
 
     constructor (private $window: ng.IWindowService) {
         let localStorage = this.localStorage();
-        if(!localStorage) {
+        if (!localStorage) {
             return;
         }
 
@@ -25,17 +25,17 @@ class WebStorage implements IWebStorage {
         let key = null;
         for (let i = 0, k; i < localStorage.length; i++) {
             key = localStorage.key(i);
-            if(key.slice(0, this.key.length) === this.key) {
+            if (key.slice(0, this.key.length) === this.key) {
                 this.store[key.slice(this.key.length)] = angular.fromJson(localStorage.getItem(key));
             }
         }
     }
 
-    sync(): void {
+    sync() {
         for(let key in this.store) {
-            if(this.store.hasOwnProperty(key)) {
+            if (this.store.hasOwnProperty(key)) {
                 const value = this.store[key];
-                if(angular.isDefined(value) && key.length && '$' !== key[0]) {
+                if (angular.isDefined(value) && key.length && '$' !== key[0]) {
                     try {
                         this.localStorage().setItem(this.key + key, angular.toJson(value));
                     }
@@ -48,8 +48,8 @@ class WebStorage implements IWebStorage {
         }
     }
 
-    setProperty(key: string, value: any): void {
-        if(key && key.length && key[0] !== '$') {
+    setProperty(key: string, value: any) {
+        if (key && key.length && key[0] !== '$') {
             this.store[key] = value;
         }
     }
@@ -59,15 +59,16 @@ class WebStorage implements IWebStorage {
     }
 
     localStorage() {
-        if(!this.ls) {
+        if (!this.ls) {
             this.ls = this.$window['localStorage'];
         }
         return this.ls;
     }
 
-    localStorageSupported() {
+    localStorageSupported(): boolean {
         return this.localStorage() != null;
     }
+
 }
 
 angular.module('myApp.services').service('WebStorage', WebStorage);
