@@ -1,80 +1,92 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 import * as moment from 'moment';
 
+import { IPaths } from '../network/paths';
+
 export interface ITime {
-    formatTimestamp (timestamp: number, type?: string): string
-    start(uid: string): Promise<any>
+    formatTimestamp (timestamp: number, type?: string): string;
+    start(uid: string): Promise<any>;
     now(): number;
 }
 
-angular.module('myApp.services').factory('Time', ['$q', 'Paths', function ($q, Paths) {
-    return {
+class Time implements ITime {
 
-        localTime: null,
-        remoteTime: null,
-        uid: null,
-        working: false,
+    static $inject = ['$q', 'Paths'];
 
-        start: function (uid): Promise<any> {
+    localTime = null;
+    remoteTime = null;
+    uid: string = null;
+    working = false;
 
-            if(this.remoteTime && uid == this.uid) {
-                return Promise.resolve();
-            }
+    constructor(
+        private $q: ng.IQService,
+        private Paths: IPaths,
+    ) { }
 
-            this.working = true;
+    async start(uid: string): Promise<any> {
 
-            let ref = Paths.timeRef(uid);
-            return ref.set(firebase.database.ServerValue.TIMESTAMP).then(() => {
-                return ref.once('value', (snapshot) => {
-                    this.working = false;
-                    if(snapshot.val()) {
-                        this.impl_setTime(snapshot.val(), uid);
-                        return this.remoteTime;
-                    }
-                });
-            }, (error) => {
+        if (this.remoteTime && uid == this.uid) {
+            return Promise.resolve();
+        }
+
+        this.working = true;
+
+        let ref = this.Paths.timeRef(uid);
+        try {
+            await ref.set(firebase.database.ServerValue.TIMESTAMP);
+            return ref.once('value', (snapshot) => {
                 this.working = false;
+                if (snapshot.val()) {
+                    this.impl_setTime(snapshot.val(), uid);
+                    return this.remoteTime;
+                }
             });
-        },
-
-        impl_setTime: function (remoteTime, uid) {
-            this.remoteTime = remoteTime;
-            this.uid = uid;
+        }
+        catch (error) {
             this.working = false;
-        },
-
-        now: function () {
-            if(this.remoteTime) {
-                return new Date().getTime() - this.localTime + this.remoteTime;
-            }
-            return null;
-        },
-
-        secondsSince: function (time) {
-            return Math.abs(this.now() - time)/1000;
-        },
-
-        formatTimestamp: function (timestamp: number, type?: string): string {
-            try {
-                if(type == '24hour') {
-                    return moment(timestamp).format('HH:mm');
-                }
-                else {
-                    return moment(timestamp).format('h:mm a');
-                }
-            }
-            // In some cases (maktab.pk) a javascript conflict seems to stop moment working
-            // TODO: Investigate this
-            catch (e) {
-                const date = new Date(timestamp);
-                // hours part from the timestamp
-                const hours = date.getHours();
-                // minutes part from the timestamp
-                const minutes = "0" + date.getMinutes();
-                // will display time in 10:30:23 format
-                return hours + ':' + minutes.substr(minutes.length-2);
-            }
         }
     }
-}]);
+
+    impl_setTime(remoteTime: number, uid: string) {
+        this.remoteTime = remoteTime;
+        this.uid = uid;
+        this.working = false;
+    }
+
+    now(): number {
+        if (this.remoteTime) {
+            return new Date().getTime() - this.localTime + this.remoteTime;
+        }
+        return null;
+    }
+
+    secondsSince(time: number): number {
+        return Math.abs(this.now() - time)/1000;
+    }
+
+    formatTimestamp(timestamp: number, type?: string): string {
+        try {
+            if (type == '24hour') {
+                return moment(timestamp).format('HH:mm');
+            }
+            else {
+                return moment(timestamp).format('h:mm a');
+            }
+        }
+        // In some cases (maktab.pk) a javascript conflict seems to stop moment working
+        // TODO: Investigate this
+        catch (e) {
+            const date = new Date(timestamp);
+            // hours part from the timestamp
+            const hours = date.getHours();
+            // minutes part from the timestamp
+            const minutes = "0" + date.getMinutes();
+            // will display time in 10:30:23 format
+            return hours + ':' + minutes.substr(minutes.length-2);
+        }
+    }
+
+}
+
+angular.module('myApp.services').service('Time', Time);
