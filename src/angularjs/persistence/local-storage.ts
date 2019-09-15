@@ -1,18 +1,20 @@
-import * as angular from 'angular'
-import {Utils} from "../services/utils";
-import {IUser} from "../entities/user";
-import {IRoom} from "../entities/room";
-import {IWebStorage} from "./web-storage";
+import * as angular from 'angular';
+
+import { Utils } from '../services/utils';
+import { IUser } from '../entities/user';
+import { IRoom } from '../entities/room';
+import { IWebStorage } from './web-storage';
+import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface ILocalStorage {
-    rooms: {}
-    storeUsers(users: {}): void
-    updateUserFromStore(user: IUser): boolean
-    updateRoomFromStore(room: IRoom): void
-    sync(): void
-    storeRooms(rooms: {}): void
-    isMuted(): boolean
-    setMuted(muted: boolean): void
+    rooms: {};
+    storeUsers(users: { [key: string]: IUser }): void;
+    storeRooms(rooms: { [key: string]: IRoom }): void;
+    updateUserFromStore(user: IUser): boolean;
+    updateRoomFromStore(room: IRoom): void;
+    sync(): void;
+    isMuted(): boolean;
+    setMuted(muted: boolean): void;
 }
 
 class LocalStorage implements ILocalStorage {
@@ -20,13 +22,13 @@ class LocalStorage implements ILocalStorage {
     static $inject = ['WebStorage'];
 
     constructor (
-        private WebStorage: IWebStorage)
-    {
+        private WebStorage: IWebStorage
+    ) {
         const rooms = this.getProperty(this.roomsKey);
 
-        if(rooms && rooms.length) {
+        if (rooms && rooms.length) {
             let room = null;
-            for(let i = 0; i < rooms.length; i++) {
+            for (let i = 0; i < rooms.length; i++) {
                 room = rooms[i];
                 if (room.meta) {
                     this.rooms[room.meta.rid] = room;
@@ -35,10 +37,10 @@ class LocalStorage implements ILocalStorage {
         }
 
         const sus = this.getProperty(this.usersKey);
-        if(sus && sus.length) {
+        if (sus && sus.length) {
             let su = null;
 
-            for(let i = 0; i < sus.length; i++) {
+            for (let i = 0; i < sus.length; i++) {
                 su = sus[i];
                 if (su.meta) {
                     this.users[su.meta.uid] = su;
@@ -66,20 +68,20 @@ class LocalStorage implements ILocalStorage {
 
     lastVisited = 'cc_last_visited';
 
-    rooms = {};
-    users = {};
+    rooms: { [key: string]: StringAnyObject } = {};
+    users: { [key: string]: StringAnyObject } = {};
 
     cacheCleared = false;
 
-    isOffline() {
+    isOffline(): boolean {
         return this.getProperty('cc_offline');
     }
 
-    setOffline(offline) {
+    setOffline(offline: boolean) {
         this.setProperty('cc_offline', offline);
     }
 
-    isMuted() {
+    isMuted(): boolean {
         return this.getProperty('cc_muted');
     }
 
@@ -87,11 +89,11 @@ class LocalStorage implements ILocalStorage {
         this.setProperty('cc_muted', muted);
     }
 
-    storeRooms(rooms: {}): void {
-        let room;
-        let sr = [];
-        for(let key in rooms) {
-            if(rooms.hasOwnProperty(key)) {
+    storeRooms(rooms: { [key: string]: IRoom }) {
+        let room: IRoom;
+        let sr = Array<StringAnyObject>();
+        for (let key in rooms) {
+            if (rooms.hasOwnProperty(key)) {
                 room = rooms[key];
                 sr.push(room.serialize());
             }
@@ -99,11 +101,11 @@ class LocalStorage implements ILocalStorage {
         this.setProperty(this.roomsKey, sr);
     }
 
-    storeUsers(users: {}): void {
-        let user;
-        let su = [];
-        for(let key in users) {
-            if(users.hasOwnProperty(key)) {
+    storeUsers(users: { [key: string]: IUser }) {
+        let user: IUser;
+        let su = Array<StringAnyObject>();
+        for (let key in users) {
+            if (users.hasOwnProperty(key)) {
                 user = users[key];
                 su.push(user.serialize());
             }
@@ -111,27 +113,27 @@ class LocalStorage implements ILocalStorage {
         this.setProperty(this.usersKey, su);
     }
 
-    sync(): void {
+    sync() {
         this.WebStorage.sync();
     }
 
-    updateRoomFromStore(room: IRoom): void {
+    updateRoomFromStore(room: IRoom) {
         let sr = this.rooms[room.rid()];
-        if(sr) {
+        if (sr) {
             room.deserialize(sr);
         }
     }
 
     updateUserFromStore(user: IUser): boolean {
         let su = this.users[user.uid()];
-        if(su) {
+        if (su) {
             user.deserialize(su);
             return true;
         }
         return false;
     }
 
-    getLastVisited() {
+    getLastVisited(): number {
         return this.getProperty(this.lastVisited);
     }
 
@@ -139,16 +141,16 @@ class LocalStorage implements ILocalStorage {
         this.setProperty(this.lastVisited, new Date().getTime());
     }
 
-    setProperty(key, value) {
-        if(!this.cacheCleared) {
+    setProperty(key: string, value: any) {
+        if (!this.cacheCleared) {
             this.WebStorage.setProperty(key, value);
         }
     }
 
-    getProperty(key) {
+    getProperty(key: string): any {
         let c = this.WebStorage.getProperty(key);
 
-        if(!Utils.unORNull(c)) {
+        if (!Utils.unORNull(c)) {
             let e;
             try {
                 e = eval(c);
@@ -163,7 +165,7 @@ class LocalStorage implements ILocalStorage {
         }
     }
 
-    removeProperty(key) {
+    removeProperty(key: string) {
         this.setProperty(key, null);
     }
 
@@ -175,11 +177,11 @@ class LocalStorage implements ILocalStorage {
         this.cacheCleared = true;
     }
 
-    clearCacheWithTimestamp(timestamp) {
-        if(!timestamp) return;
+    clearCacheWithTimestamp(timestamp: number) {
+        if (!timestamp) return;
 
         let currentTimestamp = this.getProperty(this.timestampKey);
-        if(!currentTimestamp || timestamp > currentTimestamp) {
+        if (!currentTimestamp || timestamp > currentTimestamp) {
             this.removeProperty(this.roomsKey);
             this.removeProperty(this.usersKey);
             this.clearToken();
@@ -194,6 +196,7 @@ class LocalStorage implements ILocalStorage {
         this.removeProperty(this.tokenExpiryKey);
         this.removeProperty(this.apiDetailsKey);
     }
+
 }
 
 angular.module('myApp.services').service('LocalStorage', LocalStorage);
