@@ -1,5 +1,5 @@
 import * as angular from 'angular';
-import * as pikaday from 'Pikaday';
+import * as pikaday from 'pikaday';
 
 import { IRootScope } from '../interfaces/root-scope';
 
