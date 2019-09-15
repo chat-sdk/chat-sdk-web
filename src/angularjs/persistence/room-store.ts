@@ -1,27 +1,31 @@
-import * as angular from 'angular'
-import {IRoom} from "../entities/room";
-import {ILocalStorage} from "./local-storage";
-import {IUserStore} from "./user-store";
-import {ArrayUtils} from "../services/array-utils";
+import * as angular from 'angular';
+
+import { IRoom } from '../entities/room';
+import { ILocalStorage } from './local-storage';
+import { IUserStore } from './user-store';
+import { ArrayUtils } from '../services/array-utils';
+import { IBeforeUnload } from '../services/before-unload';
+import { IUser } from '../entities/user';
 
 export interface IRoomStore {
-    getOrCreateRoomWithID(rid): IRoom
-    getRoomWithID(rid: string): IRoom
-    removeRoom(room: IRoom): void
+    getOrCreateRoomWithID(rid: string): IRoom;
+    getRoomWithID(rid: string): IRoom;
+    removeRoom(room: IRoom): void;
 }
 
 class RoomStore implements IRoomStore {
 
-    rooms = {};
+    rooms: { [key: string]: IRoom } = {};
     roomsLoadedFromMemory = false;
 
     static $inject = ['LocalStorage', 'Room', 'BeforeUnload', 'UserStore'];
 
     constructor(
         private LocalStorage: ILocalStorage,
-        private Room,
-        BeforeUnload,
-        private UserStore: IUserStore) {
+        private Room/*: IRoom*/,
+        private BeforeUnload: IBeforeUnload,
+        private UserStore: IUserStore
+    ) {
         BeforeUnload.addListener(this);
     }
 
@@ -29,7 +33,7 @@ class RoomStore implements IRoomStore {
      * Load the private rooms so they're available
      * to the inbox list
      */
-    loadPrivateRoomsToMemory(): void {
+    loadPrivateRoomsToMemory() {
 
         if (this.roomsLoadedFromMemory || !this.UserStore.currentUser()) {
             return;
@@ -45,7 +49,7 @@ class RoomStore implements IRoomStore {
         }
     }
 
-    beforeUnload(): void {
+    beforeUnload() {
         this.sync();
     }
 
@@ -80,13 +84,13 @@ class RoomStore implements IRoomStore {
         return room;
     }
 
-    addRoom(room) {
+    addRoom(room: IRoom) {
         if (room && room.rid()) {
             this.rooms[room.rid()] = room;
         }
     }
 
-    removeRoom(room: IRoom): void {
+    removeRoom(room: IRoom) {
         if (room && room.rid()) {
             delete this.rooms[room.rid()];
         }
@@ -100,7 +104,7 @@ class RoomStore implements IRoomStore {
         this.rooms = {};
     }
 
-    getPrivateRooms() {
+    getPrivateRooms(): IRoom[] {
 
         if (!this.UserStore.currentUser()) {
             return [];
@@ -108,7 +112,7 @@ class RoomStore implements IRoomStore {
 
         this.loadPrivateRoomsToMemory();
 
-        let rooms = [];
+        let rooms = Array<IRoom>();
         for (let rid in this.rooms) {
             if (this.rooms.hasOwnProperty(rid)) {
                 let room = this.rooms[rid];
@@ -121,8 +125,8 @@ class RoomStore implements IRoomStore {
         return rooms;
     }
 
-    getPrivateRoomsWithUsers(user1, user2) {
-        let rooms = [];
+    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[] {
+        let rooms = Array<IRoom>();
         for (let key in this.rooms) {
             if (this.rooms.hasOwnProperty(key)) {
                 if (!this.rooms[key].isPublic()) {
@@ -134,7 +138,7 @@ class RoomStore implements IRoomStore {
         return ArrayUtils.roomsSortedByMostRecent(rooms);
     }
 
-    inboxBadgeCount() {
+    inboxBadgeCount(): number {
         let count = 0;
         let rooms = this.getPrivateRooms();
         for (let i = 0; i < rooms.length; i++) {

@@ -50,6 +50,9 @@ export interface IRoom extends IEntity {
     invitedBy: IUser;
     deleted: boolean;
     messages: IMessage[];
+    associatedUserID: string;
+    usersMeta: StringAnyObject;
+    badge: number;
     transcript(): string;
     setOffset(offset: number): void;
     updateOffsetFromSlot(): void;
@@ -61,6 +64,7 @@ export interface IRoom extends IEntity {
     created(): number;
     getUserStatus(user: IUser): UserStatus;
     getType(): RoomType;
+    isPublic(): boolean;
     containsOnlyUsers(users: IUser[]): boolean;
     addUserUpdate(user: IUser, status: UserStatus): {};
     removeUserUpdate(user: IUser): {};
