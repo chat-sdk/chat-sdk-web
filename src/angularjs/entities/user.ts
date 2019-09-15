@@ -23,6 +23,7 @@ export interface IUser extends IEntity {
     meta: Map<string, any>
     friend?: boolean
     ssoFriend?: boolean
+    blocked: boolean
     unblock(): void
 
     uid(): string
@@ -58,6 +59,7 @@ class User extends Entity implements IUser {
     public meta = new Map<string, any>();
     public online: boolean;
     private image: string;
+    public blocked: boolean;
     unblock: () => void = null;
 
     constructor(
