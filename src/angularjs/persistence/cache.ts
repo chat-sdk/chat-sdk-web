@@ -10,7 +10,10 @@ import {Utils} from "../services/utils";
 
 export interface ICache {
     rooms: IRoom []
+    addRoom(room: IRoom): void
+    removeRoom(room: IRoom): void
     activeRooms(): IRoom []
+    inactiveRooms(): IRoom[]
     isBlockedUser(uid): boolean
     addBlockedUser(user): void
     removeBlockedUserWithID(uid: string): void
@@ -36,7 +39,7 @@ class Cache implements ICache {
      * Rooms
      */
 
-    addRoom(room) {
+    addRoom(room: IRoom) {
         if(!ArrayUtils.contains(this.rooms, room)) {
             room.isOpen = true;
             this.rooms.push(room);
@@ -62,7 +65,7 @@ class Cache implements ICache {
         return ar;
     }
 
-    inactiveRooms() {
+    inactiveRooms(): IRoom[] {
         let ar = [];
         for(let i =0; i < this.rooms.length; i++) {
             if(!this.rooms[i].active) {

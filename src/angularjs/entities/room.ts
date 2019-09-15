@@ -37,6 +37,8 @@ import { StringAnyObject } from '../interfaces/string-any-object';
 export interface IRoom extends IEntity {
     name: string;
     isOpen: boolean;
+    active: boolean;
+    minimized: boolean;
     slot: number;
     height: number;
     width: number;
@@ -64,9 +66,11 @@ export interface IRoom extends IEntity {
     removeUserUpdate(user: IUser): {};
     open(slot: number, duration?: number): void;
     close(): void;
+    setActive(active: boolean): void;
     deserialize(sr: StringAnyObject): void;
     lastMessage(): IMessage;
     lastMessageTime(): number;
+    setSizeToDefault(): void;
 }
 
 export interface IRoomFactory {
