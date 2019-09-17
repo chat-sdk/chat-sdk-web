@@ -1,12 +1,12 @@
-import * as angular from 'angular'
-import {IUploadHandler} from "./upload-handler";
-import {IFirebaseUploadHandler} from "./firebase-upload-handler";
-import {AbstractAuthenticationHandler, IAuthenticationHandler} from "./abstract-authentication-handler";
-import {IAuth} from "./auth";
+import * as angular from 'angular';
+
+import { IUploadHandler } from './upload-handler';
+import { IFirebaseUploadHandler } from './firebase-upload-handler';
+import { IAuthenticationHandler } from './abstract-authentication-handler';
 
 export interface INetworkManager {
-    upload: IUploadHandler
-    auth: IAuthenticationHandler
+    upload: IUploadHandler;
+    auth: IAuthenticationHandler;
 }
 
 class NetworkManager implements INetworkManager {
@@ -16,7 +16,10 @@ class NetworkManager implements INetworkManager {
     upload: IUploadHandler;
     auth: IAuthenticationHandler;
 
-    constructor (FirebaseUploadHandler: IFirebaseUploadHandler, AbstractAuthenticationHandler: IAuthenticationHandler) {
+    constructor(
+        private FirebaseUploadHandler: IFirebaseUploadHandler,
+        private AbstractAuthenticationHandler: IAuthenticationHandler
+    ) {
         this.upload = FirebaseUploadHandler;
         this.auth = AbstractAuthenticationHandler;
     }
