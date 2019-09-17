@@ -1,10 +1,12 @@
-import * as angular from 'angular'
-import {PasswordKey, RoomIDKey, TokenKey, UsernameKey} from "../keys/keys";
-import {RoomType} from "../keys/room-type";
-import {Utils} from "../services/utils";
-import {ICredential} from "./credential";
-import {IEnvironment} from "../services/environment";
-import {IRoomCreator} from "../entities/room";
+import * as angular from 'angular';
+
+import { PasswordKey, RoomIDKey, TokenKey, UsernameKey } from '../keys/keys';
+import { RoomType } from '../keys/room-type';
+import { Utils } from '../services/utils';
+import { ICredential } from './credential';
+import { IEnvironment } from '../services/environment';
+import { IRoomCreator } from '../entities/room';
+import { IRoomStore } from '../persistence/room-store';
 
 export interface IAutoLogin {
     getCredentials(): ICredential
@@ -13,32 +15,32 @@ export interface IAutoLogin {
 
 class AutoLogin implements IAutoLogin {
 
-    username = "";
-    password = "";
-    roomID = "";
-    token = "";
+    username = '';
+    password = '';
+    roomID = '';
+    token = '';
     updated = false;
 
-    static $inject = ["$window", "Credential", "RoomCreator", "RoomStore", "Environment"];
+    static $inject = ['$window', 'Credential', 'RoomCreator', 'RoomStore', 'Environment'];
 
-    constructor (
+    constructor(
         private $window: ng.IWindowService,
-        private Credential,
+        private Credential: ICredential,
         private RoomCreator: IRoomCreator,
-        private RoomStore,
-        private Environment: IEnvironment) {
-    }
+        private RoomStore: IRoomStore,
+        private Environment: IEnvironment,
+    ) { }
 
     updateParameters() {
         if (this.updated) {
             return;
         }
 
-        let pairs = this.$window.location.search.replace("?", "").split("&");
+        let pairs = this.$window.location.search.replace('?', '').split('&');
 
-        for(let i = 0; i < pairs.length; i++) {
-            let values = pairs[i].split("=");
-            if(values.length === 2) {
+        for (let i = 0; i < pairs.length; i++) {
+            let values = pairs[i].split('=');
+            if (values.length === 2) {
                 let key = values[0];
                 let value = values[1];
 
@@ -58,16 +60,16 @@ class AutoLogin implements IAutoLogin {
         }
 
         // If the parameters aren't set, check the config options
-        if (this.username === "" && !Utils.unORNull(this.Environment.config().username)) {
+        if (this.username === '' && !Utils.unORNull(this.Environment.config().username)) {
             this.username = this.Environment.config().username;
         }
-        if (this.password === "" && !Utils.unORNull(this.Environment.config().password)) {
+        if (this.password === '' && !Utils.unORNull(this.Environment.config().password)) {
             this.password = this.Environment.config().password;
         }
-        if (this.roomID === "" && !Utils.unORNull(this.Environment.config().roomID)) {
+        if (this.roomID === '' && !Utils.unORNull(this.Environment.config().roomID)) {
             this.roomID = this.Environment.config().roomID;
         }
-        if (this.token === "" && !Utils.unORNull(this.Environment.config().token)) {
+        if (this.token === '' && !Utils.unORNull(this.Environment.config().token)) {
             this.token = this.Environment.config().token;
         }
 
@@ -76,15 +78,15 @@ class AutoLogin implements IAutoLogin {
 
     autoLoginEnabled() {
         this.updateParameters();
-        return (this.username !== "" && this.password !== "") || this.token != "";
+        return (this.username !== '' && this.password !== '') || this.token != '';
     }
 
     getCredentials(): ICredential {
         if (this.autoLoginEnabled()) {
-            if (this.token != "") {
-                return new this.Credential().customToken(this.token);
+            if (this.token != '') {
+                return this.Credential.customToken(this.token);
             } else {
-                return new this.Credential().emailAndPassword(this.username, this.password);
+                return this.Credential.emailAndPassword(this.username, this.password);
             }
         } else {
             return null;
@@ -93,15 +95,16 @@ class AutoLogin implements IAutoLogin {
 
     // username=1@d.co&password=123456&roomID=123
 
-    tryToJoinRoom(): void {
+    tryToJoinRoom() {
         this.updateParameters();
-        if (this.roomID !== "") {
+        if (this.roomID !== '') {
             let room = this.RoomStore.getRoomWithID(this.roomID);
             if (Utils.unORNull(room)) {
-                this.RoomCreator.createRoomWithRID(this.roomID, this.roomID, "", true, RoomType.Group, true, 0);
+                this.RoomCreator.createRoomWithRID(this.roomID, this.roomID, '', true, RoomType.Group, true, 0);
             }
         }
     }
+
 }
 
 angular.module('myApp.services').service('AutoLogin', AutoLogin);

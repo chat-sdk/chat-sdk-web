@@ -91,27 +91,27 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
         };
 
         $scope.loginWithPassword = function () {
-            $scope.login(new Credential().emailAndPassword($scope.email, $scope.password));
+            $scope.login(Credential.emailAndPassword($scope.email, $scope.password));
         };
 
         $scope.loginWithFacebook = function () {
-            $scope.login(new Credential().facebook());
+            $scope.login(Credential.facebook());
         };
 
         $scope.loginWithTwitter = function () {
-            $scope.login(new Credential().twitter());
+            $scope.login(Credential.twitter());
         };
 
         $scope.loginWithGoogle = function () {
-            $scope.login(new Credential().google());
+            $scope.login(Credential.google());
         };
 
         $scope.loginWithGithub = function () {
-            $scope.login(new Credential().github());
+            $scope.login(Credential.github());
         };
 
         $scope.loginWithAnonymous = function () {
-            $scope.login(new Credential().anonymous());
+            $scope.login(Credential.anonymous());
         };
 
         /**

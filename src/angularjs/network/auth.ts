@@ -15,7 +15,7 @@ import { ITime } from '../services/time';
 import { IAutoLogin } from './auto-login';
 import { INetworkManager } from './network-manager';
 import { IRootScope } from '../interfaces/root-scope';
-import { ICredential } from './credential';
+import { ICredential, CredentialType } from './credential';
 import { IAuthUser, IAuthUserData } from '../interfaces/auth-user';
 
 export interface IAuth {
@@ -75,13 +75,13 @@ class Auth implements IAuth {
 
             this.authenticating = true;
 
-            if (credential.getType() === credential.Email) {
+            if (credential.getType() === CredentialType.Email) {
                 resolve(firebase.auth().signInWithEmailAndPassword(credential.getEmail(), credential.getPassword()));
             }
-            else if (credential.getType() === credential.Anonymous) {
+            else if (credential.getType() === CredentialType.Anonymous) {
                 resolve(firebase.auth().signInAnonymously());
             }
-            else if (credential.getType() === credential.CustomToken) {
+            else if (credential.getType() === CredentialType.CustomToken) {
                 resolve(firebase.auth().signInWithCustomToken(credential.getToken()));
             }
             else {
@@ -89,19 +89,19 @@ class Auth implements IAuth {
                 let scopes = null;
                 let provider = null;
 
-                if (credential.getType() === credential.Facebook) {
+                if (credential.getType() === CredentialType.Facebook) {
                     provider = new firebase.auth.FacebookAuthProvider();
                     scopes = 'email,user_likes';
                 }
-                if (credential.getType() === credential.Github) {
+                if (credential.getType() === CredentialType.Github) {
                     provider = new firebase.auth.GithubAuthProvider();
                     scopes = 'user,gist';
                 }
-                if (credential.getType() === credential.Google) {
+                if (credential.getType() === CredentialType.Google) {
                     provider = new firebase.auth.GoogleAuthProvider();
                     scopes = 'email';
                 }
-                if (credential.getType() === credential.Twitter) {
+                if (credential.getType() === CredentialType.Twitter) {
                     provider = new firebase.auth.TwitterAuthProvider();
                 }
 

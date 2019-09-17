@@ -7,85 +7,79 @@ export interface ICredential {
     getPassword(): string;
     getToken(): string;
     getType(): string;
-    Email: string;
-    Facebook: string;
-    Twitter: string;
-    Google: string;
-    Github: string;
-    Anonymous: string;
-    CustomToken: string;
 }
 
-angular.module('myApp.services').factory('Credential', [
-    function () {
+export enum CredentialType {
+    Email = 'email',
+    Facebook = 'facebook',
+    Twitter = 'twitter',
+    Google = 'google',
+    Github = 'github',
+    Anonymous = 'anonymous',
+    CustomToken = 'custom',
+}
 
-        function Credential () {}
+class Credential implements ICredential {
 
-        Credential.prototype = {
+    email: string;
+    password: string;
+    type: CredentialType;
+    token: string;
 
-            Email: "email",
-            Facebook: "facebook",
-            Twitter: "twitter",
-            Google: "google",
-            Github: "github",
-            Anonymous: "anonymous",
-            CustomToken: "custom",
+    emailAndPassword(email: string, password: string): ICredential {
+        this.email = email;
+        this.password = password;
+        this.type = CredentialType.Email;
+        return this;
+    }
 
-            emailAndPassword: function(email, password) {
-                this.email = email;
-                this.password = password;
-                this.type = this.Email;
-                return this;
-            },
+    facebook(): ICredential {
+        this.type = CredentialType.Facebook;
+        return this;
+    }
 
-            facebook: function() {
-                this.type = this.Facebook;
-                return this;
-            },
+    twitter(): ICredential {
+        this.type = CredentialType.Twitter;
+        return this;
+    }
 
-            twitter: function() {
-                this.type = this.Twitter;
-                return this;
-            },
+    google(): ICredential {
+        this.type = CredentialType.Google;
+        return this;
+    }
 
-            google: function() {
-                this.type = this.Google;
-                return this;
-            },
+    github(): ICredential {
+        this.type = CredentialType.Github;
+        return this;
+    }
 
-            github: function () {
-                this.type = this.Github;
-                return this;
-            },
+    anonymous(): ICredential {
+        this.type = CredentialType.Anonymous;
+        return this;
+    }
 
-            anonymous: function () {
-                this.type = this.Anonymous;
-                return this;
-            },
+    customToken(token: string): ICredential {
+        this.token = token;
+        this.type = CredentialType.CustomToken;
+        return this;
+    }
 
-            customToken: function (token) {
-                this.token = token;
-                this.type = this.CustomToken;
-                return this;
-            },
+    getEmail(): string {
+        return this.email;
+    }
 
-            getEmail: function () {
-                return this.email;
-            },
+    getPassword(): string {
+        return this.password;
+    }
 
-            getPassword: function () {
-                return this.password;
-            },
+    getToken(): string {
+        return this.token;
+    }
 
-            getToken: function () {
-                return this.token;
-            },
+    getType(): CredentialType {
+        return this.type;
+    }
 
-            getType: function () {
-                return this.type;
-            }
+}
 
-        };
-
-        return Credential;
-    }]);
+angular.module('myApp.services').service('Credential', Credential);
