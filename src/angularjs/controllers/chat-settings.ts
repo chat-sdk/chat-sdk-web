@@ -1,16 +1,14 @@
-import * as angular from 'angular'
-
-
-import {DEBUG} from "../keys/defines";
+import * as angular from 'angular';
 import * as FileSaver from 'file-saver'
-import {IRoomScope} from "./chat";
-import {IRoom} from "../entities/room";
 
+import { DEBUG } from '../keys/defines';
+import { IRoomScope } from './chat';
+import { IRoom } from '../entities/room';
 
 export interface IChatSettingsController {
-    $scope: IRoomScope
-    saveTranscript()
-    copyTranscript()
+    $scope: IRoomScope;
+    copyTranscript(): void;
+    saveTranscript(): void;
 }
 
 class ChatSettingsController implements IChatSettingsController {
@@ -18,25 +16,21 @@ class ChatSettingsController implements IChatSettingsController {
     static $inject = ['$scope'];
 
     public room: IRoom;
-    public $scope: IRoomScope;
 
-    constructor ($scope: IRoomScope) {
-        this.$scope = $scope;
-    }
+    constructor(public $scope: IRoomScope) { }
 
     copyTranscript() {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", this.$scope.room.transcript());
-    };
+        window.prompt('Copy to clipboard: Ctrl+C, Enter', this.$scope.room.transcript());
+    }
 
     saveTranscript() {
+        const t = this.$scope.room.transcript();
 
-        let t = this.$scope.room.transcript();
+        if (DEBUG) console.log(t);
 
-        if(DEBUG) console.log(t);
+        FileSaver.saveAs(new Blob([t], {type: 'text/plain;charset=utf-8'}), this.$scope.room.name + '-transcript.txt');
+    }
 
-        FileSaver.saveAs(new Blob([t], {type: "text/plain;charset=utf-8"}), this.$scope.room.name + "-transcript.txt");
-
-    };
 }
 
 angular.module('myApp.controllers').controller('ChatSettingsController', ChatSettingsController);
