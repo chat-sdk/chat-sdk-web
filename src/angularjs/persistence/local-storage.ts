@@ -8,10 +8,16 @@ import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface ILocalStorage {
     rooms: {};
+    tokenKey: string;
+    UIDKey: string;
+    tokenExpiryKey: string;
     storeUsers(users: { [key: string]: IUser }): void;
     storeRooms(rooms: { [key: string]: IRoom }): void;
     updateUserFromStore(user: IUser): boolean;
     updateRoomFromStore(room: IRoom): void;
+    setProperty(key: string, value: any): void;
+    getProperty(key: string): any;
+    removeProperty(key: string): void;
     sync(): void;
     isMuted(): boolean;
     setMuted(muted: boolean): void;

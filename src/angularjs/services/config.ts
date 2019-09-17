@@ -15,6 +15,8 @@ export interface IConfig {
     friendsEnabled: boolean;
     maxHistoricMessages: number;
     inactivityTimeout: number;
+    singleSignOnAPILevel: number;
+    singleSignOnURL: string;
     setConfig(setBy: SetBy, config: Map<string, any>): void;
 }
 
