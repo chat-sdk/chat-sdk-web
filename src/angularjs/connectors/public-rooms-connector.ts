@@ -1,35 +1,33 @@
-import * as angular from 'angular'
-import {N} from "../keys/notification-keys";
-import {IPaths} from "../network/paths";
-import {IRoomStore} from "../persistence/room-store";
+import * as angular from 'angular';
+
+import { N } from '../keys/notification-keys';
+import { IPaths } from '../network/paths';
+import { IRoomStore } from '../persistence/room-store';
+import { IRootScope } from '../interfaces/root-scope';
 
 export interface IPublicRoomsConnector {
-    off(): void
-    on(): void
+    off(): void;
+    on(): void;
 }
 
 class PublicRoomsConnector implements IPublicRoomsConnector{
 
     static $inject = ['$rootScope', 'RoomStore', 'Paths'];
 
-    $rootScope;
-    Paths: IPaths;
-    RoomStore: IRoomStore;
+    constructor(
+        private $rootScope: IRootScope,
+        private RoomStore: IRoomStore,
+        private Paths: IPaths,
+    ) { }
 
-    constructor ($rootScope, RoomStore, Paths) {
-        this.$rootScope = $rootScope;
-        this.Paths = Paths;
-        this.RoomStore = RoomStore;
-    }
-
-    on(): void {
+    on() {
         const publicRoomsRef = this.Paths.publicRoomsRef();
 
         // Start listening to Firebase
         publicRoomsRef.on('child_added', (snapshot) => {
 
             const rid = snapshot.key;
-            if(rid) {
+            if (rid) {
                 const room = this.RoomStore.getOrCreateRoomWithID(rid);
 
                 room.on().then(() => {
@@ -46,12 +44,13 @@ class PublicRoomsConnector implements IPublicRoomsConnector{
         });
     }
 
-    off(): void {
+    off() {
         const publicRoomsRef = this.Paths.publicRoomsRef();
 
         publicRoomsRef.off('child_added');
         publicRoomsRef.off('child_removed');
     }
+
 }
 
 angular.module('myApp.services').service('PublicRoomsConnector', PublicRoomsConnector);
