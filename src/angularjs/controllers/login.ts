@@ -2,10 +2,10 @@ import * as angular from 'angular'
 import * as firebase from 'firebase';
 
 
-import {NotificationTypeAlert, NotificationTypeWaiting} from "../keys/defines";
 import {N} from "../keys/notification-keys";
 import {Utils} from "../services/utils";
 import {LoginMode} from "../keys/login-mode-keys";
+import { NotificationType } from '../keys/notification-type';
 
 angular.module('myApp.controllers').controller('LoginController', ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential', 'AutoLogin',
     function($rootScope, $scope, $timeout, FriendsConnector, Cache, Presence, SingleSignOn, OnlineConnector, Paths, LocalStorage, StateManager, RoomPositionManager, Config, Auth, Credential, AutoLogin) {
@@ -129,7 +129,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
             $scope.showError = false;
 
             // Hide the overlay
-            $scope.showNotification(NotificationTypeWaiting, "Logging in", "For social login make sure to enable popups!");
+            $scope.showNotification(NotificationType.Waiting, "Logging in", "For social login make sure to enable popups!");
 
             Auth.authenticate(credential).then((authData) => {
                 $scope.handleAuthData(authData);
@@ -146,7 +146,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
         $scope.forgotPassword  = function (email) {
 
             Auth.resetPasswordByEmail(email).then(() => {
-                $scope.showNotification(NotificationTypeAlert, "Email sent",
+                $scope.showNotification(NotificationType.Alert, "Email sent",
                     "Instructions have been sent. Please check your Junk folder!", "ok");
                 $scope.setError(null);
             }).catch((error) => {
@@ -166,7 +166,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
 
             $scope.showError = false;
 
-            $scope.showNotification(NotificationTypeWaiting, "Registering...");
+            $scope.showNotification(NotificationType.Waiting, "Registering...");
 
             // First create the super
 
@@ -190,7 +190,7 @@ angular.module('myApp.controllers').controller('LoginController', ['$rootScope',
         $scope.handleLoginComplete = function (userData, firstLogin) {
 
             // Write a record to the firebase to record this API key
-            $scope.showNotification(NotificationTypeWaiting, "Opening Chat...");
+            $scope.showNotification(NotificationType.Waiting, "Opening Chat...");
 
             // Load friends from config
             if(Config.friends) {

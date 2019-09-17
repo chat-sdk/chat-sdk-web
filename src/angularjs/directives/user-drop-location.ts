@@ -1,11 +1,11 @@
 import * as angular from 'angular';
 import * as $ from 'jquery';
 
-import { NotificationTypeAlert } from '../keys/defines';
 import { IRoomScope } from '../controllers/chat';
 import { UserStatus } from '../keys/user-status';
 import { IRootScope } from '../interfaces/root-scope';
 import { IRoomFactory } from '../entities/room';
+import { NotificationType } from '../keys/notification-type';
 
 export interface IUserDropLocation extends ng.IDirective {
 
@@ -43,7 +43,7 @@ class UserDropLocation implements IUserDropLocation {
                     // Update the room's type
                     scope.room.updateType();
                 }, (error) => {
-                    this.$rootScope.showNotification(NotificationTypeAlert, 'Error', error.message, 'Ok');
+                    this.$rootScope.showNotification(NotificationType.Alert, 'Error', error.message, 'Ok');
                 });
             }
         });

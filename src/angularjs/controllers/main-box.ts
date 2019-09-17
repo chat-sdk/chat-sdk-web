@@ -3,10 +3,10 @@ import * as angular from 'angular'
 
 import {N} from "../keys/notification-keys";
 import {FriendsTab, InboxTab, RoomsTab, UsersTab} from "../keys/tab-keys";
-import {NotificationTypeWaiting} from "../keys/defines";
 import {Dimensions} from "../keys/dimensions";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
+import { NotificationType } from '../keys/notification-type';
 
 angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '$timeout', 'Auth', 'FriendsConnector', 'Config', 'Screen', 'RoomPositionManager', 'RoomStore',
     function($scope, $timeout, Auth, FriendsConnector, Config, Screen, RoomPositionManager, RoomStore) {
@@ -125,7 +125,7 @@ angular.module('myApp.controllers').controller('MainBoxController', ['$scope', '
 
         $scope.showOverlay = function (message) {
             $scope.notification.show = true;
-            $scope.type = NotificationTypeWaiting;
+            $scope.type = NotificationType.Waiting;
             $scope.notification.message = message;
         };
 

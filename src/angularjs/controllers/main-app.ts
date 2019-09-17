@@ -9,6 +9,7 @@ import {IUser} from "../entities/user";
 import {Utils} from "../services/utils";
 import {IRoom} from "../entities/room";
 import {Log} from "../services/log";
+import { NotificationType } from '../keys/notification-type';
 
 angular.module('myApp.controllers').controller('MainAppController', [
     '$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment',
@@ -489,7 +490,7 @@ angular.module('myApp.controllers').controller('MainAppController', [
 
             }
             else {
-                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+                $scope.showNotification(NotificationType.Alert, 'File error', 'Only image files can be uploaded', 'ok');
                 return;
             }
 
@@ -564,7 +565,7 @@ angular.module('myApp.controllers').controller('MainAppController', [
             $scope.notification.show = false;
         };
 
-        $scope.showNotification = function (type: Defines.NotificationType, title: string, message: string, button: string) {
+        $scope.showNotification = function (type: NotificationType, title: string, message: string, button: string) {
             $scope.notification.title = title;
             $scope.notification.message = message;
             $scope.notification.type = type;

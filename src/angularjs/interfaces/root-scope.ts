@@ -1,7 +1,7 @@
 import { IUser } from '../entities/user';
 import { IConfig } from '../services/config';
 import { UserDragAction } from '../directives/draggable-user';
-import { NotificationType } from '../keys/defines';
+import { NotificationType } from '../keys/notification-type';
 
 export interface IRootScope extends ng.IRootScopeService {
     user: IUser;

@@ -2,13 +2,13 @@ import * as angular from 'angular'
 
 
 import {N} from "../keys/notification-keys";
-import * as Defines from "../keys/defines";
 import * as TabKeys from "../keys/tab-keys";
 import {IRoom} from "../entities/room";
 import {Dimensions} from "../keys/dimensions";
 import {Utils} from "../services/utils";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
+import { NotificationType } from '../keys/notification-type';
 
 export interface IRoomScope extends ng.IScope {
     room: IRoom
@@ -145,7 +145,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 $scope.sendingImage = true;
             }
             else {
-                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'Only image files can be uploaded', 'ok');
+                $scope.showNotification(NotificationType.Alert, 'File error', 'Only image files can be uploaded', 'ok');
                 this.imageUploadFinished();
                 return;
             }
@@ -170,7 +170,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 this.imageUploadFinished();
 
             }, (error) => {
-                $scope.showNotification(Defines.NotificationTypeAlert, 'Image error', 'The image could not be sent', 'ok');
+                $scope.showNotification(NotificationType.Alert, 'Image error', 'The image could not be sent', 'ok');
                 this.imageUploadFinished();
             });
         };
@@ -200,7 +200,7 @@ angular.module('myApp.controllers').controller('ChatController', ['$scope', '$ti
                 this.fileUploadFinished();
 
             }, (error) => {
-                $scope.showNotification(Defines.NotificationTypeAlert, 'File error', 'The file could not be sent', 'ok');
+                $scope.showNotification(NotificationType.Alert, 'File error', 'The file could not be sent', 'ok');
                 this.fileUploadFinished();
             });
         };

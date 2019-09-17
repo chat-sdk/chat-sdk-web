@@ -26,8 +26,3 @@ export const ShowProfileSettingsBox = 'showProfileSettingsBox';
 export const ShowCreateChatBox = 'showCreateChatBox';
 
 // Notifications
-
-export type NotificationType = 'waiting' | 'alert'
-export const NotificationTypeWaiting: NotificationType = 'waiting'
-export const NotificationTypeAlert: NotificationType = 'alert';
-

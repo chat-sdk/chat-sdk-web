@@ -1,9 +1,10 @@
 import * as angular from 'angular'
 
 
-import {NotificationTypeAlert, ShowProfileSettingsBox} from "../keys/defines";
+import {ShowProfileSettingsBox} from "../keys/defines";
 import {UserKeys} from "../keys/user-keys";
 import {Utils} from "../services/utils";
+import { NotificationType } from '../keys/notification-type';
 
 angular.module('myApp.controllers').controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'LocalStorage',
     function($scope, Auth, Config, SoundEffects, LocalStorage) {
@@ -173,13 +174,13 @@ angular.module('myApp.controllers').controller('ProfileSettingsController', ['$s
             }
             else {
                 if(!$scope.validation[UserKeys.Name].valid) {
-                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The name must be between "+$scope.validation[UserKeys.Name].minLength+" - "+$scope.validation[UserKeys.Name].maxLength+" characters long ", "Ok");
+                    $scope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between "+$scope.validation[UserKeys.Name].minLength+" - "+$scope.validation[UserKeys.Name].maxLength+" characters long ", "Ok");
                 }
                 // if(!$scope.validation[UserKeys.Location].valid) {
-                //     $scope.showNotification(NotificationTypeAlert, "Validation failed", "The location must be between "+$scope.validation[UserKeys.Location].minLength+" - "+$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
+                //     $scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+$scope.validation[UserKeys.Location].minLength+" - "+$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
                 // }
                 if(!$scope.validation[UserKeys.ProfileLink].valid) {
-                    $scope.showNotification(NotificationTypeAlert, "Validation failed", "The profile link must be a valid URL", "Ok");
+                    $scope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
                 }
             }
         };
