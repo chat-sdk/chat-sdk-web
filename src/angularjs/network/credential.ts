@@ -1,7 +1,19 @@
 import * as angular from 'angular'
 
 export interface ICredential {
-
+    customToken(token: string): ICredential;
+    emailAndPassword(email: string, password: string): ICredential;
+    getEmail(): string;
+    getPassword(): string;
+    getToken(): string;
+    getType(): string;
+    Email: string;
+    Facebook: string;
+    Twitter: string;
+    Google: string;
+    Github: string;
+    Anonymous: string;
+    CustomToken: string;
 }
 
 angular.module('myApp.services').factory('Credential', [
