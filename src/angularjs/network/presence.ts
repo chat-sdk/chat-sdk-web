@@ -1,10 +1,17 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-
-import {UserStatus} from "../keys/user-status";
-import {N} from "../keys/notification-keys";
+import { UserStatus } from '../keys/user-status';
+import { N } from '../keys/notification-keys';
 import { IUser } from '../entities/user';
+import { IRootScope } from '../interfaces/root-scope';
+import { IVisibility } from '../services/visibility';
+import { IConfig } from '../services/config';
+import { ICache } from '../persistence/cache';
+import { IPaths } from './paths';
+import { ILocalStorage } from '../persistence/local-storage';
+import { IBeforeUnload } from '../services/before-unload';
+import { IRoom } from '../entities/room';
 /**
  * The presence service handles the user's online / offline
  * status
@@ -16,103 +23,110 @@ export interface IPresence {
     update(): Promise<any>;
 }
 
-angular.module('myApp.services').factory('Presence', ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q',
-    function ($rootScope, $timeout, Visibility, Config, Cache, Paths, LocalStorage, BeforeUnload, $q) {
-        let Presence = {
+class Presence implements IPresence {
 
-            user: null,
-            inactiveTimerPromise: null,
+    static $inject = ['$rootScope', '$timeout', 'Visibility', 'Config', 'Cache', 'Paths', 'LocalStorage', 'BeforeUnload', '$q'];
 
-            init: function () {
-                return this;
-            },
+    user: IUser;
+    inactiveTimerPromise: ng.IPromise<void>;
 
-            // Initialize the visibility service
-            start: function (user): void {
+    constructor(
+        private $rootScope: IRootScope,
+        private $timeout: ng.ITimeoutService,
+        private Visibility: IVisibility,
+        private Config: IConfig,
+        private Cache: ICache,
+        private Paths: IPaths,
+        private LocalStorage: ILocalStorage,
+        private BeforeUnload: IBeforeUnload,
+        private $q: ng.IQService,
+    ) { }
 
-                this.user = user;
+    start(user: IUser) {
 
-                // Take the user online
+        this.user = user;
+
+        // Take the user online
+        this.goOnline();
+
+        this.$rootScope.$on(N.VisibilityChanged, (event, hidden) => {
+
+            if (this.inactiveTimerPromise) {
+                this.$timeout.cancel(this.inactiveTimerPromise);
+            }
+
+            if (!hidden) {
+
+                // If the user's clicked the screen then cancel the
+                // inactivity timer
                 this.goOnline();
+            }
+            else {
+                // If the user switches tabs and doesn't enter for
+                // 2 minutes take them offline
+                this.inactiveTimerPromise = this.$timeout(() => {
+                    this.goOffline();
+                }, 1000 * 60 * this.Config.inactivityTimeout);
+            }
+        });
 
-                $rootScope.$on(N.VisibilityChanged, (event, hidden) => {
+    }
 
-                    if(this.inactiveTimerPromise) {
-                        $timeout.cancel(this.inactiveTimerPromise);
-                    }
+    stop() {
+        this.user = null;
+    }
 
-                    if(!hidden) {
+    goOffline() {
+        firebase.database().goOffline();
+    }
 
-                        // If the user's clicked the screen then cancel the
-                        // inactivity timer
-                        this.goOnline();
-                    }
-                    else {
-                        // If the user switches tabs and doesn't enter for
-                        // 2 minutes take them offline
-                        this.inactiveTimerPromise = $timeout(() => {
-                            this.goOffline();
-                        }, 1000 * 60 * Config.inactivityTimeout);
-                    }
-                });
+    goOnline(): Promise<any> {
+        firebase.database().goOnline();
+        return this.update();
+    }
 
-            },
+    update(): Promise<any> {
 
-            stop: function () {
-                this.user = null;
-            },
+        const promises = [];
 
-            goOffline: function () {
-                firebase.database().goOffline();
-            },
+        if (this.user) {
+            const uid = this.user.uid();
+            if (uid) {
 
-            goOnline: function (): Promise<any> {
-                firebase.database().goOnline();
-                return this.update();
-            },
+                if (this.Config.onlineUsersEnabled) {
+                    const ref = this.Paths.onlineUserRef(uid);
 
-            update: function (): Promise<any> {
-
-                const promises = [];
-
-                if(this.user) {
-                    const uid = this.user.uid();
-                    if (uid) {
-
-                        if(Config.onlineUsersEnabled) {
-                            const ref = Paths.onlineUserRef(uid);
-
-                            promises.push(ref.setWithPriority({
-                                time: firebase.database.ServerValue.TIMESTAMP
-                            }, this.user.getName()).then(() => {
-                                const _ = ref.onDisconnect().remove();
-                            }));
-                        }
-
-                        // Also store this information on the user object
-                        const userOnlineRef = Paths.userOnlineRef(uid);
-                        promises.push(userOnlineRef.set(true).then(() => {
-                            const _ = userOnlineRef.onDisconnect().set(false);
-                        }));
-
-                        // Go online for the public rooms
-                        const rooms = Cache.rooms;
-                        let room;
-                        for(let i = 0; i < rooms.length; i++) {
-                            // TRAFFIC
-                            // If this is a public room we would have removed it when we logged off
-                            // We need to set ourself as a member again
-                            room = rooms[i];
-                            if(room.isPublic()) {
-                                promises.push(room.join(UserStatus.Member));
-                            }
-                        }
-                    }
+                    promises.push(ref.setWithPriority({
+                        time: firebase.database.ServerValue.TIMESTAMP
+                    }, this.user.getName()).then(() => {
+                        const _ = ref.onDisconnect().remove();
+                    }));
                 }
 
-                return Promise.all(promises);
-            }
-        };
+                // Also store this information on the user object
+                const userOnlineRef = this.Paths.userOnlineRef(uid);
+                promises.push(userOnlineRef.set(true).then(() => {
+                    const _ = userOnlineRef.onDisconnect().set(false);
+                }));
 
-        return Presence.init();
-    }]);
+                // Go online for the public rooms
+                const rooms = this.Cache.rooms;
+                let room: IRoom;
+                for (let i = 0; i < rooms.length; i++) {
+                    // TRAFFIC
+                    // If this is a public room we would have removed it when we logged off
+                    // We need to set ourself as a member again
+                    room = rooms[i];
+                    if (room.isPublic()) {
+                        promises.push(room.join(UserStatus.Member));
+                    }
+                }
+            }
+        }
+
+        return Promise.all(promises);
+    }
+
+}
+
+angular.module('myApp.services').service('Presence', Presence);

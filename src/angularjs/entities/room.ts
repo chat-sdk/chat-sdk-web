@@ -65,6 +65,7 @@ export interface IRoom extends IEntity {
     getUserStatus(user: IUser): UserStatus;
     getType(): RoomType;
     isPublic(): boolean;
+    join(status: UserStatus): Promise<any>;
     containsOnlyUsers(users: IUser[]): boolean;
     addUserUpdate(user: IUser, status: UserStatus): {};
     removeUserUpdate(user: IUser): {};

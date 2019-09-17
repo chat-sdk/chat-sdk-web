@@ -14,6 +14,7 @@ export interface IConfig {
     onlineUsersEnabled: boolean;
     friendsEnabled: boolean;
     maxHistoricMessages: number;
+    inactivityTimeout: number;
     setConfig(setBy: SetBy, config: Map<string, any>): void;
 }
 
