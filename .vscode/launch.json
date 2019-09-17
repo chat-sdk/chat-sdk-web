@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug on Chrome",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug on Chromium macOS",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}",
+            "runtimeExecutable": "/Applications/Chromium.app/Contents/MacOS/Chromium"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug on Brave macOS",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}",
+            "runtimeExecutable": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+        }
+    ]
+}
