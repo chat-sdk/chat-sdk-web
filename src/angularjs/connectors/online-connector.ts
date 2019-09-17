@@ -1,16 +1,16 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 import * as firebase from 'firebase';
 
-import {DEBUG} from "../keys/defines";
-import {N} from "../keys/notification-keys";
-import {IUser} from "../entities/user";
-import {IPaths} from "../network/paths";
-import {IUserStore} from "../persistence/user-store";
-import {IRootScope} from "../interfaces/root-scope";
+import { DEBUG } from '../keys/defines';
+import { N } from '../keys/notification-keys';
+import { IUser } from '../entities/user';
+import { IPaths } from '../network/paths';
+import { IUserStore } from '../persistence/user-store';
+import { IRootScope } from '../interfaces/root-scope';
 
 export interface IOnlineConnector {
-    on(): void
-    off(): void
+    on(): void;
+    off(): void;
 }
 
 class OnlineConnector implements IOnlineConnector {
@@ -20,24 +20,24 @@ class OnlineConnector implements IOnlineConnector {
 
     static $inject = ['$rootScope', 'UserStore', 'Paths'];
 
-    constructor (
+    constructor(
         private $rootScope: IRootScope,
         private UserStore: IUserStore,
-        private Paths: IPaths) {}
+        private Paths: IPaths,
+    ) { }
 
 
-    on(): void {
-
-        if(this.isOn) {
+    on() {
+        if (this.isOn) {
             return;
         }
         this.isOn = true;
 
         let onlineUsersRef = this.Paths.onlineUsersRef();
 
-        onlineUsersRef.on("child_added", (snapshot: firebase.database.DataSnapshot) => {
+        onlineUsersRef.on('child_added', (snapshot: firebase.database.DataSnapshot) => {
 
-            if(DEBUG) console.log('Online: ' + snapshot.key);
+            if (DEBUG) console.log('Online: ' + snapshot.key);
 
             // Get the UID of the added user
             let uid = null;
@@ -46,17 +46,17 @@ class OnlineConnector implements IOnlineConnector {
 
                 let user = this.UserStore.getOrCreateUserWithID(uid);
 
-                if(this.addOnlineUser(user)) {
+                if (this.addOnlineUser(user)) {
                     // Update the user's rooms
                     this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
                 }
             }
 
-        }, (error) => {
+        }, (error: Error) => {
             console.log(error.message);
         });
 
-        onlineUsersRef.on("child_removed", (snapshot: firebase.database.DataSnapshot) => {
+        onlineUsersRef.on('child_removed', (snapshot: firebase.database.DataSnapshot) => {
 
             console.log('Offline: ' + snapshot.key);
 
@@ -70,12 +70,12 @@ class OnlineConnector implements IOnlineConnector {
 
             this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
 
-        }, (error) => {
+        }, (error: Error) => {
             console.log(error.message);
         });
     }
 
-    off(): void {
+    off() {
 
         this.isOn = false;
 
@@ -83,8 +83,8 @@ class OnlineConnector implements IOnlineConnector {
         // having the user.blocked is useful because it means
         // that the partials don't have to call a function
         // however when you logout you want the flags to be reset
-        for(let key in this.onlineUsers) {
-            if(this.onlineUsers.hasOwnProperty(key)) {
+        for (let key in this.onlineUsers) {
+            if (this.onlineUsers.hasOwnProperty(key)) {
                 this.onlineUsers[key].blocked = false;
                 this.onlineUsers[key].friend = false;
             }
@@ -97,13 +97,11 @@ class OnlineConnector implements IOnlineConnector {
         onlineUsersRef.off('child_removed');
     }
 
-    /**
-     * Online users
-     */
+    // Online users
 
     addOnlineUser(user: IUser) {
-        if(user && user.uid()) {
-            if(!user.isMe()) {
+        if (user && user.uid()) {
+            if (!user.isMe()) {
                 user.online = true;
                 this.onlineUsers[user.uid()] = user;
                 this.$rootScope.$broadcast(N.OnlineUserAdded);
@@ -113,16 +111,16 @@ class OnlineConnector implements IOnlineConnector {
         return false;
     }
 
-    removeOnlineUser(user) {
-        if(user && user.meta && user.uid()) {
+    removeOnlineUser(user: IUser) {
+        if (user && user.meta && user.uid()) {
             this.removeOnlineUserWithID(user.uid());
         }
     }
 
-    removeOnlineUserWithID(uid) {
-        if(uid) {
+    removeOnlineUserWithID(uid: string) {
+        if (uid) {
             let user = this.onlineUsers[uid];
-            if(user) {
+            if (user) {
                 user.online = false;
                 delete this.onlineUsers[uid];
                 this.$rootScope.$broadcast(N.OnlineUserRemoved);
@@ -132,8 +130,8 @@ class OnlineConnector implements IOnlineConnector {
 
     onlineUserCount() {
         let i = 0;
-        for(let key in this.onlineUsers) {
-            if(this.onlineUsers.hasOwnProperty(key)) {
+        for (let key in this.onlineUsers) {
+            if (this.onlineUsers.hasOwnProperty(key)) {
                 i++;
             }
         }
