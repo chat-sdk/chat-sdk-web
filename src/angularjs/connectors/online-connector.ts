@@ -11,6 +11,7 @@ import { IRootScope } from '../interfaces/root-scope';
 export interface IOnlineConnector {
     on(): void;
     off(): void;
+    onlineUsers: {};
 }
 
 class OnlineConnector implements IOnlineConnector {

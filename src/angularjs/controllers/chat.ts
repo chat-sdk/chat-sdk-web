@@ -9,6 +9,7 @@ import {Utils} from "../services/utils";
 import {ArrayUtils} from "../services/array-utils";
 import {Log} from "../services/log";
 import { NotificationType } from '../keys/notification-type';
+import { IUser } from '../entities/user';
 
 export interface IRoomScope extends ng.IScope {
     room: IRoom
@@ -21,7 +22,11 @@ export interface IRoomScope extends ng.IScope {
     input: any
     emojis: string[]
     autoScroll: boolean
+    allUsers: IUser[]
+    users: IUser[]
     leaveRoom()
+    searchKeyword(): string
+    getAllUsers(): IUser[]
 }
 
 export interface MessageScope extends ng.IScope {
