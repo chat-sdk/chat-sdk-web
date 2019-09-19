@@ -1,9 +1,10 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { IUser } from '../entities/user';
 
 export interface IProfileBoxScope extends ng.IScope {
-    hover: any,
-    currentUser: any,
+    hover: any;
+    currentUser: IUser;
 }
 
 export interface IUserProfileBoxController {
@@ -14,19 +15,14 @@ class UserProfileBoxController implements IUserProfileBoxController{
 
     static $inject = ['$scope'];
 
-    private $scope;
-
-    constructor($scope) {
-        this.$scope = $scope;
-    }
+    constructor(private $scope: IProfileBoxScope) { }
 
     copyUserID() {
-
         // Get the ID
         const id = this.$scope.currentUser.uid();
 
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", id);
-    };
+        window.prompt('Copy to clipboard: Ctrl+C, Enter', id);
+    }
 
 }
 
