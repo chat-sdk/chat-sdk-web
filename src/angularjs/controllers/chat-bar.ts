@@ -1,15 +1,14 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
-
-import {N} from "../keys/notification-keys";
-import {IRoomListScope} from "./room-list-box";
-import {ICache} from "../persistence/cache";
-import {IRoom} from "../entities/room";
-import {Log} from "../services/log";
+import { N } from '../keys/notification-keys';
+import { IRoomListScope } from './room-list-box';
+import { ICache } from '../persistence/cache';
+import { IRoom } from '../entities/room';
+import { Log } from '../services/log';
 
 export interface IChatBarController {
-    rooms: IRoom []
-    updateList(): void
+    rooms: IRoom [];
+    updateList(): void;
 }
 
 class ChatBarController implements IChatBarController{
@@ -18,11 +17,11 @@ class ChatBarController implements IChatBarController{
 
     public rooms: IRoom [] = [];
 
-    constructor (
+    constructor(
         private $scope: IRoomListScope,
         private $timeout: ng.ITimeoutService,
-        private Cache: ICache) {
-
+        private Cache: ICache
+    ) {
         const updateList = () => {
             this.updateList();
         };
@@ -33,12 +32,12 @@ class ChatBarController implements IChatBarController{
 
         $scope.$on(N.UpdateRoomActiveStatus, () => {
             Log.notification(N.UpdateRoomActiveStatus, 'ChatBarController');
-            updateList();
+            updateList.bind(this)();
         });
     }
 
-    updateList(): void {
-        Log.notification(N.RoomOpened + "/" + N.RoomClosed, 'ChatBarController');
+    updateList() {
+        Log.notification(N.RoomOpened + '/' + N.RoomClosed, 'ChatBarController');
 
         // Only include rooms that are active
         this.rooms = this.Cache.activeRooms();
