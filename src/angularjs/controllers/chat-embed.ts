@@ -1,30 +1,50 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { RoomType } from '../keys/room-type';
+import { UserStatus } from '../keys/user-status';
+import { N } from '../keys/notification-keys';
+import { IRootScope } from '../interfaces/root-scope';
+import { IRoomStore } from '../persistence/room-store';
+import { IRoom } from '../entities/room';
 
-import {RoomType} from "../keys/room-type";
-import {UserStatus} from "../keys/user-status";
-import {N} from "../keys/notification-keys";
+export interface IChatEmbedScope extends ng.IScope {
+    rooms: IRoom[];
+}
 
-angular.module('myApp.controllers').controller('ChatEmbedController', ['$scope', '$timeout', '$rootScope', 'RoomStore', function($scope, $timeout, $rootScope, RoomStore) {
+export interface IChatEmbedController {
+    init(rid: string, width: number, height: number): void;
+}
 
-    $scope.rooms = [];
+class ChatEmbedController implements IChatEmbedController {
 
-    $scope.init = (rid, width, height) => {
-        $scope.rid = rid;
-        $scope.width = width;
-        $scope.height = height;
+    static $inject = ['$scope', '$timeout', '$rootScope', 'RoomStore'];
+
+    rid: string;
+    width: number;
+    height: number;
+
+    constructor(
+        private $scope: IChatEmbedScope,
+        private $timeout: ng.ITimeoutService,
+        private $rootScope: IRootScope,
+        private RoomStore: IRoomStore,
+    ) { }
+
+    init(rid: string, width: number, height: number) {
+        this.rid = rid;
+        this.width = width;
+        this.height = height;
 
         // When login is complete setup this room
-        $scope.$on(N.LoginComplete, () => {
+        this.$scope.$on(N.LoginComplete, () => {
 
-            let rid = $scope.rid;
-            let room = RoomStore.getOrCreateRoomWithID(rid);
+            const room = this.RoomStore.getOrCreateRoomWithID(this.rid);
             room.on().then(() => {
 
-                room.width = $scope.width;
-                room.height = $scope.height;
+                room.width = this.width;
+                room.height = this.height;
 
-                let open = () => {
+                const open = () => {
 
                     // Start listening to message updates
                     room.messagesOn(room.deletedTimestamp);
@@ -39,7 +59,7 @@ angular.module('myApp.controllers').controller('ChatEmbedController', ['$scope',
                         room.join(UserStatus.Member).then(() => {
                             open();
                         }, (error) => {
-                            console.log(error);
+                            console.error(error);
                         });
                         break;
                     case RoomType.Group:
@@ -47,16 +67,17 @@ angular.module('myApp.controllers').controller('ChatEmbedController', ['$scope',
                         open();
                 }
 
-                $scope.rooms = [
-                    room
-                ];
+                this.$scope.rooms = [ room ];
 
-                $timeout(() => {
-                    $rootScope.$digest();
+                this.$timeout(() => {
+                    this.$rootScope.$digest();
                 });
 
             });
 
         });
-    };
-}]);
+    }
+
+}
+
+angular.module('myApp.controllers').controller('ChatEmbedController', ChatEmbedController);

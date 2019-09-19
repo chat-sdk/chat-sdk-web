@@ -53,6 +53,9 @@ export interface IRoom extends IEntity {
     associatedUserID: string;
     usersMeta: StringAnyObject;
     badge: number;
+    deletedTimestamp: number;
+    messagesOn(timestamp: number): void;
+    typingOn(): void;
     transcript(): string;
     setOffset(offset: number): void;
     updateOffsetFromSlot(): void;
