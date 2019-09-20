@@ -1,96 +1,108 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { N } from '../keys/notification-keys';
+import { Utils } from '../services/utils';
+import { ArrayUtils } from '../services/array-utils';
+import { Log } from '../services/log';
+import { IRoom } from '../entities/room';
 
-import {N} from "../keys/notification-keys";
-import {Utils} from "../services/utils";
-import {ArrayUtils} from "../services/array-utils";
-import {Log} from "../services/log";
+export interface IPublicRoomsListScope extends ng.IScope {
+  activeTab: string;
+  allRooms: IRoom[];
+  rooms: IRoom[];
+  search: { [key: string]: string };
+  updateList(): void;
+}
 
-angular.module('myApp.controllers').controller('PublicRoomsListController', ['$scope', '$timeout', function($scope, $timeout) {
+export interface IPublicRoomsListController {
 
+}
+
+class PublicRoomsListController implements IPublicRoomsListController {
+
+  static $inject = ['$scope', '$timeout'];
+
+  constructor(
+    private $scope: IPublicRoomsListScope,
+    private $timeout: ng.ITimeoutService,
+  ) {
+    // $scope propeties
     $scope.rooms = [];
     $scope.allRooms = [];
 
-    $scope.init = function () {
+    // $scope methods
+    $scope.updateList = this.updateList.bind(this);
 
-        $scope.$on(N.PublicRoomAdded, (event, room) => {
-            Log.notification(N.PublicRoomAdded, 'PublicRoomsListController');
-            // Add the room and sort the list
-            if(!ArrayUtils.contains($scope.allRooms, room)) {
-                $scope.allRooms.push(room);
-            }
-            $scope.updateList();
+    $scope.$on(N.PublicRoomAdded, (event, room) => {
+      Log.notification(N.PublicRoomAdded, 'PublicRoomsListController');
+      // Add the room and sort the list
+      if (!ArrayUtils.contains($scope.allRooms, room)) {
+          $scope.allRooms.push(room);
+      }
+      this.updateList();
 
-        });
+    });
 
-        $scope.$on(N.PublicRoomRemoved, (event, room) => {
-            Log.notification(N.PublicRoomRemoved, 'PublicRoomsListController');
+    $scope.$on(N.PublicRoomRemoved, (event, room) => {
+      Log.notification(N.PublicRoomRemoved, 'PublicRoomsListController');
 
-            ArrayUtils.remove($scope.allRooms, room);
-            $scope.updateList();
+      ArrayUtils.remove($scope.allRooms, room);
+      this.updateList.bind(this)();
+    });
 
-        });
+    // Update the list if the user count on a room changes
+    $scope.$on(N.RoomUpdated, this.updateList.bind(this));
 
-        // Update the list if the user count on a room changes
-        $scope.$on(N.RoomUpdated, $scope.updateList);
+    $scope.$on(N.Logout, this.updateList.bind(this));
 
-        $scope.$on(N.Logout, $scope.updateList);
+    $scope.$watchCollection('search', this.updateList.bind(this));
+  }
 
-        $scope.$watchCollection('search', $scope.updateList);
-    };
+  updateList() {
+    Log.notification(N.Logout, 'PublicRoomsListController');
 
+    this.$scope.allRooms.sort((a, b) => {
 
-    $scope.updateList = function () {
+        const au = Utils.unORNull(a.getMetaObject().userCreated) ? false : a.getMetaObject().userCreated;
+        const bu = Utils.unORNull(b.getMetaObject().userCreated) ? false : b.getMetaObject().userCreated;
 
-        Log.notification(N.Logout, 'PublicRoomsListController');
+        if (au != bu) {
+            return au ? 1 : -1;
+        }
 
-        $scope.allRooms.sort((a, b) => {
+        // Weight
+        const aw = Utils.unORNull(a.getMetaObject().weight) ? 100 : a.getMetaObject().weight;
+        const bw = Utils.unORNull(b.getMetaObject().weight) ? 100 : b.getMetaObject().weight;
 
-            let au = Utils.unORNull(a.meta.userCreated) ? false : a.meta.userCreated;
-            let bu = Utils.unORNull(b.meta.userCreated) ? false : b.meta.userCreated;
+        if (aw != bw) {
+            return aw - bw;
+        }
+        else {
 
-            if(au != bu) {
-                return au ? 1 : -1;
-            }
+            const ac = a.getOnlineUserCount();
+            const bc = b.getOnlineUserCount();
 
-            // Weight
-            let aw = Utils.unORNull(a.meta.weight) ? 100 : a.meta.weight;
-            let bw = Utils.unORNull(b.meta.weight) ? 100 : b.meta.weight;
+            //console.log('1: ' + ac + ', 2: ' + bc);
 
-            if(aw != bw) {
-                return aw - bw;
+            if (ac != bc) {
+                return bc - ac;
             }
             else {
-
-                let ac = a.getOnlineUserCount();
-                let bc = b.getOnlineUserCount();
-
-                //console.log("1: " + ac + ", 2: " + bc);
-
-                if(ac != bc) {
-                    return bc - ac;
-                }
-                else {
-                    return a.name < b.name ? -1 : 1;
-                }
+                return a.name < b.name ? -1 : 1;
             }
+        }
 
-        });
+    });
 
-        $scope.rooms = ArrayUtils.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], (room) => {
-            return (room as any).meta.name;
-        });
+    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.$scope.search[this.$scope.activeTab], (room) => {
+        return room.getMetaObject.name;
+    });
 
-        $timeout(() =>{
-            $scope.$digest();
-        });
-    };
+    this.$timeout(() =>{
+        this.$scope.$digest();
+    });
+  }
 
-//    $scope.getRooms = function() {
-//        // Filter rooms by search text
-//        return Utilities.filterByName(Cache.getPublicRooms(), $scope.search[$scope.activeTab]);
-//    };
+}
 
-    $scope.init();
-
-}]);
+angular.module('myApp.controllers').controller('PublicRoomsListController', PublicRoomsListController);

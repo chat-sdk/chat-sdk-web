@@ -60,6 +60,7 @@ export interface IRoom extends IEntity {
     containsOnlyUsers(users: IUser[]): boolean;
     created(): number;
     deserialize(sr: StringAnyObject): void;
+    getOnlineUserCount(): number;
     getType(): RoomType;
     getUserStatus(user: IUser): UserStatus;
     isPublic(): boolean;
