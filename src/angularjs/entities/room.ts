@@ -60,6 +60,7 @@ export interface IRoom extends IEntity {
     containsOnlyUsers(users: IUser[]): boolean;
     created(): number;
     deserialize(sr: StringAnyObject): void;
+    flashHeader(): boolean;
     getOnlineUserCount(): number;
     getType(): RoomType;
     getUserStatus(user: IUser): UserStatus;
@@ -78,6 +79,7 @@ export interface IRoom extends IEntity {
     setOffset(offset: number): void;
     setSizeToDefault(): void;
     transcript(): string;
+    trimMessageList(): void;
     typingOn(): void;
     updateOffsetFromSlot(): void;
     updateType(): void;

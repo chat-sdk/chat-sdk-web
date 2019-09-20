@@ -9,6 +9,7 @@ import { IRootScope } from '../interfaces/root-scope';
 export interface IConfig {
     clockType: string;
     defaultUserName: string;
+    disableProfileBox: boolean;
     friendsEnabled: boolean;
     headerColor: string;
     inactivityTimeout: number;

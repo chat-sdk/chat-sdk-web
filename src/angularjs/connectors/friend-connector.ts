@@ -8,16 +8,17 @@ import { IUserStore } from '../persistence/user-store';
 import { IPaths } from '../network/paths';
 
 export interface IFriendsConnector {
-    on(uid: string): void;
-    off(uid: string): void;
+    friends: { [uid: string]: IUser };
     isFriend(user: IUser): boolean;
+    off(uid: string): void;
+    on(uid: string): void;
 }
 
 class FriendsConnector implements FriendsConnector {
 
     static $inject = ['$rootScope', 'User', 'UserStore', 'Paths'];
 
-    friends: { [uid: string]: IUser } = {};
+    friends = {};
 
     constructor(
         private $rootScope: IRootScope,
