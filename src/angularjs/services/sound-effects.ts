@@ -5,7 +5,9 @@ import { ILocalStorage } from '../persistence/local-storage';
 import { IEnvironment } from './environment';
 
 export interface ISoundEffects {
+    muted: boolean;
     messageReceived(): void;
+    toggleMuted(): boolean;
 }
 
 class SoundEffects implements ISoundEffects {

@@ -12,6 +12,7 @@ export interface ILocalStorage {
     tokenExpiryKey: string;
     tokenKey: string;
     UIDKey: string;
+    clearCache(): void;
     getProperty(key: string): any;
     isMuted(): boolean;
     removeProperty(key: string): void;

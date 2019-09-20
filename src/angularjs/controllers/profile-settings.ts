@@ -1,190 +1,229 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
-
-import {ShowProfileSettingsBox} from "../keys/defines";
-import {UserKeys} from "../keys/user-keys";
-import {Utils} from "../services/utils";
+import { ShowProfileSettingsBox } from '../keys/defines';
+import { UserKeys } from '../keys/user-keys';
+import { Utils } from '../services/utils';
 import { NotificationType } from '../keys/notification-type';
+import { IAuth } from '../network/auth';
+import { IConfig } from '../services/config';
+import { ISoundEffects } from '../services/sound-effects';
+import { ILocalStorage } from '../persistence/local-storage';
+import { IRootScope } from '../interfaces/root-scope';
+import { IUser } from '../entities/user';
 
-angular.module('myApp.controllers').controller('ProfileSettingsController', ['$scope', 'Auth', 'Config', 'SoundEffects', 'LocalStorage',
-    function($scope, Auth, Config, SoundEffects, LocalStorage) {
+export interface ProfileSettingsScope extends ng.IScope {
+  dirty: boolean;
+  muted: boolean;
+  nameChangeDummy: any;
+  ref: any;
+  validation: {};
+  cacheCleared: boolean;
+  clearCache(): void;
+  done(): void;
+  getUser(): IUser;
+  isValidURL(): void;
+  showMainBox(): void;
+  toggleMuted(): void;
+  validate(): boolean;
+  validateLocation(): boolean;
+  validateName(): boolean;
+  validateProfileLink(): boolean;
+  validateString(key: string, string: string): boolean;
+}
 
-        $scope.ref = null;
-        $scope.muted = false;
-        $scope.nameChangeDummy = null;
-        $scope.dirty = false;
+export interface IProfileSettingsController {
 
-        $scope.init = function () {
+}
 
-            // Listen for validation errors
-            $scope.muted = SoundEffects.muted;
+class ProfileSettingsController implements IProfileSettingsController {
 
-            $scope.validation = {};
+  static $inject = ['$scope', '$rootScope', 'Auth', 'Config', 'SoundEffects', 'LocalStorage'];
 
-            $scope.validation[UserKeys.Name] = {
-                minLength: 2,
-                maxLength: 50,
-                valid: true
-            };
+  constructor(
+    private $scope: ProfileSettingsScope,
+    private $rootScope: IRootScope,
+    private Auth: IAuth,
+    private Config: IConfig,
+    private SoundEffects: ISoundEffects,
+    private LocalStorage: ILocalStorage,
+  ) {
+    // $scope propeties
+    $scope.dirty = false;
+    $scope.muted = SoundEffects.muted;
+    $scope.nameChangeDummy = null;
+    $scope.ref = null;
+    $scope.validation = {
+      [UserKeys.Name]: {
+        minLength: 2,
+        maxLength: 50,
+        valid: true
+      },
+      // [UserKeys.Location]: {
+      //   minLength: 0,
+      //   maxLength: 50,
+      //   valid: true
+      // },
+      [UserKeys.ProfileLink]: {
+        minLength: 0,
+        maxLength: 100,
+        valid: true
+      },
+    };
 
-            // $scope.validation[UserKeys.Location] = {
-            //     minLength: 0,
-            //     maxLength: 50,
-            //     valid: true
-            // };
+    // $scope methods
+    $scope.clearCache = this.clearCache.bind(this);
+    $scope.done = this.done.bind(this);
+    $scope.isValidURL = this.isValidURL.bind(this);
+    $scope.toggleMuted = this.toggleMuted.bind(this);
+    $scope.validate = this.validate.bind(this);
+    $scope.validateLocation = this.validateLocation.bind(this);
+    $scope.validateName = this.validateName.bind(this);
+    $scope.validateProfileLink = this.validateProfileLink.bind(this);
+    $scope.validateString = this.validateString.bind(this);
 
-            $scope.validation[UserKeys.ProfileLink] = {
-                minLength: 0,
-                maxLength: 100,
-                valid: true
-            };
+    $scope.$watchCollection('user.meta', () => {
+      $scope.dirty = true;
+    });
 
-            $scope.$watchCollection('user.meta', () => {
-                $scope.dirty = true;
-            });
+    // When the box will be opened we need to add a listener to the user
+    $scope.$on(ShowProfileSettingsBox, () => {
+      console.log('Show Profile');
+    });
+  }
 
-            // When the box will be opened we need to add a listener to the
-            // user
-            $scope.$on(ShowProfileSettingsBox, () => {
+  validateLocation(): boolean {
+    return true;
+    // return this.$scope.validation[UserKeys.Location].valid;
+  };
 
-                console.log("Show Profile");
+  validateProfileLink(): boolean {
+    return this.$scope.validation[UserKeys.ProfileLink].valid;
+  }
 
-            });
-        };
+  validateName(): boolean {
+    return this.$scope.validation[UserKeys.Name].valid;
+  }
 
-        $scope.validateLocation = function () {
-            return true;
-            // return $scope.validation[UserKeys.Location].valid;
-        };
+  toggleMuted() {
+    this.$scope.muted = this.SoundEffects.toggleMuted();
+  }
 
-        $scope.validateProfileLink = function () {
-            return $scope.validation[UserKeys.ProfileLink].valid;
-        };
+  clearCache() {
+    if (!this.$scope.cacheCleared) {
+      this.LocalStorage.clearCache();
+    }
+    this.$scope.cacheCleared = true;
+  }
 
-        $scope.validateName= function () {
-            return $scope.validation[UserKeys.Name].valid;
-        };
+  isValidURL(url: string): boolean {// wrapped in self calling function to prevent global pollution
 
-        $scope.toggleMuted = function () {
-            $scope.muted = SoundEffects.toggleMuted();
-        };
+    //URL pattern based on rfc1738 and rfc3986
+    let rg_pctEncoded = "%[0-9a-fA-F]{2}";
+    let rg_protocol = "(http|https):\\/\\/";
 
-        $scope.clearCache = function () {
-            if(!$scope.cacheCleared) {
-                LocalStorage.clearCache();
-            }
-            $scope.cacheCleared = true;
-        };
+    let rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
 
-        $scope.isValidURL = function(url) {// wrapped in self calling function to prevent global pollution
+    let rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
+    let rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
+    let rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
+    let rg_port = "[0-9]+";
 
-            //URL pattern based on rfc1738 and rfc3986
-            let rg_pctEncoded = "%[0-9a-fA-F]{2}";
-            let rg_protocol = "(http|https):\\/\\/";
+    let rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
 
-            let rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
+    // chars sets
+    // safe           = "$" | "-" | "_" | "." | "+"
+    // extra          = "!" | "*" | "'" | "(" | ")" | ","
+    // hsegment       = *[ alpha | digit | safe | extra | ";" | ":" | "@" | "&" | "=" | escape ]
+    let rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
+    let rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
 
-            let rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
-            let rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
-            let rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
-            let rg_port = "[0-9]+";
+    let rg_path = rg_segment + "(\\/" + rg_segment + ")*";
+    let rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+    let rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
 
-            let rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
+    let rgHttpUrl = new RegExp(
+        "^"
+        + rg_protocol
+        + "(" + rg_userinfo + ")?"
+        + rg_hostport
+        + "(\\/"
+        + "(" + rg_path + ")?"
+        + "(" + rg_query + ")?"
+        + "(" + rg_fragment + ")?"
+        + ")?"
+        + "$"
+    );
 
-            // chars sets
-            // safe           = "$" | "-" | "_" | "." | "+"
-            // extra          = "!" | "*" | "'" | "(" | ")" | ","
-            // hsegment       = *[ alpha | digit | safe | extra | ";" | ":" | "@" | "&" | "=" | escape ]
-            let rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
-            let rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
+    // export public function
+    if (rgHttpUrl.test(url)) {
+        return true;
+    } else {
+        return false;
+    }
+  }
 
-            let rg_path = rg_segment + "(\\/" + rg_segment + ")*";
-            let rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
-            let rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+  validate(): boolean {
 
-            let rgHttpUrl = new RegExp(
-                "^"
-                + rg_protocol
-                + "(" + rg_userinfo + ")?"
-                + rg_hostport
-                + "(\\/"
-                + "(" + rg_path + ")?"
-                + "(" + rg_query + ")?"
-                + "(" + rg_fragment + ")?"
-                + ")?"
-                + "$"
-            );
+    let user = this.$scope.getUser();
 
-            // export public function
-            if (rgHttpUrl.test(url)) {
-                return true;
-            } else {
-                return false;
-            }
-        };
+    // Validate the user
+    let nameValid = this.$scope.validateString(UserKeys.Name, user.getName());
 
-        $scope.validate = function () {
+    let profileLinkValid = !this.Config.userProfileLinkEnabled || this.$scope.validateString(UserKeys.ProfileLink, user.getProfileLink());
 
-            let user = $scope.getUser();
+    return nameValid && profileLinkValid;
+  }
 
-            // Validate the user
-            let nameValid = $scope.validateString(UserKeys.Name, user.getName());
+  validateString(key: string, string: string): boolean {
+    let valid = true;
 
-            let profileLinkValid = !Config.userProfileLinkEnabled || $scope.validateString(UserKeys.ProfileLink, user.getProfileLink());
+    if (Utils.unORNull(string)) {
+        valid = false;
+    }
 
-            return nameValid && profileLinkValid;
-        };
+    else if (string.length < this.$scope.validation[key].minLength) {
+        valid = false;
+    }
 
-        $scope.validateString = function (key, string) {
-            let valid = true;
+    else if (string.length > this.$scope.validation[key].maxLength) {
+        valid = false;
+    }
 
-            if(Utils.unORNull(string)) {
-                valid = false;
-            }
+    this.$scope.validation[key].valid = valid;
+    return valid;
 
-            else if(string.length < $scope.validation[key].minLength) {
-                valid = false;
-            }
+  }
 
-            else if(string.length > $scope.validation[key].maxLength) {
-                valid = false;
-            }
+  /**
+   * This is called when the user confirms changes to their user
+   * profile
+   */
+  done() {
 
-            $scope.validation[key].valid = valid;
-            return valid;
+    // Is the name valid?
+    if (this.$scope.validate()) {
 
-        };
+        this.$scope.showMainBox();
 
-        /**
-         * This is called when the user confirms changes to their user
-         * profile
-         */
-        $scope.done = function () {
+        // Did the user update any values?
+        if (this.$scope.dirty) {
+            this.$scope.getUser().pushMeta();
+            this.$scope.dirty = false;
+        }
+    }
+    else {
+        if (!this.$scope.validation[UserKeys.Name].valid) {
+            this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between "+this.$scope.validation[UserKeys.Name].minLength+" - "+this.$scope.validation[UserKeys.Name].maxLength+" characters long ", "Ok");
+        }
+        // if (!this.$scope.validation[UserKeys.Location].valid) {
+        //     this.$scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+this.$scope.validation[UserKeys.Location].minLength+" - "+this.$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
+        // }
+        if (!this.$scope.validation[UserKeys.ProfileLink].valid) {
+            this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
+        }
+    }
+  }
 
-            // Is the name valid?
-            if($scope.validate()) {
+}
 
-                $scope.showMainBox();
-
-                // Did the user update any values?
-                if($scope.dirty) {
-                    $scope.getUser().pushMeta();
-                    $scope.dirty = false;
-                }
-            }
-            else {
-                if(!$scope.validation[UserKeys.Name].valid) {
-                    $scope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between "+$scope.validation[UserKeys.Name].minLength+" - "+$scope.validation[UserKeys.Name].maxLength+" characters long ", "Ok");
-                }
-                // if(!$scope.validation[UserKeys.Location].valid) {
-                //     $scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+$scope.validation[UserKeys.Location].minLength+" - "+$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
-                // }
-                if(!$scope.validation[UserKeys.ProfileLink].valid) {
-                    $scope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
-                }
-            }
-        };
-
-        $scope.init();
-
-    }]);
+angular.module('myApp.controllers').controller('ProfileSettingsController', ProfileSettingsController);

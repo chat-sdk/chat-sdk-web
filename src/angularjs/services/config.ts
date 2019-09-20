@@ -9,14 +9,15 @@ import { IRootScope } from '../interfaces/root-scope';
 export interface IConfig {
     clockType: string;
     defaultUserName: string;
-    headerColor: string;
-    publicRoomsEnabled: boolean;
-    onlineUsersEnabled: boolean;
     friendsEnabled: boolean;
-    maxHistoricMessages: number;
+    headerColor: string;
     inactivityTimeout: number;
+    maxHistoricMessages: number;
+    onlineUsersEnabled: boolean;
+    publicRoomsEnabled: boolean;
     singleSignOnAPILevel: number;
     singleSignOnURL: string;
+    userProfileLinkEnabled: boolean;
     setConfig(setBy: SetBy, config: Map<string, any>): void;
 }
 

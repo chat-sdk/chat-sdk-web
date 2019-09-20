@@ -19,39 +19,35 @@ import { INetworkManager } from '../network/network-manager';
 import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface IUser extends IEntity {
-    online: boolean
-    meta: Map<string, any>
-    friend?: boolean
-    ssoFriend?: boolean
-    blocked: boolean
-    unblock(): void
-
-    uid(): string
-    isMe(): boolean
-
-    setName(name: string): void
-    getName(): string
-    name(value: string): string
-
-    getImageURL(): string
-    setImageURL(imageURL: string): void
-
-    setImage(image: string, isData?: boolean): void
-
-    setProfileHTML(profileHTML: string): void
-    hasImage(): boolean
-    addRoomUpdate(room: IRoom): {}
-    removeRoomUpdate(room: IRoom): {}
-    updateImageURL(imageURL: string): Promise<any>
-    pushMeta(): Promise<any>
-    on(): Promise<any>
-    off(): void
-    unblockUser(block): void
-    canBeInvitedByUser(invitingUser: IUser): boolean
-    allowInvitesFrom(type: UserAllowInvites): boolean
-    deserialize(su): void
-    removeFriend(friend?: IUser): void
-    markRoomReadTime(rid: string): Promise<any>
+    blocked: boolean;
+    friend?: boolean;
+    meta: Map<string, any>;
+    online: boolean;
+    ssoFriend?: boolean;
+    addRoomUpdate(room: IRoom): {};
+    allowInvitesFrom(type: UserAllowInvites): boolean;
+    canBeInvitedByUser(invitingUser: IUser): boolean;
+    deserialize(su): void;
+    getImageURL(): string;
+    getName(): string;
+    getProfileLink(): string;
+    hasImage(): boolean;
+    isMe(): boolean;
+    markRoomReadTime(rid: string): Promise<any>;
+    name(value: string): string;
+    off(): void;
+    on(): Promise<any>;
+    pushMeta(): Promise<any>;
+    removeFriend(friend?: IUser): void;
+    removeRoomUpdate(room: IRoom): {};
+    setImage(image: string, isData?: boolean): void;
+    setImageURL(imageURL: string): void;
+    setName(name: string): void;
+    setProfileHTML(profileHTML: string): void;
+    uid(): string;
+    unblock(): void;
+    unblockUser(user: IUser): void;
+    updateImageURL(imageURL: string): Promise<any>;
 }
 
 class User extends Entity implements IUser {
