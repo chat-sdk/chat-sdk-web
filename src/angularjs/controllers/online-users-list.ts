@@ -1,68 +1,86 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
-
-import {N} from "../keys/notification-keys";
-import {ArrayUtils} from "../services/array-utils";
-import {Log} from "../services/log";
+import { N } from '../keys/notification-keys';
+import { ArrayUtils } from '../services/array-utils';
+import { Log } from '../services/log';
 import { IUser } from '../entities/user';
+import { IOnlineConnector } from '../connectors/online-connector';
 
-angular.module('myApp.controllers').controller('OnlineUsersListController', ['$scope', '$timeout', 'OnlineConnector', function($scope, $timeout, OnlineConnector) {
+export interface OnlineUsersListScope extends ng.IScope {
+  activeTab: string;
+  allUsers: IUser[];
+  users: IUser[];
+  search: { [key: string]: string };
+  updateList(): void;
+}
 
-    $scope.users = [];
+export interface IOnlineUsersListController {
+
+}
+
+class OnlineUsersListController implements IOnlineUsersListController {
+
+  static $inject = ['$scope', '$timeout', 'OnlineConnector'];
+
+  constructor(
+    private $scope: OnlineUsersListScope,
+    private $timeout: ng.ITimeoutService,
+    private OnlineConnector: IOnlineConnector,
+  ) {
+    // $scope propeties
     $scope.allUsers = [];
+    $scope.users = [];
 
-    $scope.init = function () {
+    //$scope methods
+    $scope.updateList = this.updateList.bind(this);
 
-        $scope.$on(N.OnlineUserAdded, () => {
-            Log.notification(N.OnlineUserAdded, 'OnlineUsersListController');
-            $scope.updateList();
+    $scope.$on(N.OnlineUserAdded, () => {
+      Log.notification(N.OnlineUserAdded, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        });
+    $scope.$on(N.OnlineUserRemoved, () => {
+      Log.notification(N.OnlineUserRemoved, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.OnlineUserRemoved, () => {
-            Log.notification(N.OnlineUserRemoved, 'OnlineUsersListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.UserBlocked, () => {
+      Log.notification(N.UserBlocked, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.UserBlocked, () => {
-            Log.notification(N.UserBlocked, 'OnlineUsersListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.UserUnblocked, () => {
+      Log.notification(N.UserUnblocked, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.UserUnblocked, () => {
-            Log.notification(N.UserUnblocked, 'OnlineUsersListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.FriendAdded, () => {
+      Log.notification(N.FriendAdded, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.FriendAdded, () => {
-            Log.notification(N.FriendAdded, 'OnlineUsersListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.FriendRemoved, () => {
+      Log.notification(N.FriendAdded, 'OnlineUsersListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.FriendRemoved, () => {
-            Log.notification(N.FriendAdded, 'OnlineUsersListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.Logout, this.updateList.bind(this));
 
-        $scope.$on(N.Logout, $scope.updateList);
+    $scope.$watchCollection('search', this.updateList.bind(this));
+  }
 
-        $scope.$watchCollection('search', $scope.updateList);
+  updateList() {
+    // Filter online users to remove users that are blocking us
+    this.$scope.allUsers = ArrayUtils.objectToArray(this.OnlineConnector.onlineUsers);
+    this.$scope.users = ArrayUtils.filterByKey(this.$scope.allUsers, this.$scope.search[this.$scope.activeTab], (user) => {
+        return user.getName();
+    });
 
-    };
+    this.$timeout(() => {
+      this.$scope.$digest();
+    });
+  }
 
-    $scope.updateList = function () {
+}
 
-        // Filter online users to remove users that are blocking us
-        $scope.allUsers = ArrayUtils.objectToArray(OnlineConnector.onlineUsers);
-        $scope.users = ArrayUtils.filterByKey($scope.allUsers, $scope.search[$scope.activeTab], (user) => {
-            return (user as IUser).getName();
-        });
-
-        $timeout(() => {
-            $scope.$digest();
-        });
-    };
-
-    $scope.init();
-
-}]);
+angular.module('myApp.controllers').controller('OnlineUsersListController', OnlineUsersListController);
