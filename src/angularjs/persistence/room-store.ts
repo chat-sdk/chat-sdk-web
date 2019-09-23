@@ -9,8 +9,10 @@ import { IUser } from '../entities/user';
 
 export interface IRoomStore {
     getOrCreateRoomWithID(rid: string): IRoom;
+    getPrivateRooms(): IRoom[];
     getRoomWithID(rid: string): IRoom;
     inboxBadgeCount(): number;
+    loadPrivateRoomsToMemory(): void;
     removeRoom(room: IRoom): void;
 }
 

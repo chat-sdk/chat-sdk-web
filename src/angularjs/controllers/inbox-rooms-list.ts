@@ -1,58 +1,77 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { N } from '../keys/notification-keys';
+import { ArrayUtils } from '../services/array-utils';
+import { Log } from '../services/log';
+import { IRoomStore } from '../persistence/room-store';
+import { IRoom } from '../entities/room';
 
-import {N} from "../keys/notification-keys";
-import {ArrayUtils} from "../services/array-utils";
-import {Log} from "../services/log";
+export interface InboxRoomsListScope extends ng.IScope {
+  activeTab: string;
+  allRooms: IRoom[];
+  rooms: IRoom[];
+  search: { [key: string]: string };
+  updateList(): void;
+}
 
-angular.module('myApp.controllers').controller('InboxRoomsListController', ['$scope', '$timeout', 'RoomStore', function($scope, $timeout, RoomStore) {
+export interface IInboxRoomsListController {
 
+}
+
+class InboxRoomsListController implements IInboxRoomsListController {
+
+  static $inject = ['$scope', '$timeout', 'RoomStore'];
+
+  constructor(
+    private $scope: InboxRoomsListScope,
+    private $timeout: ng.ITimeoutService,
+    private RoomStore: IRoomStore,
+  ) {
+    // $scope properties
     $scope.rooms = [];
     $scope.allRooms = [];
 
-    $scope.init = function () {
+    // $scope methods
+    $scope.updateList = this.updateList.bind(this);
 
-        $scope.$on(N.RoomAdded, () => {
-            Log.notification(N.RoomAdded, 'InboxRoomsListController');
-            $scope.updateList();
+    $scope.$on(N.RoomAdded, () => {
+      Log.notification(N.RoomAdded, 'InboxRoomsListController');
+      this.updateList.bind(this)();
+    });
 
-        });
+    $scope.$on(N.RoomRemoved, () => {
+      Log.notification(N.RoomRemoved, 'InboxRoomsListController');
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.RoomRemoved, () => {
-            Log.notification(N.RoomRemoved, 'InboxRoomsListController');
-            $scope.updateList();
-        });
+    $scope.$on(N.LoginComplete, () => {
+      Log.notification(N.LoginComplete, 'InboxRoomsListController');
+      RoomStore.loadPrivateRoomsToMemory();
+      this.updateList.bind(this)();
+    });
 
-        $scope.$on(N.LoginComplete, () => {
-            Log.notification(N.LoginComplete, 'InboxRoomsListController');
-            RoomStore.loadPrivateRoomsToMemory();
-            $scope.updateList();
-        });
+    // Update the list if the user count on a room changes
+    $scope.$on(N.RoomUpdated, this.updateList.bind(this));
 
-        // Update the list if the user count on a room changes
-        $scope.$on(N.RoomUpdated, $scope.updateList);
+    $scope.$on(N.Logout, this.updateList.bind(this));
 
-        $scope.$on(N.Logout, $scope.updateList);
+    $scope.$watchCollection('search', this.updateList.bind(this));
+  }
 
-        $scope.$watchCollection('search', $scope.updateList);
+  updateList() {
+    this.$scope.allRooms = this.RoomStore.getPrivateRooms();
 
-    };
+    this.$scope.allRooms = ArrayUtils.roomsSortedByMostRecent(this.$scope.allRooms);
 
-    $scope.updateList = function () {
+    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.$scope.search[this.$scope.activeTab], (room) => {
+      return room.getMetaObject().name;
+    });
 
-        $scope.allRooms = RoomStore.getPrivateRooms();
+    this.$timeout(() => {
+      this.$scope.$digest();
+    });
+  }
 
-        $scope.allRooms = ArrayUtils.roomsSortedByMostRecent($scope.allRooms);
+}
 
-        $scope.rooms = ArrayUtils.filterByKey($scope.allRooms, $scope.search[$scope.activeTab], (room) => {
-            return (room as any).meta.name;
-        });
-
-        $timeout(() => {
-            $scope.$digest();
-        });
-    };
-
-    $scope.init();
-
-}]);
+angular.module('myApp.controllers').controller('InboxRoomsListController', InboxRoomsListController);
