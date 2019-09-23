@@ -9,8 +9,9 @@ import { IUserStore } from '../persistence/user-store';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IOnlineConnector {
-    on(): void;
     off(): void;
+    on(): void;
+    onlineUserCount(): number;
     onlineUsers: {};
 }
 

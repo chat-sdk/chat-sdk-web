@@ -7,14 +7,16 @@ import { IFirebaseConfig } from '../interfaces/firebase-config';
 import { IChatSDKConfig } from '../interfaces/chat-sdk-config';
 
 export interface IEnvironment {
-    firebaseConfig(): any;
+    audioURL(): string;
+    cloudImageToken(): string;
     config(): any;
-    partialsURL(): string;
     defaultProfilePictureURL(): string;
     defaultRoomPictureURL(): string;
-    cloudImageToken(): string;
+    firebaseConfig(): any;
+    imagesURL(): string;
+    partialsURL(): string;
+    rootPath(): string
     showOnPaths(): string;
-    audioURL(): string;
 }
 
 class Environment implements IEnvironment {

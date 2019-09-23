@@ -15,14 +15,17 @@ export interface ICache {
     /**
      * The user's active rooms
      */
+    blockedUsers: { [uid: string]: IUser };
     rooms: IRoom [];
-    addRoom(room: IRoom): void;
-    removeRoom(room: IRoom): void;
     activeRooms(): IRoom[];
+    addBlockedUser(user: IUser): void;
+    addRoom(room: IRoom): void;
+    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
     inactiveRooms(): IRoom[];
     isBlockedUser(uid: string): boolean;
-    addBlockedUser(user: IUser): void;
     removeBlockedUserWithID(uid: string): void;
+    removeRoom(room: IRoom): void;
+    clear(): void;
 }
 
 class Cache implements ICache {

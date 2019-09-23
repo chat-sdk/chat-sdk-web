@@ -19,8 +19,10 @@ import { IRoom } from '../entities/room';
  */
 
 export interface IPresence {
+    goOffline(): void;
     goOnline(): Promise<any>;
     start(user: IUser): void;
+    stop(): void;
     update(): Promise<any>;
 }
 

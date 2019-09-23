@@ -3,7 +3,7 @@ import * as angular from 'angular';
 import { IEnvironment } from './environment';
 
 export interface IPartials {
-
+  load(): void;
 }
 
 class Partials implements IPartials {

@@ -12,19 +12,23 @@ export interface IConfig {
     clockType: string;
     defaultUserName: string;
     disableProfileBox: boolean;
+    disableUserInfoPopup: boolean;
     fileMessagesEnabled: boolean;
     friends: any[];
     friendsEnabled: boolean;
     headerColor: string;
     imageMessagesEnabled: boolean;
     inactivityTimeout: number;
+    loginURL: string;
     maxHistoricMessages: number;
     onlineUsersEnabled: boolean;
     publicRoomsEnabled: boolean;
+    registerURL: string;
     singleSignOnAPILevel: number;
     singleSignOnURL: string;
     userProfileLinkEnabled: boolean;
     setConfig(setBy: SetBy, config: Map<string, any>): void;
+    startConfigListener(): Promise<any>;
 }
 
 export enum SetBy {

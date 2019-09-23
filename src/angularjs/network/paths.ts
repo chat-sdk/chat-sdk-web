@@ -27,38 +27,39 @@ export interface IFirebaseReference extends firebase.database.Reference {
 }
 
 export interface IPaths {
-    firebase (): firebase.database.Reference;
-    usersRef(): firebase.database.Reference;
     configRef(): firebase.database.Reference;
-    timeRef(uid: string): firebase.database.Reference;
-    userRef(fid: string): firebase.database.Reference;
-    userMetaRef(fid: string): firebase.database.Reference;
-    userImageRef(fid: string): firebase.database.Reference;
-    userStateRef(fid: string): firebase.database.Reference;
-    userOnlineRef(fid: string): firebase.database.Reference;
-    userFriendsRef(fid: string): firebase.database.Reference;
-    userBlockedRef(fid: string): firebase.database.Reference;
-    onlineUsersRef(): firebase.database.Reference;
+    firebase (): firebase.database.Reference;
     onlineUserRef(fid: string): firebase.database.Reference;
-    roomsRef(): firebase.database.Reference;
-    publicRoomsRef(): firebase.database.Reference;
+    onlineUsersRef(): firebase.database.Reference;
     publicRoomRef(rid: string): firebase.database.Reference;
-    roomRef(fid: string): firebase.database.Reference;
-    roomMetaRef(fid: string): firebase.database.Reference;
+    publicRoomsRef(): firebase.database.Reference;
     roomLastMessageRef(fid: string): firebase.database.Reference;
+    roomMetaRef(fid: string): firebase.database.Reference;
+    roomRef(fid: string): firebase.database.Reference;
+    roomsRef(): firebase.database.Reference;
     roomStateRef(fid: string): firebase.database.Reference;
+    setCID(cid: string): void;
+    timeRef(uid: string): firebase.database.Reference;
+    userBlockedRef(fid: string): firebase.database.Reference;
+    userFriendsRef(fid: string): firebase.database.Reference;
+    userImageRef(fid: string): firebase.database.Reference;
+    userMetaRef(fid: string): firebase.database.Reference;
+    userOnlineRef(fid: string): firebase.database.Reference;
+    userRef(fid: string): firebase.database.Reference;
+    usersRef(): firebase.database.Reference;
+    userStateRef(fid: string): firebase.database.Reference;
 
     // If we cast this as a reference, we can't set the priority as a timestamp
-    roomMessagesRef(fid: string): firebase.database.Reference;
-    roomUsersRef(fid: string): firebase.database.Reference;
-    roomTypingRef(fid: string): firebase.database.Reference;
-    userRoomsRef(fid: string): firebase.database.Reference;
-    messageUsersRef(rid: string, mid: string): firebase.database.Reference;
+    flaggedMessageRef(mid: string): firebase.database.Reference;
     messageRef(rid: string, mid: string): firebase.database.Reference;
+    messageUsersRef(rid: string, mid: string): firebase.database.Reference;
     onlineUserCountRef(): firebase.database.Reference;
     publicRoomsRef(): firebase.database.Reference;
-    flaggedMessageRef(mid: string): firebase.database.Reference;
+    roomMessagesRef(fid: string): firebase.database.Reference;
+    roomTypingRef(fid: string): firebase.database.Reference;
     roomUsersRef(fid: string): firebase.database.Reference;
+    roomUsersRef(fid: string): firebase.database.Reference;
+    userRoomsRef(fid: string): firebase.database.Reference;
     // Test
 }
 

@@ -1,7 +1,7 @@
 import * as angular from 'angular';
 
 export interface IPathAnalyser {
-
+  shouldShowChatOnPath(paths: string): boolean;
 }
 
 class PathAnalyser implements IPathAnalyser {

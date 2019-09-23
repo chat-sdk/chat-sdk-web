@@ -15,6 +15,7 @@ import { IScreen } from './screen';
  */
 
 export interface IRoomPositionManager {
+    closeAllRooms(): void;
     closeRoom(room: IRoom): void;
     effectiveScreenWidth(): number;
     getRooms(): any[];

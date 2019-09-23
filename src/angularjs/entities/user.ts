@@ -24,12 +24,15 @@ export interface IUser extends IEntity {
     meta: Map<string, any>;
     online: boolean;
     ssoFriend?: boolean;
+    addFriend(friend: IUser): Promise<any>;
     addRoomUpdate(room: IRoom): {};
     allowInvitesFrom(type: UserAllowInvites): boolean;
+    blockUser(user: IUser): void;
     canBeInvitedByUser(invitingUser: IUser): boolean;
     deserialize(su): void;
     getImageURL(): string;
     getName(): string;
+    getProfileHTML(): string;
     getProfileLink(): string;
     hasImage(): boolean;
     isMe(): boolean;

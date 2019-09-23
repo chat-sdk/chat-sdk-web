@@ -1543,9 +1543,10 @@ class RoomFactory implements IRoomFactory {
 }
 
 export interface IRoomCreator {
-    createRoomWithRID(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated: boolean, weight: number): Promise<IRoom>
+    createPrivateRoom(users: [IUser]): Promise<IRoom>;
     createPublicRoom(name: string, description: string, weight?): Promise<IRoom>
     createRoom(name: string, description: string, invitesEnabled: boolean, type: RoomType, weight?): Promise<IRoom>
+    createRoomWithRID(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated: boolean, weight: number): Promise<IRoom>
 }
 
 class RoomCreator implements IRoomCreator {

@@ -16,7 +16,9 @@ import { IRoomOpenQueue } from './room-open-queue';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IStateManager {
+    off(): void;
     on(): void;
+    userOff(uid: string): void;
     userOn(uid: string): void;
 }
 

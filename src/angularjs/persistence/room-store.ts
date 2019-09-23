@@ -10,6 +10,7 @@ import { IUser } from '../entities/user';
 export interface IRoomStore {
     getOrCreateRoomWithID(rid: string): IRoom;
     getPrivateRooms(): IRoom[];
+    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
     getRoomWithID(rid: string): IRoom;
     inboxBadgeCount(): number;
     loadPrivateRoomsToMemory(): void;

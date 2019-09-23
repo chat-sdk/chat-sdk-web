@@ -7,6 +7,7 @@ import { IWebStorage } from './web-storage';
 import { StringAnyObject } from '../interfaces/string-any-object';
 
 export interface ILocalStorage {
+    mainMinimizedKey: string;
     moreMinimizedKey: string;
     rooms: {};
     tokenExpiryKey: string;
@@ -17,15 +18,18 @@ export interface ILocalStorage {
     getLastVisited(): number;
     getProperty(key: string): any;
     isMuted(): boolean;
+    isOffline(): boolean;
     removeProperty(key: string): void;
     setLastVisited(): void;
     setMuted(muted: boolean): void;
+    setOffline(offline: boolean): void;
     setProperty(key: string, value: any): void;
     storeRooms(rooms: { [key: string]: IRoom }): void;
     storeUsers(users: { [key: string]: IUser }): void;
     sync(): void;
     updateRoomFromStore(room: IRoom): void;
     updateUserFromStore(user: IUser): boolean;
+    clearToken(): void;
 }
 
 class LocalStorage implements ILocalStorage {
