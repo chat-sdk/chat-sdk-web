@@ -55,7 +55,7 @@ export interface ILoginController {
 
 class LoginController implements LoginController {
 
-  static $inject = ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn','OnlineConnector', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential', 'AutoLogin'];
+  static $inject = ['$rootScope', '$scope', '$timeout', 'FriendsConnector', 'Cache', 'Presence', 'SingleSignOn', 'OnlineConnector', 'Paths', 'LocalStorage', 'StateManager', 'RoomPositionManager', 'Config', 'Auth', 'Credential', 'AutoLogin'];
 
   /**
    * Initialize the login controller
@@ -104,7 +104,7 @@ class LoginController implements LoginController {
     $scope.showLoginBox(LoginMode.Authenticating);
 
     if (AutoLogin.autoLoginEnabled()) {
-        const _ = firebase.auth().signOut();
+      const _ = firebase.auth().signOut();
     }
 
     firebase.auth().onAuthStateChanged((authData) => {
@@ -141,7 +141,7 @@ class LoginController implements LoginController {
     // We don't want to load the messenger straightaway to save bandwidth.
     // This will check when they last accessed the chat. If it was less than the timeout time ago,
     // then the click to chat box will be displayed. Clicking that will reset the timer
-    if (Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited)/1000 > this.Config.clickToChatTimeout && this.Config.clickToChatTimeout > 0) {
+    if (Utils.unORNull(lastVisited) || (new Date().getTime() - lastVisited) / 1000 > this.Config.clickToChatTimeout && this.Config.clickToChatTimeout > 0) {
       loginMode = LoginMode.ClickToChat;
     }
     return loginMode;
@@ -214,7 +214,7 @@ class LoginController implements LoginController {
       this.$scope.hideNotification();
       this.handleLoginError(error);
 
-      this.$timeout(() =>{
+      this.$timeout(() => {
         this.$scope.$digest();
       });
     }
@@ -303,28 +303,28 @@ class LoginController implements LoginController {
     let message = error.message || 'An unknown error occurred';
 
     if (error.code == 'AUTHENTICATION_DISABLED') {
-        message = 'This authentication method is currently disabled.';
+      message = 'This authentication method is currently disabled.';
     }
     if (error.code == 'EMAIL_TAKEN') {
-        message = 'Email address unavailable.';
+      message = 'Email address unavailable.';
     }
     if (error.code == 'INVALID_EMAIL') {
-        message = 'Please enter a valid email.';
+      message = 'Please enter a valid email.';
     }
     if (error.code == 'INVALID_ORIGIN') {
-        message = 'Login is not available from this domain.';
+      message = 'Login is not available from this domain.';
     }
     if (error.code == 'INVALID_PASSWORD') {
-        message = 'Please enter a valid password.';
+      message = 'Please enter a valid password.';
     }
     if (error.code == 'INVALID_USER') {
-        message = 'Invalid email or password.';
+      message = 'Invalid email or password.';
     }
     if (error.code == 'INVALID_USER') {
-        message = 'Invalid email or password.';
+      message = 'Invalid email or password.';
     }
     if (error.code == 'ALREADY_AUTHENTICATING') {
-        message = 'Already Authenticating'
+      message = 'Already Authenticating'
     }
 
     this.setError(message);

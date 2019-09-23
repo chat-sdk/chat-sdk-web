@@ -8,28 +8,28 @@ import * as angular from 'angular';
  * that function open it
  */
 export interface IRoomOpenQueue {
-    roomExistsAndPop(rid: string): boolean;
-    addRoomWithID(rid: string): void;
+  addRoomWithID(rid: string): void;
+  roomExistsAndPop(rid: string): boolean;
 }
 
 class RoomOpenQueue implements IRoomOpenQueue {
 
-    rids = new Array<string>();
+  rids = new Array<string>();
 
-    addRoomWithID(rid: string): void {
-        if (this.rids.indexOf(rid) < 0) {
-            this.rids.push(rid);
-        }
+  addRoomWithID(rid: string): void {
+    if (this.rids.indexOf(rid) < 0) {
+      this.rids.push(rid);
     }
+  }
 
-    roomExistsAndPop(rid: string): boolean {
-        let index = this.rids.indexOf(rid);
-        if (index >= 0) {
-            this.rids.splice(index, 1);
-            return true;
-        }
-        return false;
+  roomExistsAndPop(rid: string): boolean {
+    let index = this.rids.indexOf(rid);
+    if (index >= 0) {
+      this.rids.splice(index, 1);
+      return true;
     }
+    return false;
+  }
 
 }
 

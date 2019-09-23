@@ -8,148 +8,148 @@ import { IBeforeUnload } from '../services/before-unload';
 import { IUser } from '../entities/user';
 
 export interface IRoomStore {
-    getOrCreateRoomWithID(rid: string): IRoom;
-    getPrivateRooms(): IRoom[];
-    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
-    getRoomWithID(rid: string): IRoom;
-    inboxBadgeCount(): number;
-    loadPrivateRoomsToMemory(): void;
-    removeRoom(room: IRoom): void;
+  getOrCreateRoomWithID(rid: string): IRoom;
+  getPrivateRooms(): IRoom[];
+  getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
+  getRoomWithID(rid: string): IRoom;
+  inboxBadgeCount(): number;
+  loadPrivateRoomsToMemory(): void;
+  removeRoom(room: IRoom): void;
 }
 
 class RoomStore implements IRoomStore {
 
-    rooms: { [key: string]: IRoom } = {};
-    roomsLoadedFromMemory = false;
+  rooms: { [key: string]: IRoom } = {};
+  roomsLoadedFromMemory = false;
 
-    static $inject = ['LocalStorage', 'Room', 'BeforeUnload', 'UserStore'];
+  static $inject = ['LocalStorage', 'Room', 'BeforeUnload', 'UserStore'];
 
-    constructor(
-        private LocalStorage: ILocalStorage,
-        private Room/*: IRoom*/,
-        private BeforeUnload: IBeforeUnload,
-        private UserStore: IUserStore
-    ) {
-        BeforeUnload.addListener(this);
+  constructor(
+    private LocalStorage: ILocalStorage,
+    private Room/*: IRoom*/,
+    private BeforeUnload: IBeforeUnload,
+    private UserStore: IUserStore
+  ) {
+    BeforeUnload.addListener(this);
+  }
+
+  /**
+   * Load the private rooms so they're available
+   * to the inbox list
+   */
+  loadPrivateRoomsToMemory() {
+
+    if (this.roomsLoadedFromMemory || !this.UserStore.currentUser()) {
+      return;
+    }
+    this.roomsLoadedFromMemory = true;
+
+    // Load private rooms
+    let rooms = this.LocalStorage.rooms;
+    for (let key in rooms) {
+      if (rooms.hasOwnProperty(key)) {
+        this.getOrCreateRoomWithID(key);
+      }
+    }
+  }
+
+  beforeUnload() {
+    this.sync();
+  }
+
+  sync() {
+    this.LocalStorage.storeRooms(this.rooms);
+    this.LocalStorage.sync();
+  }
+
+  getOrCreateRoomWithID(rid: string): IRoom {
+
+    let room = this.getRoomWithID(rid);
+
+    if (!room) {
+      room = this.buildRoomWithID(rid);
+      this.addRoom(room);
     }
 
-    /**
-     * Load the private rooms so they're available
-     * to the inbox list
-     */
-    loadPrivateRoomsToMemory() {
+    return room;
+  }
 
-        if (this.roomsLoadedFromMemory || !this.UserStore.currentUser()) {
-            return;
+  buildRoomWithID(rid: string): IRoom {
+
+    let room = this.Room(rid);
+    room.associatedUserID = this.UserStore.currentUser().uid();
+
+    //            room.height = ChatRoomHeight;
+    //            room.width = ChatRoomWidth;
+
+    // Update the room from the saved state
+    this.LocalStorage.updateRoomFromStore(room);
+
+    return room;
+  }
+
+  addRoom(room: IRoom) {
+    if (room && room.rid()) {
+      this.rooms[room.rid()] = room;
+    }
+  }
+
+  removeRoom(room: IRoom) {
+    if (room && room.rid()) {
+      delete this.rooms[room.rid()];
+    }
+  }
+
+  getRoomWithID(rid: string): IRoom {
+    return this.rooms[rid];
+  }
+
+  clear() {
+    this.rooms = {};
+  }
+
+  getPrivateRooms(): IRoom[] {
+
+    if (!this.UserStore.currentUser()) {
+      return [];
+    }
+
+    this.loadPrivateRoomsToMemory();
+
+    let rooms = Array<IRoom>();
+    for (let rid in this.rooms) {
+      if (this.rooms.hasOwnProperty(rid)) {
+        let room = this.rooms[rid];
+        // Make sure that we only return private rooms for the current user
+        if (!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == this.UserStore.currentUser().uid() && room.usersMeta != {}) {
+          rooms.push(this.rooms[rid]);
         }
-        this.roomsLoadedFromMemory = true;
+      }
+    }
+    return rooms;
+  }
 
-        // Load private rooms
-        let rooms = this.LocalStorage.rooms;
-        for (let key in rooms) {
-            if (rooms.hasOwnProperty(key)) {
-                this.getOrCreateRoomWithID(key);
-            }
+  getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[] {
+    let rooms = Array<IRoom>();
+    for (let key in this.rooms) {
+      if (this.rooms.hasOwnProperty(key)) {
+        if (!this.rooms[key].isPublic()) {
+          rooms.push(this.rooms[key]);
         }
+      }
     }
+    rooms = ArrayUtils.getRoomsWithUsers(rooms, [user1, user2]);
+    return ArrayUtils.roomsSortedByMostRecent(rooms);
+  }
 
-    beforeUnload() {
-        this.sync();
+  inboxBadgeCount(): number {
+    let count = 0;
+    let rooms = this.getPrivateRooms();
+    for (let i = 0; i < rooms.length; i++) {
+      count += rooms[i].badge;
     }
-
-    sync() {
-        this.LocalStorage.storeRooms(this.rooms);
-        this.LocalStorage.sync();
-    }
-
-    getOrCreateRoomWithID(rid: string): IRoom {
-
-        let room = this.getRoomWithID(rid);
-
-        if (!room) {
-            room = this.buildRoomWithID(rid);
-            this.addRoom(room);
-        }
-
-        return room;
-    }
-
-    buildRoomWithID(rid: string): IRoom {
-
-        let room = this.Room(rid);
-        room.associatedUserID = this.UserStore.currentUser().uid();
-
-//            room.height = ChatRoomHeight;
-//            room.width = ChatRoomWidth;
-
-        // Update the room from the saved state
-        this.LocalStorage.updateRoomFromStore(room);
-
-        return room;
-    }
-
-    addRoom(room: IRoom) {
-        if (room && room.rid()) {
-            this.rooms[room.rid()] = room;
-        }
-    }
-
-    removeRoom(room: IRoom) {
-        if (room && room.rid()) {
-            delete this.rooms[room.rid()];
-        }
-    }
-
-    getRoomWithID(rid: string): IRoom {
-        return this.rooms[rid];
-    }
-
-    clear() {
-        this.rooms = {};
-    }
-
-    getPrivateRooms(): IRoom[] {
-
-        if (!this.UserStore.currentUser()) {
-            return [];
-        }
-
-        this.loadPrivateRoomsToMemory();
-
-        let rooms = Array<IRoom>();
-        for (let rid in this.rooms) {
-            if (this.rooms.hasOwnProperty(rid)) {
-                let room = this.rooms[rid];
-                // Make sure that we only return private rooms for the current user
-                if (!room.isPublic() && !room.deleted && room.associatedUserID && room.associatedUserID == this.UserStore.currentUser().uid() && room.usersMeta != {}) {
-                    rooms.push(this.rooms[rid]);
-                }
-            }
-        }
-        return rooms;
-    }
-
-    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[] {
-        let rooms = Array<IRoom>();
-        for (let key in this.rooms) {
-            if (this.rooms.hasOwnProperty(key)) {
-                if (!this.rooms[key].isPublic()) {
-                    rooms.push(this.rooms[key]);
-                }
-            }
-        }
-        rooms = ArrayUtils.getRoomsWithUsers(rooms, [user1, user2]);
-        return ArrayUtils.roomsSortedByMostRecent(rooms);
-    }
-
-    inboxBadgeCount(): number {
-        let count = 0;
-        let rooms = this.getPrivateRooms();
-        for (let i = 0; i < rooms.length; i++) {
-            count += rooms[i].badge;
-        }
-        return count;
-    }
+    return count;
+  }
 }
 
 angular.module('myApp.services').service('RoomStore', RoomStore);

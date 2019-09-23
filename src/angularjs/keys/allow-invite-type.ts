@@ -1,5 +1,5 @@
 export enum UserAllowInvites {
-    Everyone = 'Everyone',
-    Friends = 'Friends',
-    Nobody = 'Nobody',
+  Everyone = 'Everyone',
+  Friends = 'Friends',
+  Nobody = 'Nobody',
 }

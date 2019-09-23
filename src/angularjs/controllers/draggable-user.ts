@@ -1,4 +1,4 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
 interface IDraggableUserController {
 
@@ -9,7 +9,9 @@ interface IDraggableUserController {
  */
 class DraggableUserController implements IDraggableUserController {
 
-    static $inject = ['$scope'];
+  static $inject = ['$scope'];
+
+  constructor(private $scope: ng.IScope) { }
 
 }
 

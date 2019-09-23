@@ -86,7 +86,7 @@ export interface IMainAppController {
 
 class MainAppController implements IMainAppController {
 
-  static $inject = ['$rootScope', '$scope','$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore','$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment'];
+  static $inject = ['$rootScope', '$scope', '$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore', '$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment'];
 
   constructor(
     private $rootScope: IRootScope,
@@ -337,7 +337,7 @@ class MainAppController implements IMainAppController {
     this.$scope.activeBox = Defines.ErrorBox;
     this.$scope.errorBoxMessage = message;
     this.$timeout.bind(this)(() => {
-        this.$scope.$digest();
+      this.$scope.$digest();
     });
   }
 
@@ -377,7 +377,7 @@ class MainAppController implements IMainAppController {
   showProfileBox(uid: string, duration: number) {
 
     if (this.Config.disableUserInfoPopup) {
-        return;
+      return;
     }
 
     this.$scope.friendsEnabled = this.Config.friendsEnabled;
@@ -437,7 +437,7 @@ class MainAppController implements IMainAppController {
 
   isBlocked(user: IUser): boolean {
     if (user) {
-        return !Utils.unORNull(this.Cache.blockedUsers[user.uid()]);
+      return !Utils.unORNull(this.Cache.blockedUsers[user.uid()]);
     }
     return false;
   }
@@ -643,17 +643,17 @@ class MainAppController implements IMainAppController {
 
           // Resize the image
           const canvas = document.createElement('canvas'),
-                max_size = 100,
-                width = image.width,
-                height = image.height;
+            max_size = 100,
+            width = image.width,
+            height = image.height;
 
           let x = 0;
           let y = 0;
 
           if (width > height) {
-            x = (width - height)/2;
+            x = (width - height) / 2;
           } else {
-            y = (height - width)/2;
+            y = (height - width) / 2;
           }
 
           //let size = width - 2 * x;

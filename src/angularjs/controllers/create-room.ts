@@ -25,7 +25,7 @@ class CreateRoomController {
   ) {
     this.clearForm();
 
-    $scope.$on(ShowCreateChatBox , () => {
+    $scope.$on(ShowCreateChatBox, () => {
       Log.notification(ShowCreateChatBox, 'CreateRoomController');
       $scope.focusName = true;
     });

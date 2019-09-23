@@ -1,4 +1,4 @@
 
 export interface IUploadHandler {
-    uploadFile(file: File): Promise<{}>
+  uploadFile(file: File): Promise<{}>
 }

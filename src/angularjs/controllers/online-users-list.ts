@@ -73,7 +73,7 @@ class OnlineUsersListController implements IOnlineUsersListController {
     // Filter online users to remove users that are blocking us
     this.$scope.allUsers = ArrayUtils.objectToArray(this.OnlineConnector.onlineUsers);
     this.$scope.users = ArrayUtils.filterByKey(this.$scope.allUsers, this.$scope.search[this.$scope.activeTab], (user) => {
-        return user.getName();
+      return user.getName();
     });
 
     this.$timeout(() => {

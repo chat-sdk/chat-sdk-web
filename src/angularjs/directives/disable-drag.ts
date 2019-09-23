@@ -9,31 +9,31 @@ export interface IDisableDrag extends ng.IDirective {
 
 class DisableDrag implements IDisableDrag {
 
-    static $inject = ['$rootScope','$document'];
+  static $inject = ['$rootScope', '$document'];
 
-    constructor(
-        private $rootScope: IRootScope,
-        private $document: ng.IDocumentService
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    private $document: ng.IDocumentService
+  ) { }
 
-    link(scope: ng.IScope, element: JQLite) {
-        $(element).mousedown((e) => {
-            this.$rootScope.disableDrag = true;
-        });
+  link(scope: ng.IScope, element: JQLite) {
+    $(element).mousedown((e) => {
+      this.$rootScope.disableDrag = true;
+    });
 
-        // TODO: Check this MM1
-        $(document).mouseup((e) => {
-            this.$rootScope.disableDrag = false;
-        });
+    // TODO: Check this MM1
+    $(document).mouseup((e) => {
+      this.$rootScope.disableDrag = false;
+    });
 
-        // $document.mouseup((e) => {
-        //     this.$rootScope.disableDrag = false;
-        // });
-    }
+    // $document.mouseup((e) => {
+    //     this.$rootScope.disableDrag = false;
+    // });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return ($rootScope: IRootScope, $document: ng.IDocumentService) => new DisableDrag($rootScope, $document);
-    }
+  static factory(): ng.IDirectiveFactory {
+    return ($rootScope: IRootScope, $document: ng.IDocumentService) => new DisableDrag($rootScope, $document);
+  }
 
 }
 

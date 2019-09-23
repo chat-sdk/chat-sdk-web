@@ -13,32 +13,32 @@ export interface ICenterMouseY extends ng.IDirective {
  */
 class CenterMouseY implements ICenterMouseY {
 
-    static $inject = ['$document', 'Screen'];
+  static $inject = ['$document', 'Screen'];
 
-    constructor(
-        private $document: ng.IDocumentService,
-        private Screen: IScreen,
-    ) { }
+  constructor(
+    private $document: ng.IDocumentService,
+    private Screen: IScreen,
+  ) { }
 
-    link(scope: IProfileBoxScope, element: JQLite) {
-        $(element).hover(() => {
-            scope.hover = true;
-        }, () => {
-            scope.hover = false;
-        });
+  link(scope: IProfileBoxScope, element: JQLite) {
+    $(element).hover(() => {
+      scope.hover = true;
+    }, () => {
+      scope.hover = false;
+    });
 
-        $(document).mousemove((e) => {
-            //!element.is(':hover')
-            if (scope.currentUser && !scope.hover) {
-                // Keep the center of this box level with the mouse y
-                element.css({bottom: (this.Screen.screenHeight - e.clientY - $(element).height() / 2) + 'px'});
-            }
-        });
-    }
+    $(document).mousemove((e) => {
+      //!element.is(':hover')
+      if (scope.currentUser && !scope.hover) {
+        // Keep the center of this box level with the mouse y
+        element.css({ bottom: (this.Screen.screenHeight - e.clientY - $(element).height() / 2) + 'px' });
+      }
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return ($document: ng.IDocumentService, Screen: IScreen) => new CenterMouseY($document, Screen);
-    }
+  static factory(): ng.IDirectiveFactory {
+    return ($document: ng.IDocumentService, Screen: IScreen) => new CenterMouseY($document, Screen);
+  }
 
 }
 

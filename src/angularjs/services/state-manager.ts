@@ -16,241 +16,241 @@ import { IRoomOpenQueue } from './room-open-queue';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IStateManager {
-    off(): void;
-    on(): void;
-    userOff(uid: string): void;
-    userOn(uid: string): void;
+  off(): void;
+  on(): void;
+  userOff(uid: string): void;
+  userOn(uid: string): void;
 }
 
 class StateManager implements IStateManager {
 
-    isOn = false;
-    onUserID = null;
+  isOn = false;
+  onUserID = null;
 
-    static $inject = ['$rootScope', 'FriendsConnector', 'Config', 'Cache', 'RoomStore', 'UserStore', 'OnlineConnector', 'PublicRoomsConnector', 'Paths', 'RoomOpenQueue'];
+  static $inject = ['$rootScope', 'FriendsConnector', 'Config', 'Cache', 'RoomStore', 'UserStore', 'OnlineConnector', 'PublicRoomsConnector', 'Paths', 'RoomOpenQueue'];
 
-    constructor (
-        private $rootScope: IRootScope,
-        private FriendsConnector: IFriendsConnector,
-        private Config: IConfig,
-        private Cache: ICache,
-        private RoomStore: IRoomStore,
-        private UserStore: IUserStore,
-        private OnlineConnector: IOnlineConnector,
-        private PublicRoomsConnector: IPublicRoomsConnector,
-        private Paths: IPaths,
-        private RoomOpenQueue: IRoomOpenQueue,
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    private FriendsConnector: IFriendsConnector,
+    private Config: IConfig,
+    private Cache: ICache,
+    private RoomStore: IRoomStore,
+    private UserStore: IUserStore,
+    private OnlineConnector: IOnlineConnector,
+    private PublicRoomsConnector: IPublicRoomsConnector,
+    private Paths: IPaths,
+    private RoomOpenQueue: IRoomOpenQueue,
+  ) { }
+
+  /**
+   * Add universal listeners to Firebase
+   * these listeners are not specific to an individual user
+   */
+  on() {
+
+    if (this.isOn) {
+      return;
+    }
+    this.isOn = true;
 
     /**
-     * Add universal listeners to Firebase
-     * these listeners are not specific to an individual user
+     * Public rooms ref
      */
-    on() {
-
-        if (this.isOn) {
-            return;
-        }
-        this.isOn = true;
-
-        /**
-         * Public rooms ref
-         */
-        if (this.Config.publicRoomsEnabled) {
-            this.PublicRoomsConnector.on();
-        }
-
-        /**
-         * Online users ref
-         */
-        if (this.Config.onlineUsersEnabled) {
-            this.OnlineConnector.on();
-        }
-
+    if (this.Config.publicRoomsEnabled) {
+      this.PublicRoomsConnector.on();
     }
 
     /**
-     * Stop listening to Firebase
+     * Online users ref
      */
-    off() {
+    if (this.Config.onlineUsersEnabled) {
+      this.OnlineConnector.on();
+    }
 
-        this.isOn = false;
+  }
 
-        this.PublicRoomsConnector.off();
+  /**
+   * Stop listening to Firebase
+   */
+  off() {
 
-        if (this.Config.onlineUsersEnabled) {
-            this.OnlineConnector.off();
-        }
+    this.isOn = false;
 
+    this.PublicRoomsConnector.off();
+
+    if (this.Config.onlineUsersEnabled) {
+      this.OnlineConnector.off();
+    }
+
+  }
+
+  /**
+   * Start listening to a specific user location
+   */
+  userOn(uid: string) {
+
+    // Check to see that we've not already started to listen to this user
+    if (this.onUserID) {
+      if (this.onUserID == uid) {
+        console.log('You can\'t call "userOn" on a user twice');
+        return;
+      }
+      else {
+        this.userOff(this.onUserID);
+      }
+    }
+
+    this.onUserID = uid;
+
+    /**
+     * Rooms
+     */
+
+    let roomsRef = this.Paths.userRoomsRef(uid);
+
+    roomsRef.on('child_added', (snapshot) => {
+      if (snapshot.val()) {
+        this.impl_roomAdded(snapshot.key, snapshot.val()[RoomKeys.InvitedBy]);
+      }
+    });
+
+    roomsRef.on('child_removed', (snapshot) => {
+      let rid = snapshot.key;
+      if (rid) {
+        this.impl_roomRemoved(rid);
+      }
+    });
+
+    /**
+     * Friends
+     */
+
+    if (this.Config.friendsEnabled) {
+      this.FriendsConnector.on(uid);
     }
 
     /**
-     * Start listening to a specific user location
+     * Blocked
      */
-    userOn(uid: string) {
 
-        // Check to see that we've not already started to listen to this user
-        if (this.onUserID) {
-            if (this.onUserID == uid) {
-                console.log('You can\'t call "userOn" on a user twice');
-                return;
-            }
-            else {
-                this.userOff(this.onUserID);
-            }
-        }
+    let blockedUsersRef = this.Paths.userBlockedRef(uid);
+    blockedUsersRef.on('child_added', (snapshot) => {
 
-        this.onUserID = uid;
+      if (snapshot && snapshot.val()) {
+        this.impl_blockedAdded(snapshot);
+      }
 
-        /**
-         * Rooms
-         */
+    });
 
-        let roomsRef = this.Paths.userRoomsRef(uid);
+    blockedUsersRef.on('child_removed', (snapshot) => {
 
-        roomsRef.on('child_added', (snapshot) => {
-            if (snapshot.val()) {
-                this.impl_roomAdded(snapshot.key, snapshot.val()[RoomKeys.InvitedBy]);
-            }
-        });
+      if (snapshot && snapshot.val()) {
+        this.impl_blockedRemoved(snapshot);
+      }
 
-        roomsRef.on('child_removed', (snapshot) => {
-            let rid = snapshot.key;
-            if (rid) {
-                this.impl_roomRemoved(rid);
-            }
-        });
+    });
 
-        /**
-         * Friends
-         */
+  }
 
-        if (this.Config.friendsEnabled) {
-            this.FriendsConnector.on(uid);
-        }
+  userOff(uid: string) {
 
-        /**
-         * Blocked
-         */
+    this.onUserID = null;
 
-        let blockedUsersRef = this.Paths.userBlockedRef(uid);
-        blockedUsersRef.on('child_added', (snapshot) => {
+    let roomsRef = this.Paths.userRoomsRef(uid);
 
-            if (snapshot && snapshot.val()) {
-                this.impl_blockedAdded(snapshot);
-            }
+    roomsRef.off('child_added');
+    roomsRef.off('child_removed');
 
-        });
+    this.FriendsConnector.off(uid);
 
-        blockedUsersRef.on('child_removed', (snapshot) => {
+    let blockedUsersRef = this.Paths.userBlockedRef(uid);
 
-            if (snapshot && snapshot.val()) {
-                this.impl_blockedRemoved(snapshot);
-            }
+    blockedUsersRef.off('child_added');
+    blockedUsersRef.off('child_removed');
 
-        });
-
+    // Switch the rooms off
+    for (let i = 0; i < this.Cache.rooms.length; i++) {
+      let room = this.Cache.rooms[i];
+      room.off();
     }
 
-    userOff(uid: string) {
+  }
 
-        this.onUserID = null;
+  impl_blockedAdded(snapshot: firebase.database.DataSnapshot) {
 
-        let roomsRef = this.Paths.userRoomsRef(uid);
+    let uid = snapshot.key;
+    if (uid) {
+      let user = this.UserStore.getOrCreateUserWithID(uid);
 
-        roomsRef.off('child_added');
-        roomsRef.off('child_removed');
+      user.unblock = () => {
+        snapshot.ref.remove();
+      };
 
-        this.FriendsConnector.off(uid);
+      this.Cache.addBlockedUser(user);
+    }
 
-        let blockedUsersRef = this.Paths.userBlockedRef(uid);
+  }
 
-        blockedUsersRef.off('child_added');
-        blockedUsersRef.off('child_removed');
+  impl_blockedRemoved(snapshot: firebase.database.DataSnapshot) {
+    this.Cache.removeBlockedUserWithID(snapshot.key);
+  }
 
-        // Switch the rooms off
-        for (let i = 0; i < this.Cache.rooms.length; i++) {
-            let room = this.Cache.rooms[i];
-            room.off();
+  /**
+   * This is called each time a room is added to the user's
+   * list of rooms
+   * @param rid
+   * @param invitedBy
+   */
+  impl_roomAdded(rid: string, invitedBy: string) {
+
+    if (rid && invitedBy) {
+      const invitedByUser = this.UserStore.getOrCreateUserWithID(invitedBy);
+
+      // First check if we want to accept the room
+      // This should never happen
+      if (this.Cache.isBlockedUser(invitedBy)) {
+        return;
+      }
+
+      if (!this.UserStore.currentUser().canBeInvitedByUser(invitedByUser)) {
+        return;
+      }
+      // If they only allow invites from friends
+      // the other user must be a friend
+      if (this.UserStore.currentUser().allowInvitesFrom(UserAllowInvites.Friends) && !this.FriendsConnector.isFriend(invitedByUser) && !invitedByUser.isMe()) {
+        return;
+      }
+
+      // Does the room already exist?
+      const room = this.RoomStore.getOrCreateRoomWithID(rid);
+
+      // If you clear the cache without this all the messages
+      // would show up as unread...
+      room.invitedBy = invitedByUser;
+      room.deleted = false;
+
+      room.on().then(() => {
+        if (room.isOpen) {
+          room.open(-1, 0);
         }
-
-    }
-
-    impl_blockedAdded(snapshot: firebase.database.DataSnapshot) {
-
-        let uid = snapshot.key;
-        if (uid) {
-            let user = this.UserStore.getOrCreateUserWithID(uid);
-
-            user.unblock = () => {
-                snapshot.ref.remove();
-            };
-
-            this.Cache.addBlockedUser(user);
+        // If the user just created the room...
+        if (this.RoomOpenQueue.roomExistsAndPop(room.rid())) {
+          room.open(0);
         }
-
+      });
     }
+  }
 
-    impl_blockedRemoved(snapshot: firebase.database.DataSnapshot) {
-        this.Cache.removeBlockedUserWithID(snapshot.key);
+  impl_roomRemoved(rid: string) {
+
+    let room = this.RoomStore.getRoomWithID(rid);
+    room.close();
+
+    if (room.getType() === RoomType.OneToOne) {
+      this.RoomStore.removeRoom(room);
+      this.$rootScope.$broadcast(N.RoomRemoved);
     }
-
-    /**
-     * This is called each time a room is added to the user's
-     * list of rooms
-     * @param rid
-     * @param invitedBy
-     */
-    impl_roomAdded(rid: string, invitedBy: string) {
-
-        if (rid && invitedBy) {
-            const invitedByUser = this.UserStore.getOrCreateUserWithID(invitedBy);
-
-            // First check if we want to accept the room
-            // This should never happen
-            if (this.Cache.isBlockedUser(invitedBy)) {
-                return;
-            }
-
-            if (!this.UserStore.currentUser().canBeInvitedByUser(invitedByUser)) {
-                return;
-            }
-            // If they only allow invites from friends
-            // the other user must be a friend
-            if (this.UserStore.currentUser().allowInvitesFrom(UserAllowInvites.Friends) && !this.FriendsConnector.isFriend(invitedByUser) && !invitedByUser.isMe()) {
-                return;
-            }
-
-            // Does the room already exist?
-            const room = this.RoomStore.getOrCreateRoomWithID(rid);
-
-            // If you clear the cache without this all the messages
-            // would show up as unread...
-            room.invitedBy = invitedByUser;
-            room.deleted = false;
-
-            room.on().then(() => {
-                if (room.isOpen) {
-                    room.open(-1, 0);
-                }
-                // If the user just created the room...
-                if (this.RoomOpenQueue.roomExistsAndPop(room.rid())) {
-                    room.open(0);
-                }
-            });
-        }
-    }
-
-    impl_roomRemoved(rid: string) {
-
-        let room = this.RoomStore.getRoomWithID(rid);
-        room.close();
-
-        if (room.getType() === RoomType.OneToOne){
-            this.RoomStore.removeRoom(room);
-            this.$rootScope.$broadcast(N.RoomRemoved);
-        }
-    }
+  }
 
 }
 

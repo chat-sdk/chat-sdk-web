@@ -3,21 +3,21 @@ import * as angular from 'angular';
 import { AllEmojiNames } from '../keys/all-emojis';
 
 export interface IEmoji {
-    getEmojis(): string[];
+  getEmojis(): string[];
 }
 
 export class Emoji implements IEmoji {
 
-    private store = Array<string>();
+  private store = Array<string>();
 
-    getEmojis(): string[] {
-        if (!this.store.length) {
-            for (let i = 0; i < 50; i++) {
-                this.store.push(':' + AllEmojiNames[i] + ':');
-            }
-        }
-        return this.store;
+  getEmojis(): string[] {
+    if (!this.store.length) {
+      for (let i = 0; i < 50; i++) {
+        this.store.push(':' + AllEmojiNames[i] + ':');
+      }
     }
+    return this.store;
+  }
 
 }
 

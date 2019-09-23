@@ -142,23 +142,23 @@ class ProfileSettingsController implements IProfileSettingsController {
     let rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
 
     let rgHttpUrl = new RegExp(
-        "^"
-        + rg_protocol
-        + "(" + rg_userinfo + ")?"
-        + rg_hostport
-        + "(\\/"
-        + "(" + rg_path + ")?"
-        + "(" + rg_query + ")?"
-        + "(" + rg_fragment + ")?"
-        + ")?"
-        + "$"
+      "^"
+      + rg_protocol
+      + "(" + rg_userinfo + ")?"
+      + rg_hostport
+      + "(\\/"
+      + "(" + rg_path + ")?"
+      + "(" + rg_query + ")?"
+      + "(" + rg_fragment + ")?"
+      + ")?"
+      + "$"
     );
 
     // export public function
     if (rgHttpUrl.test(url)) {
-        return true;
+      return true;
     } else {
-        return false;
+      return false;
     }
   }
 
@@ -178,15 +178,15 @@ class ProfileSettingsController implements IProfileSettingsController {
     let valid = true;
 
     if (Utils.unORNull(string)) {
-        valid = false;
+      valid = false;
     }
 
     else if (string.length < this.$scope.validation[key].minLength) {
-        valid = false;
+      valid = false;
     }
 
     else if (string.length > this.$scope.validation[key].maxLength) {
-        valid = false;
+      valid = false;
     }
 
     this.$scope.validation[key].valid = valid;
@@ -203,24 +203,24 @@ class ProfileSettingsController implements IProfileSettingsController {
     // Is the name valid?
     if (this.$scope.validate()) {
 
-        this.$scope.showMainBox();
+      this.$scope.showMainBox();
 
-        // Did the user update any values?
-        if (this.$scope.dirty) {
-            this.$scope.getUser().pushMeta();
-            this.$scope.dirty = false;
-        }
+      // Did the user update any values?
+      if (this.$scope.dirty) {
+        this.$scope.getUser().pushMeta();
+        this.$scope.dirty = false;
+      }
     }
     else {
-        if (!this.$scope.validation[UserKeys.Name].valid) {
-            this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between "+this.$scope.validation[UserKeys.Name].minLength+" - "+this.$scope.validation[UserKeys.Name].maxLength+" characters long ", "Ok");
-        }
-        // if (!this.$scope.validation[UserKeys.Location].valid) {
-        //     this.$scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+this.$scope.validation[UserKeys.Location].minLength+" - "+this.$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
-        // }
-        if (!this.$scope.validation[UserKeys.ProfileLink].valid) {
-            this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
-        }
+      if (!this.$scope.validation[UserKeys.Name].valid) {
+        this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between " + this.$scope.validation[UserKeys.Name].minLength + " - " + this.$scope.validation[UserKeys.Name].maxLength + " characters long ", "Ok");
+      }
+      // if (!this.$scope.validation[UserKeys.Location].valid) {
+      //     this.$scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+this.$scope.validation[UserKeys.Location].minLength+" - "+this.$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
+      // }
+      if (!this.$scope.validation[UserKeys.ProfileLink].valid) {
+        this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
+      }
     }
   }
 

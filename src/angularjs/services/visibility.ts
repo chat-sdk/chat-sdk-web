@@ -5,35 +5,35 @@ import { N } from '../keys/notification-keys';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IVisibility {
-    getIsHidden(): boolean;
+  getIsHidden(): boolean;
 }
 
 class Visibility implements IVisibility {
 
-    static $inject = ['$rootScope'];
+  static $inject = ['$rootScope'];
 
-    isHidden = false;
+  isHidden = false;
 
-    constructor(private $rootScope: IRootScope) {
-        $(window).blur(() => {
-            this.isHidden = true;
-            this.changed()
-        });
+  constructor(private $rootScope: IRootScope) {
+    $(window).blur(() => {
+      this.isHidden = true;
+      this.changed()
+    });
 
-        $(window).focus(() => {
-            this.isHidden = false;
-            this.changed()
-        });
+    $(window).focus(() => {
+      this.isHidden = false;
+      this.changed()
+    });
 
-    }
+  }
 
-    changed() {
-        this.$rootScope.$broadcast(N.VisibilityChanged, this.isHidden);
-    }
+  changed() {
+    this.$rootScope.$broadcast(N.VisibilityChanged, this.isHidden);
+  }
 
-    getIsHidden(): boolean {
-        return this.isHidden;
-    }
+  getIsHidden(): boolean {
+    return this.isHidden;
+  }
 
 }
 

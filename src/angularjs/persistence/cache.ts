@@ -12,131 +12,131 @@ import { IRootScope } from '../interfaces/root-scope';
  */
 
 export interface ICache {
-    /**
-     * The user's active rooms
-     */
-    blockedUsers: { [uid: string]: IUser };
-    rooms: IRoom [];
-    activeRooms(): IRoom[];
-    addBlockedUser(user: IUser): void;
-    addRoom(room: IRoom): void;
-    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
-    inactiveRooms(): IRoom[];
-    isBlockedUser(uid: string): boolean;
-    removeBlockedUserWithID(uid: string): void;
-    removeRoom(room: IRoom): void;
-    clear(): void;
+  /**
+   * The user's active rooms
+   */
+  blockedUsers: { [uid: string]: IUser };
+  rooms: IRoom[];
+  activeRooms(): IRoom[];
+  addBlockedUser(user: IUser): void;
+  addRoom(room: IRoom): void;
+  clear(): void;
+  getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[];
+  inactiveRooms(): IRoom[];
+  isBlockedUser(uid: string): boolean;
+  removeBlockedUserWithID(uid: string): void;
+  removeRoom(room: IRoom): void;
 }
 
 class Cache implements ICache {
 
-    rooms = [];
+  rooms = [];
 
-    /**
-     * These are user specific stores
-     */
-    blockedUsers = {};
-    //onlineUsers = {};
-    //friends = {};
+  /**
+   * These are user specific stores
+   */
+  blockedUsers = {};
+  //onlineUsers = {};
+  //friends = {};
 
-    static $inject = ['$rootScope', '$timeout'];
+  static $inject = ['$rootScope', '$timeout'];
 
-    constructor (
-        private $rootScope: IRootScope,
-        private $timeout: ng.ITimeoutService,
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    private $timeout: ng.ITimeoutService,
+  ) { }
 
-    // Rooms
+  // Rooms
 
-    addRoom(room: IRoom) {
-        if (!ArrayUtils.contains(this.rooms, room)) {
-            room.isOpen = true;
-            this.rooms.push(room);
-        }
+  addRoom(room: IRoom) {
+    if (!ArrayUtils.contains(this.rooms, room)) {
+      room.isOpen = true;
+      this.rooms.push(room);
     }
+  }
 
-    // roomExists(room: IRoom) {
-    //     return ArrayUtils.contains(this.rooms, room);
-    // }
+  // roomExists(room: IRoom) {
+  //     return ArrayUtils.contains(this.rooms, room);
+  // }
 
-    removeRoom(room: IRoom) {
-        room.isOpen = false;
-        ArrayUtils.remove(this.rooms, room);
+  removeRoom(room: IRoom) {
+    room.isOpen = false;
+    ArrayUtils.remove(this.rooms, room);
+  }
+
+  activeRooms(): IRoom[] {
+    let ar = Array<IRoom>();
+    for (let i = 0; i < this.rooms.length; i++) {
+      if (this.rooms[i].active) {
+        ar.push(this.rooms[i]);
+      }
     }
+    return ar;
+  }
 
-    activeRooms(): IRoom[] {
-        let ar = Array<IRoom>();
-        for (let i =0; i < this.rooms.length; i++) {
-            if (this.rooms[i].active) {
-                ar.push(this.rooms[i]);
-            }
-        }
-        return ar;
+  inactiveRooms(): IRoom[] {
+    let ar = Array<IRoom>();
+    for (let i = 0; i < this.rooms.length; i++) {
+      if (!this.rooms[i].active) {
+        ar.push(this.rooms[i]);
+      }
     }
+    return ar;
+  }
 
-    inactiveRooms(): IRoom[] {
-        let ar = Array<IRoom>();
-        for (let i =0; i < this.rooms.length; i++) {
-            if (!this.rooms[i].active) {
-                ar.push(this.rooms[i]);
-            }
-        }
-        return ar;
+  // Blocked users
+
+  addBlockedUser(user: IUser) {
+    if (user && user.meta && user.uid()) {
+      this.blockedUsers[user.uid()] = user;
+      user.blocked = true;
+      this.$rootScope.$broadcast(N.UserBlocked);
     }
+  }
 
-    // Blocked users
+  isBlockedUser(uid: string): boolean {
+    return !Utils.unORNull(this.blockedUsers[uid]);
+  }
 
-    addBlockedUser(user: IUser) {
-        if (user && user.meta && user.uid()) {
-            this.blockedUsers[user.uid()] = user;
-            user.blocked = true;
-            this.$rootScope.$broadcast(N.UserBlocked);
-        }
+  removeBlockedUserWithID(uid: string) {
+    if (uid) {
+      const user = this.blockedUsers[uid];
+      if (user) {
+        user.blocked = false;
+        delete this.blockedUsers[uid];
+        this.$rootScope.$broadcast(N.UserUnblocked);
+      }
     }
+  }
 
-    isBlockedUser(uid: string): boolean {
-        return !Utils.unORNull(this.blockedUsers[uid]);
+
+  // Utility functions
+
+  clear() {
+    this.blockedUsers = {};
+    this.rooms = Array<IRoom>();
+
+    this.$timeout(() => {
+      this.$rootScope.$digest();
+    });
+  }
+
+
+  getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[] {
+    const rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2]);
+    return ArrayUtils.roomsSortedByMostRecent(rooms);
+  }
+
+  getPrivateRooms(): IRoom[] {
+    const rooms = Array<IRoom>();
+    for (let i = 0; i < this.rooms.length; i++) {
+      const room = this.rooms[i];
+      if (!room.isPublic()) {
+        rooms.push(room);
+      }
     }
-
-    removeBlockedUserWithID(uid: string) {
-        if (uid) {
-            const user = this.blockedUsers[uid];
-            if (user) {
-                user.blocked = false;
-                delete this.blockedUsers[uid];
-                this.$rootScope.$broadcast(N.UserUnblocked);
-            }
-        }
-    }
-
-
-    // Utility functions
-
-    clear() {
-        this.blockedUsers = {};
-        this.rooms = Array<IRoom>();
-
-        this.$timeout(() => {
-            this.$rootScope.$digest();
-        });
-    }
-
-
-    getPrivateRoomsWithUsers(user1: IUser, user2: IUser): IRoom[] {
-        const rooms = ArrayUtils.getRoomsWithUsers(this.getPrivateRooms(), [user1, user2]);
-        return ArrayUtils.roomsSortedByMostRecent(rooms);
-    }
-
-    getPrivateRooms(): IRoom[] {
-        const rooms = Array<IRoom>();
-        for (let i = 0; i < this.rooms.length; i++) {
-            const room = this.rooms[i];
-            if (!room.isPublic()) {
-                rooms.push(room);
-            }
-        }
-        return rooms;
-    }
+    return rooms;
+  }
 }
 
 angular.module('myApp.services').service('Cache', Cache);

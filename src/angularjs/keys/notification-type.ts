@@ -1,4 +1,4 @@
 export enum NotificationType {
-    Waiting = 'waiting',
-    Alert = 'alert',
+  Waiting = 'waiting',
+  Alert = 'alert',
 }

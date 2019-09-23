@@ -37,7 +37,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
       Log.notification(N.PublicRoomAdded, 'PublicRoomsListController');
       // Add the room and sort the list
       if (!ArrayUtils.contains($scope.allRooms, room)) {
-          $scope.allRooms.push(room);
+        $scope.allRooms.push(room);
       }
       this.updateList();
 
@@ -63,43 +63,43 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     this.$scope.allRooms.sort((a, b) => {
 
-        const au = Utils.unORNull(a.getMetaObject().userCreated) ? false : a.getMetaObject().userCreated;
-        const bu = Utils.unORNull(b.getMetaObject().userCreated) ? false : b.getMetaObject().userCreated;
+      const au = Utils.unORNull(a.getMetaObject().userCreated) ? false : a.getMetaObject().userCreated;
+      const bu = Utils.unORNull(b.getMetaObject().userCreated) ? false : b.getMetaObject().userCreated;
 
-        if (au != bu) {
-            return au ? 1 : -1;
-        }
+      if (au != bu) {
+        return au ? 1 : -1;
+      }
 
-        // Weight
-        const aw = Utils.unORNull(a.getMetaObject().weight) ? 100 : a.getMetaObject().weight;
-        const bw = Utils.unORNull(b.getMetaObject().weight) ? 100 : b.getMetaObject().weight;
+      // Weight
+      const aw = Utils.unORNull(a.getMetaObject().weight) ? 100 : a.getMetaObject().weight;
+      const bw = Utils.unORNull(b.getMetaObject().weight) ? 100 : b.getMetaObject().weight;
 
-        if (aw != bw) {
-            return aw - bw;
+      if (aw != bw) {
+        return aw - bw;
+      }
+      else {
+
+        const ac = a.getOnlineUserCount();
+        const bc = b.getOnlineUserCount();
+
+        //console.log('1: ' + ac + ', 2: ' + bc);
+
+        if (ac != bc) {
+          return bc - ac;
         }
         else {
-
-            const ac = a.getOnlineUserCount();
-            const bc = b.getOnlineUserCount();
-
-            //console.log('1: ' + ac + ', 2: ' + bc);
-
-            if (ac != bc) {
-                return bc - ac;
-            }
-            else {
-                return a.name < b.name ? -1 : 1;
-            }
+          return a.name < b.name ? -1 : 1;
         }
+      }
 
     });
 
     this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.$scope.search[this.$scope.activeTab], (room) => {
-        return room.getMetaObject.name;
+      return room.getMetaObject.name;
     });
 
-    this.$timeout(() =>{
-        this.$scope.$digest();
+    this.$timeout(() => {
+      this.$scope.$digest();
     });
   }
 

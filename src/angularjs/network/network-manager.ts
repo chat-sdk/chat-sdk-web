@@ -5,24 +5,24 @@ import { IFirebaseUploadHandler } from './firebase-upload-handler';
 import { IAuthenticationHandler } from './abstract-authentication-handler';
 
 export interface INetworkManager {
-    upload: IUploadHandler;
-    auth: IAuthenticationHandler;
+  auth: IAuthenticationHandler;
+  upload: IUploadHandler;
 }
 
 class NetworkManager implements INetworkManager {
 
-    static $inject = ['FirebaseUploadHandler', 'AbstractAuthenticationHandler'];
+  static $inject = ['FirebaseUploadHandler', 'AbstractAuthenticationHandler'];
 
-    upload: IUploadHandler;
-    auth: IAuthenticationHandler;
+  auth: IAuthenticationHandler;
+  upload: IUploadHandler;
 
-    constructor(
-        private FirebaseUploadHandler: IFirebaseUploadHandler,
-        private AbstractAuthenticationHandler: IAuthenticationHandler
-    ) {
-        this.upload = FirebaseUploadHandler;
-        this.auth = AbstractAuthenticationHandler;
-    }
+  constructor(
+    private FirebaseUploadHandler: IFirebaseUploadHandler,
+    private AbstractAuthenticationHandler: IAuthenticationHandler
+  ) {
+    this.upload = FirebaseUploadHandler;
+    this.auth = AbstractAuthenticationHandler;
+  }
 
 }
 

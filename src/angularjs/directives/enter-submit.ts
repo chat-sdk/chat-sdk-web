@@ -6,28 +6,28 @@ export interface IEnterSubmit extends ng.IDirective {
 
 class EnterSubmit implements IEnterSubmit {
 
-    restrict = 'A';
+  restrict = 'A';
 
-    link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
-        element.bind('keydown', function(event) {
-            let code = event.keyCode || event.which;
+  link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
+    element.bind('keydown', function (event) {
+      let code = event.keyCode || event.which;
 
-            if (code === 13) {
-                if (!event.shiftKey) {
-                    event.preventDefault();
-                    scope.$apply(attrs.enterSubmit);
+      if (code === 13) {
+        if (!event.shiftKey) {
+          event.preventDefault();
+          scope.$apply(attrs.enterSubmit);
 
-                    // Scroll down on enter too
-                    scope.$broadcast('enterScrollDown');
+          // Scroll down on enter too
+          scope.$broadcast('enterScrollDown');
 
-                }
-            }
-        });
-    }
+        }
+      }
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return () => new EnterSubmit();
-    }
+  static factory(): ng.IDirectiveFactory {
+    return () => new EnterSubmit();
+  }
 
 }
 

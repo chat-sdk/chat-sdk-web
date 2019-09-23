@@ -83,7 +83,7 @@ class MainBoxController implements IMainBoxController {
     $scope.updateMainBoxSize = this.updateMainBoxSize.bind(this);
 
     // Work out how many tabs there are
-    $scope.$on(N.ConfigUpdated , () => {
+    $scope.$on(N.ConfigUpdated, () => {
       this.updateConfig.bind(this)();
     });
     $scope.updateConfig();
@@ -102,7 +102,7 @@ class MainBoxController implements IMainBoxController {
     $scope.canCloseRoom = false;
 
     // When the user value changes update the user interface
-    $scope.$on(N.UserValueChanged , () =>{
+    $scope.$on(N.UserValueChanged, () => {
       Log.notification(N.UserValueChanged, 'MainBoxController');
       $timeout(() => {
         $scope.$digest();
@@ -110,12 +110,12 @@ class MainBoxController implements IMainBoxController {
     });
 
     this.updateMainBoxSize();
-    $scope.$on(N.ScreenSizeChanged, () =>{
+    $scope.$on(N.ScreenSizeChanged, () => {
       Log.notification(N.ScreenSizeChanged, 'MainBoxController');
       this.updateMainBoxSize.bind(this)();
     });
 
-    $scope.$on(N.RoomBadgeChanged, () =>{
+    $scope.$on(N.RoomBadgeChanged, () => {
       Log.notification(N.RoomBadgeChanged, 'MainBoxController');
       this.updateInboxCount.bind(this)();
     });

@@ -5,44 +5,44 @@ import { ILocalStorage } from '../persistence/local-storage';
 import { IEnvironment } from './environment';
 
 export interface ISoundEffects {
-    muted: boolean;
-    messageReceived(): void;
-    toggleMuted(): boolean;
+  muted: boolean;
+  messageReceived(): void;
+  toggleMuted(): boolean;
 }
 
 class SoundEffects implements ISoundEffects {
 
-    static $inject = ['LocalStorage', 'Environment'];
+  static $inject = ['LocalStorage', 'Environment'];
 
-    messageReceivedSoundNumber = 1;
-    muted = this.LocalStorage.isMuted();
+  messageReceivedSoundNumber = 1;
+  muted = this.LocalStorage.isMuted();
 
-    constructor(
-        private LocalStorage: ILocalStorage,
-        private Environment: IEnvironment,
-    ) { }
+  constructor(
+    private LocalStorage: ILocalStorage,
+    private Environment: IEnvironment,
+  ) { }
 
-    messageReceived() {
-        if (this.muted) {
-            return;
-        }
-        if (this.messageReceivedSoundNumber == 1) {
-            this.alert1();
-        }
+  messageReceived() {
+    if (this.muted) {
+      return;
     }
-
-    alert1() {
-        let sound = new Howl({
-            src: [this.Environment.audioURL() + 'alert_1.mp3']
-        });
-        sound.play();
+    if (this.messageReceivedSoundNumber == 1) {
+      this.alert1();
     }
+  }
 
-    toggleMuted() {
-        this.muted = !this.muted;
-        this.LocalStorage.setMuted(this.muted);
-        return this.muted;
-    }
+  alert1() {
+    let sound = new Howl({
+      src: [this.Environment.audioURL() + 'alert_1.mp3']
+    });
+    sound.play();
+  }
+
+  toggleMuted() {
+    this.muted = !this.muted;
+    this.LocalStorage.setMuted(this.muted);
+    return this.muted;
+  }
 
 }
 

@@ -9,17 +9,17 @@ export interface IOnEditMessage extends ng.IDirective {
 
 class OnEditMessage implements IOnEditMessage {
 
-    link(scope: IMessageScope, element: JQLite) {
-        scope.$on(N.EditMessage, (event, mid, newText) => {
-            if (mid == scope.message.meta.mid) {
-                element.text(newText);
-            }
-        });
-    }
+  link(scope: IMessageScope, element: JQLite) {
+    scope.$on(N.EditMessage, (event, mid, newText) => {
+      if (mid == scope.message.meta.mid) {
+        element.text(newText);
+      }
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return () => new OnEditMessage();
-    }
+  static factory(): ng.IDirectiveFactory {
+    return () => new OnEditMessage();
+  }
 
 }
 

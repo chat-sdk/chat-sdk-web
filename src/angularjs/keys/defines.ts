@@ -1,7 +1,7 @@
 export const DEBUG = false;
 export const FIREBASE_REF_DEBUG = false;
 
-export const DefaultAvatarProvider = "http://flathash.com";
+export const DefaultAvatarProvider = 'http://flathash.com';
 
 export const Minute = 60;
 export const Hour = Minute * 60;
@@ -12,7 +12,7 @@ export const Day = Hour * 24;
 export const LastVisitedTimeout = Hour;
 
 // TODO:
-export const DefaultUserPrefix = "ChatSDK";
+export const DefaultUserPrefix = 'ChatSDK';
 
 export const ProviderTypeCustom = 'custom';
 
@@ -24,5 +24,3 @@ export const ErrorBox = 'errorBox';
 
 export const ShowProfileSettingsBox = 'showProfileSettingsBox';
 export const ShowCreateChatBox = 'showCreateChatBox';
-
-// Notifications

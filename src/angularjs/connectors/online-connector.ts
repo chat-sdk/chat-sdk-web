@@ -9,136 +9,136 @@ import { IUserStore } from '../persistence/user-store';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IOnlineConnector {
-    off(): void;
-    on(): void;
-    onlineUserCount(): number;
-    onlineUsers: {};
+  onlineUsers: { [uid: string]: IUser };
+  off(): void;
+  on(): void;
+  onlineUserCount(): number;
 }
 
 class OnlineConnector implements IOnlineConnector {
 
-    isOn = false;
-    onlineUsers = {};
+  isOn = false;
+  onlineUsers: { [uid: string]: IUser } = {};
 
-    static $inject = ['$rootScope', 'UserStore', 'Paths'];
+  static $inject = ['$rootScope', 'UserStore', 'Paths'];
 
-    constructor(
-        private $rootScope: IRootScope,
-        private UserStore: IUserStore,
-        private Paths: IPaths,
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    private UserStore: IUserStore,
+    private Paths: IPaths,
+  ) { }
 
 
-    on() {
-        if (this.isOn) {
-            return;
-        }
-        this.isOn = true;
-
-        let onlineUsersRef = this.Paths.onlineUsersRef();
-
-        onlineUsersRef.on('child_added', (snapshot: firebase.database.DataSnapshot) => {
-
-            if (DEBUG) console.log('Online: ' + snapshot.key);
-
-            // Get the UID of the added user
-            let uid = null;
-            if (snapshot && snapshot.val()) {
-                uid = snapshot.key;
-
-                let user = this.UserStore.getOrCreateUserWithID(uid);
-
-                if (this.addOnlineUser(user)) {
-                    // Update the user's rooms
-                    this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
-                }
-            }
-
-        }, (error: Error) => {
-            console.log(error.message);
-        });
-
-        onlineUsersRef.on('child_removed', (snapshot: firebase.database.DataSnapshot) => {
-
-            console.log('Offline: ' + snapshot.key);
-
-            let user = this.UserStore.getOrCreateUserWithID(snapshot.key);
-
-            user.off();
-
-            if (user) {
-                this.removeOnlineUser(user);
-            }
-
-            this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
-
-        }, (error: Error) => {
-            console.log(error.message);
-        });
+  on() {
+    if (this.isOn) {
+      return;
     }
+    this.isOn = true;
 
-    off() {
+    let onlineUsersRef = this.Paths.onlineUsersRef();
 
-        this.isOn = false;
+    onlineUsersRef.on('child_added', (snapshot: firebase.database.DataSnapshot) => {
 
-        //this.onlineUsers = {};
-        // having the user.blocked is useful because it means
-        // that the partials don't have to call a function
-        // however when you logout you want the flags to be reset
-        for (let key in this.onlineUsers) {
-            if (this.onlineUsers.hasOwnProperty(key)) {
-                this.onlineUsers[key].blocked = false;
-                this.onlineUsers[key].friend = false;
-            }
+      if (DEBUG) console.log('Online: ' + snapshot.key);
+
+      // Get the UID of the added user
+      let uid = null;
+      if (snapshot && snapshot.val()) {
+        uid = snapshot.key;
+
+        let user = this.UserStore.getOrCreateUserWithID(uid);
+
+        if (this.addOnlineUser(user)) {
+          // Update the user's rooms
+          this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
         }
-        this.onlineUsers = {};
+      }
 
-        let onlineUsersRef = this.Paths.onlineUsersRef();
+    }, (error: Error) => {
+      console.log(error.message);
+    });
 
-        onlineUsersRef.off('child_added');
-        onlineUsersRef.off('child_removed');
+    onlineUsersRef.on('child_removed', (snapshot: firebase.database.DataSnapshot) => {
+
+      console.log('Offline: ' + snapshot.key);
+
+      let user = this.UserStore.getOrCreateUserWithID(snapshot.key);
+
+      user.off();
+
+      if (user) {
+        this.removeOnlineUser(user);
+      }
+
+      this.$rootScope.$broadcast(N.UserOnlineStateChanged, user);
+
+    }, (error: Error) => {
+      console.log(error.message);
+    });
+  }
+
+  off() {
+
+    this.isOn = false;
+
+    //this.onlineUsers = {};
+    // having the user.blocked is useful because it means
+    // that the partials don't have to call a function
+    // however when you logout you want the flags to be reset
+    for (let key in this.onlineUsers) {
+      if (this.onlineUsers.hasOwnProperty(key)) {
+        this.onlineUsers[key].blocked = false;
+        this.onlineUsers[key].friend = false;
+      }
     }
+    this.onlineUsers = {};
 
-    // Online users
+    let onlineUsersRef = this.Paths.onlineUsersRef();
 
-    addOnlineUser(user: IUser) {
-        if (user && user.uid()) {
-            if (!user.isMe()) {
-                user.online = true;
-                this.onlineUsers[user.uid()] = user;
-                this.$rootScope.$broadcast(N.OnlineUserAdded);
-                return true;
-            }
-        }
-        return false;
+    onlineUsersRef.off('child_added');
+    onlineUsersRef.off('child_removed');
+  }
+
+  // Online users
+
+  addOnlineUser(user: IUser) {
+    if (user && user.uid()) {
+      if (!user.isMe()) {
+        user.online = true;
+        this.onlineUsers[user.uid()] = user;
+        this.$rootScope.$broadcast(N.OnlineUserAdded);
+        return true;
+      }
     }
+    return false;
+  }
 
-    removeOnlineUser(user: IUser) {
-        if (user && user.meta && user.uid()) {
-            this.removeOnlineUserWithID(user.uid());
-        }
+  removeOnlineUser(user: IUser) {
+    if (user && user.meta && user.uid()) {
+      this.removeOnlineUserWithID(user.uid());
     }
+  }
 
-    removeOnlineUserWithID(uid: string) {
-        if (uid) {
-            let user = this.onlineUsers[uid];
-            if (user) {
-                user.online = false;
-                delete this.onlineUsers[uid];
-                this.$rootScope.$broadcast(N.OnlineUserRemoved);
-            }
-        }
+  removeOnlineUserWithID(uid: string) {
+    if (uid) {
+      let user = this.onlineUsers[uid];
+      if (user) {
+        user.online = false;
+        delete this.onlineUsers[uid];
+        this.$rootScope.$broadcast(N.OnlineUserRemoved);
+      }
     }
+  }
 
-    onlineUserCount() {
-        let i = 0;
-        for (let key in this.onlineUsers) {
-            if (this.onlineUsers.hasOwnProperty(key)) {
-                i++;
-            }
-        }
-        return i;
+  onlineUserCount() {
+    let i = 0;
+    for (let key in this.onlineUsers) {
+      if (this.onlineUsers.hasOwnProperty(key)) {
+        i++;
+      }
     }
+    return i;
+  }
 
 }
 

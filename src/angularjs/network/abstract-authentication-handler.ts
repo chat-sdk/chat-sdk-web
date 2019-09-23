@@ -1,29 +1,27 @@
-import * as angular from 'angular'
-import {IAuth} from "./auth";
+import * as angular from 'angular';
 
 export interface IAuthenticationHandler {
-    currentUserID(): string
-    setCurrentUserID(uid)
+  currentUserID(): string
+  setCurrentUserID(uid: string): void;
 }
 
 export class AbstractAuthenticationHandler implements IAuthenticationHandler {
 
-    static $inject = [];
+  static $inject = [];
 
-    constructor () {
+  constructor() { }
+
+  private currentUserEntityID: string;
+
+  currentUserID(): string {
+    return this.currentUserEntityID;
+  }
+
+  setCurrentUserID(uid: string) {
+    if (uid !== this.currentUserEntityID) {
+      this.currentUserEntityID = uid;
     }
-
-    private currentUserEntityID: string;
-
-    currentUserID(): string {
-        return this.currentUserEntityID;
-    }
-
-    setCurrentUserID(uid) {
-        if (uid !== this.currentUserEntityID) {
-            this.currentUserEntityID = uid;
-        }
-    }
+  }
 
 }
 

@@ -1,5 +1,5 @@
 export enum LoginMode {
-    Simple = "simple",
-    Authenticating = "authenticating",
-    ClickToChat = "clickToChat",
+  Simple = 'simple',
+  Authenticating = 'authenticating',
+  ClickToChat = 'clickToChat',
 }

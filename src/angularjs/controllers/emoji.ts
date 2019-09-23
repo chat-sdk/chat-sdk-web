@@ -1,56 +1,51 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
-
-import {Emoji} from "../services/emoji";
-import {IRoomScope} from "./chat";
-
-// module app.controllers {
+import { Emoji } from '../services/emoji';
+import { IRoomScope } from './chat';
 
 export interface IEmojiController {
-    addEmoji(text: string): void
-    getEmojis(): string[]
+  addEmoji(text: string): void
+  getEmojis(): string[]
 }
 
-class EmojiController implements IEmojiController{
+class EmojiController implements IEmojiController {
 
-    static $inject = ['Emoji', '$scope'];
+  static $inject = ['Emoji', '$scope'];
 
-    private emoji: Emoji;
-    private $scope: IRoomScope;
-    private emojis: string[];
+  private emoji: Emoji;
+  private $scope: IRoomScope;
+  private emojis: string[];
 
-    constructor (public Emoji: Emoji, $scope: IRoomScope) {
-        this.emoji = Emoji;
-        this.$scope = $scope;
-        this.emojis = this.getEmojis()
+  constructor(public Emoji: Emoji, $scope: IRoomScope) {
+    this.emoji = Emoji;
+    this.$scope = $scope;
+    this.emojis = this.getEmojis()
+  }
+
+  addEmoji(text: string): void {
+    if (!this.$scope.input.text) {
+      this.$scope.input.text = ""
     }
+    this.$scope.input.text += text
+  }
 
-    addEmoji(text: string): void {
-        if(!this.$scope.input.text) {
-            this.$scope.input.text = ""
-        }
-        this.$scope.input.text += text
-    }
-
-    getEmojis(): string[] {
-        return this.emoji.getEmojis()
-    }
+  getEmojis(): string[] {
+    return this.emoji.getEmojis()
+  }
 
 }
 
 // TODO: Finish this
 class EmojiComponent implements ng.IComponentOptions {
 
-    public bindings:any;
-    public controller:any;
-    public templateUrl:'emojis.html';
+  public bindings: any;
+  public controller: any;
+  public templateUrl: 'emojis.html';
 
-    constructor () {
-        this.controller = EmojiController
-    }
+  constructor() {
+    this.controller = EmojiController
+  }
 
 }
 
 angular.module('myApp.controllers').controller('EmojiController', EmojiController);
-
-

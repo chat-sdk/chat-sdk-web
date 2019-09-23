@@ -15,27 +15,27 @@ export interface IStopShake extends ng.IDirective {
  */
 class StopShake implements IStopShake {
 
-    $inject = ['$rootScope'/*, '$document'*/];
+  $inject = ['$rootScope'/*, '$document'*/];
 
-    constructor(
-        private $rootScope: IRootScope,
-        // private $document: ng.IDocumentService,
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    // private $document: ng.IDocumentService,
+  ) { }
 
-    link(scope: ng.IScope, element: JQLite) {
-        $(element).scroll(() => {
-            this.$rootScope.disableDrag = true;
-        });
+  link(scope: ng.IScope, element: JQLite) {
+    $(element).scroll(() => {
+      this.$rootScope.disableDrag = true;
+    });
 
-        // Allow dragging again on mouse up
-        $(document).mouseup((e) => {
-            this.$rootScope.disableDrag = false;
-        });
-    }
+    // Allow dragging again on mouse up
+    $(document).mouseup((e) => {
+      this.$rootScope.disableDrag = false;
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return ($rootScope: IRootScope, $document: ng.IDocumentService) => new StopShake($rootScope);
-    }
+  static factory(): ng.IDirectiveFactory {
+    return ($rootScope: IRootScope, $document: ng.IDocumentService) => new StopShake($rootScope);
+  }
 
 }
 

@@ -6,17 +6,17 @@ export interface IOnFileChange extends ng.IDirective {
 
 class OnFileChange implements IOnFileChange {
 
-    restrict = 'A';
+  restrict = 'A';
 
-    link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
-        element.bind('change' , () =>{
-            scope.$eval(attrs.onFileChange);
-        });
-    }
+  link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
+    element.bind('change', () => {
+      scope.$eval(attrs.onFileChange);
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return () => new OnFileChange();
-    }
+  static factory(): ng.IDirectiveFactory {
+    return () => new OnFileChange();
+  }
 
 }
 

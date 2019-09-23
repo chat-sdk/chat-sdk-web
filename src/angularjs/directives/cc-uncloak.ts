@@ -6,13 +6,13 @@ export interface ICCUncloak extends ng.IDirective {
 
 class CCUncloak implements ICCUncloak {
 
-    link(scope: ng.IScope, element: JQLite) {
-        element.removeAttr('style');
-    }
+  link(scope: ng.IScope, element: JQLite) {
+    element.removeAttr('style');
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return () => new CCUncloak();
-    }
+  static factory(): ng.IDirectiveFactory {
+    return () => new CCUncloak();
+  }
 
 }
 

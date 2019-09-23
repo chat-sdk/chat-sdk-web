@@ -6,50 +6,50 @@ import { IRoomStore } from '../persistence/room-store';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IPublicRoomsConnector {
-    off(): void;
-    on(): void;
+  off(): void;
+  on(): void;
 }
 
-class PublicRoomsConnector implements IPublicRoomsConnector{
+class PublicRoomsConnector implements IPublicRoomsConnector {
 
-    static $inject = ['$rootScope', 'RoomStore', 'Paths'];
+  static $inject = ['$rootScope', 'RoomStore', 'Paths'];
 
-    constructor(
-        private $rootScope: IRootScope,
-        private RoomStore: IRoomStore,
-        private Paths: IPaths,
-    ) { }
+  constructor(
+    private $rootScope: IRootScope,
+    private RoomStore: IRoomStore,
+    private Paths: IPaths,
+  ) { }
 
-    on() {
-        const publicRoomsRef = this.Paths.publicRoomsRef();
+  on() {
+    const publicRoomsRef = this.Paths.publicRoomsRef();
 
-        // Start listening to Firebase
-        publicRoomsRef.on('child_added', (snapshot) => {
+    // Start listening to Firebase
+    publicRoomsRef.on('child_added', (snapshot) => {
 
-            const rid = snapshot.key;
-            if (rid) {
-                const room = this.RoomStore.getOrCreateRoomWithID(rid);
+      const rid = snapshot.key;
+      if (rid) {
+        const room = this.RoomStore.getOrCreateRoomWithID(rid);
 
-                room.on().then(() => {
-                    this.$rootScope.$broadcast(N.PublicRoomAdded, room);
-                });
-            }
-
+        room.on().then(() => {
+          this.$rootScope.$broadcast(N.PublicRoomAdded, room);
         });
+      }
 
-        publicRoomsRef.on('child_removed', (snapshot) => {
+    });
 
-            const room = this.RoomStore.getOrCreateRoomWithID(snapshot.key);
-            this.$rootScope.$broadcast(N.PublicRoomRemoved, room);
-        });
-    }
+    publicRoomsRef.on('child_removed', (snapshot) => {
 
-    off() {
-        const publicRoomsRef = this.Paths.publicRoomsRef();
+      const room = this.RoomStore.getOrCreateRoomWithID(snapshot.key);
+      this.$rootScope.$broadcast(N.PublicRoomRemoved, room);
+    });
+  }
 
-        publicRoomsRef.off('child_added');
-        publicRoomsRef.off('child_removed');
-    }
+  off() {
+    const publicRoomsRef = this.Paths.publicRoomsRef();
+
+    publicRoomsRef.off('child_added');
+    publicRoomsRef.off('child_removed');
+  }
 
 }
 

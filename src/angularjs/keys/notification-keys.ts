@@ -1,50 +1,50 @@
 export enum N {
-    VisibilityChanged = 'VisibilityChanged',
+  VisibilityChanged = 'VisibilityChanged',
 
-    PublicRoomAdded = 'PublicRoomAdded',
-    PublicRoomRemoved = 'PublicRoomRemoved',
+  PublicRoomAdded = 'PublicRoomAdded',
+  PublicRoomRemoved = 'PublicRoomRemoved',
 
-    RoomAdded = 'RoomAdded',
-    RoomRemoved = 'RoomRemoved',
+  RoomAdded = 'RoomAdded',
+  RoomRemoved = 'RoomRemoved',
 
-    RoomOpened = 'RoomOpened',
-    RoomClosed = 'RoomClosed',
+  RoomOpened = 'RoomOpened',
+  RoomClosed = 'RoomClosed',
 
-    AnimateRoom = 'AnimateRoom',
+  AnimateRoom = 'AnimateRoom',
 
-    RoomUpdated = 'RoomUpdated',
-    RoomPositionUpdated = 'RoomPositionUpdated',
-    RoomSizeUpdated = 'RoomSizeUpdated',
-    UpdateRoomActiveStatus = 'UpdateRoomActiveStatus',
+  RoomUpdated = 'RoomUpdated',
+  RoomPositionUpdated = 'RoomPositionUpdated',
+  RoomSizeUpdated = 'RoomSizeUpdated',
+  UpdateRoomActiveStatus = 'UpdateRoomActiveStatus',
 
-    LazyLoadedMessages = 'LazyLoadedMessages',
+  LazyLoadedMessages = 'LazyLoadedMessages',
 
-    ChatUpdated = 'ChatUpdated',
+  ChatUpdated = 'ChatUpdated',
 
-    UserOnlineStateChanged = 'UserOnlineStateChanged',
-    UserValueChanged = 'UserValueChanged',
+  UserOnlineStateChanged = 'UserOnlineStateChanged',
+  UserValueChanged = 'UserValueChanged',
 
-    ScreenSizeChanged = 'ScreenSizeChanged',
+  ScreenSizeChanged = 'ScreenSizeChanged',
 
-    LoginComplete = 'LoginComplete',
-    Logout = 'Logout',
+  LoginComplete = 'LoginComplete',
+  Logout = 'Logout',
 
-    StartSocialLogin = 'StartSocialLogin',
+  StartSocialLogin = 'StartSocialLogin',
 
-    RoomFlashHeader = 'RoomFlashHeader',
-    RoomBadgeChanged = 'RoomBadgeChanged',
+  RoomFlashHeader = 'RoomFlashHeader',
+  RoomBadgeChanged = 'RoomBadgeChanged',
 
-    OnlineUserAdded = 'OnlineUserAdded',
-    OnlineUserRemoved = 'OnlineUserRemoved',
+  OnlineUserAdded = 'OnlineUserAdded',
+  OnlineUserRemoved = 'OnlineUserRemoved',
 
-    UserBlocked = 'UserBlocked',
-    UserUnblocked = 'UserUnblocked',
+  UserBlocked = 'UserBlocked',
+  UserUnblocked = 'UserUnblocked',
 
-    FriendAdded = 'FriendAdded',
-    FriendRemoved = 'FriendRemoved',
+  FriendAdded = 'FriendAdded',
+  FriendRemoved = 'FriendRemoved',
 
-    DeleteMessage = 'DeleteMessage',
-    EditMessage = 'EditMessage',
+  DeleteMessage = 'DeleteMessage',
+  EditMessage = 'EditMessage',
 
-    ConfigUpdated = "ConfigUpdated",
+  ConfigUpdated = 'ConfigUpdated',
 }

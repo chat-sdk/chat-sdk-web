@@ -9,16 +9,16 @@ export interface IConsumeEvent extends ng.IDirective {
 
 class ConsumeEvent implements IConsumeEvent {
 
-    link(scope: ng.IScope, element: JQLite) {
-        $(element).mousedown((e) => {
-            Utils.stopDefault(e);
-            return false;
-        });
-    }
+  link(scope: ng.IScope, element: JQLite) {
+    $(element).mousedown((e) => {
+      Utils.stopDefault(e);
+      return false;
+    });
+  }
 
-    static factory(): ng.IDirectiveFactory {
-        return () => new ConsumeEvent();
-    }
+  static factory(): ng.IDirectiveFactory {
+    return () => new ConsumeEvent();
+  }
 
 }
 
