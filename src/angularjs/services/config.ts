@@ -12,9 +12,11 @@ export interface IConfig {
     clockType: string;
     defaultUserName: string;
     disableProfileBox: boolean;
+    fileMessagesEnabled: boolean;
     friends: any[];
     friendsEnabled: boolean;
     headerColor: string;
+    imageMessagesEnabled: boolean;
     inactivityTimeout: number;
     maxHistoricMessages: number;
     onlineUsersEnabled: boolean;

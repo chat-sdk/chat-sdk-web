@@ -15,15 +15,16 @@ import { IScreen } from './screen';
  */
 
 export interface IRoomPositionManager {
-    offsetForSlot(slot: number): number;
-    roomDragged(room: IRoom): void;
+    closeRoom(room: IRoom): void;
     effectiveScreenWidth(): number;
     getRooms(): any[];
     insertRoom(room: IRoom, slot: number, duration: number): void;
+    offsetForSlot(slot: number): number;
+    roomDragged(room: IRoom): void;
     roomIsOpen(room: IRoom): boolean;
-    closeRoom(room: IRoom): void;
     setDirty(): void;
     updateAllRoomActiveStatus(): void;
+    updateRoomPositions(room: IRoom, duration: number): void;
 }
 
 class RoomPositionManager implements IRoomPositionManager {

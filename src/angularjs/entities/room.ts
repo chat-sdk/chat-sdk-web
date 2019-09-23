@@ -58,17 +58,21 @@ export interface IRoom extends IEntity {
     addUserUpdate(user: IUser, status: UserStatus): {};
     close(): void;
     containsOnlyUsers(users: IUser[]): boolean;
+    containsUser(user: IUser): boolean;
     created(): number;
     deserialize(sr: StringAnyObject): void;
+    finishTyping(user: IUser): Promise<any>;
     flashHeader(): boolean;
     getOnlineUserCount(): number;
     getRID(): string;
     getType(): RoomType;
+    getUsers(): { [uid: string]: IUser };
     getUserStatus(user: IUser): UserStatus;
     isPublic(): boolean;
     join(status: UserStatus): Promise<any>;
     lastMessage(): IMessage;
     lastMessageTime(): number;
+    leave(): void;
     loadMoreMessages(numberOfMessages?: number): Promise<Array<IMessage>>;
     messagesOn(timestamp: number): void;
     off(): void;
@@ -76,9 +80,12 @@ export interface IRoom extends IEntity {
     open(slot: number, duration?: number): void;
     removeUserUpdate(user: IUser): {};
     rid(): string;
+    sendImageMessage(user: IUser, url: string, width: number, height: number): Promise<any>;
+    sendTextMessage(user: IUser, text: string): Promise<any>;
     setActive(active: boolean): void;
     setOffset(offset: number): void;
     setSizeToDefault(): void;
+    startTyping(user: IUser): Promise<any>;
     transcript(): string;
     trimMessageList(): void;
     typingOn(): void;
@@ -1081,7 +1088,7 @@ class Room extends Entity implements IRoom {
      * TYPING INDICATOR
      */
 
-    startTyping(user): Promise<any> {
+    startTyping(user: IUser): Promise<any> {
         // The user is typing...
         const ref = this.Paths.roomTypingRef(this.rid()).child(user.uid());
         const promise = ref.set({name: user.getName()});
@@ -1092,7 +1099,7 @@ class Room extends Entity implements IRoom {
         return promise;
     }
 
-    finishTyping(user): Promise<any> {
+    finishTyping(user: IUser): Promise<any> {
         const ref = this.Paths.roomTypingRef(this.rid()).child(user.uid());
         return ref.remove();
     }
