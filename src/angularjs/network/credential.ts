@@ -1,12 +1,17 @@
 import * as angular from 'angular'
 
 export interface ICredential {
+    anonymous(): ICredential;
     customToken(token: string): ICredential;
     emailAndPassword(email: string, password: string): ICredential;
+    facebook(): ICredential;
     getEmail(): string;
     getPassword(): string;
     getToken(): string;
     getType(): string;
+    github(): ICredential;
+    google(): ICredential;
+    twitter(): ICredential;
 }
 
 export enum CredentialType {

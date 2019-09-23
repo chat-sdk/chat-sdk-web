@@ -2,12 +2,15 @@ import { IUser } from '../entities/user';
 import { IConfig } from '../services/config';
 import { UserDragAction } from '../directives/draggable-user';
 import { NotificationType } from '../keys/notification-type';
+import { LoginMode } from '../keys/login-mode-keys';
 
 export interface IRootScope extends ng.IRootScopeService {
-    user: IUser;
+    auth: any;
     config: IConfig;
-    userDrag: UserDragAction;
     disableDrag: boolean;
+    loginMode: LoginMode;
     partialsURL: string;
-    showNotification: (type: NotificationType, title: string, message: string, button: string) => void;
+    user: IUser;
+    userDrag: UserDragAction;
+    showNotification(type: NotificationType, title: string, message?: string, button?: string): void;
 }

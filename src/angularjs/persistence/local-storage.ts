@@ -13,9 +13,12 @@ export interface ILocalStorage {
     tokenKey: string;
     UIDKey: string;
     clearCache(): void;
+    clearCacheWithTimestamp(timestamp: number): void;
+    getLastVisited(): number;
     getProperty(key: string): any;
     isMuted(): boolean;
     removeProperty(key: string): void;
+    setLastVisited(): void;
     setMuted(muted: boolean): void;
     setProperty(key: string, value: any): void;
     storeRooms(rooms: { [key: string]: IRoom }): void;

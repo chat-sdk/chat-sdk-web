@@ -19,7 +19,12 @@ import { ICredential, CredentialType } from './credential';
 import { IAuthUser, IAuthUserData } from '../interfaces/auth-user';
 
 export interface IAuth {
+    mode: LoginModeKeys.LoginMode;
+    authenticate(credential: ICredential): Promise<any>;
+    isAuthenticating(): boolean;
     logout(): Promise<void>
+    resetPasswordByEmail(email: string): Promise<void>;
+    signUp(email: string, password: string): Promise<firebase.auth.UserCredential>;
 }
 
 class Auth implements IAuth {

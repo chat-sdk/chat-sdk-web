@@ -9,8 +9,9 @@ import { IRoomCreator } from '../entities/room';
 import { IRoomStore } from '../persistence/room-store';
 
 export interface IAutoLogin {
-    getCredentials(): ICredential
-    tryToJoinRoom(): void
+    autoLoginEnabled(): boolean;
+    getCredentials(): ICredential;
+    tryToJoinRoom(): void;
 }
 
 class AutoLogin implements IAutoLogin {

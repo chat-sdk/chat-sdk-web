@@ -9,6 +9,7 @@ import { IPaths } from '../network/paths';
 
 export interface IFriendsConnector {
     friends: { [uid: string]: IUser };
+    addFriendsFromConfig(friends: string[]): void;
     isFriend(user: IUser): boolean;
     off(uid: string): void;
     on(uid: string): void;

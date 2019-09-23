@@ -7,9 +7,12 @@ import { IEnvironment } from './environment';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IConfig {
+    clearCacheTimestamp: number;
+    clickToChatTimeout: number;
     clockType: string;
     defaultUserName: string;
     disableProfileBox: boolean;
+    friends: any[];
     friendsEnabled: boolean;
     headerColor: string;
     inactivityTimeout: number;
