@@ -1,7 +1,15 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+export interface IErrorBoxController {
 
-angular.module('myApp.controllers').controller('ErrorBoxController', ['$scope', function($scope) {
+}
 
+class ErrorBoxController implements IErrorBoxController {
 
-}]);
+  static $inject = ['$scope'];
+
+  constructor(private $scope: ng.IScope) { }
+
+}
+
+angular.module('myApp.controllers').controller('ErrorBoxController', ErrorBoxController);
