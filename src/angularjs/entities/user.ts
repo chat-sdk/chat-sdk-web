@@ -16,7 +16,7 @@ import { IPaths } from '../network/paths';
 import { ICloudImage } from '../services/cloud-image';
 import { IEnvironment } from '../services/environment';
 import { INetworkManager } from '../network/network-manager';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export interface IUser extends IEntity {
     blocked: boolean;
@@ -456,11 +456,11 @@ class User extends Entity implements IUser {
         this.updateState(PathKeys.BlockedPath);
     };
 
-    serialize(): StringAnyObject {
+    serialize(): IStringAnyObject {
         return super.serialize();
     };
 
-    deserialize(su: StringAnyObject) {
+    deserialize(su: IStringAnyObject) {
         if (su) {
             super.deserialize(su._super);
             this.setImage(su.meta[UserKeys.ImageURL]);

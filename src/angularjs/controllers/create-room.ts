@@ -5,12 +5,12 @@ import { RoomType } from '../keys/room-type';
 import { IRoomCreator, IRoom } from '../entities/room';
 import { IRoomOpenQueue } from '../services/room-open-queue';
 import { Log } from '../services/log';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
-export interface CreateRoomScope extends ng.IScope {
+export interface ICreateRoomScope extends ng.IScope {
   focusName: boolean;
   public: boolean;
-  room: StringAnyObject;
+  room: IStringAnyObject;
   showMainBox(): void;
 }
 
@@ -19,7 +19,7 @@ class CreateRoomController {
   static $inject = ['$scope', 'RoomCreator', 'RoomOpenQueue'];
 
   constructor(
-    private $scope: CreateRoomScope,
+    private $scope: ICreateRoomScope,
     private RoomCreator: IRoomCreator,
     private RoomOpenQueue: IRoomOpenQueue,
   ) {

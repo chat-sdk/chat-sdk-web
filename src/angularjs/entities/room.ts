@@ -32,7 +32,7 @@ import { ICloudImage } from '../services/cloud-image';
 import { IMarquee } from '../services/marquee';
 import { IEnvironment } from '../services/environment';
 import { INetworkManager } from '../network/network-manager';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export interface IRoom extends IEntity {
     active: boolean;
@@ -52,7 +52,7 @@ export interface IRoom extends IEntity {
     onlineUserCount: number;
     slot: number;
     type: RoomType;
-    usersMeta: StringAnyObject;
+    usersMeta: IStringAnyObject;
     width: number;
     zIndex: number;
     addUserUpdate(user: IUser, status: UserStatus): {};
@@ -60,7 +60,7 @@ export interface IRoom extends IEntity {
     containsOnlyUsers(users: IUser[]): boolean;
     containsUser(user: IUser): boolean;
     created(): number;
-    deserialize(sr: StringAnyObject): void;
+    deserialize(sr: IStringAnyObject): void;
     finishTyping(user: IUser): Promise<any>;
     flashHeader(): boolean;
     getOnlineUserCount(): number;

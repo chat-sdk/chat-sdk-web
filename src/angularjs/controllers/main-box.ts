@@ -16,7 +16,7 @@ import { IRoom } from '../entities/room';
 import { IUser } from '../entities/user';
 import { IMessage } from '../entities/message';
 
-export interface MainBoxScope extends ng.IScope {
+export interface IMainBoxScope extends ng.IScope {
   activeTab: string;
   boxWidth: number;
   canCloseRoom: boolean;
@@ -53,7 +53,7 @@ class MainBoxController implements IMainBoxController {
   static $inject = ['$scope', '$timeout', 'Auth', 'FriendsConnector', 'Config', 'Screen', 'RoomPositionManager', 'RoomStore'];
 
   constructor(
-    private $scope: MainBoxScope,
+    private $scope: IMainBoxScope,
     private $timeout: ng.ITimeoutService,
     private Auth: IAuth,
     private FriendsConnector: IFriendsConnector,

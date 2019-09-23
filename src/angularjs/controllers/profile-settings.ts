@@ -11,7 +11,7 @@ import { ILocalStorage } from '../persistence/local-storage';
 import { IRootScope } from '../interfaces/root-scope';
 import { IUser } from '../entities/user';
 
-export interface ProfileSettingsScope extends ng.IScope {
+export interface IProfileSettingsScope extends ng.IScope {
   dirty: boolean;
   muted: boolean;
   nameChangeDummy: any;
@@ -40,7 +40,7 @@ class ProfileSettingsController implements IProfileSettingsController {
   static $inject = ['$scope', '$rootScope', 'Auth', 'Config', 'SoundEffects', 'LocalStorage'];
 
   constructor(
-    private $scope: ProfileSettingsScope,
+    private $scope: IProfileSettingsScope,
     private $rootScope: IRootScope,
     private Auth: IAuth,
     private Config: IConfig,

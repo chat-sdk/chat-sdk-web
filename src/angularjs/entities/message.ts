@@ -5,7 +5,7 @@ import { IUser } from './user';
 import { MessageType } from '../keys/message-type';
 import { MessageKeys } from '../keys/message-keys';
 import { Utils } from '../services/utils';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 import { IRootScope } from '../interfaces/root-scope';
 import { ITime } from '../services/time';
 import { IUserStore } from '../persistence/user-store';
@@ -18,7 +18,7 @@ export interface IMessage {
     mid: string;
     rid: string;
     user: IUser;
-    meta: StringAnyObject;
+    meta: IStringAnyObject;
     nextMessage: IMessage;
     previousMessage: IMessage;
     read: boolean;
@@ -110,7 +110,7 @@ class Message implements IMessage {
     }
 
 
-    serialize(): StringAnyObject {
+    serialize(): IStringAnyObject {
         return {
             meta: this.meta,
             mid: this.mid,
@@ -140,7 +140,7 @@ class Message implements IMessage {
         //console.log("Message: " + this.text() + ", user: " + this.uid() + ", h: " + this.date().getHours() + " m:" + this.date().getMinutes() + " hideName: " + hideName + ", hideDate: " + hideDate);
     }
 
-    deserialize(sm: StringAnyObject) {
+    deserialize(sm: IStringAnyObject) {
         this.mid = sm.mid;
         this.meta = sm.meta;
         this.read = sm.read;

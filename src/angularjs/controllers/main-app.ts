@@ -29,9 +29,9 @@ import { IRoomOpenQueue } from '../services/room-open-queue';
 import { INetworkManager } from '../network/network-manager';
 import { IEnvironment } from '../services/environment';
 import { LoginMode } from '../keys/login-mode-keys';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
-export interface MainAppScope extends ng.IScope {
+export interface IMainAppScope extends ng.IScope {
   activeBox: string;
   currentUser: IUser;
   currentUserHTML: string;
@@ -45,7 +45,7 @@ export interface MainAppScope extends ng.IScope {
   notification: any;
   on: boolean;
   password: string;
-  profileBoxStyle: StringAnyObject;
+  profileBoxStyle: IStringAnyObject;
   profileHideTimeoutPromise: ng.IPromise<void>;
   totalUserCount: number;
   uploadingFile: boolean;
@@ -90,7 +90,7 @@ class MainAppController implements IMainAppController {
 
   constructor(
     private $rootScope: IRootScope,
-    private $scope: MainAppScope,
+    private $scope: IMainAppScope,
     private $timeout: ng.ITimeoutService,
     private $window: ng.IWindowService,
     private $sce: ng.ISCEService,

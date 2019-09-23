@@ -1,4 +1,4 @@
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export class Utils {
 
@@ -20,7 +20,7 @@ export class Utils {
         return false;
     }
 
-    static toObject(map: Map<string, any>): StringAnyObject {
+    static toObject(map: Map<string, any>): IStringAnyObject {
         const obj = {};
         map.forEach((value: any, key: string) => {
             obj[key] = map.get(key);

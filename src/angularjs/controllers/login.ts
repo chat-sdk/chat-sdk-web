@@ -20,7 +20,7 @@ import { IAuth } from '../network/auth';
 import { ICredential } from '../network/credential';
 import { IAutoLogin } from '../network/auto-login';
 
-export interface LoginScope extends ng.IScope {
+export interface ILoginScope extends ng.IScope {
   email: string;
   errorMessage: string;
   password: string;
@@ -64,7 +64,7 @@ class LoginController implements LoginController {
    */
   constructor(
     private $rootScope: IRootScope,
-    private $scope: LoginScope,
+    private $scope: ILoginScope,
     private $timeout: ng.ITimeoutService,
     private FriendsConnector: IFriendsConnector,
     private Cache: ICache,

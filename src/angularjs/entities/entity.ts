@@ -6,12 +6,12 @@ import * as Defines from '../keys/defines';
 import { IPaths } from '../network/paths';
 import { Emoji } from '../services/emoji';
 import { Utils } from '../services/utils';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export interface IEntity {
-    serialize(): StringAnyObject
+    serialize(): IStringAnyObject
     setMeta(meta: any): void
-    getMetaObject (): StringAnyObject
+    getMetaObject (): IStringAnyObject
     getMeta(): Map<string, any>
     updateState(key: string): Promise<any>
     removeOnDisconnect (path: string): Promise<any>
@@ -23,7 +23,7 @@ export class Entity implements IEntity {
     protected _path: string;
     protected _id: string;
     pathIsOn: { [key: string]: boolean } = {};
-    state: StringAnyObject = {};
+    state: IStringAnyObject = {};
 
     // static $inject = ['$q', 'Paths'];
     constructor(
@@ -45,7 +45,7 @@ export class Entity implements IEntity {
      * @returns promise - the promise is resolved when the it's confirmed that
      *                    the state of the local data is up to date
      */
-    pathOn(key: string, callback: (value: StringAnyObject) => void): Promise<any> {
+    pathOn(key: string, callback: (value: IStringAnyObject) => void): Promise<any> {
         return new Promise((resolve, reject) => {
             // Check to see if this path has already
             // been turned on
@@ -135,7 +135,7 @@ export class Entity implements IEntity {
         return ref.set(firebase.database.ServerValue.TIMESTAMP);
     }
 
-    setMeta(meta: Map<string, any> | StringAnyObject): void {
+    setMeta(meta: Map<string, any> | IStringAnyObject): void {
         if (meta instanceof Map) {
             this.meta = meta;
         } else {
@@ -143,7 +143,7 @@ export class Entity implements IEntity {
         }
     };
 
-    getMetaObject(): StringAnyObject {
+    getMetaObject(): IStringAnyObject {
         return Utils.toObject(this.meta);
     }
 
@@ -166,7 +166,7 @@ export class Entity implements IEntity {
         this.getMeta().set(key, value);
     };
 
-    serialize(): StringAnyObject {
+    serialize(): IStringAnyObject {
         return {
             _path: this._path,
             _id: this._id,
@@ -175,7 +175,7 @@ export class Entity implements IEntity {
         }
     }
 
-    deserialize(se: StringAnyObject) {
+    deserialize(se: IStringAnyObject) {
         if (se) {
             this._path = se._path;
             this._id = se._id;

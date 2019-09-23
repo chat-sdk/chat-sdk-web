@@ -6,7 +6,7 @@ import { Log } from '../services/log';
 import { IUser } from '../entities/user';
 import { IOnlineConnector } from '../connectors/online-connector';
 
-export interface OnlineUsersListScope extends ng.IScope {
+export interface IOnlineUsersListScope extends ng.IScope {
   activeTab: string;
   allUsers: IUser[];
   users: IUser[];
@@ -23,7 +23,7 @@ class OnlineUsersListController implements IOnlineUsersListController {
   static $inject = ['$scope', '$timeout', 'OnlineConnector'];
 
   constructor(
-    private $scope: OnlineUsersListScope,
+    private $scope: IOnlineUsersListScope,
     private $timeout: ng.ITimeoutService,
     private OnlineConnector: IOnlineConnector,
   ) {

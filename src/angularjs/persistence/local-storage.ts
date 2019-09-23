@@ -4,7 +4,7 @@ import { Utils } from '../services/utils';
 import { IUser } from '../entities/user';
 import { IRoom } from '../entities/room';
 import { IWebStorage } from './web-storage';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export interface ILocalStorage {
     mainMinimizedKey: string;
@@ -83,8 +83,8 @@ class LocalStorage implements ILocalStorage {
 
     lastVisited = 'cc_last_visited';
 
-    rooms: { [key: string]: StringAnyObject } = {};
-    users: { [key: string]: StringAnyObject } = {};
+    rooms: { [key: string]: IStringAnyObject } = {};
+    users: { [key: string]: IStringAnyObject } = {};
 
     cacheCleared = false;
 
@@ -106,7 +106,7 @@ class LocalStorage implements ILocalStorage {
 
     storeRooms(rooms: { [key: string]: IRoom }) {
         let room: IRoom;
-        let sr = Array<StringAnyObject>();
+        let sr = Array<IStringAnyObject>();
         for (let key in rooms) {
             if (rooms.hasOwnProperty(key)) {
                 room = rooms[key];
@@ -118,7 +118,7 @@ class LocalStorage implements ILocalStorage {
 
     storeUsers(users: { [key: string]: IUser }) {
         let user: IUser;
-        let su = Array<StringAnyObject>();
+        let su = Array<IStringAnyObject>();
         for (let key in users) {
             if (users.hasOwnProperty(key)) {
                 user = users[key];

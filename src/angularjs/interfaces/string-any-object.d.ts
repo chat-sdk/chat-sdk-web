@@ -1,3 +1,3 @@
-export interface StringAnyObject {
+export interface IStringAnyObject {
     [key: string]: any
 }

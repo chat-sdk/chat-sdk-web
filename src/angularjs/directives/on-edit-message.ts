@@ -1,7 +1,7 @@
 import * as angular from 'angular';
 
 import { N } from '../keys/notification-keys';
-import { MessageScope } from '../controllers/chat';
+import { IMessageScope } from '../controllers/chat';
 
 export interface IOnEditMessage extends ng.IDirective {
 
@@ -9,7 +9,7 @@ export interface IOnEditMessage extends ng.IDirective {
 
 class OnEditMessage implements IOnEditMessage {
 
-    link(scope: MessageScope, element: JQLite) {
+    link(scope: IMessageScope, element: JQLite) {
         scope.$on(N.EditMessage, (event, mid, newText) => {
             if (mid == scope.message.meta.mid) {
                 element.text(newText);

@@ -1,6 +1,6 @@
 import * as angular from 'angular';
 
-export interface NotificationScope extends ng.IScope {
+export interface INotificationScope extends ng.IScope {
   notification: any;
   submit(): void;
 }
@@ -14,7 +14,7 @@ class NotificationController implements INotificationController {
   static $inject = ['$scope'];
 
   constructor(
-    private $scope: NotificationScope,
+    private $scope: INotificationScope,
   ) {
     $scope.submit = this.submit.bind(this)()
   }

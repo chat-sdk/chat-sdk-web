@@ -6,7 +6,7 @@ import { Log } from '../services/log';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoom } from '../entities/room';
 
-export interface InboxRoomsListScope extends ng.IScope {
+export interface IInboxRoomsListScope extends ng.IScope {
   activeTab: string;
   allRooms: IRoom[];
   rooms: IRoom[];
@@ -23,7 +23,7 @@ class InboxRoomsListController implements IInboxRoomsListController {
   static $inject = ['$scope', '$timeout', 'RoomStore'];
 
   constructor(
-    private $scope: InboxRoomsListScope,
+    private $scope: IInboxRoomsListScope,
     private $timeout: ng.ITimeoutService,
     private RoomStore: IRoomStore,
   ) {

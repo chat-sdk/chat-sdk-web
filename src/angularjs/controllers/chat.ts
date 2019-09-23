@@ -14,7 +14,7 @@ import { IAuth } from '../network/auth';
 import { IScreen } from '../services/screen';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { INetworkManager } from '../network/network-manager';
-import { StringAnyObject } from '../interfaces/string-any-object';
+import { IStringAnyObject } from '../interfaces/string-any-object';
 
 export interface IRoomScope extends ng.IScope {
   activeTab: string;
@@ -36,7 +36,7 @@ export interface IRoomScope extends ng.IScope {
   showMessageOptions: boolean;
   uploadingFile: boolean;
   users: IUser[];
-  profileBoxStyle: StringAnyObject;
+  profileBoxStyle: IStringAnyObject;
   dragStarted: boolean;
   mainBoxWidth: number;
   acceptInvitation(): void;
@@ -71,7 +71,7 @@ export interface IRoomScope extends ng.IScope {
   wasDragged(): void;
 }
 
-export interface MessageScope extends ng.IScope {
+export interface IMessageScope extends ng.IScope {
     message: any;
 }
 

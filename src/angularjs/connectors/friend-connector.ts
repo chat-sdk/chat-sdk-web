@@ -15,7 +15,7 @@ export interface IFriendsConnector {
     on(uid: string): void;
 }
 
-class FriendsConnector implements FriendsConnector {
+class FriendsConnector implements IFriendsConnector {
 
     static $inject = ['$rootScope', 'User', 'UserStore', 'Paths'];
 
