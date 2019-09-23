@@ -62,6 +62,7 @@ export interface IRoom extends IEntity {
     deserialize(sr: StringAnyObject): void;
     flashHeader(): boolean;
     getOnlineUserCount(): number;
+    getRID(): string;
     getType(): RoomType;
     getUserStatus(user: IUser): UserStatus;
     isPublic(): boolean;

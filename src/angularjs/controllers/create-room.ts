@@ -1,68 +1,75 @@
-import * as angular from 'angular'
+import * as angular from 'angular';
 
+import { ShowCreateChatBox } from '../keys/defines';
+import { RoomType } from '../keys/room-type';
+import { IRoomCreator, IRoom } from '../entities/room';
+import { IRoomOpenQueue } from '../services/room-open-queue';
+import { Log } from '../services/log';
+import { StringAnyObject } from '../interfaces/string-any-object';
 
-import {ShowCreateChatBox} from "../keys/defines";
-import {RoomType} from "../keys/room-type";
-import {IRoomCreator} from "../entities/room";
-import {IRoomOpenQueue} from "../services/room-open-queue";
-import {Log} from "../services/log";
+export interface CreateRoomScope extends ng.IScope {
+  focusName: boolean;
+  public: boolean;
+  room: StringAnyObject;
+  showMainBox(): void;
+}
 
 class CreateRoomController {
-    static $inject = ['$scope', 'RoomCreator', 'RoomOpenQueue'];
 
-    constructor (
-        private $scope,
-        private RoomCreator: IRoomCreator,
-        private RoomOpenQueue: IRoomOpenQueue,
-    ){
-        this.clearForm();
+  static $inject = ['$scope', 'RoomCreator', 'RoomOpenQueue'];
 
-        $scope.$on(ShowCreateChatBox , () =>{
-            Log.notification(ShowCreateChatBox, 'CreateRoomController');
-            $scope.focusName = true;
-        });
-    }
+  constructor(
+    private $scope: CreateRoomScope,
+    private RoomCreator: IRoomCreator,
+    private RoomOpenQueue: IRoomOpenQueue,
+  ) {
+    this.clearForm();
 
-    createRoom() {
+    $scope.$on(ShowCreateChatBox , () => {
+      Log.notification(ShowCreateChatBox, 'CreateRoomController');
+      $scope.focusName = true;
+    });
+  }
 
-        let promise;
+  async createRoom() {
 
-        // Is this a public room?
-        if(this.$scope.public) {
-            promise = this.RoomCreator.createPublicRoom(
-                this.$scope.room.name,
-                this.$scope.room.description
-            );
-        }
-        else {
-            promise = this.RoomCreator.createRoom(
-                this.$scope.room.name,
-                this.$scope.room.description,
-                this.$scope.room.invitesEnabled,
-                RoomType.OneToOne
-            );
-        }
+    const room = await (() => {
+      // Is this a public room?
+      if (this.$scope.public) {
+        return this.RoomCreator.createPublicRoom(
+          this.$scope.room.name,
+          this.$scope.room.description
+        );
+      }
+      else {
+        return this.RoomCreator.createRoom(
+          this.$scope.room.name,
+          this.$scope.room.description,
+          this.$scope.room.invitesEnabled,
+          RoomType.OneToOne
+        );
+      }
+    })();
 
-        promise.then((room) => {
-            this.RoomOpenQueue.addRoomWithID(room.getRID());
-            room.open(0)
-        });
+    this.RoomOpenQueue.addRoomWithID(room.getRID());
+    room.open(0)
 
-        this.back();
+    this.back();
+  }
+
+  back() {
+    this.clearForm();
+    this.$scope.showMainBox();
+  }
+
+  clearForm() {
+    this.$scope.room = {
+      invitesEnabled: false,
+      name: null,
+      description: null
     };
+  }
 
-    back() {
-        this.clearForm();
-        this.$scope.showMainBox();
-    };
-
-    clearForm() {
-        this.$scope.room = {
-            invitesEnabled: false,
-            name: null,
-            description: null
-        };
-    };
 }
 
 angular.module('myApp.controllers').controller('CreateRoomController', CreateRoomController);
