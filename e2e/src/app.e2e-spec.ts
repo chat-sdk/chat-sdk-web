@@ -10,7 +10,7 @@ describe('workspace-project App', () => {
 
   it('should display welcome message', () => {
     page.navigateTo();
-    expect(page.getTitleText()).toEqual('Welcome to chat-sdk-web!');
+    expect(page.getTitleText()).toEqual('chat-sdk-web app is running!');
   });
 
   afterEach(async () => {

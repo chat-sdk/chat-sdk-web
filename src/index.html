@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>ChatSdkWeb</title>
   <base href="/">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
@@ -12,7 +11,8 @@
   <app-root></app-root>
 
   <!--<div data-ng-app="myApp" id="cc-app" ng-controller="MainAppController"><ng-include src=" partialsURL + 'chatsdk.html'" ></ng-include>-->
-  <div id="cc-app" ng-controller="MainAppController"><ng-include src=" partialsURL + 'chatsdk.html'" ></ng-include>
+  <div id="cc-app" ng-controller="MainAppController">
+    <ng-include src="partialsURL + 'chatsdk.html'"></ng-include>
 
     <!--<div data-ng-controller="ChatEmbedController" data-ng-init="init('1234', 300, 400)" style="background: white; width: 300px; height: 400px">-->
     <!--<div data-ng-repeat="(id, room) in rooms">-->
@@ -23,7 +23,6 @@
     <!--</div>-->
 
   </div>
-
 
 </body>
 </html>
