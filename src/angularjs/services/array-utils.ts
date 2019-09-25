@@ -89,7 +89,7 @@ export class ArrayUtils {
         if (!Utils.unORNull(key) && !Utils.unORNull(elmKey)) {
           t1 = key.toLowerCase().replace(/ /g, '');
           t2 = elmKey.toLowerCase().replace(/ /g, '');
-          if (t2.length >= t1.length && t2.substring(0, t1.length) == t1) {
+          if (t2.includes(t1)) {
             result.push(elm);
           }
         }
