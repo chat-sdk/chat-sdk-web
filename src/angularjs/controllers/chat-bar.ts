@@ -1,7 +1,6 @@
 import * as angular from 'angular';
 
 import { N } from '../keys/notification-keys';
-import { IRoomListScope } from './room-list-box';
 import { ICache } from '../persistence/cache';
 import { IRoom } from '../entities/room';
 import { Log } from '../services/log';
@@ -15,24 +14,20 @@ class ChatBarController implements IChatBarController {
 
   static $inject = ['$scope', '$timeout', 'Cache'];
 
-  public rooms: IRoom[] = [];
+  rooms = Array<IRoom>();
 
   constructor(
-    private $scope: IRoomListScope,
+    private $scope: ng.IScope,
     private $timeout: ng.ITimeoutService,
     private Cache: ICache
   ) {
-    const updateList = () => {
-      this.updateList();
-    };
-
-    $scope.$on(N.RoomOpened, updateList);
-    $scope.$on(N.RoomClosed, updateList);
-    $scope.$on(N.Logout, updateList);
+    $scope.$on(N.RoomOpened, this.updateList.bind(this));
+    $scope.$on(N.RoomClosed, this.updateList.bind(this));
+    $scope.$on(N.Logout, this.updateList.bind(this));
 
     $scope.$on(N.UpdateRoomActiveStatus, () => {
       Log.notification(N.UpdateRoomActiveStatus, 'ChatBarController');
-      updateList.bind(this)();
+      this.updateList();
     });
   }
 
