@@ -8,12 +8,6 @@ import { IRoom } from '../entities/room';
 import { ISearch } from '../services/search';
 import { InboxTab } from '../keys/tab-keys';
 
-export interface IInboxRoomsListScope extends ng.IScope {
-  allRooms: IRoom[];
-  rooms: IRoom[];
-  updateList(): void;
-}
-
 export interface IInboxRoomsListController {
 
 }
@@ -22,33 +16,28 @@ class InboxRoomsListController implements IInboxRoomsListController {
 
   static $inject = ['$scope', '$timeout', 'RoomStore', 'Search'];
 
+  rooms = Array<IRoom>();
+
   constructor(
-    private $scope: IInboxRoomsListScope,
+    private $scope: ng.IScope,
     private $timeout: ng.ITimeoutService,
     private RoomStore: IRoomStore,
     private Search: ISearch,
   ) {
-    // $scope properties
-    $scope.rooms = [];
-    $scope.allRooms = [];
-
-    // $scope methods
-    $scope.updateList = this.updateList.bind(this);
-
     $scope.$on(N.RoomAdded, () => {
       Log.notification(N.RoomAdded, 'InboxRoomsListController');
-      this.updateList.bind(this)();
+      this.updateList();
     });
 
     $scope.$on(N.RoomRemoved, () => {
       Log.notification(N.RoomRemoved, 'InboxRoomsListController');
-      this.updateList.bind(this)();
+      this.updateList();
     });
 
     $scope.$on(N.LoginComplete, () => {
       Log.notification(N.LoginComplete, 'InboxRoomsListController');
       RoomStore.loadPrivateRoomsToMemory();
-      this.updateList.bind(this)();
+      this.updateList();
     });
 
     // Update the list if the user count on a room changes
@@ -62,17 +51,30 @@ class InboxRoomsListController implements IInboxRoomsListController {
   }
 
   updateList() {
-    this.$scope.allRooms = this.RoomStore.getPrivateRooms();
+    const privateRooms = ArrayUtils.roomsSortedByMostRecent(this.RoomStore.getPrivateRooms());
 
-    this.$scope.allRooms = ArrayUtils.roomsSortedByMostRecent(this.$scope.allRooms);
-
-    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.Search.getQueryForActiveTab(), (room) => {
-      return room.getMetaObject.name;
+    this.rooms = ArrayUtils.filterByKey(privateRooms, this.Search.getQueryForActiveTab(), (room) => {
+      return room.name;
     });
 
     this.$timeout(() => {
       this.$scope.$digest();
     });
+  }
+
+  roomClicked(room: IRoom) {
+
+    // Trim the messages array in case it gets too long
+    // we only need to store the last 200 messages!
+    room.trimMessageList();
+
+    // Messages on is called by when we add the room to the user
+    // If the room is already open do nothing!
+    if (room.flashHeader()) {
+      return;
+    }
+
+    room.open(0);
   }
 
 }

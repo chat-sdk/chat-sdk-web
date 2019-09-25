@@ -10,8 +10,6 @@ import { RoomsTab } from '../keys/tab-keys';
 
 export interface IPublicRoomsListScope extends ng.IScope {
   allRooms: IRoom[];
-  rooms: IRoom[];
-  updateList(): void;
 }
 
 export interface IPublicRoomsListController {
@@ -22,17 +20,15 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
   static $inject = ['$scope', '$timeout', 'Search'];
 
+  rooms = Array<IRoom>();
+
   constructor(
     private $scope: IPublicRoomsListScope,
     private $timeout: ng.ITimeoutService,
     private Search: ISearch,
   ) {
     // $scope propeties
-    $scope.rooms = [];
     $scope.allRooms = [];
-
-    // $scope methods
-    $scope.updateList = this.updateList.bind(this);
 
     $scope.$on(N.PublicRoomAdded, (event, room) => {
       Log.notification(N.PublicRoomAdded, 'PublicRoomsListController');
@@ -48,7 +44,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
       Log.notification(N.PublicRoomRemoved, 'PublicRoomsListController');
 
       ArrayUtils.remove($scope.allRooms, room);
-      this.updateList.bind(this)();
+      this.updateList();
     });
 
     // Update the list if the user count on a room changes
@@ -97,13 +93,28 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     });
 
-    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.Search.getQueryForActiveTab(), (room) => {
-      return room.getMetaObject.name;
+    this.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.Search.getQueryForActiveTab(), (room) => {
+      return room.name;
     });
 
     this.$timeout(() => {
       this.$scope.$digest();
     });
+  }
+
+  roomClicked(room: IRoom) {
+
+    // Trim the messages array in case it gets too long
+    // we only need to store the last 200 messages!
+    room.trimMessageList();
+
+    // Messages on is called by when we add the room to the user
+    // If the room is already open do nothing!
+    if (room.flashHeader()) {
+      return;
+    }
+
+    room.open(0);
   }
 
 }

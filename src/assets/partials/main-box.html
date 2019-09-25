@@ -56,13 +56,13 @@
         <div data-ng-include data-ng-controller="OnlineUsersListController" data-ng-show="activeTab == 'users'" src=" partialsURL + 'user-list.html'"></div>
 
         <!--Add the list of public chat rooms-->
-        <div data-ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" data-ng-controller="PublicRoomsListController" >
+        <div data-ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x" data-ng-controller="PublicRoomsListController as ctrl" >
             <div data-ng-include src=" partialsURL + 'room-list.html'"></div>
         </div>
 
         <!--Add the list of public chat rooms-->
-        <div data-ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x" data-ng-controller="InboxRoomsListController" >
-            <div data-ng-include src=" partialsURL + 'room-list.html'"></div>
+        <div data-ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x" ng-controller="InboxRoomsListController as ctrl">
+            <div data-ng-include src="partialsURL + 'room-list.html'"></div>
         </div>
 
         <!--Add the table of users / chat rooms-->
