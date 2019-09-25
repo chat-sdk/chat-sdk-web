@@ -7,10 +7,6 @@ import { IRootScope } from '../interfaces/root-scope';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoom } from '../entities/room';
 
-export interface IChatEmbedScope extends ng.IScope {
-  rooms: IRoom[];
-}
-
 export interface IChatEmbedController {
   init(rid: string, width: number, height: number): void;
 }
@@ -22,9 +18,10 @@ class ChatEmbedController implements IChatEmbedController {
   rid: string;
   width: number;
   height: number;
+  rooms: IRoom[];
 
   constructor(
-    private $scope: IChatEmbedScope,
+    private $scope: ng.IScope,
     private $timeout: ng.ITimeoutService,
     private $rootScope: IRootScope,
     private RoomStore: IRoomStore,
@@ -67,7 +64,7 @@ class ChatEmbedController implements IChatEmbedController {
             open();
         }
 
-        this.$scope.rooms = [room];
+        this.rooms = [room];
 
         this.$timeout(() => {
           this.$rootScope.$digest();
