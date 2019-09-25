@@ -1,8 +1,9 @@
-import * as Defines from '../keys/defines';
+import { DEBUG } from '../keys/defines';
 
 export class Log {
-  public static notification(notification, context) {
-    if (Defines.DEBUG) {
+
+  public static notification(notification: string, context: string) {
+    if (DEBUG) {
       if (!context) {
         context = ''
       } else {
@@ -11,4 +12,5 @@ export class Log {
       console.log('Notification: ' + notification + context)
     }
   }
+
 }
