@@ -15,6 +15,8 @@ import { IRoomStore } from '../persistence/room-store';
 import { IRoom } from '../entities/room';
 import { IUser } from '../entities/user';
 import { IMessage } from '../entities/message';
+import { ISearch } from '../services/search';
+import { ITab } from '../services/tab';
 
 export interface IMainBoxScope extends ng.IScope {
   activeTab: string;
@@ -50,7 +52,7 @@ export interface IMainBoxController {
 
 class MainBoxController implements IMainBoxController {
 
-  static $inject = ['$scope', '$timeout', 'Auth', 'FriendsConnector', 'Config', 'Screen', 'RoomPositionManager', 'RoomStore'];
+  static $inject = ['$scope', '$timeout', 'Auth', 'FriendsConnector', 'Config', 'Screen', 'RoomPositionManager', 'RoomStore', 'Search', 'Tab'];
 
   constructor(
     private $scope: IMainBoxScope,
@@ -61,6 +63,8 @@ class MainBoxController implements IMainBoxController {
     private Screen: IScreen,
     private RoomPositionManager: IRoomPositionManager,
     private RoomStore: IRoomStore,
+    private Search: ISearch,
+    private Tab: ITab,
   ) {
     // $scope propeties
     $scope.friendsTabEnabled = true;
@@ -90,10 +94,9 @@ class MainBoxController implements IMainBoxController {
 
     // Setup the search variable - if we don't do this
     // Angular can't set search.text
-    $scope.search = {};
-    $scope.search[UsersTab] = '';
-    $scope.search[RoomsTab] = '';
-    $scope.search[FriendsTab] = '';
+    Search.setQueryForTab(UsersTab, '');
+    Search.setQueryForTab(RoomsTab, '');
+    Search.setQueryForTab(FriendsTab, '');
 
     // This is used by sub views for their layouts
     $scope.boxWidth = Dimensions.MainBoxWidth;
@@ -123,6 +126,14 @@ class MainBoxController implements IMainBoxController {
     $scope.$on(N.LoginComplete, () => {
       Log.notification(N.RoomRemoved, 'InboxRoomsListController');
       this.updateInboxCount.bind(this)();
+    });
+
+    Tab.activeTabForMainBoxObservable().subscribe(tab => {
+      $scope.activeTab = tab;
+    });
+
+    $scope.$watchCollection('search', (query: {}) => {
+      Search.setQueryForActiveTab(query[$scope.activeTab]);
     });
   }
 
@@ -190,7 +201,7 @@ class MainBoxController implements IMainBoxController {
   }
 
   tabClicked(tab: string) {
-    this.$scope.activeTab = tab;
+    this.Tab.setActiveTabForMainBox(tab);
 
     // Save current search text
     // this.$scope.search
@@ -218,7 +229,7 @@ class MainBoxController implements IMainBoxController {
   }
 
   searchKeyword(): string {
-    return this.$scope.search[this.$scope.activeTab];
+    return this.Search.getQueryForActiveTab();
   }
 
   roomClicked(room: IRoom) {

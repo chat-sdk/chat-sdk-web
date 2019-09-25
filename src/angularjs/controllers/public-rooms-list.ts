@@ -5,12 +5,12 @@ import { Utils } from '../services/utils';
 import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IRoom } from '../entities/room';
+import { ISearch } from '../services/search';
+import { RoomsTab } from '../keys/tab-keys';
 
 export interface IPublicRoomsListScope extends ng.IScope {
-  activeTab: string;
   allRooms: IRoom[];
   rooms: IRoom[];
-  search: { [key: string]: string };
   updateList(): void;
 }
 
@@ -20,11 +20,12 @@ export interface IPublicRoomsListController {
 
 class PublicRoomsListController implements IPublicRoomsListController {
 
-  static $inject = ['$scope', '$timeout'];
+  static $inject = ['$scope', '$timeout', 'Search'];
 
   constructor(
     private $scope: IPublicRoomsListScope,
     private $timeout: ng.ITimeoutService,
+    private Search: ISearch,
   ) {
     // $scope propeties
     $scope.rooms = [];
@@ -55,7 +56,9 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     $scope.$on(N.Logout, this.updateList.bind(this));
 
-    $scope.$watchCollection('search', this.updateList.bind(this));
+    Search.queryForTabObservable('rooms').subscribe(query => {
+      this.updateList();
+    });
   }
 
   updateList() {
@@ -94,7 +97,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     });
 
-    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.$scope.search[this.$scope.activeTab], (room) => {
+    this.$scope.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.Search.getQueryForActiveTab(), (room) => {
       return room.getMetaObject.name;
     });
 

@@ -5,12 +5,11 @@ import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IUser } from '../entities/user';
 import { IOnlineConnector } from '../connectors/online-connector';
+import { ISearch } from '../services/search';
 
 export interface IOnlineUsersListScope extends ng.IScope {
-  activeTab: string;
   allUsers: IUser[];
   users: IUser[];
-  search: { [key: string]: string };
   updateList(): void;
 }
 
@@ -20,12 +19,13 @@ export interface IOnlineUsersListController {
 
 class OnlineUsersListController implements IOnlineUsersListController {
 
-  static $inject = ['$scope', '$timeout', 'OnlineConnector'];
+  static $inject = ['$scope', '$timeout', 'OnlineConnector', 'Search'];
 
   constructor(
     private $scope: IOnlineUsersListScope,
     private $timeout: ng.ITimeoutService,
     private OnlineConnector: IOnlineConnector,
+    private Search: ISearch,
   ) {
     // $scope propeties
     $scope.allUsers = [];
@@ -72,7 +72,7 @@ class OnlineUsersListController implements IOnlineUsersListController {
   updateList() {
     // Filter online users to remove users that are blocking us
     this.$scope.allUsers = ArrayUtils.objectToArray(this.OnlineConnector.onlineUsers);
-    this.$scope.users = ArrayUtils.filterByKey(this.$scope.allUsers, this.$scope.search[this.$scope.activeTab], (user) => {
+    this.$scope.users = ArrayUtils.filterByKey(this.$scope.allUsers, this.Search.getQueryForActiveTab(), (user) => {
       return user.getName();
     });
 

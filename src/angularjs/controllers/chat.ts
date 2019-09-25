@@ -15,6 +15,7 @@ import { IScreen } from '../services/screen';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { INetworkManager } from '../network/network-manager';
 import { IStringAnyObject } from '../interfaces/string-any-object';
+import { ITab } from '../services/tab';
 
 export interface IRoomScope extends ng.IScope {
   activeTab: string;
@@ -81,7 +82,7 @@ export interface IChatController {
 
 class ChatController implements IChatController {
 
-  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'NetworkManager'];
+  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'NetworkManager', 'Tab'];
 
   constructor(
     private $scope: IRoomScope,
@@ -92,7 +93,8 @@ class ChatController implements IChatController {
     private Auth: IAuth,
     private Screen: IScreen,
     private RoomPositionManager: IRoomPositionManager,
-    private NetworkManager: INetworkManager
+    private NetworkManager: INetworkManager,
+    private Tab: ITab,
   ) {
     // $scope properties
     $scope.showEmojis = false;
@@ -131,6 +133,10 @@ class ChatController implements IChatController {
 
     // Save the super class
     $scope.superShowProfileBox = $scope.showProfileBox;
+
+    Tab.activeTabForRoomObservable($scope.room.getRID()).subscribe(tab => {
+      $scope.activeTab = tab;
+    });
   }
 
   init(room: IRoom) {
@@ -326,7 +332,7 @@ class ChatController implements IChatController {
   }
 
   tabClicked(tab: string) {
-    this.$scope.activeTab = tab;
+    this.Tab.setActiveTabForRoom(this.$scope.room.getRID(), tab);
     if (tab == TabKeys.MessagesTab) {
       this.$scope.showEmojis = false;
       this.$scope.showMessageOptions = false;
