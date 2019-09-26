@@ -1,5 +1,5 @@
 import * as angular from 'angular';
-import * as firebase from 'firebase';
+import { database } from 'firebase';
 
 import { IUser } from './user';
 import { MessageType } from '../keys/message-type';
@@ -24,6 +24,7 @@ export interface IMessage {
   rid: string;
   user: IUser;
   date(): Date;
+  deserialize(sm: IStringAnyObject): void;
   markRead(uid?: string): void;
   metaValue(key: string): any;
   sender(): IUser;
@@ -34,7 +35,7 @@ export interface IMessage {
   updateDisplay(): void;
 }
 
-class Message implements IMessage {
+export class Message implements IMessage {
 
   public read = false;
   public flagged = false;
@@ -230,6 +231,7 @@ class Message implements IMessage {
   setMID(mid: string) {
     this.mid = mid;
   }
+
 }
 
 export enum MessageSide {
@@ -239,14 +241,27 @@ export enum MessageSide {
 
 export interface IMessageFactory {
   buildFileMeta(fileName: string, mimeType: string, fileURL: string): Map<string, any>;
-  buildTextMeta(text: string): Map<string, any>;
-  buildImageMeta(url: string, width: number, height: number): Map<string, any>
+  buildImageMeta(url: string, width: number, height: number): Map<string, any>;
   buildMessage(from: string, to: Array<string>, type: MessageType, meta: Map<string, any>): {};
+  buildTextMeta(text: string): Map<string, any>;
+  createMessage(mid: string, meta?: Map<string, any>): IMessage;
 }
 
 class MessageFactory implements IMessageFactory {
 
-  constructor() { }
+  static $inject = ['$rootScope', 'Time', 'UserStore', 'Config', 'CloudImage'];
+
+  constructor(
+    private $rootScope: IRootScope,
+    private Time: ITime,
+    private UserStore: IUserStore,
+    private Config: IConfig,
+    private CloudImage: ICloudImage,
+  ) { }
+
+  createMessage(mid: string, meta?: Map<string, any>): IMessage {
+    return new Message(this.$rootScope, this.Time, this.UserStore, this.Config, this.CloudImage, mid, meta);
+  }
 
   buildFileMeta(fileName: string, mimeType: string, fileURL: string): Map<string, any> {
     const map = new Map<string, any>();
@@ -283,7 +298,7 @@ class MessageFactory implements IMessageFactory {
     message[MessageKeys.Meta] = metaObject;
     message[MessageKeys.JSONv2] = metaObject;
 
-    message[MessageKeys.Date] = firebase.database.ServerValue.TIMESTAMP;
+    message[MessageKeys.Date] = database.ServerValue.TIMESTAMP;
     message[MessageKeys.Type] = type;
 
     let read = new Map<string, any>();
@@ -305,11 +320,4 @@ class MessageFactory implements IMessageFactory {
   }
 }
 
-angular.module('myApp.services')
-  .service('Message', ['$rootScope', 'Time', 'UserStore', 'Config', 'CloudImage', function ($rootScope: IRootScope, Time: ITime, UserStore: IUserStore, Config: IConfig, CloudImage: ICloudImage) {
-    // we can ask for more parameters if needed
-    return function messageFactory(mid: string, meta: Map<string, any>) { // return a factory instead of a new talker
-      return new Message($rootScope, Time, UserStore, Config, CloudImage, mid, meta);
-    }
-  }])
-  .service('MessageFactory', MessageFactory);
+angular.module('myApp.services').service('MessageFactory', MessageFactory);

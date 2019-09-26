@@ -16,7 +16,7 @@ import { UserStatus } from '../keys/user-status';
 import { IRoomMeta } from '../interfaces/room-meta';
 import { IPresence } from '../network/presence';
 import { IConfig } from './config';
-import { IMessage, IMessageFactory } from '../entities/message';
+import { IMessageFactory } from '../entities/message';
 import { ICache } from '../persistence/cache';
 import { IRoomPositionManager } from './room-position-manager';
 import { ISoundEffects } from './sound-effects';
@@ -36,14 +36,13 @@ export interface IRoomCreator {
 
 class RoomCreator implements IRoomCreator {
 
-  static $inject = ['$rootScope', 'Presence', 'Paths', 'Config', 'Message', 'MessageFactory', 'Cache', 'UserStore', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Time', 'CloudImage', 'Marquee', 'Environment', 'RoomFactory', 'EntityFactory'];
+  static $inject = ['$rootScope', 'Presence', 'Paths', 'Config', 'MessageFactory', 'Cache', 'UserStore', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Time', 'CloudImage', 'Marquee', 'Environment', 'RoomFactory', 'EntityFactory'];
 
   constructor(
     private $rootScope: IRootScope,
     private Presence: IPresence,
     private Paths: IPaths,
     private Config: IConfig,
-    private Message: IMessage,
     private MessageFactory: IMessageFactory,
     private Cache: ICache,
     private UserStore: IUserStore,
@@ -59,7 +58,7 @@ class RoomCreator implements IRoomCreator {
   ) { }
 
   createRoom(rid: string, meta?: IRoomMeta): IRoom {
-    return new Room(this.$rootScope, this.Presence, this.Paths, this.Config, this.Message, this.MessageFactory, this.Cache, this.UserStore, this.RoomPositionManager, this.SoundEffects, this.Visibility, this.Time, this.CloudImage, this.Marquee, this.Environment, this.RoomFactory, rid, meta);
+    return new Room(this.$rootScope, this.Presence, this.Paths, this.Config, this.MessageFactory, this.Cache, this.UserStore, this.RoomPositionManager, this.SoundEffects, this.Visibility, this.Time, this.CloudImage, this.Marquee, this.Environment, this.RoomFactory, rid, meta);
   }
 
   async createAndPushRoom(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated = true, weight = 0): Promise<IRoom> {

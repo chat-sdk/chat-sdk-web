@@ -152,7 +152,6 @@ export class Room extends Entity implements IRoom {
     private Presence: IPresence,
     Paths: IPaths,
     private Config: IConfig,
-    private Message/*: IMessage*/,
     private MessageFactory: IMessageFactory,
     private Cache: ICache,
     private UserStore: IUserStore,
@@ -818,8 +817,8 @@ export class Room extends Entity implements IRoom {
     this.addMessageToEnd(message, true);
   }
 
-  getMessageFromMeta(mid: string, metaValue) {
-    return this.Message(mid, metaValue);
+  getMessageFromMeta(mid: string, metaValue: Map<string, any>) {
+    return this.MessageFactory.createMessage(mid, metaValue);
   }
 
   getMessagesNewerThan(date: Date = null, number: number = null): Array<IMessage> {
@@ -907,11 +906,11 @@ export class Room extends Entity implements IRoom {
     }
 
     return <Promise<Array<IMessage>>>query.once('value').then((snapshot: firebase.database.DataSnapshot) => {
-      const val = snapshot.val();
+      const data = snapshot.val();
       const messages = new Array<IMessage>();
-      if (val) {
-        Object.keys(val).forEach(key => {
-          messages.push(this.Message(key, val[key]));
+      if (data) {
+        Object.keys(data).forEach(key => {
+          messages.push(this.MessageFactory.createMessage(key, data[key]));
         });
       }
       return messages;
