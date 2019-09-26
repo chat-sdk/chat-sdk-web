@@ -17,13 +17,12 @@ export interface IFriendsConnector {
 
 class FriendsConnector implements IFriendsConnector {
 
-  static $inject = ['$rootScope', 'User', 'UserStore', 'Paths'];
+  static $inject = ['$rootScope', 'UserStore', 'Paths'];
 
   friends = {};
 
   constructor(
     private $rootScope: IRootScope,
-    private User: IUser,
     private UserStore: IUserStore,
     private Paths: IPaths,
   ) { }

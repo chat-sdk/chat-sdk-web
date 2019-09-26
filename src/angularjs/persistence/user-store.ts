@@ -1,10 +1,11 @@
 import * as angular from 'angular';
 
 import { IUser } from '../entities/user';
+import { IRootScope } from '../interfaces/root-scope';
 import { ILocalStorage } from './local-storage';
+import { IUserCreator } from '../services/user-creator';
 import { IBeforeUnload, IBeforeUnloadListener } from '../services/before-unload';
 import { INetworkManager } from '../network/network-manager';
-import { IRootScope } from '../interfaces/root-scope';
 
 export interface IUserStore {
   users: { [uid: string]: IUser };
@@ -17,12 +18,12 @@ class UserStore implements IUserStore, IBeforeUnloadListener {
 
   users: { [uid: string]: IUser } = {};
 
-  static $inject = ['$rootScope', 'LocalStorage', 'User', 'BeforeUnload', 'NetworkManager'];
+  static $inject = ['$rootScope', 'LocalStorage', 'UserCreator', 'BeforeUnload', 'NetworkManager'];
 
   constructor(
     private $rootScope: IRootScope,
     private LocalStorage: ILocalStorage,
-    private User/*: IUser*/,
+    private UserCreator: IUserCreator,
     private BeforeUnload: IBeforeUnload,
     private NetworkManager: INetworkManager) {
     this.BeforeUnload.addListener(this);
@@ -51,7 +52,7 @@ class UserStore implements IUserStore, IBeforeUnloadListener {
   }
 
   buildUserWithID(uid: string): IUser {
-    const user = this.User(uid);
+    const user = this.UserCreator.createUser(uid);
     this.LocalStorage.updateUserFromStore(user);
     return user;
   }

@@ -25,7 +25,6 @@ import { ITime } from './time';
 import { ICloudImage } from './cloud-image';
 import { IMarquee } from './marquee';
 import { IEnvironment } from './environment';
-import { INetworkManager } from '../network/network-manager';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IRoomCreator {
@@ -37,12 +36,10 @@ export interface IRoomCreator {
 
 class RoomCreator implements IRoomCreator {
 
-  static $inject = ['$rootScope', '$timeout', '$window', 'Presence', 'Paths', 'Config', 'Message', 'MessageFactory', 'Cache', 'UserStore', 'User', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Time', 'CloudImage', 'Marquee', 'Environment', 'RoomFactory', 'NetworkManager', 'EntityFactory'];
+  static $inject = ['$rootScope', 'Presence', 'Paths', 'Config', 'Message', 'MessageFactory', 'Cache', 'UserStore', 'RoomPositionManager', 'SoundEffects', 'Visibility', 'Time', 'CloudImage', 'Marquee', 'Environment', 'RoomFactory', 'EntityFactory'];
 
   constructor(
     private $rootScope: IRootScope,
-    private $timeout: ng.ITimeoutService,
-    private $window: ng.IWindowService,
     private Presence: IPresence,
     private Paths: IPaths,
     private Config: IConfig,
@@ -50,7 +47,6 @@ class RoomCreator implements IRoomCreator {
     private MessageFactory: IMessageFactory,
     private Cache: ICache,
     private UserStore: IUserStore,
-    private User: IUser,
     private RoomPositionManager: IRoomPositionManager,
     private SoundEffects: ISoundEffects,
     private Visibility: IVisibility,
@@ -59,12 +55,11 @@ class RoomCreator implements IRoomCreator {
     private Marquee: IMarquee,
     private Environment: IEnvironment,
     private RoomFactory: IRoomFactory,
-    private NetworkManager: INetworkManager,
     private EntityFactory: IEntityFactory,
   ) { }
 
   createRoom(rid: string, meta?: IRoomMeta): IRoom {
-    return new Room(this.$rootScope, this.$timeout, this.$window, this.Presence, this.Paths, this.Config, this.Message, this.MessageFactory, this.Cache, this.UserStore, this.User, this.RoomPositionManager, this.SoundEffects, this.Visibility, this.Time, this.CloudImage, this.Marquee, this.Environment, this.RoomFactory, this.NetworkManager, rid, meta);
+    return new Room(this.$rootScope, this.Presence, this.Paths, this.Config, this.Message, this.MessageFactory, this.Cache, this.UserStore, this.RoomPositionManager, this.SoundEffects, this.Visibility, this.Time, this.CloudImage, this.Marquee, this.Environment, this.RoomFactory, rid, meta);
   }
 
   async createAndPushRoom(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated = true, weight = 0): Promise<IRoom> {

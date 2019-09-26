@@ -1,5 +1,4 @@
-import * as angular from 'angular';
-import * as firebase from 'firebase';
+import { database } from 'firebase';
 
 import * as PathKeys from '../keys/path-keys';
 import * as Keys from '../keys/keys';
@@ -53,7 +52,7 @@ export interface IUser extends IEntity {
   updateImageURL(imageURL: string): Promise<any>;
 }
 
-class User extends Entity implements IUser {
+export class User extends Entity implements IUser {
 
   public meta = new Map<string, any>();
   public online: boolean;
@@ -63,7 +62,6 @@ class User extends Entity implements IUser {
 
   constructor(
     private $rootScope: IRootScope,
-    private $timeout: ng.ITimeoutService,
     Paths: IPaths,
     private CloudImage: ICloudImage,
     private Environment: IEnvironment,
@@ -371,17 +369,14 @@ class User extends Entity implements IUser {
     return this.image && this.image != this.Environment.defaultProfilePictureURL();
   }
 
-  addRoomUpdate(room: IRoom): {} {
-    const update = {};
+  addRoomUpdate(room: IRoom): { [path: string]: string } {
     const path = this.relativeFirebasePath(this.roomsRef().child(room.rid()).child(RoomKeys.InvitedBy));
-    update[path] = this.NetworkManager.auth.currentUserID();
-    return update;
+    return { [path]: this.NetworkManager.auth.currentUserID() };
   }
 
-  removeRoomUpdate(room: IRoom): {} {
-    const update = {};
-    update[this.relativeFirebasePath(this.roomsRef().child(room.rid()))] = null;
-    return update;
+  removeRoomUpdate(room: IRoom): { [path: string]: null } {
+    const path = this.relativeFirebasePath(this.roomsRef().child(room.rid()));
+    return { [path]: null };
   }
 
   roomsRef(): firebase.database.Reference {
@@ -438,9 +433,7 @@ class User extends Entity implements IUser {
 
   markRoomReadTime(rid: string) {
     const ref = this.Paths.userRoomsRef(this.uid()).child(rid);
-    const data = {
-      [Keys.ReadKey]: firebase.database.ServerValue.TIMESTAMP,
-    };
+    const data = { [Keys.ReadKey]: database.ServerValue.TIMESTAMP };
     return ref.update(data);
   }
 
@@ -468,11 +461,3 @@ class User extends Entity implements IUser {
   }
 
 }
-
-angular.module('myApp.services')
-  .service('User', ['$rootScope', '$timeout', 'Paths', 'CloudImage', 'Environment', 'NetworkManager', function ($rootScope: IRootScope, $timeout: ng.ITimeoutService, Paths: IPaths, CloudImage: ICloudImage, Environment: IEnvironment, NetworkManager: INetworkManager) {
-    // we can ask for more parameters if needed
-    return function messageFactory(uid: string) { // return a factory instead of a new talker
-      return new User($rootScope, $timeout, Paths, CloudImage, Environment, NetworkManager, uid);
-    }
-  }]);

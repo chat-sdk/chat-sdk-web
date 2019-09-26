@@ -18,5 +18,6 @@ import './sound-effects';
 import './state-manager';
 import './tab';
 import './time';
-import './utils';
+import './user-creator';
+import './utils'
 import './visibility';

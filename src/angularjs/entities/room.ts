@@ -11,7 +11,6 @@ import { RoomKeys } from '../keys/room-keys';
 import { RoomType } from '../keys/room-type';
 import { UserKeys } from '../keys/user-keys';
 import { UserStatus } from '../keys/user-status';
-import { INetworkManager } from '../network/network-manager';
 import { IFirebaseReference, IPaths } from '../network/paths';
 import { IPresence } from '../network/presence';
 import { ICache } from '../persistence/cache';
@@ -150,8 +149,6 @@ export class Room extends Entity implements IRoom {
 
   constructor(
     private $rootScope: IRootScope,
-    private $timeout: ng.ITimeoutService,
-    private $window: ng.IWindowService,
     private Presence: IPresence,
     Paths: IPaths,
     private Config: IConfig,
@@ -159,7 +156,6 @@ export class Room extends Entity implements IRoom {
     private MessageFactory: IMessageFactory,
     private Cache: ICache,
     private UserStore: IUserStore,
-    private User: IUser,
     private RoomPositionManager: IRoomPositionManager,
     private SoundEffects: ISoundEffects,
     private Visibility: IVisibility,
@@ -168,7 +164,6 @@ export class Room extends Entity implements IRoom {
     private Marquee: IMarquee,
     private Environment: IEnvironment,
     private RoomFactory: IRoomFactory,
-    private NetworkManager: INetworkManager,
     rid: string,
     meta?: IRoomMeta,
   ) {
