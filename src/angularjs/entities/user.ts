@@ -1,3 +1,4 @@
+import * as angular from 'angular';
 import { database } from 'firebase';
 
 import * as PathKeys from '../keys/path-keys';
@@ -52,7 +53,7 @@ export interface IUser extends IEntity {
   updateImageURL(imageURL: string): Promise<any>;
 }
 
-export class User extends Entity implements IUser {
+class User extends Entity implements IUser {
 
   public meta = new Map<string, any>();
   public online: boolean;
@@ -461,3 +462,27 @@ export class User extends Entity implements IUser {
   }
 
 }
+
+export interface IUserFactory {
+  createUser(uid: string): IUser;
+}
+
+class UserFactory implements IUserFactory {
+
+  static $inject = ['$rootScope', 'Paths', 'CloudImage', 'Environment', 'NetworkManager'];
+
+  constructor(
+    private $rootScope: IRootScope,
+    private Paths: IPaths,
+    private CloudImage: ICloudImage,
+    private Environment: IEnvironment,
+    private NetworkManager: INetworkManager,
+  ) { }
+
+  createUser(uid: string): IUser {
+    return new User(this.$rootScope, this.Paths, this.CloudImage, this.Environment, this.NetworkManager, uid);
+  }
+
+}
+
+angular.module('myApp.services').service('UserFactory', UserFactory);
