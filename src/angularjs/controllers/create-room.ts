@@ -2,7 +2,7 @@ import * as angular from 'angular';
 
 import { ShowCreateChatBox } from '../keys/defines';
 import { RoomType } from '../keys/room-type';
-import { IRoomCreator, IRoom } from '../entities/room';
+import { IRoomCreator } from '../services/room-creator';
 import { IRoomOpenQueue } from '../services/room-open-queue';
 import { Log } from '../services/log';
 import { IStringAnyObject } from '../interfaces/string-any-object';
@@ -36,17 +36,19 @@ class CreateRoomController {
     const room = await (() => {
       // Is this a public room?
       if (this.$scope.public) {
-        return this.RoomCreator.createPublicRoom(
+        return this.RoomCreator.createAndPushPublicRoom(
           this.$scope.room.name,
           this.$scope.room.description
         );
       }
       else {
-        return this.RoomCreator.createRoom(
+        return this.RoomCreator.createAndPushRoom(
+          null,
           this.$scope.room.name,
           this.$scope.room.description,
           this.$scope.room.invitesEnabled,
-          RoomType.OneToOne
+          RoomType.OneToOne,
+          true,
         );
       }
     })();

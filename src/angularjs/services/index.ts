@@ -8,6 +8,8 @@ import './log';
 import './marquee';
 import './partials';
 import './path-analyser';
+import './room-creator';
+import './room-factory';
 import './room-open-queue';
 import './room-position-manager';
 import './screen';

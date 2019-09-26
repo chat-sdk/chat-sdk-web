@@ -7,7 +7,7 @@ import { Dimensions } from '../keys/dimensions';
 import { MessageType } from '../keys/message-type';
 import { IUser } from '../entities/user';
 import { Utils } from '../services/utils';
-import { IRoom, IRoomCreator } from '../entities/room';
+import { IRoomCreator } from '../services/room-creator';
 import { Log } from '../services/log';
 import { NotificationType } from '../keys/notification-type';
 import { IRootScope } from '../interfaces/root-scope';
@@ -506,7 +506,7 @@ class MainAppController implements IMainAppController {
           return;
         }
       }
-      this.RoomCreator.createPrivateRoom([user]).then((room: IRoom) => {
+      this.RoomCreator.createAndPushPrivateRoom([user]).then((room) => {
         this.RoomOpenQueue.addRoomWithID(room.rid());
         room.open(0);
         //let room = RoomStore.getOrCreateRoomWithID(rid);

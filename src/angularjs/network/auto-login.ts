@@ -5,8 +5,8 @@ import { RoomType } from '../keys/room-type';
 import { Utils } from '../services/utils';
 import { ICredential } from './credential';
 import { IEnvironment } from '../services/environment';
-import { IRoomCreator } from '../entities/room';
 import { IRoomStore } from '../persistence/room-store';
+import { IRoomCreator } from '../services/room-creator';
 
 export interface IAutoLogin {
   autoLoginEnabled(): boolean;
@@ -101,7 +101,7 @@ class AutoLogin implements IAutoLogin {
     if (this.roomID !== '') {
       let room = this.RoomStore.getRoomWithID(this.roomID);
       if (Utils.unORNull(room)) {
-        this.RoomCreator.createRoomWithRID(this.roomID, this.roomID, '', true, RoomType.Group, true, 0);
+        this.RoomCreator.createAndPushRoom(this.roomID, this.roomID, '', true, RoomType.Group, true, 0);
       }
     }
   }

@@ -6,6 +6,7 @@ import { IUserStore } from './user-store';
 import { ArrayUtils } from '../services/array-utils';
 import { IBeforeUnload } from '../services/before-unload';
 import { IUser } from '../entities/user';
+import { IRoomCreator } from '../services/room-creator';
 
 export interface IRoomStore {
   getOrCreateRoomWithID(rid: string): IRoom;
@@ -22,11 +23,11 @@ class RoomStore implements IRoomStore {
   rooms: { [key: string]: IRoom } = {};
   roomsLoadedFromMemory = false;
 
-  static $inject = ['LocalStorage', 'Room', 'BeforeUnload', 'UserStore'];
+  static $inject = ['LocalStorage', 'RoomCreator', 'BeforeUnload', 'UserStore'];
 
   constructor(
     private LocalStorage: ILocalStorage,
-    private Room/*: IRoom*/,
+    private RoomCreator: IRoomCreator,
     private BeforeUnload: IBeforeUnload,
     private UserStore: IUserStore
   ) {
@@ -76,7 +77,7 @@ class RoomStore implements IRoomStore {
 
   buildRoomWithID(rid: string): IRoom {
 
-    let room = this.Room(rid);
+    const room = this.RoomCreator.createRoom(rid);
     room.associatedUserID = this.UserStore.currentUser().uid();
 
     //            room.height = ChatRoomHeight;

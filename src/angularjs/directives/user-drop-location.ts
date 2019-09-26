@@ -4,7 +4,7 @@ import * as $ from 'jquery';
 import { IRoomScope } from '../controllers/chat';
 import { UserStatus } from '../keys/user-status';
 import { IRootScope } from '../interfaces/root-scope';
-import { IRoomFactory } from '../entities/room';
+import { IRoomFactory } from '../services/room-factory';
 import { NotificationType } from '../keys/notification-type';
 
 export interface IUserDropLocation extends ng.IDirective {

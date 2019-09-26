@@ -1,5 +1,5 @@
 import * as angular from 'angular';
-import * as firebase from 'firebase';
+import { database } from 'firebase';
 
 import * as PathKeys from '../keys/path-keys';
 import * as Defines from '../keys/defines';
@@ -131,7 +131,7 @@ export class Entity implements IEntity {
 
   updateState(key: string): Promise<any> {
     const ref = this.stateRef(key);
-    return ref.set(firebase.database.ServerValue.TIMESTAMP);
+    return ref.set(database.ServerValue.TIMESTAMP);
   }
 
   setMeta(meta: Map<string, any> | IStringAnyObject): void {
@@ -140,7 +140,7 @@ export class Entity implements IEntity {
     } else {
       this.meta = new Map(Object.entries(meta));
     }
-  };
+  }
 
   getMetaObject(): IStringAnyObject {
     return Utils.toObject(this.meta);
@@ -185,7 +185,13 @@ export class Entity implements IEntity {
 
 }
 
-export class EntityFactory {
+export interface IEntityFactory {
+  ref(path: string, id: string): firebase.database.Reference;
+  stateRef(path: string, id: string, key: string): firebase.database.Reference;
+  updateState(path: string, id: string, key: string): ng.IPromise<any>;
+}
+
+class EntityFactory implements IEntityFactory {
 
   static $inject = ['$q', 'Paths'];
 
@@ -194,20 +200,20 @@ export class EntityFactory {
     protected Paths: IPaths
   ) { }
 
-  ref(path: string, id: string) {
+  ref(path: string, id: string): firebase.database.Reference {
     return this.Paths.firebase().child(path).child(id);
   }
 
-  stateRef(path: string, id: string, key: string) {
+  stateRef(path: string, id: string, key: string): firebase.database.Reference {
     return this.ref(path, id).child(PathKeys.UpdatedPath).child(key);
   }
 
-  updateState(path: string, id: string, key: string) {
+  updateState(path: string, id: string, key: string): ng.IPromise<any> {
 
-    const deferred = this.$q.defer();
+    const deferred = this.$q.defer<any>();
 
     const ref = this.stateRef(path, id, key);
-    ref.set(firebase.database.ServerValue.TIMESTAMP, (error) => {
+    ref.set(database.ServerValue.TIMESTAMP, (error) => {
       if (!error) {
         deferred.resolve();
       }

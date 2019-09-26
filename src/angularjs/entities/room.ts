@@ -1,38 +1,39 @@
-import * as angular from 'angular';
-import * as firebase from 'firebase';
+import { database } from 'firebase';
 
-import * as PathKeys from '../keys/path-keys';
-import * as RoomNameKeys from '../keys/room-name-keys';
-import * as Keys from '../keys/keys';
-import * as Defines from '../keys/defines';
-import { N } from '../keys/notification-keys';
-import { Entity, IEntity } from './entity';
-import { RoomKeys } from '../keys/room-keys';
-import { IMessage, IMessageFactory } from './message';
-import { RoomType } from '../keys/room-type';
+import { IRoomMeta } from '../interfaces/room-meta';
+import { IRootScope } from '../interfaces/root-scope';
+import { IStringAnyObject } from '../interfaces/string-any-object';
+import { Dimensions } from '../keys/dimensions';
 import { MessageKeys } from '../keys/message-keys';
 import { MessageType } from '../keys/message-type';
-import { Dimensions } from '../keys/dimensions';
-import { IUser } from './user';
-import { Utils } from '../services/utils';
-import { UserStatus } from '../keys/user-status';
+import { N } from '../keys/notification-keys';
+import { RoomKeys } from '../keys/room-keys';
+import { RoomType } from '../keys/room-type';
 import { UserKeys } from '../keys/user-keys';
-import { Log } from '../services/log';
+import { UserStatus } from '../keys/user-status';
+import { INetworkManager } from '../network/network-manager';
 import { IFirebaseReference, IPaths } from '../network/paths';
-import { IRootScope } from '../interfaces/root-scope';
 import { IPresence } from '../network/presence';
-import { IConfig } from '../services/config';
 import { ICache } from '../persistence/cache';
 import { IUserStore } from '../persistence/user-store';
+import { ICloudImage } from '../services/cloud-image';
+import { IConfig } from '../services/config';
+import { IEnvironment } from '../services/environment';
+import { Log } from '../services/log';
+import { IMarquee } from '../services/marquee';
+import { IRoomFactory } from '../services/room-factory';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { ISoundEffects } from '../services/sound-effects';
-import { IVisibility } from '../services/visibility';
 import { ITime } from '../services/time';
-import { ICloudImage } from '../services/cloud-image';
-import { IMarquee } from '../services/marquee';
-import { IEnvironment } from '../services/environment';
-import { INetworkManager } from '../network/network-manager';
-import { IStringAnyObject } from '../interfaces/string-any-object';
+import { Utils } from '../services/utils';
+import { IVisibility } from '../services/visibility';
+import { Entity, IEntity } from './entity';
+import { IMessage, IMessageFactory } from './message';
+import { IUser } from './user';
+import { RoomsPath, MessagesPath } from '../keys/path-keys';
+import { RoomDefaultNamePublic, RoomDefaultNameEmpty, RoomDefaultNameGroup, RoomDefaultName1To1 } from '../keys/room-name-keys';
+import { From, Creator, CreatorEntityID, SenderEntityID, MessageKey, ThreadKey, DateKey, DetailsKey, userUID } from '../keys/keys';
+import { DEBUG } from '../keys/defines';
 
 export interface IRoom extends IEntity {
   active: boolean;
@@ -93,13 +94,7 @@ export interface IRoom extends IEntity {
   updateType(): void;
 }
 
-export interface IRoomFactory {
-  addUserToRoom(user: IUser, room: IRoom, status: UserStatus): Promise<any>;
-  removeUserFromRoom(user: IUser, room: IRoom): Promise<any>;
-  updateRoomType(rid: string, type: RoomType): void;
-}
-
-class Room extends Entity implements IRoom {
+export class Room extends Entity implements IRoom {
 
   users = {};
   usersMeta = {};
@@ -175,9 +170,9 @@ class Room extends Entity implements IRoom {
     private RoomFactory: IRoomFactory,
     private NetworkManager: INetworkManager,
     rid: string,
-    meta?: Map<string, any>,
+    meta?: IRoomMeta,
   ) {
-    super(Paths, PathKeys.RoomsPath, rid);
+    super(Paths, RoomsPath, rid);
     if (meta) {
       this.setMeta(meta);
     }
@@ -271,16 +266,16 @@ class Room extends Entity implements IRoom {
     // Ben Smiley
     if (!this.name || !this.name.length) {
       if (this.isPublic()) {
-        this.name = RoomNameKeys.RoomDefaultNamePublic;
+        this.name = RoomDefaultNamePublic;
       }
       else if (this.userCount() == 1) {
-        this.name = RoomNameKeys.RoomDefaultNameEmpty;
+        this.name = RoomDefaultNameEmpty;
       }
       else if (this.getType() == RoomType.Group) {
-        this.name = RoomNameKeys.RoomDefaultNameGroup;
+        this.name = RoomDefaultNameGroup;
       }
       else {
-        this.name = RoomNameKeys.RoomDefaultName1To1;
+        this.name = RoomDefaultName1To1;
       }
     }
   }
@@ -473,15 +468,15 @@ class Room extends Entity implements IRoom {
 
     const data = {};
 
-    data[Keys.Creator] = this.UserStore.currentUser().uid();
-    data[Keys.CreatorEntityID] = data[Keys.Creator];
+    data[Creator] = this.UserStore.currentUser().uid();
+    data[CreatorEntityID] = data[Creator];
 
-    data[Keys.From] = message.metaValue(MessageKeys.UserFirebaseID);
-    data[Keys.SenderEntityID] = data[Keys.From];
+    data[From] = message.metaValue(MessageKeys.UserFirebaseID);
+    data[SenderEntityID] = data[From];
 
-    data[Keys.MessageKey] = message.text();
-    data[Keys.ThreadKey] = message.rid;
-    data[Keys.DateKey] = firebase.database.ServerValue.TIMESTAMP;
+    data[MessageKey] = message.text();
+    data[ThreadKey] = message.rid;
+    data[DateKey] = database.ServerValue.TIMESTAMP;
 
     await ref.set(data);
     message.flagged = false;
@@ -792,14 +787,14 @@ class Room extends Entity implements IRoom {
       // Add the message
       const newRef = ref.push() as IFirebaseReference;
 
-      const p1 = newRef.setWithPriority(messageMeta, firebase.database.ServerValue.TIMESTAMP);
+      const p1 = newRef.setWithPriority(messageMeta, database.ServerValue.TIMESTAMP);
 
       // The user's been active so update their status
       // with the current time
       // this.updateUserStatusTime(user);
 
       // Avoid a clash..
-      const p2 = this.updateState(PathKeys.MessagesPath);
+      const p2 = this.updateState(MessagesPath);
 
       return Promise.all([
         p1, p2
@@ -1062,7 +1057,7 @@ class Room extends Entity implements IRoom {
   pushMeta(): Promise<any> {
     const ref = this.Paths.roomMetaRef(this.rid());
     return ref.update(this.getMetaObject()).then(() => {
-      return this.updateState(Keys.DetailsKey);
+      return this.updateState(DetailsKey);
     });
   }
 
@@ -1168,7 +1163,7 @@ class Room extends Entity implements IRoom {
    * room meta data
    */
   metaOn() {
-    return this.pathOn(Keys.DetailsKey, (val) => {
+    return this.pathOn(DetailsKey, (val) => {
       if (val) {
         this.setMeta(val);
         this.update();
@@ -1177,17 +1172,17 @@ class Room extends Entity implements IRoom {
   }
 
   metaOff() {
-    this.pathOff(Keys.DetailsKey);
+    this.pathOff(DetailsKey);
   }
 
   addUserMeta(meta) {
     // We only display users who have been active
     // recently
     // if (this.RoomFactory.userIsActiveWithInfo(meta)) {
-    this.usersMeta[meta[Keys.userUID]] = meta;
+    this.usersMeta[meta[userUID]] = meta;
 
     // Add the user object
-    let user = this.UserStore.getOrCreateUserWithID(meta[Keys.userUID]);
+    let user = this.UserStore.getOrCreateUserWithID(meta[userUID]);
     this.users[user.uid()] = user;
 
     this.update(false);
@@ -1195,8 +1190,8 @@ class Room extends Entity implements IRoom {
   }
 
   removeUserMeta(meta) {
-    delete this.usersMeta[meta[Keys.userUID]];
-    delete this.users[meta[Keys.userUID]];
+    delete this.usersMeta[meta[userUID]];
+    delete this.users[meta[userUID]];
     this.update(false);
   }
 
@@ -1309,8 +1304,8 @@ class Room extends Entity implements IRoom {
         if (this.Visibility.getIsHidden()) {
           // Only make a sound for messages that were received less than
           // 30 seconds ago
-          if (Defines.DEBUG) console.log('Now: ' + new Date().getTime() + ', Date now: ' + this.Time.now() + ', Message: ' + snapshot.val()[MessageKeys.Date]);
-          if (Defines.DEBUG) console.log('Diff: ' + Math.abs(this.Time.now() - snapshot.val().time));
+          if (DEBUG) console.log('Now: ' + new Date().getTime() + ', Date now: ' + this.Time.now() + ', Message: ' + snapshot.val()[MessageKeys.Date]);
+          if (DEBUG) console.log('Diff: ' + Math.abs(this.Time.now() - snapshot.val().time));
           if (Math.abs(this.Time.now() - snapshot.val()[MessageKeys.Date]) / 1000 < 30) {
             this.SoundEffects.messageReceived();
           }
@@ -1440,7 +1435,7 @@ class Room extends Entity implements IRoom {
     let data = null;
     if (this.getType() == RoomType.OneToOne) {
       data = {};
-      data[RoomKeys.Deleted] = firebase.database.ServerValue.TIMESTAMP;
+      data[RoomKeys.Deleted] = database.ServerValue.TIMESTAMP;
       data[RoomKeys.Name] = user.getName();
     }
     update[this.relativeFirebasePath(this.usersRef().child(user.uid()))] = data;
@@ -1451,253 +1446,4 @@ class Room extends Entity implements IRoom {
     return this.Paths.roomUsersRef(this.rid());
   }
 
-
 }
-
-class RoomFactory implements IRoomFactory {
-
-  static $inject = [
-    '$rootScope',
-    'Time',
-    'UserStore',
-    'EntityFactory',
-    'Paths',
-  ];
-
-  constructor(
-    private $rootScope,
-    private Time,
-    private UserStore,
-    private EntityFactory,
-    private Paths) { }
-
-  // **********************
-  // *** Static methods ***
-  // **********************
-
-
-
-  // Group chats should be handled separately to
-  // private chats
-  updateRoomType(rid: string, type: RoomType) {
-
-    const ref = this.Paths.roomMetaRef(rid);
-    const data = {};
-    data[Keys.TypeKey] = type;
-
-    return ref.update(data);
-  }
-
-  removeUserFromRoom(user: IUser, room: IRoom): Promise<any> {
-    const updates = { ...room.removeUserUpdate(user), ...user.removeRoomUpdate(room) };
-    return this.Paths.firebase().update(updates);
-  }
-
-  addUserToRoom(user: IUser, room: IRoom, status: UserStatus): Promise<any> {
-
-    const updates = { ...user.addRoomUpdate(room), ...room.addUserUpdate(user, status) };
-
-    return this.Paths.firebase().update(updates).then(() => {
-      if (room.getType() == RoomType.Public) {
-        user.removeOnDisconnect(PathKeys.RoomsPath + '/' + room.rid());
-        room.removeOnDisconnect(PathKeys.UsersPath + '/' + user.uid())
-      }
-      return Promise.all([
-        room.updateState(PathKeys.UsersPath),
-        user.updateState(PathKeys.RoomsPath)
-      ]);
-    }).catch((error) => {
-      console.log(error);
-    });
-  }
-
-  roomMeta(rid, name, description, userCreated, invitesEnabled, type, weight) {
-
-    const m = {};
-    // TODO: Is this used?
-    // m[RoomKeys.RID] = rid ? rid : null;
-    m[RoomKeys.Name] = name ? name : null;
-    m[RoomKeys.InvitesEnabled] = !Utils.unORNull(invitesEnabled) ? invitesEnabled : true;
-    m[RoomKeys.Description] = description ? description : null;
-    m[RoomKeys.UserCreated] = !Utils.unORNull(userCreated) ? userCreated : true;
-    m[RoomKeys.Created] = firebase.database.ServerValue.TIMESTAMP;
-    m[RoomKeys.Weight] = weight ? weight : 0;
-
-    m[RoomKeys.Type] = type;
-    m[RoomKeys.Type_v4] = type; // Deprecated
-
-    return m;
-  }
-
-  // userIsActiveWithInfo(info) {
-  //     // TODO: For the time being assume that users that
-  //     // don't have this information are active
-  //     if (info && info.status && info.time) {
-  //         if (info.status != UserStatus.Closed) {
-  //             return this.Time.secondsSince(info.time) < 60 * 60 * 24;
-  //         }
-  //     }
-  //     return true;
-  // };
-
-}
-
-export interface IRoomCreator {
-  createPrivateRoom(users: [IUser]): Promise<IRoom>;
-  createPublicRoom(name: string, description: string, weight?): Promise<IRoom>
-  createRoom(name: string, description: string, invitesEnabled: boolean, type: RoomType, weight?): Promise<IRoom>
-  createRoomWithRID(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated: boolean, weight: number): Promise<IRoom>
-}
-
-class RoomCreator implements IRoomCreator {
-
-  static $inject = ['Room', 'UserStore', 'Paths', 'RoomFactory', 'EntityFactory'];
-
-  constructor(private Room, private UserStore, private Paths, private RoomFactory, private EntityFactory) {
-
-  }
-
-  createRoom(name: string, description: string, invitesEnabled: boolean, type: RoomType, weight = 0): Promise<IRoom> {
-    return this.createRoomWithRID(null, name, description, invitesEnabled, type, true, weight);
-  }
-
-  createRoomWithRID(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated: boolean, weight: number): Promise<IRoom> {
-
-    if (Utils.unORNull(rid)) {
-      rid = this.Paths.roomsRef().push().key;
-    }
-    const roomMeta = this.RoomFactory.roomMeta(rid, name, description, true, invitesEnabled, type, weight);
-
-    const room = this.Room(rid, roomMeta);
-
-    roomMeta[RoomKeys.Creator] = this.UserStore.currentUser().uid();
-    roomMeta[RoomKeys.CreatorEntityID] = roomMeta[RoomKeys.Creator];
-
-    const roomMetaRef = this.Paths.roomMetaRef(rid);
-
-    // Add the room to Firebase
-    return roomMetaRef.set(roomMeta).then(() => {
-      return this.RoomFactory.addUserToRoom(this.UserStore.currentUser(), room, UserStatus.Owner).then(() => {
-        if (type == RoomType.Public) {
-          const ref = this.Paths.publicRoomRef(rid);
-
-          const data = {};
-
-          data[RoomKeys.Created] = firebase.database.ServerValue.TIMESTAMP;
-          data[RoomKeys.RID] = rid;
-          data[RoomKeys.UserCreated] = true;
-
-          return ref.set(data);
-        }
-      }).then(() => {
-        const _ = this.EntityFactory.updateState(PathKeys.RoomsPath, rid, Keys.DetailsKey);
-        return room;
-      });
-    });
-  }
-
-  createPublicRoom(name: string, description: string, weight = 0): Promise<IRoom> {
-    return this.createRoom(name, description, true, RoomType.Public, weight);
-  }
-
-  createPrivateRoom(users: [IUser]): Promise<IRoom> {
-
-    // Since we're calling create room we will be added automatically
-    return this.createRoom(
-      null,
-      null,
-      true,
-      users.length == 1 ? RoomType.OneToOne : RoomType.Group
-    ).then((room: IRoom) => {
-
-      let promises = [];
-
-      for (let i = 0; i < users.length; i++) {
-        promises.push(
-          this.RoomFactory.addUserToRoom(users[i], room, UserStatus.Member)
-        );
-      }
-
-      return Promise.all(promises).then(() => {
-        return room;
-      });
-    });
-  }
-
-}
-
-angular.module('myApp.services')
-  .service('Room', [
-    '$rootScope',
-    '$timeout',
-    '$window',
-    'Presence',
-    'Paths',
-    'Config',
-    'Message',
-    'MessageFactory',
-    'Cache',
-    'UserStore',
-    'User',
-    'RoomPositionManager',
-    'SoundEffects',
-    'Visibility',
-    'Time',
-    'CloudImage',
-    'Marquee',
-    'Environment',
-    'RoomFactory',
-    'NetworkManager'
-    , function (
-      $rootScope,
-      $timeout,
-      $window,
-      Presence,
-      Paths,
-      Config,
-      Message,
-      MessageFactory,
-      Cache,
-      UserStore,
-      User,
-      RoomPositionManager,
-      SoundEffects,
-      Visibility,
-      Time,
-      CloudImage,
-      Marquee,
-      Environment,
-      RoomFactory,
-      NetworkManager
-    ) {
-      // we can ask for more parameters if needed
-      return function roomFactory(rid: string, meta?: Map<string, any>) { // return a factory instead of a new talker
-        return new Room(
-          $rootScope,
-          $timeout,
-          $window,
-          Presence,
-          Paths,
-          Config,
-          Message,
-          MessageFactory,
-          Cache,
-          UserStore,
-          User,
-          RoomPositionManager,
-          SoundEffects,
-          Visibility,
-          Time,
-          CloudImage,
-          Marquee,
-          Environment,
-          RoomFactory,
-          NetworkManager,
-          rid,
-          meta,
-        );
-      }
-    }])
-  .service('RoomFactory', RoomFactory)
-  .service('RoomCreator', RoomCreator);
-
