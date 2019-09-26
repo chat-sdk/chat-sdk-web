@@ -1,23 +1,23 @@
-<div data-ng-hide="moreChatsMinimized" data-ng-style="{'height': boxHeight + 'px'}"  data-ng-controller="RoomListBoxController">
-    <div class="cc-room-list-bar" data-ng-click="toggle()">
+<div data-ng-hide="moreChatsMinimized" data-ng-style="{'height': ctrl.boxHeight + 'px'}"  ng-controller="RoomListBoxController as ctrl">
+    <div class="cc-room-list-bar" data-ng-click="ctrl.toggle()">
         <div class="cc-base-text">
             <div class="cc-inner">
                 <div class="uk-float-left">More Chats</div>
             </div>
         </div>
-        <a data-ng-show="moreChatsMinimized">
+        <a data-ng-show="ctlr.moreChatsMinimized">
             <img class="uk-float-left cc-image-30" data-ng-src="{{ ::img_30_maximize }}" data-disable-drag/>
         </a>
     </div>
-    <div class="cc-box cc-room-list-box cc-shadow" data-ng-style="{'width' : boxWidth + 'px'}" data-ng-hide="hideRoomList">
-        <div class="cc-box-header" data-ng-style="{background: config.headerColor}">More Chats
-            <a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="minimize()">
+    <div class="cc-box cc-room-list-box cc-shadow" data-ng-style="{'width' : ctrl.boxWidth + 'px'}" data-ng-hide="ctrl.hideRoomList">
+        <div class="cc-box-header" data-ng-style="{background: ctrl.config.headerColor}">More Chats
+            <a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="ctrl.minimize()">
                 <img  data-ng-src="{{ ::img_30_minimize }}" />
             </a>
         </div>
         <!-- This 30 relates to the header height -->
-        <div class="cc-hide-overflow-x" data-ng-style="{'height': (boxHeight - 30) + 'px'}" >
-            <div data-ng-include src=" partialsURL + 'room-list.html'"></div>
+        <div class="cc-hide-overflow-x" data-ng-style="{'height': (ctrl.boxHeight - 30) + 'px'}" >
+            <div data-ng-include src="partialsURL + 'room-list.html'"></div>
         </div>
     </div>
 </div>

@@ -10,21 +10,6 @@ import { ICache } from '../persistence/cache';
 import { ILocalStorage } from '../persistence/local-storage';
 import { IRoomPositionManager } from '../services/room-position-manager';
 
-export interface IRoomListScope extends ng.IScope {
-  boxHeight: number;
-  boxWidth: number;
-  canCloseRoom: boolean;
-  hideRoomList: boolean;
-  moreChatsMinimized: boolean;
-  roomBackgroundColor: string;
-  rooms: IRoom[];
-  minimize(): void;
-  roomClicked(room: IRoom): void;
-  setMoreBoxMinimized(minimized: boolean): void;
-  toggle(): void;
-  updateList(): void;
-}
-
 export interface IRoomListBoxController {
 
 }
@@ -33,8 +18,16 @@ class RoomListBoxController implements IRoomListBoxController {
 
   static $inject = ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'LocalStorage', 'RoomPositionManager'];
 
+  rooms = Array<IRoom>();
+  boxHeight = Dimensions.RoomListBoxHeight;
+  boxWidth = Dimensions.RoomListBoxWidth;
+  canCloseRoom = true;
+  moreChatsMinimized = true;
+  roomBackgroundColor = '#FFF';
+  hideRoomList = true;
+
   constructor(
-    private $scope: IRoomListScope,
+    private $scope: ng.IScope,
     private $rootScope: IRootScope,
     private $timeout: ng.ITimeoutService,
     private Auth: IAuth,
@@ -42,21 +35,6 @@ class RoomListBoxController implements IRoomListBoxController {
     private LocalStorage: ILocalStorage,
     private RoomPositionManager: IRoomPositionManager,
   ) {
-    // $scope properties
-    $scope.boxHeight = Dimensions.RoomListBoxHeight;
-    $scope.boxWidth = Dimensions.RoomListBoxWidth;
-    $scope.canCloseRoom = true;
-    $scope.moreChatsMinimized = true;
-    $scope.roomBackgroundColor = '#FFF';
-    $scope.rooms = [];
-
-    // $scope methods
-    $scope.updateList = this.updateList.bind(this);
-    $scope.roomClicked = this.roomClicked.bind(this);
-    $scope.minimize = this.minimize.bind(this);
-    $scope.toggle = this.toggle.bind(this);
-    $scope.setMoreBoxMinimized = this.setMoreBoxMinimized.bind(this);
-
     // Is the more box minimized?
     this.setMoreBoxMinimized(LocalStorage.getProperty(LocalStorage.moreMinimizedKey));
 
@@ -69,10 +47,10 @@ class RoomListBoxController implements IRoomListBoxController {
   updateList() {
     Log.notification(N.UpdateRoomActiveStatus, 'RoomListBoxController');
 
-    this.$scope.rooms = this.Cache.inactiveRooms();
+    this.rooms = this.Cache.inactiveRooms();
 
     // Sort rooms by the number of unread messages
-    this.$scope.rooms.sort((a, b) => {
+    this.rooms.sort((a, b) => {
       // First order by number of unread messages
       // Badge can be null
       let ab = a.badge ? a.badge : 0;
@@ -87,7 +65,7 @@ class RoomListBoxController implements IRoomListBoxController {
       }
     });
 
-    this.$scope.moreChatsMinimized = this.$scope.rooms.length == 0;
+    this.moreChatsMinimized = this.rooms.length == 0;
 
     this.$timeout(() => {
       this.$scope.$digest();
@@ -142,11 +120,11 @@ class RoomListBoxController implements IRoomListBoxController {
   }
 
   toggle() {
-    this.setMoreBoxMinimized(!this.$scope.hideRoomList);
+    this.setMoreBoxMinimized(!this.hideRoomList);
   }
 
   setMoreBoxMinimized(minimized: boolean) {
-    this.$scope.hideRoomList = minimized;
+    this.hideRoomList = minimized;
     this.LocalStorage.setProperty(this.LocalStorage.moreMinimizedKey, minimized);
   }
 
