@@ -11,6 +11,5 @@ import './main-box';
 import './notification';
 import './online-users-list';
 import './profile-settings';
-import './room-list-box';
 import './user-list';
 import './user-profile-box';

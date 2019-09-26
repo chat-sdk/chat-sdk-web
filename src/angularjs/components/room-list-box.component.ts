@@ -9,14 +9,11 @@ import { IAuth } from '../network/auth';
 import { ICache } from '../persistence/cache';
 import { ILocalStorage } from '../persistence/local-storage';
 import { IRoomPositionManager } from '../services/room-position-manager';
+import { IEnvironment } from '../services/environment';
 
-export interface IRoomListBoxController {
+class RoomListBoxController {
 
-}
-
-class RoomListBoxController implements IRoomListBoxController {
-
-  static $inject = ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'LocalStorage', 'RoomPositionManager'];
+  static $inject = ['$scope', '$rootScope', '$timeout', 'Auth', 'Cache', 'Environment', 'LocalStorage', 'RoomPositionManager'];
 
   rooms = Array<IRoom>();
   boxHeight = Dimensions.RoomListBoxHeight;
@@ -25,6 +22,8 @@ class RoomListBoxController implements IRoomListBoxController {
   moreChatsMinimized = true;
   roomBackgroundColor = '#FFF';
   hideRoomList = true;
+  img_30_maximize: string;
+  img_30_minimize: string;
 
   constructor(
     private $scope: ng.IScope,
@@ -32,9 +31,13 @@ class RoomListBoxController implements IRoomListBoxController {
     private $timeout: ng.ITimeoutService,
     private Auth: IAuth,
     private Cache: ICache,
+    private Environment: IEnvironment,
     private LocalStorage: ILocalStorage,
     private RoomPositionManager: IRoomPositionManager,
   ) {
+    this.img_30_maximize = this.Environment.imagesURL() + 'cc-30-maximize.png';
+    this.img_30_minimize = this.Environment.imagesURL() + 'cc-30-minimize.png';
+
     // Is the more box minimized?
     this.setMoreBoxMinimized(LocalStorage.getProperty(LocalStorage.moreMinimizedKey));
 
@@ -130,4 +133,8 @@ class RoomListBoxController implements IRoomListBoxController {
 
 }
 
-angular.module('myApp.controllers').controller('RoomListBoxController', RoomListBoxController);
+angular.module('myApp.components').component('roomListBox', {
+  templateUrl: '/assets/partials/room-list-box.html',
+  controller: RoomListBoxController,
+  controllerAs: 'ctrl',
+});
