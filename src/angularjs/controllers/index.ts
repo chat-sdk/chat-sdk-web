@@ -1,14 +1,13 @@
-import './main-app';
-import './chat';
 import './chat-bar';
 import './chat-embed';
-import './chat-settings';
+import './chat';
 import './create-room';
 import './draggable-user';
 import './emoji';
 import './error-box';
 import './inbox-rooms-list';
 import './login';
+import './main-app';
 import './main-box';
 import './notification';
 import './online-users-list';

@@ -4,6 +4,7 @@ import './filters';
 import './services';
 import './directives';
 import './controllers';
+import './components';
 
 import '../controllers/index';
 import '../services/index';
@@ -13,6 +14,7 @@ import '../entities/index';
 import '../network/index';
 import '../connectors/index';
 import '../persistence/index';
+import '../components/index';
 
 // Declare app level module which depends on filters, and services
 export let myApp = angular.module('myApp',
@@ -21,6 +23,7 @@ export let myApp = angular.module('myApp',
     'myApp.services',
     'myApp.directives',
     'myApp.controllers',
+    'myApp.components',
     require('angular-sanitize'),
   ]
 ).config(['$sceDelegateProvider', '$provide', ($sceDelegateProvider, $provide) => {
