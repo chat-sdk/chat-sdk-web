@@ -226,11 +226,4 @@ class EntityFactory implements IEntityFactory {
   }
 }
 
-angular.module('myApp.services')
-  .service('Entity', ['Paths', function (Paths: IPaths) {
-    // we can ask for more parameters if needed
-    return function entityFactory(path: string, id: string) { // return a factory instead of a new talker
-      return new Entity(Paths, path, id);
-    }
-  }])
-  .service('EntityFactory', EntityFactory);
+angular.module('myApp.services').service('EntityFactory', EntityFactory);
