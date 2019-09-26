@@ -8,33 +8,23 @@ import { IRoom } from '../entities/room';
 import { ISearch } from '../services/search';
 import { RoomsTab } from '../keys/tab-keys';
 
-export interface IPublicRoomsListScope extends ng.IScope {
-  allRooms: IRoom[];
-}
-
-export interface IPublicRoomsListController {
-
-}
-
-class PublicRoomsListController implements IPublicRoomsListController {
+class PublicRoomsListController {
 
   static $inject = ['$scope', '$timeout', 'Search'];
 
+  allRooms = Array<IRoom>();
   rooms = Array<IRoom>();
 
   constructor(
-    private $scope: IPublicRoomsListScope,
+    private $scope: ng.IScope,
     private $timeout: ng.ITimeoutService,
     private Search: ISearch,
   ) {
-    // $scope propeties
-    $scope.allRooms = [];
-
     $scope.$on(N.PublicRoomAdded, (event, room) => {
       Log.notification(N.PublicRoomAdded, 'PublicRoomsListController');
       // Add the room and sort the list
-      if (!ArrayUtils.contains($scope.allRooms, room)) {
-        $scope.allRooms.push(room);
+      if (!ArrayUtils.contains(this.allRooms, room)) {
+        this.allRooms.push(room);
       }
       this.updateList();
 
@@ -43,7 +33,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
     $scope.$on(N.PublicRoomRemoved, (event, room) => {
       Log.notification(N.PublicRoomRemoved, 'PublicRoomsListController');
 
-      ArrayUtils.remove($scope.allRooms, room);
+      ArrayUtils.remove(this.allRooms, room);
       this.updateList();
     });
 
@@ -52,7 +42,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     $scope.$on(N.Logout, this.updateList.bind(this));
 
-    Search.queryForTabObservable('rooms').subscribe(query => {
+    Search.queryForTabObservable(RoomsTab).subscribe(query => {
       this.updateList();
     });
   }
@@ -60,7 +50,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
   updateList() {
     Log.notification(N.Logout, 'PublicRoomsListController');
 
-    this.$scope.allRooms.sort((a, b) => {
+    this.allRooms.sort((a, b) => {
 
       const au = Utils.unORNull(a.getMetaObject().userCreated) ? false : a.getMetaObject().userCreated;
       const bu = Utils.unORNull(b.getMetaObject().userCreated) ? false : b.getMetaObject().userCreated;
@@ -93,7 +83,7 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
     });
 
-    this.rooms = ArrayUtils.filterByKey(this.$scope.allRooms, this.Search.getQueryForActiveTab(), (room) => {
+    this.rooms = ArrayUtils.filterByKey(this.allRooms, this.Search.getQueryForActiveTab(), (room) => {
       return room.name;
     });
 
@@ -119,4 +109,8 @@ class PublicRoomsListController implements IPublicRoomsListController {
 
 }
 
-angular.module('myApp.controllers').controller('PublicRoomsListController', PublicRoomsListController);
+angular.module('myApp.components').component('publicRoomsList', {
+  templateUrl: '/assets/partials/room-list.html',
+  controller: PublicRoomsListController,
+  controllerAs: 'ctrl',
+});
