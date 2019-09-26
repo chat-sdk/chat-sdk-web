@@ -61,8 +61,8 @@
         </div>
 
         <!--Add the list of public chat rooms-->
-        <div data-ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x" ng-controller="InboxRoomsListController as ctrl">
-            <div data-ng-include src="partialsURL + 'room-list.html'"></div>
+        <div data-ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x">
+            <inbox-rooms-list></inbox-rooms-list>
         </div>
 
         <!--Add the table of users / chat rooms-->

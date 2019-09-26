@@ -8,11 +8,7 @@ import { IRoom } from '../entities/room';
 import { ISearch } from '../services/search';
 import { InboxTab } from '../keys/tab-keys';
 
-export interface IInboxRoomsListController {
-
-}
-
-class InboxRoomsListController implements IInboxRoomsListController {
+class InboxRoomsListController {
 
   static $inject = ['$scope', '$timeout', 'RoomStore', 'Search'];
 
@@ -79,4 +75,8 @@ class InboxRoomsListController implements IInboxRoomsListController {
 
 }
 
-angular.module('myApp.controllers').controller('InboxRoomsListController', InboxRoomsListController);
+angular.module('myApp.components').component('inboxRoomsList', {
+  templateUrl: '/assets/partials/room-list.html',
+  controller: InboxRoomsListController,
+  controllerAs: 'ctrl',
+});

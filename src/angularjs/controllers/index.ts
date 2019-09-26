@@ -5,7 +5,6 @@ import './create-room';
 import './draggable-user';
 import './emoji';
 import './error-box';
-import './inbox-rooms-list';
 import './login';
 import './main-app';
 import './main-box';
