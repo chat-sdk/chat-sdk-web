@@ -1,28 +1,30 @@
 <table class="uk-table">
-    <!--<span class="cc-section-header">{{ sectionHeader }}</span>-->
-    <tr data-ng-repeat="(id, aUser) in users" data-ng-mouseover="showProfileBox(aUser.uid())" data-ng-mouseleave="showProfileBox(null)">
-        <td style="position: relative"
-            class="cc-row"
-            data-ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'"
-            data-draggable-user="user"
-            data-ng-click="userClicked(aUser)">
+  <!--<span class="cc-section-header">{{ sectionHeader }}</span>-->
+  <tr data-ng-repeat="(id, aUser) in ctrl.users" data-ng-mouseover="ctrl.showProfileBox(aUser.uid())"
+    data-ng-mouseleave="ctrl.showProfileBox(null)">
+    <td style="position: relative" class="cc-row"
+      data-ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'"
+      data-draggable-user="user" data-ng-click="ctrl.userClicked(aUser)">
 
-            <img class="cc-thumbnail-30 cc-user-image uk-float-left" data-ng-src="{{ aUser.getThumbnail() }}" title="{{ aUser.uid() }}"/>
-            <img class="uk-float-right cc-move" data-ng-src="{{ img_25_drag }}">
+      <img class="cc-thumbnail-30 cc-user-image uk-float-left" data-ng-src="{{ aUser.getThumbnail() }}"
+        title="{{ aUser.uid() }}" />
+      <img class="uk-float-right cc-move" data-ng-src="{{ ctrl.img_25_drag }}">
 
-            <div class="uk-float-left cc-user-name cc-user-name" data-ng-class="aUser.getStatus() ? 'cc-show-status' : ''" >
-                <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.getName() }}</div>
-                <div class="f16 uk-float-left cc-flag" data-ng-show="aUser.meta.country" >
-                    <span class="flag {{ aUser.getCountryCode() | lowercase }}"></span>
-                </div>
-            </div>
-            <button class="uk-button uk-button-mini uk-button-danger uk-float-right" data-ng-show="aUser.blocked" >Unblock</button>
+      <div class="uk-float-left cc-user-name cc-user-name" data-ng-class="aUser.getStatus() ? 'cc-show-status' : ''">
+        <div class="uk-float-left cc-inner cc-pointer cc-ellipsis">{{ aUser.getName() }}</div>
+        <div class="f16 uk-float-left cc-flag" data-ng-show="aUser.meta.country">
+          <span class="flag {{ aUser.getCountryCode() | lowercase }}"></span>
+        </div>
+      </div>
+      <button class="uk-button uk-button-mini uk-button-danger uk-float-right"
+        data-ng-show="aUser.blocked">Unblock</button>
 
-            <img class="uk-float-right cc-right-margin-5"  data-ng-src="{{ img_20_friend }}" data-ng-show="aUser.friend && !aUser.blocked" />
+      <img class="uk-float-right cc-right-margin-5" data-ng-src="{{ ctrl.img_20_friend }}"
+        data-ng-show="aUser.friend && !aUser.blocked" />
 
-            <div data-ng-show="aUser.getStatus()" class="uk-float-left cc-user-subtitle cc-ellipsis cc-pointer">
-                {{ aUser.getStatus() }}
-            </div>
-        </td>
-    </tr>
+      <div data-ng-show="aUser.getStatus()" class="uk-float-left cc-user-subtitle cc-ellipsis cc-pointer">
+        {{ aUser.getStatus() }}
+      </div>
+    </td>
+  </tr>
 </table>

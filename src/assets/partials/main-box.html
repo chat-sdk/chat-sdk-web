@@ -53,7 +53,7 @@
 
     <div class="uk-overflow-container" data-ng-style="{'height': (mainBoxHeight - 135) + 'px'}">
         <!--Add the table of users / chat rooms-->
-        <div data-ng-include data-ng-controller="OnlineUsersListController" data-ng-show="activeTab == 'users'" src=" partialsURL + 'user-list.html'"></div>
+        <online-users-list data-ng-show="activeTab == 'users'"></online-users-list>
 
         <!--Add the list of public chat rooms-->
         <div data-ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x">
@@ -66,7 +66,7 @@
         </div>
 
         <!--Add the table of users / chat rooms-->
-        <div data-ng-include data-ng-show="activeTab == 'friends'" data-ng-controller="UserListController" src=" partialsURL + 'user-list.html'"></div>
+        <friends-list rooms="rooms" data-ng-show="activeTab == 'friends'"></friends-list>
     </div>
 
     <div id="cc-user-details">

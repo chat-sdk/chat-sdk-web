@@ -34,7 +34,7 @@
         </div>
 
         <div data-ng-show="activeTab == 'users' || activeTab == 'settings'" class="uk-overflow-container" data-ng-style="{'height': (room.height - 30 - 30) + 'px'}" data-stop-shake>
-            <div data-ng-include data-ng-controller="UserListController" data-ng-show="activeTab == 'users'" src="partialsURL + 'user-list.html'"></div>
+            <friends-list rooms="rooms" data-ng-show="activeTab == 'users'"></friends-list>
             <chat-settings ng-show="activeTab == 'settings'" room="room"></chat-settings>
         </div>
 

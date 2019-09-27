@@ -9,7 +9,5 @@ import './login';
 import './main-app';
 import './main-box';
 import './notification';
-import './online-users-list';
 import './profile-settings';
-import './user-list';
 import './user-profile-box';
