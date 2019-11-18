@@ -39,7 +39,7 @@ class ChatBarController implements IChatBarController {
 
     this.$timeout(() => {
       this.$scope.$digest();
-    })
+    });
   }
 
 }

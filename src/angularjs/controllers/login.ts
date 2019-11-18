@@ -125,10 +125,12 @@ class LoginController implements LoginController {
     try {
       const authUser = await this.Auth.authenticate(credential);
       this.handleAuthData(authUser);
-    } catch (error) {
+    }
+    catch (error) {
       if (!Utils.unORNull(error)) {
         this.handleLoginError(error);
-      } else {
+      }
+      else {
         this.$scope.showLoginBox(this.getLoginMode());
       }
     }
@@ -136,7 +138,7 @@ class LoginController implements LoginController {
 
   getLoginMode(): LoginMode {
     let loginMode = LoginMode.Simple;
-    let lastVisited = this.LocalStorage.getLastVisited();
+    const lastVisited = this.LocalStorage.getLastVisited();
 
     // We don't want to load the messenger straightaway to save bandwidth.
     // This will check when they last accessed the chat. If it was less than the timeout time ago,
@@ -210,7 +212,8 @@ class LoginController implements LoginController {
     try {
       const authData = await this.Auth.authenticate(credential);
       this.handleAuthData(authData);
-    } catch (error) {
+    }
+    catch (error) {
       this.$scope.hideNotification();
       this.handleLoginError(error);
 
@@ -225,7 +228,8 @@ class LoginController implements LoginController {
       await this.Auth.resetPasswordByEmail(email);
       this.$scope.showNotification(NotificationType.Alert, 'Email sent', 'Instructions have been sent. Please check your Junk folder!', 'ok');
       this.setError(null);
-    } catch (error) {
+    }
+    catch (error) {
       this.handleLoginError(error);
     }
   }
@@ -251,7 +255,8 @@ class LoginController implements LoginController {
       this.$scope.email = email;
       this.$scope.password = password;
       this.loginWithPassword();
-    } catch (error) {
+    }
+    catch (error) {
       this.handleLoginError(error);
     }
   }
@@ -302,29 +307,29 @@ class LoginController implements LoginController {
 
     let message = error.message || 'An unknown error occurred';
 
-    if (error.code == 'AUTHENTICATION_DISABLED') {
+    if (error.code === 'AUTHENTICATION_DISABLED') {
       message = 'This authentication method is currently disabled.';
     }
-    if (error.code == 'EMAIL_TAKEN') {
+    if (error.code === 'EMAIL_TAKEN') {
       message = 'Email address unavailable.';
     }
-    if (error.code == 'INVALID_EMAIL') {
+    if (error.code === 'INVALID_EMAIL') {
       message = 'Please enter a valid email.';
     }
-    if (error.code == 'INVALID_ORIGIN') {
+    if (error.code === 'INVALID_ORIGIN') {
       message = 'Login is not available from this domain.';
     }
-    if (error.code == 'INVALID_PASSWORD') {
+    if (error.code === 'INVALID_PASSWORD') {
       message = 'Please enter a valid password.';
     }
-    if (error.code == 'INVALID_USER') {
+    if (error.code === 'INVALID_USER') {
       message = 'Invalid email or password.';
     }
-    if (error.code == 'INVALID_USER') {
+    if (error.code === 'INVALID_USER') {
       message = 'Invalid email or password.';
     }
-    if (error.code == 'ALREADY_AUTHENTICATING') {
-      message = 'Already Authenticating'
+    if (error.code === 'ALREADY_AUTHENTICATING') {
+      message = 'Already Authenticating';
     }
 
     this.setError(message);

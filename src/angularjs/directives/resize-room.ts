@@ -8,6 +8,7 @@ import { Utils } from '../services/utils';
 import { IScreen } from '../services/screen';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { IRootScope } from '../interfaces/root-scope';
+import { IRoom } from '../entities/room';
 
 export interface IResizeRoom extends ng.IDirective {
 
@@ -64,13 +65,13 @@ class ResizeRoom implements IResizeRoom {
         this.RoomPositionManager.setDirty();
 
         // Update the rooms to the left
-        let rooms = this.RoomPositionManager.getRooms();
+        const rooms = this.RoomPositionManager.getRooms();
 
         // Only loop from this room's position onwards
-        let room;
+        let room: IRoom;
         for (let i = rooms.indexOf(scope.room); i < rooms.length; i++) {
           room = rooms[i];
-          if (room != scope.room) {
+          if (room !== scope.room) {
             room.setOffset(this.RoomPositionManager.offsetForSlot(i));
             this.$rootScope.$broadcast(N.RoomPositionUpdated, room);
             this.RoomPositionManager.updateAllRoomActiveStatus();
@@ -81,7 +82,7 @@ class ResizeRoom implements IResizeRoom {
       }
     });
 
-    $(document).mouseup((e) => {
+    $(document).mouseup((e: MouseEvent) => {
       if (scope.resizing) {
         scope.resizing = false;
       }

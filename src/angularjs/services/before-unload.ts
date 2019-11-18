@@ -30,7 +30,8 @@ class BeforeUnload implements IBeforeUnload {
 
     if ($window.addEventListener) {
       $window.addEventListener('beforeunload', beforeUnloadHandler);
-    } else {
+    }
+    else {
       $window.onbeforeunload = beforeUnloadHandler;
     }
   }

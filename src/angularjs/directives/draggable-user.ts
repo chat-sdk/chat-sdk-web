@@ -36,7 +36,7 @@ export class UserDragAction {
   }
 
   distanceMoved(x: number, y: number): number {
-    return Math.sqrt(Math.pow(x - this.x0, 2) + Math.pow(y - this.y0, 2))
+    return Math.sqrt(Math.pow(x - this.x0, 2) + Math.pow(y - this.y0, 2));
   }
 
 }

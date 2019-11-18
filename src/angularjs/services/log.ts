@@ -6,7 +6,8 @@ export class Log {
     if (DEBUG) {
       if (!context) {
         context = ''
-      } else {
+      }
+      else {
         context = ', context: ' + context
       }
       console.log('Notification: ' + notification + context)

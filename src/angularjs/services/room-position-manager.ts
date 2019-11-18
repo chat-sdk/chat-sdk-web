@@ -18,7 +18,7 @@ export interface IRoomPositionManager {
   closeAllRooms(): void;
   closeRoom(room: IRoom): void;
   effectiveScreenWidth(): number;
-  getRooms(): any[];
+  getRooms(): IRoom[];
   insertRoom(room: IRoom, slot: number, duration: number): void;
   offsetForSlot(slot: number): number;
   roomDragged(room: IRoom): void;

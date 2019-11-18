@@ -73,8 +73,8 @@ export class FriendsListController extends AbstractUsersListController {
     // then alphabetically
     this.users.sort((user1, user2) => {
       // Sort by who's online first then alphabetcially
-      let aOnline = this.OnlineConnector.onlineUsers[user1.uid()];
-      let bOnline = this.OnlineConnector.onlineUsers[user2.uid()];
+      const aOnline = this.OnlineConnector.onlineUsers[user1.uid()];
+      const bOnline = this.OnlineConnector.onlineUsers[user2.uid()];
 
       if (aOnline !== bOnline) {
         return aOnline ? 1 : -1;
@@ -90,7 +90,7 @@ export class FriendsListController extends AbstractUsersListController {
     this.$timeout(() => {
       this.$scope.$digest();
     });
-  };
+  }
 
 }
 

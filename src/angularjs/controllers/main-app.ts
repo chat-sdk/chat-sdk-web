@@ -158,7 +158,7 @@ class MainAppController implements IMainAppController {
     // Check to see if the user wants the chat to
     // load on this page. We look at the showOnPaths variable
     // in the options
-    //CC_OPTIONS.showOnPaths = '*ccwp, *p*';
+    // CC_OPTIONS.showOnPaths = '*ccwp, *p*';
     if (Environment.showOnPaths()) {
       const paths = Environment.showOnPaths();
       if (!PathAnalyser.shouldShowChatOnPath(paths)) {
@@ -176,9 +176,9 @@ class MainAppController implements IMainAppController {
 
     Partials.load();
 
-    //API.getOnlineUserCount().then(function (count) {
+    // API.getOnlineUserCount().then(function (count) {
     //    $scope.totalUserCount = count;
-    //});
+    // });
 
     // Show the waiting overlay
     $scope.notification = {
@@ -297,7 +297,7 @@ class MainAppController implements IMainAppController {
   }
 
   imgForFileType(type: MessageType): string {
-    return this.$rootScope['img_file_' + type] || this.$rootScope['img_file'];
+    return this.$rootScope['img_file_' + type] || this.$rootScope.img_file;
   }
 
   getUser(): IUser {
@@ -475,8 +475,8 @@ class MainAppController implements IMainAppController {
   }
 
   /**
-    * @return number of online users
-    */
+   * @return number of online users
+   */
   updateTotalUserCount() {
     this.$scope.totalUserCount = this.OnlineConnector.onlineUserCount();
   }
@@ -492,7 +492,7 @@ class MainAppController implements IMainAppController {
       let rooms = this.Cache.getPrivateRoomsWithUsers(this.UserStore.currentUser(), user);
       if (rooms.length) {
         const r = rooms[0];
-        if (r.getType() == RoomType.RoomType.OneToOne) {
+        if (r.getType() === RoomType.RoomType.OneToOne) {
           r.flashHeader();
           // The room is already open! Do nothing
           return;
@@ -509,7 +509,7 @@ class MainAppController implements IMainAppController {
       this.RoomCreator.createAndPushPrivateRoom([user]).then((room) => {
         this.RoomOpenQueue.addRoomWithID(room.rid());
         room.open(0);
-        //let room = RoomStore.getOrCreateRoomWithID(rid);
+        // let room = RoomStore.getOrCreateRoomWithID(rid);
       }, (error) => {
         console.log(error);
       });
@@ -517,8 +517,8 @@ class MainAppController implements IMainAppController {
   }
 
   /**
-    *
-    */
+   *
+   */
   logout() {
 
     // Now we need to
@@ -546,7 +546,7 @@ class MainAppController implements IMainAppController {
 
     // Allow the user to log back in
     // Handled by callback
-    //$scope.showLoginBox();
+    // $scope.showLoginBox();
 
     // Set all current rooms off
 
@@ -568,9 +568,10 @@ class MainAppController implements IMainAppController {
 
   shutdown($event: any) {
 
-    if (typeof $event.stopPropagation != 'undefined') {
+    if (typeof $event.stopPropagation !== 'undefined') {
       $event.stopPropagation();
-    } else {
+    }
+    else {
       $event.cancelBubble = true;
     }
 
@@ -605,7 +606,7 @@ class MainAppController implements IMainAppController {
       return;
     }
 
-    if (f.type == 'image/png' || f.type == 'image/jpeg') {
+    if (f.type === 'image/png' || f.type === 'image/jpeg') {
 
     }
     else {
@@ -618,16 +619,16 @@ class MainAppController implements IMainAppController {
         this.getUser().updateImageURL(path);
       });
 
-      //Parse.uploadFile($files[0]).then((function(r) {
+      // Parse.uploadFile($files[0]).then((function(r) {
       //
       //    if(r.data && r.data.url) {
       //
       //        $scope.getUser().updateImageURL(r.data.url);
       //    }
       //
-      //}).bind(this), (function (error) {
+      // }).bind(this), (function (error) {
       //
-      //}).bind(this));
+      // }).bind(this));
     }
 
     const reader = new FileReader();
@@ -642,26 +643,27 @@ class MainAppController implements IMainAppController {
         image.onload = (() => {
 
           // Resize the image
-          const canvas = document.createElement('canvas'),
-            max_size = 100,
-            width = image.width,
-            height = image.height;
+          const canvas = document.createElement('canvas');
+          const maxSize = 100;
+          const width = image.width;
+          const height = image.height;
 
           let x = 0;
           let y = 0;
 
           if (width > height) {
             x = (width - height) / 2;
-          } else {
+          }
+          else {
             y = (height - width) / 2;
           }
 
-          //let size = width - 2 * x;
+          // let size = width - 2 * x;
 
           // First rescale the image to be square
-          canvas.width = max_size;
-          canvas.height = max_size;
-          canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, max_size, max_size);
+          canvas.width = maxSize;
+          canvas.height = maxSize;
+          canvas.getContext('2d').drawImage(image, x, y, width - 2 * x, height - 2 * y, 0, 0, maxSize, maxSize);
 
           const imageDataURL = canvas.toDataURL('image/jpeg');
 
@@ -690,7 +692,7 @@ class MainAppController implements IMainAppController {
     this.$scope.notification.show = true;
     this.$timeout.bind(this)(() => {
       this.$scope.$digest();
-    })
+    });
   }
 
 }

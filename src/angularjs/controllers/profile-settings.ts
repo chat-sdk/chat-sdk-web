@@ -28,7 +28,7 @@ export interface IProfileSettingsScope extends ng.IScope {
   validateLocation(): boolean;
   validateName(): boolean;
   validateProfileLink(): boolean;
-  validateString(key: string, string: string): boolean;
+  validateString(key: string, str: string): boolean;
 }
 
 export interface IProfileSettingsController {
@@ -94,7 +94,7 @@ class ProfileSettingsController implements IProfileSettingsController {
   validateLocation(): boolean {
     return true;
     // return this.$scope.validation[UserKeys.Location].valid;
-  };
+  }
 
   validateProfileLink(): boolean {
     return this.$scope.validation[UserKeys.ProfileLink].valid;
@@ -117,75 +117,74 @@ class ProfileSettingsController implements IProfileSettingsController {
 
   isValidURL(url: string): boolean {// wrapped in self calling function to prevent global pollution
 
-    //URL pattern based on rfc1738 and rfc3986
-    let rg_pctEncoded = "%[0-9a-fA-F]{2}";
-    let rg_protocol = "(http|https):\\/\\/";
+    // URL pattern based on rfc1738 and rfc3986
+    const rgPctEncoded = '%[0-9a-fA-F]{2}';
+    const rgProtocol = '(http|https):\\/\\/';
 
-    let rg_userinfo = "([a-zA-Z0-9$\\-_.+!*'(),;:&=]|" + rg_pctEncoded + ")+" + "@";
+    const rgUserinfo = '([a-zA-Z0-9$\\-_.+!*\'(),;:&=]|' + rgPctEncoded + ')+' + '@';
 
-    let rg_decOctet = "(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])"; // 0-255
-    let rg_ipv4address = "(" + rg_decOctet + "(\\." + rg_decOctet + "){3}" + ")";
-    let rg_hostname = "([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})";
-    let rg_port = "[0-9]+";
+    const rgDecOctet = '(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])'; // 0-255
+    const rgIpv4address = '(' + rgDecOctet + '(\\.' + rgDecOctet + '){3}' + ')';
+    const rgHostname = '([a-zA-Z0-9\\-\\u00C0-\\u017F]+\\.)+([a-zA-Z]{2,})';
+    const rgPort = '[0-9]+';
 
-    let rg_hostport = "(" + rg_ipv4address + "|localhost|" + rg_hostname + ")(:" + rg_port + ")?";
+    const rgHostport = '(' + rgIpv4address + '|localhost|' + rgHostname + ')(:' + rgPort + ')?';
 
     // chars sets
     // safe           = "$" | "-" | "_" | "." | "+"
     // extra          = "!" | "*" | "'" | "(" | ")" | ","
     // hsegment       = *[ alpha | digit | safe | extra | ";" | ":" | "@" | "&" | "=" | escape ]
-    let rg_pchar = "a-zA-Z0-9$\\-_.+!*'(),;:@&=";
-    let rg_segment = "([" + rg_pchar + "]|" + rg_pctEncoded + ")*";
+    const rgPChar = 'a-zA-Z0-9$\\-_.+!*\'(),;:@&=';
+    const rgSegment = '([' + rgPChar + ']|' + rgPctEncoded + ')*';
 
-    let rg_path = rg_segment + "(\\/" + rg_segment + ")*";
-    let rg_query = "\\?" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
-    let rg_fragment = "\\#" + "([" + rg_pchar + "/?]|" + rg_pctEncoded + ")*";
+    const rgPath = rgSegment + '(\\/' + rgSegment + ')*';
+    const rgQuery = '\\?' + '([' + rgPChar + '/?]|' + rgPctEncoded + ')*';
+    const rgFragment = '\\#' + '([' + rgPChar + '/?]|' + rgPctEncoded + ')*';
 
-    let rgHttpUrl = new RegExp(
-      "^"
-      + rg_protocol
-      + "(" + rg_userinfo + ")?"
-      + rg_hostport
-      + "(\\/"
-      + "(" + rg_path + ")?"
-      + "(" + rg_query + ")?"
-      + "(" + rg_fragment + ")?"
-      + ")?"
-      + "$"
+    const rgHttpUrl = new RegExp(
+      '^'
+      + rgProtocol
+      + '(' + rgUserinfo + ')?'
+      + rgHostport
+      + '(\\/'
+      + '(' + rgPath + ')?'
+      + '(' + rgQuery + ')?'
+      + '(' + rgFragment + ')?'
+      + ')?'
+      + '$'
     );
 
     // export public function
     if (rgHttpUrl.test(url)) {
       return true;
-    } else {
+    }
+    else {
       return false;
     }
   }
 
   validate(): boolean {
 
-    let user = this.$scope.getUser();
+    const user = this.$scope.getUser();
 
     // Validate the user
-    let nameValid = this.$scope.validateString(UserKeys.Name, user.getName());
+    const nameValid = this.$scope.validateString(UserKeys.Name, user.getName());
 
-    let profileLinkValid = !this.Config.userProfileLinkEnabled || this.$scope.validateString(UserKeys.ProfileLink, user.getProfileLink());
+    const profileLinkValid = !this.Config.userProfileLinkEnabled || this.$scope.validateString(UserKeys.ProfileLink, user.getProfileLink());
 
     return nameValid && profileLinkValid;
   }
 
-  validateString(key: string, string: string): boolean {
+  validateString(key: string, str: string): boolean {
     let valid = true;
 
-    if (Utils.unORNull(string)) {
+    if (Utils.unORNull(str)) {
       valid = false;
     }
-
-    else if (string.length < this.$scope.validation[key].minLength) {
+    else if (str.length < this.$scope.validation[key].minLength) {
       valid = false;
     }
-
-    else if (string.length > this.$scope.validation[key].maxLength) {
+    else if (str.length > this.$scope.validation[key].maxLength) {
       valid = false;
     }
 
@@ -213,13 +212,13 @@ class ProfileSettingsController implements IProfileSettingsController {
     }
     else {
       if (!this.$scope.validation[UserKeys.Name].valid) {
-        this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The name must be between " + this.$scope.validation[UserKeys.Name].minLength + " - " + this.$scope.validation[UserKeys.Name].maxLength + " characters long ", "Ok");
+        this.$rootScope.showNotification(NotificationType.Alert, 'Validation failed', 'The name must be between ' + this.$scope.validation[UserKeys.Name].minLength + ' - ' + this.$scope.validation[UserKeys.Name].maxLength + ' characters long ', 'Ok');
       }
       // if (!this.$scope.validation[UserKeys.Location].valid) {
-      //     this.$scope.showNotification(NotificationType.Alert, "Validation failed", "The location must be between "+this.$scope.validation[UserKeys.Location].minLength+" - "+this.$scope.validation[UserKeys.Location].maxLength+" characters long", "Ok");
+      //     this.$scope.showNotification(NotificationType.Alert, 'Validation failed', 'The location must be between '+this.$scope.validation[UserKeys.Location].minLength+' - '+this.$scope.validation[UserKeys.Location].maxLength+' characters long', 'Ok');
       // }
       if (!this.$scope.validation[UserKeys.ProfileLink].valid) {
-        this.$rootScope.showNotification(NotificationType.Alert, "Validation failed", "The profile link must be a valid URL", "Ok");
+        this.$rootScope.showNotification(NotificationType.Alert, 'Validation failed', 'The profile link must be a valid URL', 'Ok');
       }
     }
   }

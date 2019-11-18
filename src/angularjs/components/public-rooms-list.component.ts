@@ -55,7 +55,7 @@ class PublicRoomsListController {
       const au = Utils.unORNull(a.getMetaObject().userCreated) ? false : a.getMetaObject().userCreated;
       const bu = Utils.unORNull(b.getMetaObject().userCreated) ? false : b.getMetaObject().userCreated;
 
-      if (au != bu) {
+      if (au !== bu) {
         return au ? 1 : -1;
       }
 
@@ -63,17 +63,16 @@ class PublicRoomsListController {
       const aw = Utils.unORNull(a.getMetaObject().weight) ? 100 : a.getMetaObject().weight;
       const bw = Utils.unORNull(b.getMetaObject().weight) ? 100 : b.getMetaObject().weight;
 
-      if (aw != bw) {
+      if (aw !== bw) {
         return aw - bw;
       }
       else {
-
         const ac = a.getOnlineUserCount();
         const bc = b.getOnlineUserCount();
 
-        //console.log('1: ' + ac + ', 2: ' + bc);
+        // console.log('1: ' + ac + ', 2: ' + bc);
 
-        if (ac != bc) {
+        if (ac !== bc) {
           return bc - ac;
         }
         else {

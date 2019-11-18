@@ -23,15 +23,15 @@ class InfiniteScroll implements ng.IDirective {
 
   link(scope: IRoomScope, element: JQLite) {
     element.on('scroll', () => {
-      this.onScroll(scope, element)
+      this.onScroll(scope, element);
     });
 
     scope.$on('$destroy', () => {
       return element.off('scroll', () => {
-        this.onScroll(scope, element)
+        this.onScroll(scope, element);
       });
     });
-  };
+  }
 
   loadMoreMessages(scope: IRoomScope, elem) {
     this.loading = true;
@@ -46,11 +46,11 @@ class InfiniteScroll implements ng.IDirective {
 
     scope.room.loadMoreMessages().then(messages => {
       this.$timeout(() => {
-        let top = elem.prop('scrollHeight');
+        const top = elem.prop('scrollHeight');
 
         // console.log('3 - Height: ' + $elem.height() + ', Scroll height: ' + top + ', top: ' + $elem.scrollTop());
 
-        if (messages && messages.length && $elem.scrollTop() == 0) {
+        if (messages && messages.length && $elem.scrollTop() === 0) {
           $elem.stop();
           this.setScrollTopSilent(elem, top - scrollHeight);
         }
@@ -76,7 +76,7 @@ class InfiniteScroll implements ng.IDirective {
     }
 
     this.timer = this.$timeout(() => {
-      this.onScrollFinished(scope, elem)
+      this.onScrollFinished(scope, elem);
     }, 100);
 
     this.scrollHeight = elem.prop('scrollHeight');
@@ -96,7 +96,7 @@ class InfiniteScroll implements ng.IDirective {
 
     // For Mobile or negative scrolling
     this.lastScrollTop = this.scrollTop <= 0 ? 0 : this.scrollTop;
-  };
+  }
 
   onScrollFinished(scope: IRoomScope, elem): void {
     this.$timeout.cancel(this.timer);
@@ -104,7 +104,7 @@ class InfiniteScroll implements ng.IDirective {
     const $elem = $(elem);
 
     // this.silent = false;
-    if ($elem.scrollTop() == 0) {
+    if ($elem.scrollTop() === 0) {
 
       this.loadMoreMessages(scope, elem);
 
@@ -131,7 +131,7 @@ class InfiniteScroll implements ng.IDirective {
 
   setScrollTopSilent(elem, position: number): void {
     this.silent = true;
-    $(elem).scrollTop(position)
+    $(elem).scrollTop(position);
   }
 
   static factory(): ng.IDirectiveFactory {

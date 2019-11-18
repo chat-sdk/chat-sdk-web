@@ -21,11 +21,11 @@ class AnimateRoom implements IAnimateRoom {
   ) { }
 
   link(scope: IRoomScope, element: JQLite) {
-    scope.$on(N.AnimateRoom, (event, args) => {
+    scope.$on(N.AnimateRoom, (_, args) => {
 
       Log.notification(N.AnimateRoom, 'animateRoom');
 
-      if (args.room == scope.room) {
+      if (args.room === scope.room) {
 
         if (!Utils.unORNull(args.slot)) {
           scope.room.slot = args.slot;
@@ -37,7 +37,7 @@ class AnimateRoom implements IAnimateRoom {
         // Stop the previous animation
         $(element).stop(true, false);
 
-        let completion = function () {
+        const completion = () => {
           scope.room.setOffset(toOffset);
 
           scope.room.zIndex = null;
@@ -49,9 +49,10 @@ class AnimateRoom implements IAnimateRoom {
           });
         };
 
-        if (!Utils.unORNull(args.duration) && args.duration == 0) {
+        if (!Utils.unORNull(args.duration) && args.duration === 0) {
           completion();
-        } else {
+        }
+        else {
           // Animate the chat room into position
           $(element).animate({ right: toOffset }, !Utils.unORNull(args.duration) ? args.duration : 300, () => {
             completion.bind(this)();

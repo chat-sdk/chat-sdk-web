@@ -23,7 +23,7 @@ class SocialIFrame implements ISocialIFrame {
   link(scope: ng.IScope, element: JQLite) {
     this.$rootScope.$on(N.StartSocialLogin, (event, data, callback) => {
 
-      //element.load(function () {
+      // element.load(function () {
 
       //                let data = {
       //                    action: 'github',
@@ -31,14 +31,14 @@ class SocialIFrame implements ISocialIFrame {
       //                };
 
       // Add the event listener
-      let eventMethod = this.$window.addEventListener ? 'addEventListener' : 'attachEvent';
-      let eventer = this.$window[eventMethod];
-      let messageEvent = eventMethod == 'attachEvent' ? 'onmessage' : 'message';
+      const eventMethod = this.$window.addEventListener ? 'addEventListener' : 'attachEvent';
+      const eventer = this.$window[eventMethod];
+      const messageEvent = eventMethod === 'attachEvent' ? 'onmessage' : 'message';
 
       eventer(messageEvent, (e) => {
         if (e.data) {
-          let data = JSON.parse(e.data);
-          if (data.provider == 'chatcat') {
+          const data = JSON.parse(e.data);
+          if (data.provider === 'chatcat') {
             callback(data);
           }
         }
@@ -47,9 +47,9 @@ class SocialIFrame implements ISocialIFrame {
         //                    }
       });
 
-      //TODO Check this
+      // TODO Check this
       ($(element).get(0) as any).contentWindow.postMessage(JSON.stringify(data), '*');
-      //});
+      // });
     });
   }
 

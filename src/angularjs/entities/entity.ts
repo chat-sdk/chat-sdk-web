@@ -50,11 +50,12 @@ export class Entity implements IEntity {
       // been turned on
       if (this.pathIsOn[key]) {
         resolve();
-      } else {
+      }
+      else {
         this.pathIsOn[key] = true;
 
         // Start listening to the state
-        let stateRef = this.stateRef(key);
+        const stateRef = this.stateRef(key);
 
         stateRef.off('value');
 
@@ -62,10 +63,10 @@ export class Entity implements IEntity {
         // when we call push this method is called twice
         stateRef.on('value', (snapshot) => {
 
-          let time = snapshot.val();
+          const time = snapshot.val();
 
-          if (Defines.DEBUG) console.log('Entity ID: ' + this._id + ' Key: ' + key);
-          if (Defines.DEBUG) console.log('Date: ' + time + ' State time: ' + this.state[key]);
+          if (Defines.DEBUG) { console.log('Entity ID: ' + this._id + ' Key: ' + key); }
+          if (Defines.DEBUG) { console.log('Date: ' + time + ' State time: ' + this.state[key]); }
 
           // If the state isn't set either locally or remotely
           // or if it is set but the timestamp is lower than the remove value
@@ -78,7 +79,7 @@ export class Entity implements IEntity {
             this.state[key] = time;
 
             // Get the ref
-            let ref = this.pathRef(key);
+            const ref = this.pathRef(key);
 
             // Add the value listener
             // TODO: Check this
@@ -103,7 +104,7 @@ export class Entity implements IEntity {
   // This method strips the root of the Firebase reference to give a relative
   // path for batch writes
   relativeFirebasePath(ref: firebase.database.Reference): string {
-    return ref.toString().replace(this.Paths.firebase().toString(), "");
+    return ref.toString().replace(this.Paths.firebase().toString(), '');
   }
 
   pathOff(key: string) {
@@ -137,7 +138,8 @@ export class Entity implements IEntity {
   setMeta(meta: Map<string, any> | IStringAnyObject): void {
     if (meta instanceof Map) {
       this.meta = meta;
-    } else {
+    }
+    else {
       this.meta = new Map(Object.entries(meta));
     }
   }
@@ -155,15 +157,15 @@ export class Entity implements IEntity {
       return this.getMeta().get(key);
     }
     return null;
-  };
+  }
 
   getMetaValue(key: string) {
     return this.metaValue(key);
-  };
+  }
 
   setMetaValue(key: string, value: any) {
     this.getMeta().set(key, value);
-  };
+  }
 
   serialize(): IStringAnyObject {
     return {
@@ -171,7 +173,7 @@ export class Entity implements IEntity {
       _id: this._id,
       state: this.state,
       meta: this.getMetaObject()
-    }
+    };
   }
 
   deserialize(se: IStringAnyObject) {

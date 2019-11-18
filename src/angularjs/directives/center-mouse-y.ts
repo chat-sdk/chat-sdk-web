@@ -28,7 +28,7 @@ class CenterMouseY implements ICenterMouseY {
     });
 
     $(document).mousemove((e) => {
-      //!element.is(':hover')
+      // !element.is(':hover')
       if (scope.currentUser && !scope.hover) {
         // Keep the center of this box level with the mouse y
         element.css({ bottom: (this.Screen.screenHeight - e.clientY - $(element).height() / 2) + 'px' });

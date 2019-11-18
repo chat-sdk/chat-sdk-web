@@ -86,10 +86,12 @@ class AutoLogin implements IAutoLogin {
     if (this.autoLoginEnabled()) {
       if (this.token != '') {
         return this.Credential.customToken(this.token);
-      } else {
+      }
+      else {
         return this.Credential.emailAndPassword(this.username, this.password);
       }
-    } else {
+    }
+    else {
       return null;
     }
   }

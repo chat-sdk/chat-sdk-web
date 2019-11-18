@@ -27,7 +27,7 @@ class ChatSettingsController {
   saveTranscript() {
     const t = this.room.transcript();
 
-    if (DEBUG) console.log(t);
+    if (DEBUG) { console.log(t); }
 
     FileSaver.saveAs(new Blob([t], { type: 'text/plain;charset=utf-8' }), this.room.name + '-transcript.txt');
   }

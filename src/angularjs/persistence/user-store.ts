@@ -59,7 +59,8 @@ class UserStore implements IUserStore, IBeforeUnloadListener {
   getUserWithID(uid: string): IUser {
     if (uid !== null) {
       return this.users[uid];
-    } else {
+    }
+    else {
       return null;
     }
   }

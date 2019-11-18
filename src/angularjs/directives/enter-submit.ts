@@ -9,8 +9,8 @@ class EnterSubmit implements IEnterSubmit {
   restrict = 'A';
 
   link(scope: ng.IScope, element: JQLite, attrs: ng.IAttributes) {
-    element.bind('keydown', function (event) {
-      let code = event.keyCode || event.which;
+    element.bind('keydown', (event) => {
+      const code = event.keyCode || event.which;
 
       if (code === 13) {
         if (!event.shiftKey) {

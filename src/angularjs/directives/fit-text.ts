@@ -9,9 +9,9 @@ export interface IFitText extends ng.IDirective {
 class FitText implements IFitText {
 
   link(scope: IRoomScope, element: JQLite, attr: ng.IAttributes) {
-    element.bind('keyup', function (e) {
-      //jQuery(element).height(0);
-      //let height = jQuery(element)[0].scrollHeight;
+    element.bind('keyup', () => {
+      // jQuery(element).height(0);
+      // let height = jQuery(element)[0].scrollHeight;
       let height = element.prop('scrollHeight');
 
       // 8 is for the padding
@@ -20,11 +20,12 @@ class FitText implements IFitText {
       }
 
       // If we go over the max height
-      let maxHeight = eval(attr.fitText);
+      const maxHeight = eval(attr.fitText);
       if (height > maxHeight) {
         height = maxHeight;
         element.css({ overflow: 'auto' });
-      } else {
+      }
+      else {
         element.css({ overflow: 'hidden' });
       }
 
@@ -33,7 +34,7 @@ class FitText implements IFitText {
       });
 
       element.css({ 'max-height': height + 'px' });
-      element.css({ 'height': height + 'px' });
+      element.css({ height: height + 'px' });
 
     });
   }

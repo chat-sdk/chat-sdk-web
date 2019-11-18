@@ -46,7 +46,7 @@ export let myApp = angular.module('myApp',
   $provide.decorator('$browser', ['$delegate', ($delegate) => {
     $delegate.onUrlChange = () => { };
     $delegate.url = () => {
-      return "";
+      return '';
     };
     return $delegate;
   }]);

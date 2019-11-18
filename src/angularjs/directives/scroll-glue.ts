@@ -37,7 +37,7 @@ class ScrollGlue implements IScroolGlue {
 
     element.bind('scroll', () => {
       didScroll = true;
-      let activate = shouldActivateAutoScroll();
+      const activate = shouldActivateAutoScroll();
       if (activate !== scope.autoScroll) {
         scope.autoScroll = activate;
       }

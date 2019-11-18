@@ -80,6 +80,7 @@ export interface IRoom extends IEntity {
   open(slot: number, duration?: number): void;
   removeUserUpdate(user: IUser): {};
   rid(): string;
+  sendFileMessage(user: IUser, fileName: string, mimeType: string, fileURL: string): Promise<any>;
   sendImageMessage(user: IUser, url: string, width: number, height: number): Promise<any>;
   sendTextMessage(user: IUser, text: string): Promise<any>;
   setActive(active: boolean): void;
@@ -191,8 +192,6 @@ export class Room extends Entity implements IRoom {
   /**
    * If silent is true then this will not broadcast to update the UI.
    * Primarily this is used when deserializing
-   *
-   * @param silent
    */
   update(silent = false) {
     this.updateName();
@@ -208,9 +207,9 @@ export class Room extends Entity implements IRoom {
 
     let i = 0;
     let name = null;
-    for (let key in this.typing) {
+    for (const key in this.typing) {
       if (this.typing.hasOwnProperty(key)) {
-        if (key == this.UserStore.currentUser().uid()) {
+        if (key === this.UserStore.currentUser().uid()) {
           continue;
         }
         name = this.typing[key];
@@ -219,7 +218,7 @@ export class Room extends Entity implements IRoom {
     }
 
     let typing = null;
-    if (i == 1) {
+    if (i === 1) {
       typing = name + '...';
     }
     else if (i > 1) {
@@ -244,9 +243,9 @@ export class Room extends Entity implements IRoom {
 
     // Otherwise build a room based on the users' names
     this.name = '';
-    for (let key in this.users) {
+    for (const key in this.users) {
       if (this.users.hasOwnProperty(key)) {
-        let user = this.users[key];
+        const user = this.users[key];
         if (!user.isMe() && user.getName() && user.getName().length) {
           this.name += user.getName() + ', ';
         }
@@ -262,10 +261,10 @@ export class Room extends Entity implements IRoom {
       if (this.isPublic()) {
         this.name = RoomDefaultNamePublic;
       }
-      else if (this.userCount() == 1) {
+      else if (this.userCount() === 1) {
         this.name = RoomDefaultNameEmpty;
       }
-      else if (this.getType() == RoomType.Group) {
+      else if (this.getType() === RoomType.Group) {
         this.name = RoomDefaultNameGroup;
       }
       else {
@@ -283,7 +282,7 @@ export class Room extends Entity implements IRoom {
       if (!this.isOn && this.rid()) {
         this.isOn = true;
 
-        let on = () => {
+        const on = () => {
           // When a user changes online state update the room
           this.userOnlineStateChangedNotificationOff = this.$rootScope.$on(N.UserOnlineStateChanged, (event, user: IUser) => {
             Log.notification(N.UserOnlineStateChanged, 'Room');
@@ -328,7 +327,8 @@ export class Room extends Entity implements IRoom {
           }
 
         });
-      } else {
+      }
+      else {
         resolve();
       }
     });
@@ -370,11 +370,10 @@ export class Room extends Entity implements IRoom {
     this.typingOff();
     this.messagesOff();
 
-    let type = this.getType();
+    const type = this.getType();
 
     switch (type) {
-      case RoomType.Public:
-        {
+      case RoomType.Public: {
           this.RoomFactory.removeUserFromRoom(this.UserStore.currentUser(), this);
         }
     }
@@ -420,7 +419,7 @@ export class Room extends Entity implements IRoom {
       if (this.userCount() <= 1) {
         type = RoomType.Invalid;
       }
-      else if (this.userCount() == 2) {
+      else if (this.userCount() === 2) {
         type = RoomType.OneToOne;
       }
       else {
@@ -433,9 +432,9 @@ export class Room extends Entity implements IRoom {
 
   updateType() {
     const type = this.calculatedType();
-    if (type != this.getType()) {
+    if (type !== this.getType()) {
       // One important thing is that we can't go from group -> 1to1
-      if (this.getType() != RoomType.Group) {
+      if (this.getType() !== RoomType.Group) {
         this.RoomFactory.updateRoomType(this.rid(), type);
       }
     }
@@ -487,7 +486,7 @@ export class Room extends Entity implements IRoom {
   }
 
   isPublic(): boolean {
-    return this.getType() == RoomType.Public;
+    return this.getType() === RoomType.Public;
   }
 
   rid(): string {
@@ -547,7 +546,6 @@ export class Room extends Entity implements IRoom {
   /**
    * Add the user to the room and add the room to the
    * user in Firebase
-   * @param status
    */
   join(status: UserStatus): Promise<any> {
     return this.RoomFactory.addUserToRoom(this.UserStore.currentUser(), this, status);
@@ -601,17 +599,17 @@ export class Room extends Entity implements IRoom {
   }
 
   getUserStatus(user: IUser): UserStatus {
-    let info = this.getUserInfo(user);
+    const info = this.getUserInfo(user);
     return info ? info[UserKeys.Status] : null;
   }
 
   getUsers(): { [uid: string]: IUser } {
-    let users = {};
-    for (let key in this.users) {
+    const users = {};
+    for (const key in this.users) {
       if (this.users.hasOwnProperty(key)) {
-        let user = this.users[key];
+        const user = this.users[key];
         if (user.meta && this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
-          if (user.uid() != this.UserStore.currentUser().uid()) {
+          if (user.uid() !== this.UserStore.currentUser().uid()) {
             users[user.uid()] = user;
           }
         }
@@ -622,7 +620,7 @@ export class Room extends Entity implements IRoom {
 
   getUserIDs(): Array<string> {
     const users = new Array<string>();
-    for (let key in this.users) {
+    for (const key in this.users) {
       if (this.users.hasOwnProperty(key)) {
         users.push(key);
       }
@@ -639,10 +637,10 @@ export class Room extends Entity implements IRoom {
     // get the owner's ID
     let data = null;
 
-    for (let key in this.usersMeta) {
+    for (const key in this.usersMeta) {
       if (this.usersMeta.hasOwnProperty(key)) {
         data = this.usersMeta[key];
-        if (data.status == UserStatus.Owner) {
+        if (data.status === UserStatus.Owner) {
           break;
         }
       }
@@ -678,11 +676,11 @@ export class Room extends Entity implements IRoom {
 
   getOnlineUserCount() {
     let i = 0;
-    for (let key in this.usersMeta) {
+    for (const key in this.usersMeta) {
       if (this.usersMeta.hasOwnProperty(key)) {
-        let user = this.usersMeta[key];
+        const user = this.usersMeta[key];
         if (this.UserStore.currentUser() && this.UserStore.currentUser().meta) {
-          if ((this.UserStore.users[user.uid].online || this.UserStore.currentUser().uid() == user.uid)) {
+          if ((this.UserStore.users[user.uid].online || this.UserStore.currentUser().uid() === user.uid)) {
             i++;
           }
         }
@@ -693,7 +691,7 @@ export class Room extends Entity implements IRoom {
 
   userCount() {
     let i = 0;
-    for (let key in this.users) {
+    for (const key in this.users) {
       if (this.users.hasOwnProperty(key)) {
         i++;
       }
@@ -705,12 +703,12 @@ export class Room extends Entity implements IRoom {
     let usersInRoom = 0;
     const totalUsers = this.userCount();
 
-    for (let i = 0; i < users.length; i++) {
-      if (this.users[users[i].uid()]) {
+    for (const user of users) {
+      if (this.users[user.uid()]) {
         usersInRoom++;
       }
     }
-    return usersInRoom == users.length && usersInRoom == totalUsers;
+    return usersInRoom === users.length && usersInRoom === totalUsers;
   }
 
   /***********************************
@@ -772,8 +770,8 @@ export class Room extends Entity implements IRoom {
     return this.sendMessage(messageMeta, user);
   }
 
-  sendMessage(messageMeta: {}, user): Promise<any> {
-    let innerSendMessage = ((message, user) => {
+  sendMessage(messageMeta: {}, user: IUser): Promise<any> {
+    const innerSendMessage = (() => {
 
       // Get a ref to the room
       const ref = this.Paths.roomMessagesRef(this.rid());
@@ -796,16 +794,16 @@ export class Room extends Entity implements IRoom {
 
     });
 
-    return innerSendMessage(messageMeta, user).catch((error) => {
+    return innerSendMessage().catch((error) => {
       this.Presence.update().then(() => {
-        return innerSendMessage(messageMeta, user);
+        return innerSendMessage();
       });
     });
   }
 
   addMessagesFromSerialization(sm) {
-    for (let i = 0; i < sm.length; i++) {
-      this.addMessageFromSerialization(sm[i]);
+    for (const s of sm) {
+      this.addMessageFromSerialization(s);
     }
     // Now update all the message displays
 
@@ -821,12 +819,11 @@ export class Room extends Entity implements IRoom {
     return this.MessageFactory.createMessage(mid, metaValue);
   }
 
-  getMessagesNewerThan(date: Date = null, number: number = null): Array<IMessage> {
+  getMessagesNewerThan(date: Date = null, amount: number = null): Array<IMessage> {
     const messages = new Array<IMessage>();
-    for (let i = 0; i < this.messages.length; i++) {
-      const message = this.messages[i];
+    for (const message of this.messages) {
       if (!date || message.date() > date) {
-        messages.push(this.messages[i]);
+        messages.push(message);
       }
     }
     return messages;
@@ -878,34 +875,33 @@ export class Room extends Entity implements IRoom {
     }
   }
 
-  getMessagesOlderThan(date: Date = null, number: number = null): Array<IMessage> {
+  getMessagesOlderThan(date: Date = null, amount: number = null): Array<IMessage> {
     const messages = new Array<IMessage>();
-    for (let i = 0; i < this.messages.length; i++) {
-      const message = this.messages[i];
+    for (const message of this.messages) {
       if (!date || message.date() < date) {
-        messages.push(this.messages[i]);
+        messages.push(message);
       }
     }
     return messages;
   }
 
-  loadLocalMessages(fromDate: Date, number: number): Array<IMessage> {
+  loadLocalMessages(fromDate: Date, amount: number): Array<IMessage> {
     const messages = new Array<IMessage>();
 
     return messages;
   }
 
   // Load m
-  loadMessagesOlderThan(date: Date = null, number: number): Promise<Array<IMessage>> {
+  loadMessagesOlderThan(date: Date = null, amount: number): Promise<Array<IMessage>> {
 
-    let ref = this.Paths.roomMessagesRef(this.rid());
-    let query = ref.orderByChild(MessageKeys.Date).limitToLast(number);
+    const ref = this.Paths.roomMessagesRef(this.rid());
+    let query = ref.orderByChild(MessageKeys.Date).limitToLast(amount);
 
     if (date) {
       query = query.endAt(date.getTime() - 1, MessageKeys.Date);
     }
 
-    return <Promise<Array<IMessage>>>query.once('value').then((snapshot: firebase.database.DataSnapshot) => {
+    return query.once('value').then((snapshot: firebase.database.DataSnapshot) => {
       const data = snapshot.val();
       const messages = new Array<IMessage>();
       if (data) {
@@ -916,7 +912,7 @@ export class Room extends Entity implements IRoom {
       return messages;
     }).catch((e) => {
       console.log(e.message);
-    });
+    }) as Promise<Array<IMessage>>;
   }
 
   loadMoreMessages(numberOfMessages: number = 10): Promise<Array<IMessage>> {
@@ -967,15 +963,15 @@ export class Room extends Entity implements IRoom {
   }
 
   deduplicateMessages() {
-    let uniqueMessages = [];
+    const uniqueMessages = [];
 
     // Deduplicate list
     let lastMID = null;
-    for (let i = 0; i < this.messages.length; i++) {
-      if (this.messages[i].mid != lastMID) {
-        uniqueMessages.push(this.messages[i]);
+    for (const message of this.messages) {
+      if (message.mid !== lastMID) {
+        uniqueMessages.push(message);
       }
-      lastMID = this.messages[i].mid;
+      lastMID = message.mid;
     }
 
     this.messages = uniqueMessages;
@@ -997,11 +993,11 @@ export class Room extends Entity implements IRoom {
 
   markRead() {
 
-    let messages = this.unreadMessages;
+    const messages = this.unreadMessages;
 
     if (messages && messages.length > 0) {
 
-      for (let i in messages) {
+      for (const i in messages) {
         if (messages.hasOwnProperty(i)) {
           messages[i].markRead();
         }
@@ -1016,14 +1012,15 @@ export class Room extends Entity implements IRoom {
     this.sendBadgeChangedNotification();
 
     // Mark the date when the thread was read
-    if (!this.isPublic())
+    if (!this.isPublic()) {
       this.UserStore.currentUser().markRoomReadTime(this.rid());
+    }
 
   }
 
   updateImageURL(imageURL) {
     // Compare to the old URL
-    let imageChanged = imageURL != this.metaValue(RoomKeys.Image);
+    const imageChanged = imageURL !== this.metaValue(RoomKeys.Image);
     if (imageChanged) {
       this.setMetaValue(RoomKeys.Image, imageURL);
       this.setImage(imageURL, false);
@@ -1033,13 +1030,13 @@ export class Room extends Entity implements IRoom {
 
   setImage(image, isData = false) {
 
-    this.showImage = this.getType() == RoomType.Public;
+    this.showImage = this.getType() === RoomType.Public;
 
     if (!image) {
       image = this.Environment.defaultRoomPictureURL();
     }
     else {
-      if (isData || image == this.Environment.defaultRoomPictureURL()) {
+      if (isData || image === this.Environment.defaultRoomPictureURL()) {
         this.thumbnail = image;
       }
       else {
@@ -1061,11 +1058,11 @@ export class Room extends Entity implements IRoom {
 
   transcript(): string {
 
-    let transcript: string = '';
+    let transcript = '';
 
-    for (let i in this.messages) {
+    for (const i in this.messages) {
       if (this.messages.hasOwnProperty(i)) {
-        let m = this.messages[i];
+        const m = this.messages[i];
         transcript += this.Time.formatTimestamp(m.time()) + ' ' + m.user.getName() + ': ' + m.text() + '\n';
       }
     }
@@ -1101,19 +1098,19 @@ export class Room extends Entity implements IRoom {
     const superData = super.serialize();
 
     const m = [];
-    for (let i = 0; i < this.messages.length; i++) {
-      m.push(this.messages[i].serialize());
+    for (const message of this.messages) {
+      m.push(message.serialize());
     }
     const data = {
       minimized: this.minimized,
       width: this.width,
       height: this.height,
-      //offset: this.offset,
+      // offset: this.offset,
       messages: m,
       usersMeta: this.usersMeta,
       deleted: this.deleted,
       isOpen: this.isOpen,
-      //badge: this.badge,
+      // badge: this.badge,
       associatedUserID: this.associatedUserID,
       offset: this.offset,
       readTimestamp: this.readTimestamp,
@@ -1129,19 +1126,19 @@ export class Room extends Entity implements IRoom {
       this.height = sr.height;
       this.deleted = sr.deleted;
       this.isOpen = sr.isOpen;
-      //this.badge = sr.badge;
+      // this.badge = sr.badge;
       this.associatedUserID = sr.associatedUserID;
       this.offset = sr.offset;
       this.readTimestamp = sr.readTimestamp;
 
-      //this.setUsersMeta(sr.usersMeta);
+      // this.setUsersMeta(sr.usersMeta);
 
-      for (let key in sr.usersMeta) {
+      for (const key in sr.usersMeta) {
         if (sr.usersMeta.hasOwnProperty(key)) {
           this.addUserMeta(sr.usersMeta[key]);
         }
       }
-      //this.offset = sr.offset;
+      // this.offset = sr.offset;
 
       this.addMessagesFromSerialization(sr.messages);
 
@@ -1176,7 +1173,7 @@ export class Room extends Entity implements IRoom {
     this.usersMeta[meta[userUID]] = meta;
 
     // Add the user object
-    let user = this.UserStore.getOrCreateUserWithID(meta[userUID]);
+    const user = this.UserStore.getOrCreateUserWithID(meta[userUID]);
     this.users[user.uid()] = user;
 
     this.update(false);
@@ -1191,11 +1188,11 @@ export class Room extends Entity implements IRoom {
 
   usersMetaOn() {
 
-    let roomUsersRef = this.Paths.roomUsersRef(this.rid());
+    const roomUsersRef = this.Paths.roomUsersRef(this.rid());
 
     roomUsersRef.on('child_added', (snapshot) => {
       if (snapshot.val() && snapshot.val()) {
-        let meta = snapshot.val();
+        const meta = snapshot.val();
         meta.uid = snapshot.key;
         this.addUserMeta(meta);
       }
@@ -1203,7 +1200,7 @@ export class Room extends Entity implements IRoom {
 
     roomUsersRef.on('child_removed', (snapshot) => {
       if (snapshot.val()) {
-        let meta = snapshot.val();
+        const meta = snapshot.val();
         meta.uid = snapshot.key;
         this.removeUserMeta(meta);
       }
@@ -1217,8 +1214,8 @@ export class Room extends Entity implements IRoom {
   userDeletedDate(): Promise<number> {
     const ref = this.Paths.roomUsersRef(this.rid()).child(this.UserStore.currentUser().uid());
     return ref.once('value').then((snapshot) => {
-      let val = snapshot.val();
-      if (val && val.status == UserStatus.Closed) {
+      const val = snapshot.val();
+      if (val && val.status === UserStatus.Closed) {
         return val.time;
       }
       return null;
@@ -1244,7 +1241,7 @@ export class Room extends Entity implements IRoom {
   }
 
   shouldIncrementUnreadMessageBadge() {
-    return (!this.active || this.minimized || !this.RoomPositionManager.roomIsOpen(this));// && !this.isPublic();
+    return (!this.active || this.minimized || !this.RoomPositionManager.roomIsOpen(this)); // && !this.isPublic();
   }
 
   messagesOn(timestamp) {
@@ -1298,8 +1295,8 @@ export class Room extends Entity implements IRoom {
         if (this.Visibility.getIsHidden()) {
           // Only make a sound for messages that were received less than
           // 30 seconds ago
-          if (DEBUG) console.log('Now: ' + new Date().getTime() + ', Date now: ' + this.Time.now() + ', Message: ' + snapshot.val()[MessageKeys.Date]);
-          if (DEBUG) console.log('Diff: ' + Math.abs(this.Time.now() - snapshot.val().time));
+          if (DEBUG) { console.log('Now: ' + new Date().getTime() + ', Date now: ' + this.Time.now() + ', Message: ' + snapshot.val()[MessageKeys.Date]); }
+          if (DEBUG) { console.log('Diff: ' + Math.abs(this.Time.now() - snapshot.val().time)); }
           if (Math.abs(this.Time.now() - snapshot.val()[MessageKeys.Date]) / 1000 < 30) {
             this.SoundEffects.messageReceived();
           }
@@ -1311,13 +1308,13 @@ export class Room extends Entity implements IRoom {
     ref.on('child_removed', (snapshot) => {
       if (snapshot.val()) {
         for (let i = 0; i < this.messages.length; i++) {
-          let message = this.messages[i];
+          const message = this.messages[i];
           if (message.mid == snapshot.key) {
             this.messages.splice(i, 1);
             break;
           }
         }
-        //this.$rootScope.$broadcast(DeleteMessageNotification, snapshot.val().meta.mid);
+        // this.$rootScope.$broadcast(DeleteMessageNotification, snapshot.val().meta.mid);
         this.update(false);
       }
     });
@@ -1328,7 +1325,7 @@ export class Room extends Entity implements IRoom {
     this.sortMessages();
     this.deduplicateMessages();
 
-    let toRemove = this.messages.length - 100;
+    const toRemove = this.messages.length - 100;
     if (toRemove > 0) {
       for (let j = 0; j < toRemove; j++) {
         this.messages.shift();
@@ -1350,7 +1347,7 @@ export class Room extends Entity implements IRoom {
   typingOn() {
 
     // Handle typing
-    let ref = this.Paths.roomTypingRef(this.rid());
+    const ref = this.Paths.roomTypingRef(this.rid());
 
     ref.on('child_added', (snapshot) => {
       this.typing[snapshot.key] = snapshot.val().name;
@@ -1405,7 +1402,6 @@ export class Room extends Entity implements IRoom {
 
   /**
    * Remove a public room
-   * @returns {promise}
    */
   removeFromPublicRooms(): Promise<any> {
     const ref = this.Paths.publicRoomRef(this.getRID());
@@ -1413,8 +1409,8 @@ export class Room extends Entity implements IRoom {
   }
 
   userIsMember(user) {
-    let userStatus = this.getUserStatus(user);
-    return userStatus == UserStatus.Member || userStatus == UserStatus.Owner;
+    const userStatus = this.getUserStatus(user);
+    return userStatus === UserStatus.Member || userStatus === UserStatus.Owner;
   }
 
   addUserUpdate(user: IUser, status: UserStatus): {} {
@@ -1427,7 +1423,7 @@ export class Room extends Entity implements IRoom {
   removeUserUpdate(user: IUser): {} {
     const update = {};
     let data = null;
-    if (this.getType() == RoomType.OneToOne) {
+    if (this.getType() === RoomType.OneToOne) {
       data = {};
       data[RoomKeys.Deleted] = database.ServerValue.TIMESTAMP;
       data[RoomKeys.Name] = user.getName();

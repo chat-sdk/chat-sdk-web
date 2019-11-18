@@ -157,7 +157,7 @@ class MainBoxController implements IMainBoxController {
 
     this.$timeout(() => {
       this.$scope.$digest();
-    })
+    });
   }
 
   numberOfTabs(): number {
@@ -206,16 +206,16 @@ class MainBoxController implements IMainBoxController {
     // Save current search text
     // this.$scope.search
 
-    if (tab == UsersTab) {
+    if (tab === UsersTab) {
       this.$scope.title = 'Who\'s online';
     }
-    if (tab == RoomsTab) {
+    if (tab === RoomsTab) {
       this.$scope.title = 'Chat rooms';
     }
-    if (tab == FriendsTab) {
+    if (tab === FriendsTab) {
       this.$scope.title = 'My friends';
     }
-    if (tab == InboxTab) {
+    if (tab === InboxTab) {
       this.$scope.title = 'Inbox';
     }
   }

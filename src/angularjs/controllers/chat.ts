@@ -45,7 +45,7 @@ export interface IRoomScope extends ng.IScope {
   enabledMessageOptions(): string[];
   enabledMessageOptionsCount(): number;
   fileUploadFinished(): void;
-  getAllUsers(): IUser[]
+  getAllUsers(): IUser[];
   getUser(): IUser;
   getZIndex(): number;
   imageUploadFinished(): void;
@@ -55,7 +55,7 @@ export interface IRoomScope extends ng.IScope {
   minimize(): void;
   onSelectFile(): void;
   onSelectImage(): void;
-  searchKeyword(): string
+  searchKeyword(): string;
   sendFileMessage(): void;
   sendImageMessage(): void;
   sendMessage(): void;
@@ -99,7 +99,7 @@ class ChatController implements IChatController {
     // $scope properties
     $scope.showEmojis = false;
     $scope.showMessageOptions = false;
-    //$scope.headerColor = $scope.config.headerColor;
+    // $scope.headerColor = $scope.config.headerColor;
     $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
 
     // $scope methods
@@ -164,45 +164,45 @@ class ChatController implements IChatController {
     };
 
     // When the user value changes update the user interface
-    scope.$on(N.UserValueChanged, (event, user) => {
+    scope.$on(N.UserValueChanged, (event, user: IUser) => {
       Log.notification(N.UserValueChanged, 'ChatController');
       if (scope.room.containsUser(user)) {
         digest(null);
       }
     });
 
-    scope.$on(N.RoomPositionUpdated, (event, room) => {
+    scope.$on(N.RoomPositionUpdated, (event, room: IRoom) => {
       Log.notification(N.RoomPositionUpdated, 'ChatController');
-      if (scope.room == room) {
+      if (scope.room === room) {
         // Update the room's active status
         digest(null);
       }
     });
 
-    scope.$on(N.RoomSizeUpdated, (event, room) => {
+    scope.$on(N.RoomSizeUpdated, (event, room: IRoom) => {
       Log.notification(N.RoomSizeUpdated, 'ChatController');
-      if (scope.room == room) {
+      if (scope.room === room) {
         digest(null);
       }
     });
 
-    scope.$on(N.LazyLoadedMessages, (event, room) => {
+    scope.$on(N.LazyLoadedMessages, (event, room: IRoom) => {
       Log.notification(N.LazyLoadedMessages, 'ChatController');
-      if (scope.room == room) {
+      if (scope.room === room) {
         digest(null);
       }
     });
 
-    scope.$on(N.ChatUpdated, (event, room) => {
+    scope.$on(N.ChatUpdated, (event, room: IRoom) => {
       Log.notification(N.ChatUpdated, 'CreateRoomController');
-      if (scope.room == room) {
+      if (scope.room === room) {
         digest(null);
       }
     });
   }
 
   enabledMessageOptions(): string[] {
-    let list = [];
+    const list = [];
     if (this.Config.fileMessagesEnabled) {
       list.push('fileMessagesEnabled');
     }
@@ -219,13 +219,13 @@ class ChatController implements IChatController {
   onSelectImage(room: IRoom) {
     this.$scope.showMessageOptions = false;
     this.$scope.uploadingFile = true;
-    this.sendImageMessage((this.$window.event.target as any).files, room)
+    this.sendImageMessage((this.$window.event.target as any).files, room);
   }
 
   onSelectFile(room: IRoom) {
     this.$scope.showMessageOptions = false;
     this.$scope.uploadingFile = true;
-    this.sendFileMessage((this.$window.event.target as any).files, room)
+    this.sendFileMessage((this.$window.event.target as any).files, room);
   }
 
   imageUploadFinished() {
@@ -245,9 +245,9 @@ class ChatController implements IChatController {
       return;
     }
 
-    let f = $files[0];
+    const f = $files[0];
 
-    if (f.type == 'image/png' || f.type == 'image/jpeg') {
+    if (f.type === 'image/png' || f.type === 'image/jpeg') {
       this.$scope.sendingImage = true;
     }
     else {
@@ -257,14 +257,14 @@ class ChatController implements IChatController {
     }
 
     this.NetworkManager.upload.uploadFile(f).then((r: any) => {
-      let url = (typeof r === 'string' ? r : r.data && r.data.url);
+      const url = (typeof r === 'string' ? r : r.data && r.data.url);
       if (typeof url === 'string' && url.length > 0) {
-        let reader = new FileReader();
+        const reader = new FileReader();
 
         // Load the image into the canvas immediately to get the dimensions
         reader.onload = () => {
           return (e) => {
-            let image = new Image();
+            const image = new Image();
             image.onload = () => {
               room.sendImageMessage(this.$scope.getUser(), url, image.width, image.height);
             };
@@ -281,16 +281,16 @@ class ChatController implements IChatController {
     });
   }
 
-  sendFileMessage($files, room) {
+  sendFileMessage($files, room: IRoom) {
 
     if (this.$scope.sendingFile || $files.length === 0) {
       this.fileUploadFinished();
       return;
     }
 
-    let f = $files[0];
+    const f = $files[0];
 
-    if (f.type == 'image/png' || f.type == 'image/jpeg') {
+    if (f.type === 'image/png' || f.type === 'image/jpeg') {
       this.sendImageMessage($files, room);
       return;
     }
@@ -299,7 +299,7 @@ class ChatController implements IChatController {
     }
 
     this.NetworkManager.upload.uploadFile(f).then((r: any) => {
-      let url = (typeof r === 'string' ? r : r.data && r.data.url)
+      const url = (typeof r === 'string' ? r : r.data && r.data.url);
       if (typeof url === 'string' && url.length > 0) {
         room.sendFileMessage(this.$scope.getUser(), f.name, f.type, url);
       }
@@ -312,13 +312,13 @@ class ChatController implements IChatController {
 
   getZIndex() {
     // Make sure windows further to the right have a higher index
-    let z = this.$scope.room.zIndex ? this.$scope.room.zIndex : 100 * (1 - this.$scope.room.offset / this.Screen.screenWidth);
+    const z = this.$scope.room.zIndex ? this.$scope.room.zIndex : 100 * (1 - this.$scope.room.offset / this.Screen.screenWidth);
     return Math.floor(z);
   }
 
   sendMessage() {
     console.log('sendMessage()');
-    let user = this.$scope.getUser();
+    const user = this.$scope.getUser();
 
     this.$scope.showEmojis = false;
     this.$scope.showMessageOptions = false;
@@ -333,7 +333,7 @@ class ChatController implements IChatController {
 
   tabClicked(tab: string) {
     this.Tab.setActiveTabForRoom(this.$scope.room.getRID(), tab);
-    if (tab == TabKeys.MessagesTab) {
+    if (tab === TabKeys.MessagesTab) {
       this.$scope.showEmojis = false;
       this.$scope.showMessageOptions = false;
     }
@@ -383,7 +383,7 @@ class ChatController implements IChatController {
 
   acceptInvitation() {
     // this.$scope.room.acceptInvitation();
-    console.error(new Error('IRoom.acceptInvitation() is not implemented yet'))
+    console.error(new Error('IRoom.acceptInvitation() is not implemented yet'));
   }
 
   minimize() {
@@ -414,7 +414,8 @@ class ChatController implements IChatController {
   getAllUsers(): IUser[] {
     if (!Utils.unORNull(this.$scope.room)) {
       return ArrayUtils.objectToArray(this.$scope.room.getUsers());
-    } else {
+    }
+    else {
       return [];
     }
   }

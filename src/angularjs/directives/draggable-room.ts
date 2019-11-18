@@ -57,13 +57,13 @@ class DraggableRoom implements IDraggableRoom {
       return false;
     });
 
-    $(document).mousemove((e) => {
+    $(document).mousemove((e: MouseEvent) => {
 
       if (scope.dragging && !this.$rootScope.disableDrag) {
 
         Utils.stopDefault(e);
 
-        let dx = lastClientX - e.clientX;
+        const dx = lastClientX - e.clientX;
 
         // We must be moving in either a positive direction
         if (dx === 0) {

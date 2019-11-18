@@ -18,13 +18,13 @@ class CCFlash implements ICCFlash {
   ) { }
 
   link(scope: IRoomScope, element: JQLite) {
+    const originalTag = element.attr('data-cc-flash');
     let originalColor = element.css('background-color');
-    let originalTag = element.attr('data-cc-flash');
     let animating = false;
 
     scope.$on(N.RoomFlashHeader, (event, room, color, period, tag) => {
-      if (scope.room == room && color && period && !animating) {
-        if (!tag || tag == originalTag) {
+      if (scope.room === room && color && period && !animating) {
+        if (!tag || tag === originalTag) {
           animating = true;
 
           element.css('background-color', color);
@@ -35,7 +35,7 @@ class CCFlash implements ICCFlash {
 
           // Set another timeout
           this.$timeout(() => {
-            if (tag == 'room-header') {
+            if (tag === 'room-header') {
               originalColor = this.Config.headerColor;
             }
             element.css('background-color', originalColor);

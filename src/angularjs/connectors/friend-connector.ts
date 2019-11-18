@@ -28,7 +28,7 @@ class FriendsConnector implements IFriendsConnector {
   ) { }
 
   on(uid: string) {
-    let friendsRef = this.Paths.userFriendsRef(uid);
+    const friendsRef = this.Paths.userFriendsRef(uid);
 
     friendsRef.on('child_added', (snapshot) => {
 
@@ -48,7 +48,7 @@ class FriendsConnector implements IFriendsConnector {
   }
 
   off(uid: string) {
-    let friendsRef = this.Paths.userFriendsRef(uid);
+    const friendsRef = this.Paths.userFriendsRef(uid);
 
     friendsRef.off('child_added');
     friendsRef.off('child_removed');
@@ -66,7 +66,7 @@ class FriendsConnector implements IFriendsConnector {
 
       user.removeFriend = () => {
         snapshot.ref.remove();
-      }
+      };
       this.addFriend(user);
     }
 
@@ -77,8 +77,7 @@ class FriendsConnector implements IFriendsConnector {
   }
 
   addFriendsFromConfig(friends: string[]) {
-    for (let i = 0; i < friends.length; i++) {
-      const uid = friends[i];
+    for (const uid of friends) {
 
       const user = this.UserStore.getOrCreateUserWithID(uid);
       user.ssoFriend = true;

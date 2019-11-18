@@ -16,7 +16,7 @@ class NotificationController implements INotificationController {
   constructor(
     private $scope: INotificationScope,
   ) {
-    $scope.submit = this.submit.bind(this)()
+    $scope.submit = this.submit.bind(this)();
   }
 
   submit() {

@@ -56,10 +56,10 @@ class RoomListBoxController {
     this.rooms.sort((a, b) => {
       // First order by number of unread messages
       // Badge can be null
-      let ab = a.badge ? a.badge : 0;
-      let bb = b.badge ? b.badge : 0;
+      const ab = a.badge ? a.badge : 0;
+      const bb = b.badge ? b.badge : 0;
 
-      if (ab != bb) {
+      if (ab !== bb) {
         return bb - ab;
       }
       // Otherwise sort them by number of users
@@ -68,7 +68,7 @@ class RoomListBoxController {
       }
     });
 
-    this.moreChatsMinimized = this.rooms.length == 0;
+    this.moreChatsMinimized = this.rooms.length === 0;
 
     this.$timeout(() => {
       this.$scope.$digest();
@@ -77,23 +77,23 @@ class RoomListBoxController {
 
   roomClicked(room: IRoom) {
     // Get the left most room
-    let rooms = this.RoomPositionManager.getRooms();
+    const rooms = this.RoomPositionManager.getRooms();
 
     // Get the last box that's active
     for (let i = rooms.length - 1; i >= 0; i--) {
       if (rooms[i].active) {
 
         // Get the details of the final room
-        let offset = rooms[i].offset;
-        let width = rooms[i].width;
-        let height = rooms[i].height;
-        let slot = rooms[i].slot;
+        const offset = rooms[i].offset;
+        const width = rooms[i].width;
+        const height = rooms[i].height;
+        const slot = rooms[i].slot;
 
         // Update the old room with the position of the new room
         rooms[i].setOffset(room.offset);
         rooms[i].width = room.width;
         rooms[i].height = room.height;
-        //rooms[i].active = false;
+        // rooms[i].active = false;
         rooms[i].setActive(false);
         rooms[i].slot = room.slot;
 
@@ -102,7 +102,7 @@ class RoomListBoxController {
         room.width = width;
         room.height = height;
 
-        //room.setSizeToDefault();
+        // room.setSizeToDefault();
         room.setActive(true);
         room.badge = null;
         room.minimized = false;

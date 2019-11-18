@@ -26,7 +26,7 @@ export class AbstractUsersListController {
     protected RoomOpenQueue: IRoomOpenQueue,
 
   ) {
-    if (this.constructor == AbstractUsersListController) {
+    if (this.constructor === AbstractUsersListController) {
       throw new Error('AbstractUsersListController can\'t be instantiated.');
     }
 
@@ -69,7 +69,7 @@ export class AbstractUsersListController {
       let rooms = this.Cache.getPrivateRoomsWithUsers(this.UserStore.currentUser(), user);
       if (rooms.length) {
         const r = rooms[0];
-        if (r.getType() == RoomType.OneToOne) {
+        if (r.getType() === RoomType.OneToOne) {
           r.flashHeader();
           // The room is already open! Do nothing
           return;
@@ -86,7 +86,7 @@ export class AbstractUsersListController {
       this.RoomCreator.createAndPushPrivateRoom([user]).then((room) => {
         this.RoomOpenQueue.addRoomWithID(room.rid());
         room.open(0);
-        //let room = RoomStore.getOrCreateRoomWithID(rid);
+        // let room = RoomStore.getOrCreateRoomWithID(rid);
       }, (error) => {
         console.log(error);
       });

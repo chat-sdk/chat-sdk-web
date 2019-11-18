@@ -35,6 +35,11 @@ export interface IMessage {
   updateDisplay(): void;
 }
 
+export enum MessageSide {
+  Right = 'right',
+  Left = 'left'
+}
+
 export class Message implements IMessage {
 
   public read = false;
@@ -71,16 +76,16 @@ export class Message implements IMessage {
         this.setType(MessageType.Text);
       }
 
-      if (this.type() == MessageType.Image || this.type() == MessageType.File) {
+      if (this.type() === MessageType.Image || this.type() === MessageType.File) {
         // Get the image and thumbnail URLs
-        let json = meta[MessageKeys.JSONv2];
+        const json = meta[MessageKeys.JSONv2];
 
         if (json) {
-          if (this.type() == MessageType.Image) {
+          if (this.type() === MessageType.Image) {
             this.thumbnailURL = this.CloudImage.cloudImage(json[MessageKeys.ImageURL], 200, 200);
             this.imageURL = json[MessageKeys.ImageURL];
           }
-          if (this.type() == MessageType.File) {
+          if (this.type() === MessageType.File) {
             this.fileURL = json[MessageKeys.FileURL];
           }
         }
@@ -88,7 +93,7 @@ export class Message implements IMessage {
 
       // Our messages are on the right - other user's messages are
       // on the left
-      this.side = this.uid() == this.UserStore.currentUser().uid() ? MessageSide.Right : MessageSide.Left;
+      this.side = this.uid() === this.UserStore.currentUser().uid() ? MessageSide.Right : MessageSide.Left;
 
       this.timeString = this.Time.formatTimestamp(this.time(), this.Config.clockType);
 
@@ -96,7 +101,7 @@ export class Message implements IMessage {
       if (this.uid()) {
 
         // We need to set the user here
-        if (this.uid() == this.UserStore.currentUser().uid()) {
+        if (this.uid() === this.UserStore.currentUser().uid()) {
           this.user = this.UserStore.currentUser();
         }
         else {
@@ -120,7 +125,7 @@ export class Message implements IMessage {
       hideTime: this.hideTime,
       hideName: this.hideName,
       side: this.side,
-    }
+    };
   }
 
   updateDisplay() {
@@ -129,7 +134,7 @@ export class Message implements IMessage {
     let hideDate = true;
 
     if (this.nextMessage) {
-      hideName = hideName || this.uid() == this.nextMessage.uid();
+      hideName = hideName || this.uid() === this.nextMessage.uid();
     }
     if (this.previousMessage) {
       hideDate = Utils.sameMinute(this.date(), this.previousMessage.date());
@@ -138,7 +143,7 @@ export class Message implements IMessage {
     this.hideName = hideName;
     this.hideTime = hideDate;
 
-    //console.log("Message: " + this.text() + ", user: " + this.uid() + ", h: " + this.date().getHours() + " m:" + this.date().getMinutes() + " hideName: " + hideName + ", hideDate: " + hideDate);
+    // console.log("Message: " + this.text() + ", user: " + this.uid() + ", h: " + this.date().getHours() + " m:" + this.date().getMinutes() + " hideName: " + hideName + ", hideDate: " + hideDate);
   }
 
   deserialize(sm: IStringAnyObject) {
@@ -168,19 +173,19 @@ export class Message implements IMessage {
   }
 
   text(): string {
-    if (this.type() == MessageType.Text) {
+    if (this.type() === MessageType.Text) {
       return this.getMetaValue(MessageKeys.Text);
     }
-    else if (this.type() == MessageType.Image) {
-      return "Image";
+    else if (this.type() === MessageType.Image) {
+      return 'Image';
     }
-    else if (this.type() == MessageType.File) {
-      return "File";
+    else if (this.type() === MessageType.File) {
+      return 'File';
     }
-    else if (this.type() == MessageType.Location) {
-      return "Location";
+    else if (this.type() === MessageType.Location) {
+      return 'Location';
     }
-    return "";
+    return '';
   }
 
   sender(): IUser {
@@ -232,11 +237,6 @@ export class Message implements IMessage {
     this.mid = mid;
   }
 
-}
-
-export enum MessageSide {
-  Right = 'right',
-  Left = 'left'
 }
 
 export interface IMessageFactory {
@@ -301,12 +301,10 @@ class MessageFactory implements IMessageFactory {
     message[MessageKeys.Date] = database.ServerValue.TIMESTAMP;
     message[MessageKeys.Type] = type;
 
-    let read = new Map<string, any>();
+    const read = new Map<string, any>();
 
-    for (let i = 0; i < to.length; i++) {
-      const status = {};
-      status[MessageKeys.Status] = 0;
-      read.set(to[i], status);
+    for (const t of to) {
+      read.set(t, { [MessageKeys.Status]: 0 });
     }
 
     // Set my read status to read

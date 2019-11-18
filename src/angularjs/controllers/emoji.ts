@@ -4,8 +4,8 @@ import { Emoji } from '../services/emoji';
 import { IRoomScope } from './chat';
 
 export interface IEmojiController {
-  addEmoji(text: string): void
-  getEmojis(): string[]
+  addEmoji(text: string): void;
+  getEmojis(): string[];
 }
 
 class EmojiController implements IEmojiController {
@@ -19,18 +19,18 @@ class EmojiController implements IEmojiController {
   constructor(public Emoji: Emoji, $scope: IRoomScope) {
     this.emoji = Emoji;
     this.$scope = $scope;
-    this.emojis = this.getEmojis()
+    this.emojis = this.getEmojis();
   }
 
   addEmoji(text: string): void {
     if (!this.$scope.input.text) {
-      this.$scope.input.text = ""
+      this.$scope.input.text = '';
     }
-    this.$scope.input.text += text
+    this.$scope.input.text += text;
   }
 
   getEmojis(): string[] {
-    return this.emoji.getEmojis()
+    return this.emoji.getEmojis();
   }
 
 }
@@ -43,7 +43,7 @@ class EmojiComponent implements ng.IComponentOptions {
   public templateUrl: 'emojis.html';
 
   constructor() {
-    this.controller = EmojiController
+    this.controller = EmojiController;
   }
 
 }

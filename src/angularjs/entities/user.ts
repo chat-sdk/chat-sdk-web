@@ -87,7 +87,8 @@ class User extends Entity implements IUser {
   name(value: string): string {
     if (Utils.unORNull(value)) {
       return this.getName();
-    } else {
+    }
+    else {
       this.setName(value);
     }
   }
@@ -104,7 +105,8 @@ class User extends Entity implements IUser {
   status(value: string) {
     if (Utils.unORNull(value)) {
       return this.getStatus();
-    } else {
+    }
+    else {
       this.setStatus(value);
     }
   }
@@ -120,7 +122,8 @@ class User extends Entity implements IUser {
   location(value) {
     if (Utils.unORNull(value)) {
       return this.getLocation();
-    } else {
+    }
+    else {
       this.setLocation(value);
     }
   }
@@ -136,7 +139,8 @@ class User extends Entity implements IUser {
   countryCode(value: string) {
     if (Utils.unORNull(value)) {
       return this.getCountryCode();
-    } else {
+    }
+    else {
       this.setCountryCode(value);
     }
   }
@@ -152,7 +156,8 @@ class User extends Entity implements IUser {
   gender(value: string) {
     if (Utils.unORNull(value)) {
       return this.getGender();
-    } else {
+    }
+    else {
       this.setGender(value);
     }
   }
@@ -168,7 +173,8 @@ class User extends Entity implements IUser {
   profileLink(value: string) {
     if (Utils.unORNull(value)) {
       return this.getProfileLink();
-    } else {
+    }
+    else {
       this.setProfileLink(value);
     }
   }
@@ -184,7 +190,8 @@ class User extends Entity implements IUser {
   homepageLink(value: string) {
     if (Utils.unORNull(value)) {
       return this.getHomepageLink();
-    } else {
+    }
+    else {
       this.setHomepageLink(value);
     }
   }
@@ -200,7 +207,8 @@ class User extends Entity implements IUser {
   homepageText(value: string) {
     if (Utils.unORNull(value)) {
       return this.getHomepageText();
-    } else {
+    }
+    else {
       this.setHomepageText(value);
     }
   }
@@ -216,7 +224,8 @@ class User extends Entity implements IUser {
   profileHTML(value: string) {
     if (Utils.unORNull(value)) {
       return this.getProfileHTML();
-    } else {
+    }
+    else {
       this.setProfileHTML(value);
     }
   }
@@ -232,7 +241,8 @@ class User extends Entity implements IUser {
   allowInvites(value?: UserAllowInvites) {
     if (Utils.unORNull(value)) {
       return this.getAllowInvites();
-    } else {
+    }
+    else {
       this.setAllowInvites(value);
     }
   }
@@ -252,7 +262,8 @@ class User extends Entity implements IUser {
   imageURL(value?: string) {
     if (Utils.unORNull(value)) {
       return this.getImageURL();
-    } else {
+    }
+    else {
       this.setImageURL(value);
     }
   }
@@ -315,7 +326,7 @@ class User extends Entity implements IUser {
 
     // This function should only ever be called on the root user
     if (!this.isMe()) {
-      console.log("Can be invited should only be called on the root user");
+      console.log('Can be invited should only be called on the root user');
       return false;
     }
 
@@ -323,17 +334,17 @@ class User extends Entity implements IUser {
       return true;
     }
 
-    let allowInvites = this.allowInvites();
-    return Utils.unORNull(allowInvites) || allowInvites == UserAllowInvites.Everyone;
+    const allowInvites = this.allowInvites();
+    return Utils.unORNull(allowInvites) || allowInvites === UserAllowInvites.Everyone;
   }
 
   allowInvitesFrom(type: UserAllowInvites): boolean {
-    return this.allowInvites() == type;
+    return this.allowInvites() === type;
   }
 
   updateImageURL(imageURL: string): Promise<any> {
     // Compare to the old URL
-    let imageChanged = imageURL != this.imageURL();
+    const imageChanged = imageURL !== this.imageURL();
     if (imageChanged) {
       this.setMetaValue(UserKeys.ImageURL, imageURL);
       this.setImageURL(imageURL);
@@ -347,7 +358,7 @@ class User extends Entity implements IUser {
       // TODO: Improve this
       this.image = this.Environment.defaultProfilePictureURL();
     }
-    else if (isData || image == this.Environment.defaultProfilePictureURL()) {
+    else if (isData || image === this.Environment.defaultProfilePictureURL()) {
       this.image = image;
     }
     else {
@@ -367,7 +378,7 @@ class User extends Entity implements IUser {
   }
 
   hasImage(): boolean {
-    return this.image && this.image != this.Environment.defaultProfilePictureURL();
+    return this.image && this.image !== this.Environment.defaultProfilePictureURL();
   }
 
   addRoomUpdate(room: IRoom): { [path: string]: string } {
@@ -392,7 +403,7 @@ class User extends Entity implements IUser {
 
   async addFriendWithUID(uid: string): Promise<any> {
     const ref = this.Paths.userFriendsRef(this.uid());
-    const data = { [uid]: { uid: uid } };
+    const data = { [uid]: { uid } };
 
     await ref.update(data);
     return this.updateState(PathKeys.FriendsPath);
@@ -414,7 +425,6 @@ class User extends Entity implements IUser {
    * Remove a specified user as a friend
    * @package friend - the user to be removed as a friend
    */
-  removeFriend(friend: IUser): void;
   removeFriend(friend?: IUser) {
     // This method is added to the object when the friend is
     // added initially
@@ -425,7 +435,7 @@ class User extends Entity implements IUser {
 
   blockUserWithUID(uid: string) {
     const ref = this.Paths.userBlockedRef(this.uid());
-    const data = { [uid]: { uid: uid } };
+    const data = { [uid]: { uid } };
 
     ref.update(data).then(() => {
       return this.updateState(PathKeys.BlockedPath);
