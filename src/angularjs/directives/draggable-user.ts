@@ -1,11 +1,14 @@
 import * as angular from 'angular';
 import * as $ from 'jquery';
 
-import { IUserListScope } from '../controllers/user-list';
 import { Utils } from '../services/utils';
 import { IScreen } from '../services/screen';
 import { IUser } from '../entities/user';
 import { IRootScope } from '../interfaces/root-scope';
+
+export interface IUserListScope extends ng.IScope {
+  aUser: any;
+}
 
 export interface IDraggableUser extends ng.IDirective {
 
