@@ -1,8 +1,13 @@
 import * as $ from 'jquery';
 import * as angular from 'angular';
 
-import { IProfileBoxScope } from '../controllers/user-profile-box';
 import { IScreen } from '../services/screen';
+import { IUser } from '../entities/user';
+
+export interface IProfileBoxScope extends ng.IScope {
+  hover: any;
+  currentUser: IUser;
+}
 
 export interface ICenterMouseY extends ng.IDirective {
 

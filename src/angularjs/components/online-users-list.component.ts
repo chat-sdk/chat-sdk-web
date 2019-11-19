@@ -13,10 +13,11 @@ import { IUserStore } from '../persistence/user-store';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoomCreator } from '../services/room-creator';
 import { IRoomOpenQueue } from '../services/room-open-queue';
+import { IProfileBox } from '../services/profile-box.service';
 
 class OnlineUsersListController extends AbstractUsersListController {
 
-  static $inject = ['$scope', '$timeout', 'OnlineConnector', 'Search', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue'];
+  static $inject = ['$scope', '$timeout', 'OnlineConnector', 'Search', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'ProfileBox'];
 
   allUsers = Array<IUser>();
   users = Array<IUser>();
@@ -31,6 +32,7 @@ class OnlineUsersListController extends AbstractUsersListController {
     protected RoomStore: IRoomStore,
     protected RoomCreator: IRoomCreator,
     protected RoomOpenQueue: IRoomOpenQueue,
+    private ProfileBox: IProfileBox,
   ) {
     super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue);
 
@@ -60,8 +62,7 @@ class OnlineUsersListController extends AbstractUsersListController {
   }
 
   showProfileBox(uid: string) {
-    // TODO
-    console.warn('showProfileBox');
+    this.ProfileBox.show(uid);
   }
 
 }

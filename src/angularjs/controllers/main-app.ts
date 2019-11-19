@@ -3,7 +3,6 @@ import * as angular from 'angular';
 import * as RoomType from '../keys/room-type';
 import * as Defines from '../keys/defines';
 import { N } from '../keys/notification-keys';
-import { Dimensions } from '../keys/dimensions';
 import { MessageType } from '../keys/message-type';
 import { IUser } from '../entities/user';
 import { Utils } from '../services/utils';
@@ -45,7 +44,6 @@ export interface IMainAppScope extends ng.IScope {
   notification: any;
   on: boolean;
   password: string;
-  profileBoxStyle: IStringAnyObject;
   profileHideTimeoutPromise: ng.IPromise<void>;
   totalUserCount: number;
   uploadingFile: boolean;
@@ -71,7 +69,6 @@ export interface IMainAppScope extends ng.IScope {
   showLoginBox(mode?: LoginMode): void;
   showMainBox(): void;
   showNotification(type: NotificationType, title: string, message?: string, button?: string): void;
-  showProfileBox(uid: string, duration: number): void;
   showProfileSettingsBox(): void;
   shutdown($event: any): void;
   shutdownImage(): string;
@@ -86,14 +83,13 @@ export interface IMainAppController {
 
 class MainAppController implements IMainAppController {
 
-  static $inject = ['$rootScope', '$scope', '$timeout', '$window', '$sce', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore', '$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment'];
+  static $inject = ['$rootScope', '$scope', '$timeout', '$window', 'PathAnalyser', 'OnlineConnector', 'FriendsConnector', 'Cache', 'UserStore', 'RoomStore', '$document', 'Presence', 'LocalStorage', 'RoomCreator', 'Config', 'Partials', 'RoomPositionManager', 'Paths', 'Auth', 'StateManager', 'RoomOpenQueue', 'NetworkManager', 'Environment'];
 
   constructor(
     private $rootScope: IRootScope,
     private $scope: IMainAppScope,
     private $timeout: ng.ITimeoutService,
     private $window: ng.IWindowService,
-    private $sce: ng.ISCEService,
     private PathAnalyser: IPathAnalyser,
     private OnlineConnector: IOnlineConnector,
     private FriendsConnector: IFriendsConnector,
@@ -116,14 +112,12 @@ class MainAppController implements IMainAppController {
   ) {
     // $scope properties
     $scope.totalUserCount = 0;
-    $scope.friendsEnabled = true;
     $scope.hidden = Environment.config().hideMainBox; // Used to hide chat box
 
     // $scope methods
     $scope.addRemoveFriend = this.addRemoveFriend.bind(this);
     $scope.blockUnblockUser = this.blockUnblockUser.bind(this);
     $scope.buttonClassForUser = this.buttonClassForUser.bind(this);
-    $scope.cancelTimer = this.cancelTimer.bind(this);
     $scope.getUser = this.getUser.bind(this);
     $scope.hideNotification = this.hideNotification.bind(this);
     $scope.imgForFileType = this.imgForFileType.bind(this);
@@ -141,7 +135,6 @@ class MainAppController implements IMainAppController {
     $scope.showLoginBox = this.showLoginBox.bind(this);
     $scope.showMainBox = this.showMainBox.bind(this);
     $scope.showNotification = this.showNotification.bind(this);
-    $scope.showProfileBox = this.showProfileBox.bind(this);
     $scope.showProfileSettingsBox = this.showProfileSettingsBox.bind(this);
     $scope.shutdown = this.shutdown.bind(this);
     $scope.shutdownImage = this.shutdownImage.bind(this);
@@ -365,53 +358,6 @@ class MainAppController implements IMainAppController {
   // saveRoomSlotToUser(room: IRoom) {
   //   this.getUser().updateRoomSlot(room, room.slot);
   // }
-
-  /**
-   * Show the floating profile box
-   * when the user's mouse leaves the box
-   * we wait a small amount of time before
-   * hiding the box - this gives the mouse
-   * time to go from the list to inside the
-   * box before the box disappears
-   */
-  showProfileBox(uid: string, duration: number) {
-
-    if (this.Config.disableUserInfoPopup) {
-      return;
-    }
-
-    this.$scope.friendsEnabled = this.Config.friendsEnabled;
-
-    this.$scope.profileBoxStyle = {
-      right: 250 + 'px',
-      width: Dimensions.ProfileBoxWidth + 'px',
-      'border-top-left-radius': 4,
-      'border-bottom-left-radius': 4,
-      'border-top-right-radius': 0,
-      'border-bottom-right-radius': 0
-    };
-
-    if (!uid) {
-      if (duration === 0) {
-        this.$scope.currentUser = null;
-      }
-      else {
-        this.$scope.profileHideTimeoutPromise = this.$timeout(() => {
-          this.$scope.currentUser = null;
-        }, duration ? duration : 100);
-      }
-    }
-    else {
-      this.$scope.cancelTimer();
-      this.$scope.currentUser = this.UserStore.getUserWithID(uid);
-      const profileHTML = this.$scope.currentUser.getProfileHTML();
-      this.$scope.currentUserHTML = !profileHTML ? null : this.$sce.trustAsHtml(profileHTML);
-    }
-  }
-
-  cancelTimer() {
-    this.$timeout.cancel(this.$scope.profileHideTimeoutPromise);
-  }
 
   addRemoveFriend(user: IUser) {
     if (this.$scope.isFriend(user)) {

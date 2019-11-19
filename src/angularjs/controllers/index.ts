@@ -10,4 +10,3 @@ import './main-app';
 import './main-box';
 import './notification';
 import './profile-settings';
-import './user-profile-box';

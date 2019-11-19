@@ -28,7 +28,7 @@ import { IEnvironment } from './environment';
 import { IRootScope } from '../interfaces/root-scope';
 
 export interface IRoomCreator {
-  createAndPushPrivateRoom(users: [IUser]): Promise<IRoom>;
+  createAndPushPrivateRoom(users: IUser[]): Promise<IRoom>;
   createAndPushPublicRoom(name: string, description: string, weight?: number): Promise<IRoom>
   createAndPushRoom(rid: string, name: string, description: string, invitesEnabled: boolean, type: RoomType, userCreated?: boolean, weight?: number): Promise<IRoom>
   createRoom(rid: string, meta?: IRoomMeta): IRoom;
@@ -94,7 +94,7 @@ class RoomCreator implements IRoomCreator {
     return this.createAndPushRoom(null, name, description, true, RoomType.Public, true, weight);
   }
 
-  async createAndPushPrivateRoom(users: [IUser]): Promise<IRoom> {
+  async createAndPushPrivateRoom(users: IUser[]): Promise<IRoom> {
     // Since we're calling create room we will be added automatically
     const room = await this.createAndPushRoom(null, null, null, true, users.length == 1 ? RoomType.OneToOne : RoomType.Group);
     const promises = users.map(user => this.RoomFactory.addUserToRoom(user, room, UserStatus.Member));

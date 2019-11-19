@@ -10,12 +10,11 @@ import { Log } from '../services/log';
 import { NotificationType } from '../keys/notification-type';
 import { IUser } from '../entities/user';
 import { IConfig } from '../services/config';
-import { IAuth } from '../network/auth';
 import { IScreen } from '../services/screen';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { INetworkManager } from '../network/network-manager';
-import { IStringAnyObject } from '../interfaces/string-any-object';
 import { ITab } from '../services/tab';
+import { IProfileBox } from '../services/profile-box.service';
 
 export interface IRoomScope extends ng.IScope {
   activeTab: string;
@@ -31,7 +30,6 @@ export interface IRoomScope extends ng.IScope {
   inputHeight: any;
   loginIframeURL: string;
   mainBoxWidth: number;
-  profileBoxStyle: IStringAnyObject;
   resizing: any;
   room: IRoom;
   sendingFile: boolean;
@@ -62,9 +60,7 @@ export interface IRoomScope extends ng.IScope {
   setMinimized(minimized: boolean): void;
   setTyping(): void;
   showNotification(type: NotificationType, title: string, message?: string, button?: string): void;
-  showProfileBox(): void;
   startDrag(): void;
-  superShowProfileBox(uid: string): void;
   tabClicked(tab: string): void;
   toggleEmoticons(): void;
   toggleMessageOptions(): void;
@@ -82,7 +78,7 @@ export interface IChatController {
 
 class ChatController implements IChatController {
 
-  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Auth', 'Screen', 'RoomPositionManager', 'NetworkManager', 'Tab'];
+  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Screen', 'RoomPositionManager', 'NetworkManager', 'Tab', 'ProfileBox'];
 
   constructor(
     private $scope: IRoomScope,
@@ -90,17 +86,17 @@ class ChatController implements IChatController {
     private $window: ng.IWindowService,
     private $sce: ng.ISCEService,
     private Config: IConfig,
-    private Auth: IAuth,
     private Screen: IScreen,
     private RoomPositionManager: IRoomPositionManager,
     private NetworkManager: INetworkManager,
     private Tab: ITab,
+    private ProfileBox: IProfileBox,
   ) {
     // $scope properties
     $scope.showEmojis = false;
     $scope.showMessageOptions = false;
     // $scope.headerColor = $scope.config.headerColor;
-    $scope.loginIframeURL = $sce.trustAsResourceUrl('http://ccwp/social.html');
+    $scope.loginIframeURL = this.$sce.trustAsResourceUrl('http://ccwp/social.html');
 
     // $scope methods
     $scope.acceptInvitation = this.acceptInvitation.bind(this);
@@ -123,16 +119,12 @@ class ChatController implements IChatController {
     $scope.sendMessage = this.sendMessage.bind(this);
     $scope.setMinimized = this.setMinimized.bind(this);
     $scope.setTyping = this.setTyping.bind(this);
-    $scope.showProfileBox = this.showProfileBox.bind(this);
     $scope.startDrag = this.startDrag.bind(this);
     $scope.tabClicked = this.tabClicked.bind(this);
     $scope.toggleEmoticons = this.toggleEmoticons.bind(this);
     $scope.toggleMessageOptions = this.toggleMessageOptions.bind(this);
     $scope.toggleVisibility = this.toggleVisibility.bind(this);
     $scope.wasDragged = this.wasDragged.bind(this);
-
-    // Save the super class
-    $scope.superShowProfileBox = $scope.showProfileBox;
 
     Tab.activeTabForRoomObservable($scope.room.getRID()).subscribe(tab => {
       $scope.activeTab = tab;
@@ -363,7 +355,7 @@ class ChatController implements IChatController {
 
   showProfileBox(uid: string) {
 
-    this.$scope.superShowProfileBox(uid);
+    this.ProfileBox.show(uid);
 
     // Work out the x position
     let x = this.$scope.room.offset + this.$scope.room.width;
@@ -374,11 +366,11 @@ class ChatController implements IChatController {
       x = this.$scope.room.offset - Dimensions.ProfileBoxWidth;
     }
 
-    this.$scope.profileBoxStyle.right = x + 'px';
-    this.$scope.profileBoxStyle['border-top-left-radius'] = facesLeft ? 4 : 0;
-    this.$scope.profileBoxStyle['border-bottom-left-radius'] = facesLeft ? 4 : 0;
-    this.$scope.profileBoxStyle['border-top-right-radius'] = facesLeft ? 0 : 4;
-    this.$scope.profileBoxStyle['border-bottom-right-radius'] = facesLeft ? 0 : 4;
+    this.ProfileBox.style.right = x + 'px';
+    this.ProfileBox.style['border-top-left-radius'] = facesLeft ? 4 : 0;
+    this.ProfileBox.style['border-bottom-left-radius'] = facesLeft ? 4 : 0;
+    this.ProfileBox.style['border-top-right-radius'] = facesLeft ? 0 : 4;
+    this.ProfileBox.style['border-bottom-right-radius'] = facesLeft ? 0 : 4;
   }
 
   acceptInvitation() {

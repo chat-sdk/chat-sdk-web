@@ -15,10 +15,11 @@ import { IUserStore } from '../persistence/user-store';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoomCreator } from '../services/room-creator';
 import { IRoomOpenQueue } from '../services/room-open-queue';
+import { IProfileBox } from '../services/profile-box.service';
 
 export class FriendsListController extends AbstractUsersListController {
 
-  static $inject = ['$scope', '$timeout', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'OnlineConnector', 'FriendsConnector', 'Search'];
+  static $inject = ['$scope', '$timeout', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'OnlineConnector', 'FriendsConnector', 'Search', 'ProfileBox'];
 
   room: IRoom;
   allUsers = Array<IUser>();
@@ -35,6 +36,7 @@ export class FriendsListController extends AbstractUsersListController {
     protected OnlineConnector: IOnlineConnector,
     protected FriendsConnector: IFriendsConnector,
     protected Search: ISearch,
+    private ProfileBox: IProfileBox,
   ) {
     super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue);
 
@@ -49,11 +51,6 @@ export class FriendsListController extends AbstractUsersListController {
     });
 
     this.Search.queryForTabObservable(FriendsTab).subscribe(this.updateList.bind(this));
-  }
-
-  showProfileBox(uid: string) {
-    // TODO
-    console.warn('showProfileBox');
   }
 
   updateList() {
@@ -90,6 +87,10 @@ export class FriendsListController extends AbstractUsersListController {
     this.$timeout(() => {
       this.$scope.$digest();
     });
+  }
+
+  showProfileBox(uid: string) {
+    this.ProfileBox.show(uid);
   }
 
 }

@@ -1,13 +1,16 @@
 import './array-utils';
 import './before-unload';
+import './blocking.service';
 import './cloud-image';
 import './config';
+import './contact.service';
 import './emoji';
 import './environment';
 import './log';
 import './marquee';
 import './partials';
 import './path-analyser';
+import './profile-box.service';
 import './room-creator';
 import './room-factory';
 import './room-open-queue';
@@ -17,6 +20,7 @@ import './search';
 import './sound-effects';
 import './state-manager';
 import './tab';
+import './thread.service';
 import './time';
-import './utils'
+import './utils';
 import './visibility';
