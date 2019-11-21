@@ -44,6 +44,7 @@ class MainBoxController {
   // Bindings
   minimizeMainBox: () => void;
   showCreateRoomBox: () => void;
+  showProfileSettingsBox: () => void;
 
   constructor(
     private $scope: IMainBoxScope,
@@ -191,12 +192,6 @@ class MainBoxController {
     room.open(0);
   }
 
-  showProfileSettingsBox() {
-    // this.$scope.activeBox = Defines.ProfileSettingsBox;
-
-    this.$scope.$broadcast(ShowProfileSettingsBox);
-  }
-
   currentUser(): IUser {
     return this.UserStore.currentUser();
   }
@@ -210,5 +205,6 @@ angular.module('myApp.components').component('mainBox', {
   bindings: {
     minimizeMainBox: '<',
     showCreateRoomBox: '<',
+    showProfileSettingsBox: '<',
   },
 });
