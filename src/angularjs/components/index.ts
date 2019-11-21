@@ -6,3 +6,4 @@ import './online-users-list.component';
 import './profile-box.component';
 import './public-rooms-list.component';
 import './room-list-box.component';
+import './room-users-list.component';

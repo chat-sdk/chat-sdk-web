@@ -4,7 +4,7 @@
     data-ng-mouseleave="ctrl.showProfileBox(null)">
     <td style="position: relative" class="cc-row"
       data-ng-class="aUser.blocked ? 'cc-blocked' : aUser.online ? 'cc-online' : 'cc-offline'"
-      data-draggable-user="user" data-ng-click="ctrl.userClicked(aUser)">
+      data-draggable-user="aUser" data-ng-click="ctrl.userClicked(aUser)">
 
       <img class="cc-thumbnail-30 cc-user-image uk-float-left" data-ng-src="{{ aUser.getThumbnail() }}"
         title="{{ aUser.uid() }}" />

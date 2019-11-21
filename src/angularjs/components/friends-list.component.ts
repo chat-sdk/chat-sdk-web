@@ -6,7 +6,6 @@ import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IUser } from '../entities/user';
 import { IOnlineConnector } from '../connectors/online-connector';
-import { IRoom } from '../entities/room';
 import { ISearch } from '../services/search.service';
 import { FriendsTab } from '../keys/tab-keys';
 import { IFriendsConnector } from '../connectors/friend-connector';
@@ -21,9 +20,7 @@ export class FriendsListController extends AbstractUsersListController {
 
   static $inject = ['$scope', '$timeout', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'OnlineConnector', 'FriendsConnector', 'Search', 'ProfileBox'];
 
-  room: IRoom;
   allUsers = Array<IUser>();
-  users = Array<IUser>();
 
   constructor(
     protected $scope: ng.IScope,
@@ -36,9 +33,9 @@ export class FriendsListController extends AbstractUsersListController {
     protected OnlineConnector: IOnlineConnector,
     protected FriendsConnector: IFriendsConnector,
     protected Search: ISearch,
-    private ProfileBox: IProfileBox,
+    protected ProfileBox: IProfileBox,
   ) {
-    super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue);
+    super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue, ProfileBox);
 
     $scope.$on(N.FriendAdded, () => {
       Log.notification(N.FriendAdded, 'FriendsListController');
@@ -87,10 +84,6 @@ export class FriendsListController extends AbstractUsersListController {
     this.$timeout(() => {
       this.$scope.$digest();
     });
-  }
-
-  showProfileBox(uid: string) {
-    this.ProfileBox.show(uid);
   }
 
 }

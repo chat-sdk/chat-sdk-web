@@ -20,7 +20,6 @@ class OnlineUsersListController extends AbstractUsersListController {
   static $inject = ['$scope', '$timeout', 'OnlineConnector', 'Search', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'ProfileBox'];
 
   allUsers = Array<IUser>();
-  users = Array<IUser>();
 
   constructor(
     protected $scope: ng.IScope,
@@ -32,9 +31,9 @@ class OnlineUsersListController extends AbstractUsersListController {
     protected RoomStore: IRoomStore,
     protected RoomCreator: IRoomCreator,
     protected RoomOpenQueue: IRoomOpenQueue,
-    private ProfileBox: IProfileBox,
+    protected ProfileBox: IProfileBox,
   ) {
-    super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue);
+    super($scope, Cache, UserStore, RoomStore, RoomCreator, RoomOpenQueue, ProfileBox);
 
     $scope.$on(N.OnlineUserAdded, () => {
       Log.notification(N.OnlineUserAdded, 'OnlineUsersListController');
@@ -59,10 +58,6 @@ class OnlineUsersListController extends AbstractUsersListController {
     this.$timeout(() => {
       this.$scope.$digest();
     });
-  }
-
-  showProfileBox(uid: string) {
-    this.ProfileBox.show(uid);
   }
 
 }

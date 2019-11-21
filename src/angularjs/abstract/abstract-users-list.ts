@@ -8,13 +8,13 @@ import { IUserStore } from '../persistence/user-store';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoomCreator } from '../services/room-creator';
 import { IRoomOpenQueue } from '../services/room-open-queue';
+import { IProfileBox } from '../services/profile-box.service';
 
 export class AbstractUsersListController {
 
-  static $inject = ['$scope', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue'];
+  static $inject = ['$scope', 'Cache', 'UserStore', 'RoomStore', 'RoomCreator', 'RoomOpenQueue', 'ProfileBox'];
 
   room: IRoom;
-  allUsers = Array<IUser>();
   users = Array<IUser>();
 
   constructor(
@@ -24,7 +24,7 @@ export class AbstractUsersListController {
     protected RoomStore: IRoomStore,
     protected RoomCreator: IRoomCreator,
     protected RoomOpenQueue: IRoomOpenQueue,
-
+    protected ProfileBox: IProfileBox,
   ) {
     if (this.constructor === AbstractUsersListController) {
       throw new Error('AbstractUsersListController can\'t be instantiated.');
@@ -56,7 +56,7 @@ export class AbstractUsersListController {
   }
 
   showProfileBox(uid: string) {
-    throw new Error('Method \'showProfileBox(uid: string)\' must be implemented.');
+    this.ProfileBox.show(uid);
   }
 
   userClicked(user: IUser) {
