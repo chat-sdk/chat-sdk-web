@@ -1,85 +1,82 @@
 <div data-ng-controller="MainBoxController" id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': mainBoxWidth + 'px', 'height': mainBoxHeight + 'px', 'margin-right': config.marginRight + 'px'}" >
-    <div class="cc-box-header" data-ng-style="{background: config.headerColor}">
-        {{ title }}
-        <a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="minimizeMainBox()">
-            <img data-ng-src="{{ ::img_30_minimize }}" />
-        </a>
-    </div>
+	<!-- Header -->
+	<div class="cc-box-header" data-ng-style="{background: config.headerColor}">
+		{{ title }}
+		<a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="minimizeMainBox()">
+			<img data-ng-src="{{ ::img_30_minimize }}" />
+		</a>
+	</div>
 
-    <div class="cc-tab-container cc-bottom-shadow" data-ng-show="tabCount > 1">
-        <div class="cc-tab"
-             data-ng-class="[activeTab == 'users' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-             data-ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
-             data-ng-click="tabClicked('users')"
-             data-ng-show="usersTabEnabled">
-            USERS
-        </div>
-        <div class="cc-tab"
-             data-ng-class="[activeTab == 'rooms' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-             data-ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
-             data-ng-click="tabClicked('rooms')"
-             data-ng-show="roomsTabEnabled">
-            ROOMS
-        </div>
-        <div class="cc-tab"
-             data-ng-class="[activeTab == 'inbox' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-             data-ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
-             data-ng-click="tabClicked('inbox')">
-            INBOX <span data-ng-show="inboxCount > 0" class="cc-tab-indicator">{{ inboxCount }}</span>
-        </div>
-        <div class="cc-tab"
-             data-ng-class="[activeTab == 'friends' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-             data-ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
-             data-ng-click="tabClicked('friends')"
-             data-ng-show="friendsTabEnabled">
-            FRIENDS
-        </div>
-    </div>
+	<!-- Tab Bar -->
+	<div class="cc-tab-container cc-bottom-shadow" data-ng-show="tabCount > 1">
+		<div class="cc-tab"
+			 data-ng-class="[activeTab == 'users' ? 'selected': null, 'cc-tab-1-' + tabCount]"
+			 data-ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
+			 data-ng-click="tabClicked('users')"
+			 data-ng-show="usersTabEnabled">
+			USERS
+		</div>
+		<div class="cc-tab"
+			 data-ng-class="[activeTab == 'rooms' ? 'selected': null, 'cc-tab-1-' + tabCount]"
+			 data-ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
+			 data-ng-click="tabClicked('rooms')"
+			 data-ng-show="roomsTabEnabled">
+			ROOMS
+		</div>
+		<div class="cc-tab"
+			 data-ng-class="[activeTab == 'inbox' ? 'selected': null, 'cc-tab-1-' + tabCount]"
+			 data-ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
+			 data-ng-click="tabClicked('inbox')">
+			INBOX <span data-ng-show="inboxCount > 0" class="cc-tab-indicator">{{ inboxCount }}</span>
+		</div>
+		<div class="cc-tab"
+			 data-ng-class="[activeTab == 'friends' ? 'selected': null, 'cc-tab-1-' + tabCount]"
+			 data-ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
+			 data-ng-click="tabClicked('friends')"
+			 data-ng-show="friendsTabEnabled">
+			FRIENDS
+		</div>
+	</div>
 
-    <!--Add the search box-->
-    <div class="uk-overflow-container" data-ng-hide="activeTab=='inbox'">
-        <form class="uk-panel uk-form uk-float-left cc-padded cc-search-bar"
-              data-ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10)) + 'px'}">
+	<!-- Search Bar -->
+	<div class="uk-overflow-container" data-ng-hide="activeTab=='inbox'">
+		<form class="uk-panel uk-form uk-float-left cc-padded cc-search-bar"
+			  data-ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10)) + 'px'}">
+			<input class="uk-width-1-1 uk-form-small" type="text" data-ng-model="search[activeTab]" placeholder="Search" />
+		</form>
+		<a class="uk-float-right"
+		   data-ng-show="activeTab == 'rooms' && config.usersCanCreatePublicRooms"
+		   data-ng-click="showCreateRoomBox()">
+			<img class="cc-image-30"  data-ng-src="{{ ::img_30_plus }}" />
+		</a>
+	</div>
 
-            <input class="uk-width-1-1 uk-form-small" type="text" data-ng-model="search[activeTab]" placeholder="Search" />
-        </form>
-        <a class="uk-float-right"
-           data-ng-show="activeTab == 'rooms' && config.usersCanCreatePublicRooms"
-           data-ng-click="showCreateRoomBox()">
+	<!-- Content -->
+	<div class="uk-overflow-container" data-ng-style="{'height': (mainBoxHeight - 135) + 'px'}">
+		<!-- Who's online -->
+		<online-users-list data-ng-show="activeTab == 'users'"></online-users-list>
 
-            <img class="cc-image-30"  data-ng-src="{{ ::img_30_plus }}" />
-        </a>
-    </div>
+		<!-- Chat rooms -->
+		<public-rooms-list data-ng-show="activeTab == 'rooms'"></public-rooms-list>
 
-    <div class="uk-overflow-container" data-ng-style="{'height': (mainBoxHeight - 135) + 'px'}">
-        <!--Add the table of users / chat rooms-->
-        <online-users-list data-ng-show="activeTab == 'users'"></online-users-list>
+		<!-- Inbox -->
+		<inbox-rooms-list data-ng-show="activeTab == 'inbox'"></inbox-rooms-list>
 
-        <!--Add the list of public chat rooms-->
-        <div data-ng-show="activeTab == 'rooms'" class="cc-hide-overflow-x">
-            <public-rooms-list></public-rooms-list>
-        </div>
+		<!-- My friends -->
+		<friends-list data-ng-show="activeTab == 'friends'" rooms="rooms"></friends-list>
+	</div>
 
-        <!--Add the list of public chat rooms-->
-        <div data-ng-show="activeTab == 'inbox'" class="cc-hide-overflow-x">
-            <inbox-rooms-list></inbox-rooms-list>
-        </div>
-
-        <!--Add the table of users / chat rooms-->
-        <friends-list rooms="rooms" data-ng-show="activeTab == 'friends'"></friends-list>
-    </div>
-
-    <div id="cc-user-details">
-        <img class="cc-thumbnail-20 cc-margin-5 uk-float-left" data-ng-src="{{ user.getThumbnail() }}" />
-        <div class="uk-float-left cc-user-name cc-ellipsis">
-            {{ getUser().getName() }}
-        </div>
-        <a class="uk-float-right cc-valign-image-fix"
-           data-ng-hide="config.disableProfileBox"
-           title="Settings"
-           data-ng-click="showProfileSettingsBox()">
-            <img class="cc-image-30 cc-right-margin-5" data-ng-src="{{ ::img_30_gear }}" />
-        </a>
-        <!--</span>-->
-    </div>
+	<!-- Status Bar -->
+	<div id="cc-user-details">
+		<img class="cc-thumbnail-20 cc-margin-5 uk-float-left" data-ng-src="{{ user.getThumbnail() }}" />
+		<div class="uk-float-left cc-user-name cc-ellipsis">
+			{{ getUser().getName() }}
+		</div>
+		<a class="uk-float-right cc-valign-image-fix"
+		   data-ng-hide="config.disableProfileBox"
+		   title="Settings"
+		   data-ng-click="showProfileSettingsBox()">
+			<img class="cc-image-30 cc-right-margin-5" data-ng-src="{{ ::img_30_gear }}" />
+		</a>
+	</div>
 </div>
