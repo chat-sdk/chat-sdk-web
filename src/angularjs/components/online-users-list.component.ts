@@ -6,7 +6,7 @@ import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IUser } from '../entities/user';
 import { IOnlineConnector } from '../connectors/online-connector';
-import { ISearch } from '../services/search';
+import { ISearch } from '../services/search.service';
 import { UsersTab } from '../keys/tab-keys';
 import { ICache } from '../persistence/cache';
 import { IUserStore } from '../persistence/user-store';

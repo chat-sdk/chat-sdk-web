@@ -35,7 +35,12 @@
                 <div data-ng-include data-ng-show="activeBox == 'loginBox' && !mainBoxMinimized" src=" partialsURL + 'login-box.html'"></div>
 
                 <div data-ng-include data-ng-show="activeBox == 'profileSettingsBox' && !mainBoxMinimized" src=" partialsURL + 'profile-settings-box.html'"></div>
-                <div data-ng-include data-ng-show="activeBox == 'mainBox' && !mainBoxMinimized" src=" partialsURL + 'main-box.html'"></div>
+
+                <main-box data-ng-show="activeBox == 'mainBox' && !mainBoxMinimized"
+                          minimize-main-box="minimizeMainBox"
+                          show-create-room-box="showCreateRoomBox">
+                </main-box>
+
                 <div data-ng-include data-ng-show="activeBox == 'createRoomBox' && !mainBoxMinimized" src=" partialsURL + 'create-room-box.html'"></div>
 
                 <div data-ng-include data-ng-show="activeBox == 'errorBox' && !mainBoxMinimized" src=" partialsURL + 'error-box.html'"></div>

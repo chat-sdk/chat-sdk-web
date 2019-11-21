@@ -13,7 +13,7 @@ import { IConfig } from '../services/config';
 import { IScreen } from '../services/screen';
 import { IRoomPositionManager } from '../services/room-position-manager';
 import { INetworkManager } from '../network/network-manager';
-import { ITab } from '../services/tab';
+import { ITabService } from '../services/tab.service';
 import { IProfileBox } from '../services/profile-box.service';
 
 export interface IRoomScope extends ng.IScope {
@@ -78,7 +78,7 @@ export interface IChatController {
 
 class ChatController implements IChatController {
 
-  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Screen', 'RoomPositionManager', 'NetworkManager', 'Tab', 'ProfileBox'];
+  static $inject = ['$scope', '$timeout', '$window', '$sce', 'Config', 'Screen', 'RoomPositionManager', 'NetworkManager', 'TabService', 'ProfileBox'];
 
   constructor(
     private $scope: IRoomScope,
@@ -89,7 +89,7 @@ class ChatController implements IChatController {
     private Screen: IScreen,
     private RoomPositionManager: IRoomPositionManager,
     private NetworkManager: INetworkManager,
-    private Tab: ITab,
+    private TabService: ITabService,
     private ProfileBox: IProfileBox,
   ) {
     // $scope properties
@@ -126,8 +126,8 @@ class ChatController implements IChatController {
     $scope.toggleVisibility = this.toggleVisibility.bind(this);
     $scope.wasDragged = this.wasDragged.bind(this);
 
-    Tab.activeTabForRoomObservable($scope.room.getRID()).subscribe(tab => {
-      $scope.activeTab = tab;
+    TabService.activeTabForRoomObservable($scope.room.getRID()).subscribe(tab => {
+      $scope.activeTab = tab.id;
     });
   }
 
@@ -323,9 +323,15 @@ class ChatController implements IChatController {
     return this.$scope.room.loadMoreMessages();
   }
 
-  tabClicked(tab: string) {
-    this.Tab.setActiveTabForRoom(this.$scope.room.getRID(), tab);
-    if (tab === TabKeys.MessagesTab) {
+  tabClicked(tabId: string) {
+    const tab = this.TabService.getRoomTabForID(tabId);
+    if (tab) {
+      this.TabService.setActiveTabForRoom(this.$scope.room.getRID(), tab);
+    } else {
+      console.error('Selected tab doesn\'t exist:', tabId);
+    }
+
+    if (tab.id === TabKeys.MessagesTab) {
       this.$scope.showEmojis = false;
       this.$scope.showMessageOptions = false;
     }

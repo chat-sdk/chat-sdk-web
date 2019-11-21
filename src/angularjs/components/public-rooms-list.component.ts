@@ -5,7 +5,7 @@ import { Utils } from '../services/utils';
 import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IRoom } from '../entities/room';
-import { ISearch } from '../services/search';
+import { ISearch } from '../services/search.service';
 import { RoomsTab } from '../keys/tab-keys';
 
 class PublicRoomsListController {

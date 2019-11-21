@@ -5,7 +5,7 @@ import { ArrayUtils } from '../services/array-utils';
 import { Log } from '../services/log';
 import { IRoomStore } from '../persistence/room-store';
 import { IRoom } from '../entities/room';
-import { ISearch } from '../services/search';
+import { ISearch } from '../services/search.service';
 import { InboxTab } from '../keys/tab-keys';
 
 class InboxRoomsListController {

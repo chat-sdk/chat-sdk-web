@@ -7,6 +7,5 @@ import './emoji';
 import './error-box';
 import './login';
 import './main-app';
-import './main-box';
 import './notification';
 import './profile-settings';

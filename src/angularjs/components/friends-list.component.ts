@@ -7,7 +7,7 @@ import { Log } from '../services/log';
 import { IUser } from '../entities/user';
 import { IOnlineConnector } from '../connectors/online-connector';
 import { IRoom } from '../entities/room';
-import { ISearch } from '../services/search';
+import { ISearch } from '../services/search.service';
 import { FriendsTab } from '../keys/tab-keys';
 import { IFriendsConnector } from '../connectors/friend-connector';
 import { ICache } from '../persistence/cache';

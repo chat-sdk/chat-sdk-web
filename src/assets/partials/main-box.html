@@ -1,82 +1,82 @@
-<div data-ng-controller="MainBoxController" id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': mainBoxWidth + 'px', 'height': mainBoxHeight + 'px', 'margin-right': config.marginRight + 'px'}" >
+<div id="cc-main-box" class="cc-box cc-root-box cc-shadow" ng-style="{'width': ctrl.mainBoxWidth + 'px', 'height': ctrl.mainBoxHeight + 'px', 'margin-right': ctrl.Config.marginRight + 'px'}" >
 	<!-- Header -->
-	<div class="cc-box-header" data-ng-style="{background: config.headerColor}">
-		{{ title }}
-		<a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="minimizeMainBox()">
-			<img data-ng-src="{{ ::img_30_minimize }}" />
+	<div class="cc-box-header" data-ng-style="{background: ctrl.Config.headerColor}">
+		{{ ctrl.activeTab.title }}
+		<a class="uk-float-right cc-image-30" title="Hide Chat" data-ng-click="ctrl.minimizeMainBox()">
+			<img data-ng-src="{{ ::ctrl.img_30_minimize }}" />
 		</a>
 	</div>
 
 	<!-- Tab Bar -->
-	<div class="cc-tab-container cc-bottom-shadow" data-ng-show="tabCount > 1">
+	<div class="cc-tab-container cc-bottom-shadow" data-ng-show="ctrl.tabCount > 1">
 		<div class="cc-tab"
-			 data-ng-class="[activeTab == 'users' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-			 data-ng-style="activeTab == 'users' ? {'border-bottom-color': config.headerColor} : null"
-			 data-ng-click="tabClicked('users')"
-			 data-ng-show="usersTabEnabled">
+			 data-ng-class="[ctrl.activeTab.id == 'users' ? 'selected': null, 'cc-tab-1-' + ctrl.tabCount]"
+			 data-ng-style="ctrl.activeTab.id == 'users' ? {'border-bottom-color': ctrl.Config.headerColor} : null"
+			 data-ng-click="ctrl.tabClicked('users')"
+			 data-ng-show="ctrl.usersTabEnabled">
 			USERS
 		</div>
 		<div class="cc-tab"
-			 data-ng-class="[activeTab == 'rooms' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-			 data-ng-style="activeTab == 'rooms' ? {'border-bottom-color': config.headerColor} : null"
-			 data-ng-click="tabClicked('rooms')"
-			 data-ng-show="roomsTabEnabled">
+			 data-ng-class="[ctrl.activeTab.id == 'rooms' ? 'selected': null, 'cc-tab-1-' + ctrl.tabCount]"
+			 data-ng-style="ctrl.activeTab.id == 'rooms' ? {'border-bottom-color': ctrl.Config.headerColor} : null"
+			 data-ng-click="ctrl.tabClicked('rooms')"
+			 data-ng-show="ctrl.roomsTabEnabled">
 			ROOMS
 		</div>
 		<div class="cc-tab"
-			 data-ng-class="[activeTab == 'inbox' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-			 data-ng-style="activeTab == 'inbox' ? {'border-bottom-color': config.headerColor} : null"
-			 data-ng-click="tabClicked('inbox')">
-			INBOX <span data-ng-show="inboxCount > 0" class="cc-tab-indicator">{{ inboxCount }}</span>
+			 data-ng-class="[ctrl.activeTab.id == 'inbox' ? 'selected': null, 'cc-tab-1-' + ctrl.tabCount]"
+			 data-ng-style="ctrl.activeTab.id == 'inbox' ? {'border-bottom-color': ctrl.Config.headerColor} : null"
+			 data-ng-click="ctrl.tabClicked('inbox')">
+			INBOX <span data-ng-show="ctrl.inboxCount > 0" class="cc-tab-indicator">{{ ctrl.inboxCount }}</span>
 		</div>
 		<div class="cc-tab"
-			 data-ng-class="[activeTab == 'friends' ? 'selected': null, 'cc-tab-1-' + tabCount]"
-			 data-ng-style="activeTab == 'friends' ? {'border-bottom-color': config.headerColor} : null"
-			 data-ng-click="tabClicked('friends')"
-			 data-ng-show="friendsTabEnabled">
+			 data-ng-class="[ctrl.activeTab.id == 'friends' ? 'selected': null, 'cc-tab-1-' + ctrl.tabCount]"
+			 data-ng-style="ctrl.activeTab.id == 'friends' ? {'border-bottom-color': ctrl.Config.headerColor} : null"
+			 data-ng-click="ctrl.tabClicked('friends')"
+			 data-ng-show="ctrl.friendsTabEnabled">
 			FRIENDS
 		</div>
 	</div>
 
 	<!-- Search Bar -->
-	<div class="uk-overflow-container" data-ng-hide="activeTab=='inbox'">
+	<div class="uk-overflow-container" data-ng-hide="ctrl.activeTab.id == 'inbox'">
 		<form class="uk-panel uk-form uk-float-left cc-padded cc-search-bar"
-			  data-ng-style="{'width': (mainBoxWidth - (activeTab == 'rooms' && config.usersCanCreatePublicRooms ? 40 : 10)) + 'px'}">
-			<input class="uk-width-1-1 uk-form-small" type="text" data-ng-model="search[activeTab]" placeholder="Search" />
+			  data-ng-style="{'width': (ctrl.mainBoxWidth - (ctrl.activeTab.id == 'rooms' && ctrl.Config.usersCanCreatePublicRooms ? 40 : 10)) + 'px'}">
+			<input class="uk-width-1-1 uk-form-small" type="text" data-ng-model="ctrl.searchQuery" data-ng-change="ctrl.searchQueryDidChange()" placeholder="Search" />
 		</form>
 		<a class="uk-float-right"
-		   data-ng-show="activeTab == 'rooms' && config.usersCanCreatePublicRooms"
-		   data-ng-click="showCreateRoomBox()">
-			<img class="cc-image-30"  data-ng-src="{{ ::img_30_plus }}" />
+		   data-ng-show="ctrl.activeTab.id == 'rooms' && ctrl.Config.usersCanCreatePublicRooms"
+		   data-ng-click="ctrl.showCreateRoomBox()">
+			<img class="cc-image-30"  data-ng-src="{{ ::ctrl.img_30_plus }}" />
 		</a>
 	</div>
 
 	<!-- Content -->
-	<div class="uk-overflow-container" data-ng-style="{'height': (mainBoxHeight - 135) + 'px'}">
+	<div class="uk-overflow-container" data-ng-style="{'height': (ctrl.mainBoxHeight - 135) + 'px'}">
 		<!-- Who's online -->
-		<online-users-list data-ng-show="activeTab == 'users'"></online-users-list>
+		<online-users-list data-ng-show="ctrl.activeTab.id == 'users'"></online-users-list>
 
 		<!-- Chat rooms -->
-		<public-rooms-list data-ng-show="activeTab == 'rooms'"></public-rooms-list>
+		<public-rooms-list data-ng-show="ctrl.activeTab.id == 'rooms'"></public-rooms-list>
 
 		<!-- Inbox -->
-		<inbox-rooms-list data-ng-show="activeTab == 'inbox'"></inbox-rooms-list>
+		<inbox-rooms-list data-ng-show="ctrl.activeTab.id == 'inbox'"></inbox-rooms-list>
 
 		<!-- My friends -->
-		<friends-list data-ng-show="activeTab == 'friends'" rooms="rooms"></friends-list>
+		<friends-list data-ng-show="ctrl.activeTab.id == 'friends'" rooms="rooms"></friends-list>
 	</div>
 
 	<!-- Status Bar -->
 	<div id="cc-user-details">
-		<img class="cc-thumbnail-20 cc-margin-5 uk-float-left" data-ng-src="{{ user.getThumbnail() }}" />
+		<img class="cc-thumbnail-20 cc-margin-5 uk-float-left" data-ng-src="{{ ctrl.currentUser().getThumbnail() }}" />
 		<div class="uk-float-left cc-user-name cc-ellipsis">
-			{{ getUser().getName() }}
+			{{ ctrl.currentUser().getName() }}
 		</div>
 		<a class="uk-float-right cc-valign-image-fix"
-		   data-ng-hide="config.disableProfileBox"
+		   data-ng-hide="ctrl.Config.disableProfileBox"
 		   title="Settings"
-		   data-ng-click="showProfileSettingsBox()">
-			<img class="cc-image-30 cc-right-margin-5" data-ng-src="{{ ::img_30_gear }}" />
+		   data-ng-click="ctrl.showProfileSettingsBox()">
+			<img class="cc-image-30 cc-right-margin-5" data-ng-src="{{ ::ctrl.img_30_gear }}" />
 		</a>
 	</div>
 </div>
