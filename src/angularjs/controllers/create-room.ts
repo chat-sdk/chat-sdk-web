@@ -33,28 +33,35 @@ class CreateRoomController {
 
   async createRoom() {
 
-    const room = await (() => {
-      // Is this a public room?
-      if (this.$scope.public) {
-        return this.RoomCreator.createAndPushPublicRoom(
-          this.$scope.room.name,
-          this.$scope.room.description
-        );
+    try {
+      const room = await (() => {
+        // Is this a public room?
+        if (this.$scope.public) {
+          return this.RoomCreator.createAndPushPublicRoom(
+            this.$scope.room.name,
+            this.$scope.room.description
+          );
+        }
+        else {
+          return this.RoomCreator.createAndPushRoom(
+            null,
+            this.$scope.room.name,
+            this.$scope.room.description,
+            this.$scope.room.invitesEnabled,
+            RoomType.OneToOne,
+            true,
+          );
+        }
+      })();
+      if (room) {
+        this.RoomOpenQueue.addRoomWithID(room.getRID());
+        room.open(0);
+      } else {
+        console.error('room is', room);
       }
-      else {
-        return this.RoomCreator.createAndPushRoom(
-          null,
-          this.$scope.room.name,
-          this.$scope.room.description,
-          this.$scope.room.invitesEnabled,
-          RoomType.OneToOne,
-          true,
-        );
-      }
-    })();
-
-    this.RoomOpenQueue.addRoomWithID(room.getRID());
-    room.open(0);
+    } catch (error) {
+      console.error(error);
+    }
 
     this.back();
   }

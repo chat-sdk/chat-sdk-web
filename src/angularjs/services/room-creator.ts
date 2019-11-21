@@ -84,7 +84,7 @@ class RoomCreator implements IRoomCreator {
       data[RoomKeys.Created] = database.ServerValue.TIMESTAMP;
       data[RoomKeys.RID] = rid;
       data[RoomKeys.UserCreated] = true;
-      return ref.set(data);
+      await ref.set(data);
     }
     const _ = this.EntityFactory.updateState(RoomsPath, rid, DetailsKey);
     return room;
