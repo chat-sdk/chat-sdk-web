@@ -27,7 +27,7 @@
     "file-saver": "latest",
     "firebase": ">= 5.5.7 <7",
     "howler": "latest",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "moment": "latest",
     "pikaday": "latest",
     "rxjs": "~6.4.0",
