@@ -23,7 +23,7 @@
     "@angular/upgrade": "~8.2.7",
     "angular-emoji-filter-hd": "latest",
     "angular-sanitize": "^1.7.8",
-    "angular": "^1.7.8",
+    "angular": "^1.8.3",
     "file-saver": "latest",
     "firebase": ">= 5.5.7 <7",
     "howler": "latest",
